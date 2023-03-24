@@ -25,8 +25,8 @@ subroutine dredge_initialize_d3d4(gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--declarations----------------------------------------------------------------
     use dfparall, only: parll, inode, nproc
     use dredge_comm, only: dredgecommunicate

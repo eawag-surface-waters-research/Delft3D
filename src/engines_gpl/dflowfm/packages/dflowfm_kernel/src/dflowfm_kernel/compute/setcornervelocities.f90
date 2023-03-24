@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine setcornervelocities()                    ! set corner related velocity x- and y components
 
@@ -36,7 +36,7 @@
  use m_netw
  use m_flowgeom
  use m_sferic
- 
+
  implicit none
 
  integer                    :: L, k1, k2, k3, k4, k, kk, LL, Lb, Lt, kw

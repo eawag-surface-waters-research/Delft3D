@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE RSORT3new (X, Y, Z, N) ! 1 !!  second faster than
       use sorting_algorithms, only: indexx

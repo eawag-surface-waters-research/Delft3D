@@ -38,8 +38,8 @@ subroutine santoss(numrealpar, realpar ,par ,npar, dzduu ,dzdvv , i2d3d, &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--declarations----------------------------------------------------------------
     use precision
     use morphology_data_module
@@ -73,7 +73,7 @@ subroutine santoss(numrealpar, realpar ,par ,npar, dzduu ,dzdvv , i2d3d, &
 !
       integer                  :: nm
       integer                  :: sw_effects ! surface wave effects 1 for on 0 for off
-      integer                  :: as_effects ! wave asymetry effects 1 for on 0 for off
+      integer                  :: as_effects ! wave asymmetry effects 1 for on 0 for off
       integer                  :: pl_effects ! phase lag effects 1 for on 0 for off
       integer                  :: sl_effects ! slope effect oaaja in critical shear stress 1 for on 0 for off
       real(fp)                 :: ag

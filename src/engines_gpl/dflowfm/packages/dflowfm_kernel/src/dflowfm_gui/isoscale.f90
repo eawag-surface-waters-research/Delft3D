@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   SUBROUTINE ISOSCALE()  !   COPY OF ISOSCALE, DIRTY BUT QUICK
   use unstruc_colors

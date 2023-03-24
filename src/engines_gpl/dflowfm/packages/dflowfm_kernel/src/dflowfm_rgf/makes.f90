@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE MAKES(X,Y,X2,Y2,T,S,S2,imax, N,NT,H)
 !     maak X,Y splines + afstandsarray en splines S op basis

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       ! Now a double precision (double precision ::)
       SUBROUTINE GETREAL(TEXT,VALUE)

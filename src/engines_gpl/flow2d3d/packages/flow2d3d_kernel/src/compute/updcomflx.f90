@@ -28,8 +28,8 @@ subroutine updcomflx(nst       ,zmodel    ,nmmax     ,kmax      ,kcs       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Update cumulative fluxes for communication file

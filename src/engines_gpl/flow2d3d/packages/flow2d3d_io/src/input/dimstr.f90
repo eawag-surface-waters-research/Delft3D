@@ -26,8 +26,8 @@ subroutine dimstr(lunmd     ,filnam    ,lundia    ,error     ,nrrec     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the number of U- and V-Barriers from the

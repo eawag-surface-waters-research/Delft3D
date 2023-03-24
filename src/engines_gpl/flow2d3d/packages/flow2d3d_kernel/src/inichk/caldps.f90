@@ -26,8 +26,8 @@ subroutine caldps(nmmax     ,nfltyp    ,icx       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Initiates the depth values at water level points

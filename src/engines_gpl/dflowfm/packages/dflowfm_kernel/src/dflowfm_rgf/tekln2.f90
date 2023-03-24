@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE TEKLN2(X, Y, mmax, nmax, M1, N1, M2, N2, NCOL)
 !     TEKEN EEN LIJN IN GRID (MET CIRKELS ROND DE UITEINDEN)

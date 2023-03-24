@@ -30,8 +30,8 @@ subroutine wrfouv(nmax      ,mmax      ,nmaxus    ,kmax      ,nofou     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - writes results of fourier analysis to output

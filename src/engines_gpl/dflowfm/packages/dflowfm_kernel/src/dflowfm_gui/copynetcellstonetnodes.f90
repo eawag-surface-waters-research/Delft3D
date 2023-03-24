@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine copynetcellstonetnodes() ! for smooth plotting only
  use m_flowgeom

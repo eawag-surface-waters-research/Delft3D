@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> select link for directional refinement in GUI
    subroutine getlink_GUI(xp, yp, L)

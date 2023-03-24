@@ -27,8 +27,8 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the harmonic boundary condition records from

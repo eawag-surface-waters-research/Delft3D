@@ -30,7 +30,7 @@ subroutine z_chkadv(lundia    ,nmmax     ,kmax      ,icx       , &
 !                                                                               
 !-------------------------------------------------------------------------------
 !  $Id: z_chkadv.f90$
-!  $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20111115_13532_z-model_improvements_oss-merge/engines_gpl/flow2d3d/packages/kernel/src/compute/z_chkadv.f90 $
+!  : https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20111115_13532_z-model_improvements_oss-merge/engines_gpl/flow2d3d/packages/kernel/src/compute/z_chkadv.f90 $
 !!--description-----------------------------------------------------------------
 !
 !    Function: Checks stability (Courant number) for horizontal velocity and

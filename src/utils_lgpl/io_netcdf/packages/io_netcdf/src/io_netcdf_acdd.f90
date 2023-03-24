@@ -25,8 +25,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> I/O module for writing ACDD information (Attribute Convention for Dataset Discovery)
 !! into NetCDF files.

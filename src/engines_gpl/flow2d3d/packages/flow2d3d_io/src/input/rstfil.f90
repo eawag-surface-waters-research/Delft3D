@@ -29,8 +29,8 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads initial field condition records from an

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> write particles header to netcdf file
 subroutine unc_write_part_header(ifile,id_timedim,id_partdim,id_parttime,id_partx,id_party,id_partz)

@@ -38,8 +38,8 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes suspended sediment transport correction

@@ -27,8 +27,8 @@ subroutine near_field(u1    ,v1      ,rho    ,thick ,kmax  ,alfas ,dps   ,&
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Converts flow results to cormix input

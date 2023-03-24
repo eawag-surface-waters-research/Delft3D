@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    SUBROUTINE CHECKTRIANGLEnetcell(N,JA,phimin,phimax)
    USE M_netw

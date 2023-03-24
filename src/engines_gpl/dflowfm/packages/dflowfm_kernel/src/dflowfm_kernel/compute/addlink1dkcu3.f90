@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine addlink1Dkcu3(L,japerim)                        ! and add area's and volumes of 1D link kcu3
  use m_flowgeom

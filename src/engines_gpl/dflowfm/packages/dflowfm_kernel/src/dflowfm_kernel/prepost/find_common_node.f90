@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> return common node of links L1 and L2
 subroutine find_common_node(L1, L2, node)

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Determines flow link' upwind/downwind parameters based on current velocities and water levels.
 !! NOTE that this is purely for this flow link, independent of left-right orientation of the structure itself.

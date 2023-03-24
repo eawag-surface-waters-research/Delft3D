@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   !> Tries to find the number of the netlink close to a point.
   !! The provided point should lie within a rhombus with the netlink

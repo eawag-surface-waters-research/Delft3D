@@ -26,8 +26,8 @@ subroutine trafil(lundia    ,filtra    ,fmttmp    ,error     ,ntruv     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the monitoring cross-section definitions

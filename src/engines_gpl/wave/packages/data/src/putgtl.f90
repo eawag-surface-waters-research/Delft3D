@@ -27,8 +27,8 @@ subroutine putgtl(filnam    ,grpnam    ,nelems    ,elmnms    ,elmdms    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Read or writes character buffer to nefis files
 ! Tests values input consistency for elmnam and

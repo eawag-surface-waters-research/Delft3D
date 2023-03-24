@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE ECRTAB(X,MC,NC,MRGF,HALF,mmax,nmax)
       implicit none

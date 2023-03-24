@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   subroutine org_klok(cpu)  ! for true performance monitoring, wallclock gives more meaningfull information than cpuclock
   implicit none

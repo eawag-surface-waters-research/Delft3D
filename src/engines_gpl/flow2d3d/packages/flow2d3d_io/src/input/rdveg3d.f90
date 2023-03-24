@@ -26,8 +26,8 @@ subroutine rdveg3d(mmax      ,nmax      ,nmaxus    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Reads Dredge and Dump input file.

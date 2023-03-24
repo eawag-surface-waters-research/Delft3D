@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine QucPer3Dsigmapiaczekteta(LL,Lb,Lt,cs,sn,ae,ai)  ! Piaczekteta in 3D
 

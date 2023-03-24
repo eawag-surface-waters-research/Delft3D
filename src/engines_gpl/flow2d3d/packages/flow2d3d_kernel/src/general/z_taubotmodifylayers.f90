@@ -32,7 +32,7 @@ subroutine z_taubotmodifylayers(nmmax  ,kmax     ,lstsci       ,icx     ,icy    
 !                                                                               
 !-------------------------------------------------------------------------------
 !  $Id: z_taubotmodifylayers.f90 1246 2012-02-09 11:25:49Z platzek $
-!  $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20111115_13532_z-model_improvements_oss-merge/engines_gpl/flow2d3d/packages/kernel/src/general/z_taubotmodifylayers.f90 $
+!  : https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20111115_13532_z-model_improvements_oss-merge/engines_gpl/flow2d3d/packages/kernel/src/general/z_taubotmodifylayers.f90 $
 !!--description-----------------------------------------------------------------
 !
 ! Computes inproduct between two vectors.

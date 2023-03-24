@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE DISMIN(X,X2,Y,Y2,XX,YY,N,DIS,TV,XV,YV)
       implicit none

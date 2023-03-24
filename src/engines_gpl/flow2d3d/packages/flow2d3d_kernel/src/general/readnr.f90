@@ -26,8 +26,8 @@ subroutine readnr(record    ,lrec      ,ibeg      ,iend      ,nlook     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads NLOOK (specified) reals from a RECORD

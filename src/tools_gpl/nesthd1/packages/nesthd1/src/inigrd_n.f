@@ -26,8 +26,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !-----------------------------------------------------------------------
 !             Module: SUBROUTINE INIGRD
 !           Function: - Reads the computational grid enclosure file

@@ -43,7 +43,7 @@ implicit none
     character(*),  public, parameter :: dfm_volume_tool_version      = dfm_volume_tool_major//'.'//dfm_volume_tool_minor//'.'//dfm_volume_tool_revision//'.'//dfm_volume_tool_build_number
     character(*),  public, parameter :: dfm_volume_tool_version_full = 'Deltares, '//dfm_volume_tool_program//' Version '//dfm_volume_tool_version//', '//__DATE__//', '//__TIME__
     character(*),  public, parameter :: dfm_volume_tool_version_id   = '@(#)'//dfm_volume_tool_version_full
-    character(*),  public, parameter :: dfm_volume_tool_source_code  = '@(#) $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dfm_volume_tool_version.F90.svn $'//char(0)
+    character(*),  public, parameter :: dfm_volume_tool_source_code  = '@(#) : https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dfm_volume_tool_version.F90.svn $'//char(0)
 
 contains
 
@@ -67,7 +67,7 @@ contains
     subroutine get_dfm_volume_tool_source(stringout)
         character(len=*), intent(out) :: stringout
         integer :: L
-        ! '@(#) $HeadURL: http://.../rootdir/src/engines_gpl/...'
+        ! '@(#) : http://.../rootdir/src/engines_gpl/...'
         !  ^1   ^6        ^16:              ^L
         L = index(dfm_volume_tool_source_code, '/src/engines_gpl/dflowfm')
         stringout = dfm_volume_tool_source_code(16:L)

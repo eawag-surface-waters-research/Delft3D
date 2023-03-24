@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> check if a link is close to a land boundary segment
 subroutine linkcrossedbyland(L, jstart, jend, netboundonly, jland, jacross)

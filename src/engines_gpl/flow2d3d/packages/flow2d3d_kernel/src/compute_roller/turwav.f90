@@ -26,8 +26,8 @@ subroutine turwav(nmmax     ,kmax      ,kfs       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes eddy viscosity as function of roller energy,

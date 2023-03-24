@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine reabar2pli(mthd, mout)   ! convert barrier v file to model independent, barv content =  m,n,sill depth
  use m_grid

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 module unstruc_opengl
    use precision
 #ifdef HAVE_OPENGL

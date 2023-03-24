@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine updateValuesOnSourceSinks(tim1)
 use m_flowexternalforcings, only: qsrc, qsrcavg, vsrccum, vsrccum_pre, numsrc

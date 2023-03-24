@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       subroutine setrcirxy(x,y,rcx,rcy) ! determine x and y search tols on the spot where you click
       use m_wearelt

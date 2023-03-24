@@ -27,8 +27,8 @@ subroutine inibcq(lundia    ,error     ,runid     ,itbct     ,nto       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the QH relations from file for the

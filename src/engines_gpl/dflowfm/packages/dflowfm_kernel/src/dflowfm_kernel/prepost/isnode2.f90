@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   SUBROUTINE ISNODE2(KP, XP, YP, ZP)  ! X,Y,Z MOETEN ALLEN KLOPPEN
   use m_netw

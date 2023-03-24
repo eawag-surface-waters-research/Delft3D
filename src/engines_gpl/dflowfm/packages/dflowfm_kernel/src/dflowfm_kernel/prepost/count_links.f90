@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> count number of 2D links and 1D endpoints
 subroutine count_links(mx1Dend, Nx)

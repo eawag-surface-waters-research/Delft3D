@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Writes current state immediately to files, typically used in
 !! case of 'emergencies', without checking output intervals.

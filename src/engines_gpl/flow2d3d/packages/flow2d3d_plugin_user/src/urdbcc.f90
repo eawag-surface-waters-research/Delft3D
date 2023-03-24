@@ -26,8 +26,8 @@ subroutine urdbcc(lundia    ,error     ,filusr    ,ltur      ,kmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Test existence of user defined file for

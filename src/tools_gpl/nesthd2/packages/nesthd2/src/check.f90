@@ -27,8 +27,8 @@ subroutine check  (lundia,fout  ,mnstat,mnes ,nnes   ,weight , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !***********************************************************************
 ! Deltares                         marine and coastal management
 !

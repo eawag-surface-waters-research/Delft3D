@@ -25,8 +25,8 @@ subroutine wridoc(error, neffil, ftype, simdat, runtxt, commrd, part_nr, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the initial group 4 ('"ftype"-version') to

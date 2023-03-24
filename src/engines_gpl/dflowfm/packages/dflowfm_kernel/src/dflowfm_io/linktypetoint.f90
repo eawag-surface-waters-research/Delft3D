@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    !> Parses a link type/mesh contact's type string into an integer
    !! that can be used to compare agains kn(3,:) codes.

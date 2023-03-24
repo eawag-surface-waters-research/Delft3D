@@ -25,8 +25,8 @@ subroutine dircor(dir       ,alfas     ,n         )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! DIRCOR corrects wave direction from x-y grid to u-v grid

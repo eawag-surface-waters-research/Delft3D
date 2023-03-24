@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 !> adjust bobs and iadvec for dams and structs
 subroutine setup_structures_and_weirs_list()
    use m_alloc

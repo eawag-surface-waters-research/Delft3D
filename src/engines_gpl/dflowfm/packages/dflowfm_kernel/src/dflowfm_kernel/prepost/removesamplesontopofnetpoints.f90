@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    SUBROUTINE REMOVESAMPLESONTOPOFNETPOINTS(XS, YS, NS)
    use m_netw

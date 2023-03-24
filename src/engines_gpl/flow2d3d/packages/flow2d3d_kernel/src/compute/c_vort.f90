@@ -27,8 +27,8 @@ subroutine c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,kcs       ,kfu    
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes vorticity and enstrophy from given

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine comp_rootshu(Eup,aa,hu)
 double precision :: Eup, aa, hu

@@ -26,8 +26,8 @@ subroutine trabwc2(utot      ,di        ,taub      ,npar      ,par       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !  Computes sediment transport according to Wilcock and Crowe formula modified to use 

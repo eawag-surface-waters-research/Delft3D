@@ -34,8 +34,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Routine is called every time step to allow a direct writing of WAQ files
 ! Routine is now written in fixed format compatible form, 2nd author is not very

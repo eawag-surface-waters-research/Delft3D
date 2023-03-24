@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   SUBROUTINE CLOSENODES(K,KK,JA) ! ARE THESE NODES CLOSE, BUT UNCONNECTED?
 

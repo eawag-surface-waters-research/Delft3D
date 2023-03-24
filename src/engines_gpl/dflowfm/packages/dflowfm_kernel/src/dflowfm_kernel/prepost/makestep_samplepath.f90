@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 ! make a step to the next sample in a sample path
 subroutine makestep_samplepath(ipprev, ipcur, ipnext, Nsub, ipsub, ierror)

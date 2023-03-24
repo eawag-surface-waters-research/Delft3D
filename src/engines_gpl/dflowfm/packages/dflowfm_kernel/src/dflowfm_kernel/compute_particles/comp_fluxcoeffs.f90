@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> compute mapping from prescribed (at flowlinks) to all fluxes (at all edges, including "internal")
 subroutine comp_fluxcoeffs()

@@ -25,8 +25,8 @@ subroutine dens_eck (temp, sal, rho ,rhods ,rhodt )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! calculation salinity ---> density

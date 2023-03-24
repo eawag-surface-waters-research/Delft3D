@@ -25,8 +25,8 @@ subroutine errmsg(msgno     ,param     ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: This routine gets LUNDIA from GDP and calls prterr

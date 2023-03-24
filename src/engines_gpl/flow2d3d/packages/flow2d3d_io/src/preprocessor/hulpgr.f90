@@ -25,8 +25,8 @@ subroutine hulpgr(jaar      ,tm1       ,v         ,f         )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Calulates help var. V and F

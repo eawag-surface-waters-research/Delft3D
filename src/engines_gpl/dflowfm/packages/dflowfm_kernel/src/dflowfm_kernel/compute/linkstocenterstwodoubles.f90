@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   subroutine linkstocenterstwodoubles(vnod,vlin)                    ! set flow node value based on flow link values scalar
 

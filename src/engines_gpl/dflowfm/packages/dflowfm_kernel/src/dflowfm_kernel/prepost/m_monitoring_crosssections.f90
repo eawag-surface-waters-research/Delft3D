@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Cross sections (crs) are used to monitor summed flow data across a line
 !! over time. The definition of crs is by a crspath, which is a polyline

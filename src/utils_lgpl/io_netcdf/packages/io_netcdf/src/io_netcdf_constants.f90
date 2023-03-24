@@ -25,8 +25,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 
 !> The parameters and error codes for io_netcdf, I/O based on selected NetCDF conventions (UGRID, and more in the future).

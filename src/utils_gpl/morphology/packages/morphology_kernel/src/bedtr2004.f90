@@ -35,8 +35,8 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Compute bed load transport according to Van Rijn
@@ -44,7 +44,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
 ! simulation.
 ! If no waves then use traditional Van Rijn formulation
 ! If waves then use new parameterization which
-! includes wave asymetry
+! includes wave asymmetry
 ! Note: The two methods are known to give different results
 ! (order factor 2) for situations without waves
 ! Van Rijn (1993,2000)

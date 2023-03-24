@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 module m_equatorial
  double precision :: x,fr,Ue0,k,h,g,L,utyp,period,ap,am,om,Zp,ufac

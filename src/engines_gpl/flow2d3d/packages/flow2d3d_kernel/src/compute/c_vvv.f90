@@ -27,8 +27,8 @@ subroutine c_vvv(j         ,nmmaxj    ,kmax      ,nm        ,nmu       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! computes average vvv velocity

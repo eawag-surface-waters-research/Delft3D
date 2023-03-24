@@ -25,8 +25,8 @@ subroutine incsdu(timhr  ,dps  ,s1  ,kcs  ,kfs,  gdp    )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determine increments and update the current time

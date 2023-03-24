@@ -26,8 +26,8 @@ subroutine morbndfill(kcs       ,guu       ,gvv       ,icx       ,icy       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Fill arrays for open boundary

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    !> test iterative solver (as "mpitest")
    subroutine soltest(iCFL,icgsolver_loc,maxsubmatvecs,iepsdiff,iepscg)

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE SEARCH(NAHEAD,NLEVEL,HLPTXT,NUMTXT,WRDKEY,NUMCHC,JOFND)
       implicit none

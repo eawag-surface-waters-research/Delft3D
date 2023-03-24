@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine setkbotktop(jazws0)                                        ! initialise vertical coordinates
  use m_netw

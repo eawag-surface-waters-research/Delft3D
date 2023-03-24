@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
       subroutine putf77(name, mapFile, doRunId, doInts,
      +                        doParDescr, doLocDescr  )
 

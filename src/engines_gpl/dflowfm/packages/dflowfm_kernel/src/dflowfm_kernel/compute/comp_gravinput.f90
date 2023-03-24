@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    !> compute Graviational Input from tidal forces and SAL
    subroutine comp_GravInput()

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> add polygon to global polygons
  subroutine addtopol(XCRA,YCRA,NCRA)

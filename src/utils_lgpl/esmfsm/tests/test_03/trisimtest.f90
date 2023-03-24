@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 subroutine trisimtest (context_id, fsm_flags)
     use precision     ! pntrsize, used in fsm.i
     implicit none

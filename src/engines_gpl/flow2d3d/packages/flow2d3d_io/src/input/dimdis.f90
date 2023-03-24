@@ -26,8 +26,8 @@ subroutine dimdis(lunmd     ,lundia    ,error     ,nrrec     ,nsrc      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the dimension for discharge definition,

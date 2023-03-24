@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine getq1(hg,d,h1,h2,q)                   ! energiebehoud bovenstrooms
 implicit none                                   ! bepaal q gegeven hg,h1,h2

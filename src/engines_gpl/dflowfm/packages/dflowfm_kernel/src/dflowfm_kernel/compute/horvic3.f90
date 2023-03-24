@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  double precision function horvic3(n12,L)             ! horizontal viscosity term, out of face normal and tang comp's
  use m_flow

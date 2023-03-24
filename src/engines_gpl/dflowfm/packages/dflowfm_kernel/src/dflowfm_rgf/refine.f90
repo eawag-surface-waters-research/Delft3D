@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE REFINE(M1, N1, M2, N2, NUM)
       use m_grid ! Use m_grid directly, because isitu does this too (otherwise shadowing of ).

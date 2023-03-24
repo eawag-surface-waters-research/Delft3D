@@ -27,8 +27,8 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Reads mass balance input data.
