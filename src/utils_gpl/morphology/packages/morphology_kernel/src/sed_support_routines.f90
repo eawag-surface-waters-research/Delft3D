@@ -36,7 +36,7 @@ private
 public shld
 public ruessink_etal_2012
 public calculate_critical_velocities
-public calculate_velocity_assymetry
+public calculate_velocity_asymmetry
 
 contains
 
@@ -210,8 +210,8 @@ subroutine calculate_critical_velocities(dilatancy, bedslpeffini, dzbdt, ag, vic
 end subroutine calculate_critical_velocities
 
 
-subroutine calculate_velocity_assymetry(waveform, facas, facsk, sws, h, hrms, rlabda, ubot, tp, &
-    ag, reposeangle, ubot_from_com, kwtur, uamag, phi, uorb, urms2)
+subroutine calculate_velocity_asymmetry(waveform, facas, facsk, sws, h, hrms, rlabda, ubot, ag, &
+    tp, reposeangle, ubot_from_com, kwtur, uamag, phi, uorb, urms2)
     use precision
     use mathconsts
     implicit none
@@ -225,8 +225,8 @@ subroutine calculate_velocity_assymetry(waveform, facas, facsk, sws, h, hrms, rl
     real(fp)                    , intent(in)     :: hrms
     real(fp)                    , intent(in)     :: rlabda
     real(fp)                    , intent(in)     :: ubot
-    real(fp)                    , intent(inout)  :: tp
     real(fp)                    , intent(in)     :: ag
+    real(fp)                    , intent(inout)  :: tp
     real(fp)                    , intent(in)     :: reposeangle
     real(fp)                    , intent(in)     :: kwtur    !<  Breaker induced turbulence
     real(fp)                    , intent(inout)  :: uamag
@@ -268,6 +268,6 @@ subroutine calculate_velocity_assymetry(waveform, facas, facsk, sws, h, hrms, rl
     else
        urms2 = 0.0_fp
     endif
-end subroutine calculate_velocity_assymetry
+end subroutine calculate_velocity_asymmetry
 
 end module sed_support_routines

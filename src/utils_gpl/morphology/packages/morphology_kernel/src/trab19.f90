@@ -36,7 +36,7 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
-    use sed_support_routines, only: calculate_critical_velocities, calculate_velocity_assymetry
+    use sed_support_routines, only: calculate_critical_velocities, calculate_velocity_asymmetry
     !
     implicit none
 !
@@ -154,7 +154,7 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     !
     cf = ag / chezy / chezy
     !
-    call calculate_velocity_assymetry(waveform, facas, facsk, sws, h, hrms, rlabda, ubot, ag, tp, &
+    call calculate_velocity_asymmetry(waveform, facas, facsk, sws, h, hrms, rlabda, ubot, ag, tp, &
                             reposeangle, ubot_from_com, kwtur, uamag, phi, uorb, urms2)
     !
     dster=(delta*ag/1e-12_fp)**ONETHIRD * d50        ! 1e-12 = nu**2
