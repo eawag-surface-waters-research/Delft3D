@@ -5,6 +5,7 @@ set(deltares_common_include_path ${CMAKE_CURRENT_SOURCE_DIR}/include)
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
 set(ini_version_file "${deltares_common_include_path}/version_number.ini")
 set(fortran_version_file "${CMAKE_CURRENT_SOURCE_DIR}/src/deltares_common_version.F90")
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
 
 # Set include path to have it accessible for other components
 set(public_include_path ${deltares_common_include_path})
@@ -38,6 +39,9 @@ if(UNIX)
    add_definitions(-DHAVE_CONFIG_H=1)
 endif(UNIX)
 
+target_include_directories(${library_name}  PRIVATE ${version_include_dir})
+
+
 # Set additional compilation properties, specific for Debug mode
 target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 
@@ -60,5 +64,5 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source}
                                                     ${ini_version_file} 
                                                     ${svn_version_file})
                                                     
- set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/deltares_common)
+set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/deltares_common)
  

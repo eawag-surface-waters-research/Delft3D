@@ -27,16 +27,18 @@ module deltares_common_version_module
 !-------------------------------------------------------------------------------
 !  
 !  
+#INCLUDE "version_definition.h"
+
 
 implicit none
 
     character(*),  public, parameter :: deltares_common_major        = '1'
     character(*),  public, parameter :: deltares_common_minor        = '00'
     character(*),  public, parameter :: deltares_common_revision     = '00'
-    character(*),  public, parameter :: deltares_common_build_number = '000000'
+    character(*),  public, parameter :: deltares_common_build_number = BUILD_NR
 
-    character(*),  public, parameter :: deltares_common_company      = 'Deltares'
-    character(*),  public, parameter :: deltares_common_company_url  = 'http://www.deltares.nl'
+    character(*),  public, parameter :: deltares_common_company      = COMPANY_NAME
+    character(*),  public, parameter :: deltares_common_company_url  = COMPANY_URL
     character(*),  public, parameter :: deltares_common_program      = 'DELTARES_COMMON'
 
     character(*),  public, parameter :: deltares_common_version      = deltares_common_major//'.'//deltares_common_minor//'.'//deltares_common_revision//'.'//deltares_common_build_number
