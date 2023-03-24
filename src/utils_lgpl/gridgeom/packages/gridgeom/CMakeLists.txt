@@ -4,7 +4,7 @@ set(src_path src)
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to the location of where this CMakeLists file is defined in.
 set(ini_version_file "${CMAKE_CURRENT_SOURCE_DIR}/include/version_number.ini")
 set(fortran_version_file "${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/gridgeom_version.F90")
-
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
 
 # Gather source files
 get_fortran_source_files(${src_path} source_files)
@@ -27,6 +27,8 @@ set(oss_dependencies    deltares_common
                         kdtree2
                         triangle_c)
 oss_include_libraries(${library_name} oss_dependencies)
+
+target_include_directories(${library_name}  PRIVATE ${version_include_dir})
 
 if (UNIX)
     message(STATUS "Setting oss_target_link_libraries in Unix")

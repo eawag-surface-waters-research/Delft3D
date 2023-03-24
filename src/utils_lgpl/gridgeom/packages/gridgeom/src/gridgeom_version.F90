@@ -25,6 +25,7 @@ module gridgeom_version_module
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
+#INCLUDE "version_definition.h"
 
 implicit none
 
@@ -32,9 +33,10 @@ implicit none
     character(*),  public, parameter :: gridgeom_minor        = '01'
     character(*),  public, parameter :: gridgeom_revision     = '00'
 
-    character(*),  public, parameter :: gridgeom_company      = 'Deltares'
-    character(*),  public, parameter :: gridgeom_company_url  = 'http://www.deltares.nl'
+    character(*),  public, parameter :: gridgeom_company      = COMPANY_NAME
+    character(*),  public, parameter :: gridgeom_company_url  = COMPANY_URL
     character(*),  public, parameter :: gridgeom_program      = 'GRIDGEOM'
+    character(*),  public, parameter :: gridgeom_build_number = BUILD_NR
 
 #if defined(WIN32)
     character(*),  public, parameter :: gridgeom_architecture = 'Win32' ! used in about box
@@ -44,7 +46,7 @@ implicit none
     character(*),  public, parameter :: gridgeom_architecture = 'unknown' ! used in about box
 #endif
 
-    character(*),  public, parameter :: gridgeom_version      = gridgeom_major//'.'//gridgeom_minor//'.'//gridgeom_revision
+    character(*),  public, parameter :: gridgeom_version      = gridgeom_major//'.'//gridgeom_minor//'.'//gridgeom_revision//'.'//gridgeom_build_number
     character(*),  public, parameter :: gridgeom_version_full = 'Deltares, '//gridgeom_program//' Version '//gridgeom_version//' ('//gridgeom_architecture// '), '//__DATE__//', '//__TIME__
     character(*),  public, parameter :: gridgeom_version_id   = '@(#)'//gridgeom_version_full
 
