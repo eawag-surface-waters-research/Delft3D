@@ -44,8 +44,6 @@
  integer                    :: m, n
  double precision           :: uLx, uLy, csk, snk, sg
 
- double precision, external :: nod2linx, nod2liny, lin2corx, lin2cory
-
  ucnx = 0 ; ucny = 0
 
  if (kmx == 0) then
