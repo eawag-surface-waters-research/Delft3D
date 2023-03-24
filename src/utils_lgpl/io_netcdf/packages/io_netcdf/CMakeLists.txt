@@ -1,6 +1,7 @@
 # Set version file variables
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
 set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/io_netcdf_version.F90)
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
 
 if(UNIX)
     # the `pkg_check_modules` function is created with this call
@@ -26,6 +27,7 @@ add_library(${library_name} ${sources} ${fortran_version_file})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources} ${fortran_version_file})
 set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/io_netcdf)
 
+target_include_directories(${library_name}  PRIVATE ${version_include_dir})
 
 if(UNIX)
     # Add dependency

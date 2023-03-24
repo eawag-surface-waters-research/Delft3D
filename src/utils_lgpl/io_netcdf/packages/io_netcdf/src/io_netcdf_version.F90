@@ -27,15 +27,17 @@ module io_netcdf_version_module
 !-------------------------------------------------------------------------------
 !
 !
+#INCLUDE "version_definition.h"
 
 implicit none
 
     character(*),  public, parameter :: io_netcdf_major        = '1'
     character(*),  public, parameter :: io_netcdf_minor        = '01'
     character(*),  public, parameter :: io_netcdf_revision     = '00'
+    character(*),  public, parameter :: io_netcdf_build_number = BUILD_NR
 
-    character(*),  public, parameter :: io_netcdf_company      = 'Deltares'
-    character(*),  public, parameter :: io_netcdf_company_url  = 'http://www.deltares.nl'
+    character(*),  public, parameter :: io_netcdf_company      = COMPANY_NAME
+    character(*),  public, parameter :: io_netcdf_company_url  = COMPANY_URL
     character(*),  public, parameter :: io_netcdf_program      = 'IO_NETCDF'
 
 #if defined(WIN32)
@@ -48,7 +50,7 @@ implicit none
     character(*),  public, parameter :: io_netcdf_architecture = 'unknown' ! used in about box
 #endif
 
-    character(*),  public, parameter :: io_netcdf_version      = io_netcdf_major//'.'//io_netcdf_minor//'.'//io_netcdf_revision
+    character(*),  public, parameter :: io_netcdf_version      = io_netcdf_major//'.'//io_netcdf_minor//'.'//io_netcdf_revision//'.'//io_netcdf_build_number
     character(*),  public, parameter :: io_netcdf_version_full = 'Deltares, '//io_netcdf_program//' Version '//io_netcdf_version//' ('//io_netcdf_architecture// '), '//__DATE__//', '//__TIME__
     character(*),  public, parameter :: io_netcdf_version_id   = '@(#)'//io_netcdf_version_full
 
