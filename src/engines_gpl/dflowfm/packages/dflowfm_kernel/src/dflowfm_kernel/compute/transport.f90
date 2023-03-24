@@ -48,6 +48,7 @@ subroutine transport()                           ! transport for now, advect sal
  use unstruc_display, only: jaGUI
  use unstruc_messages
  use m_transport, only: NUMCONST, constituents, ISALT, ITEMP, ISED1, ISEDN, ITRA1, itraN, itrac2const
+ use m_limiters, only: dslim, dlimitercentral
 
  implicit none
 
@@ -65,7 +66,7 @@ subroutine transport()                           ! transport for now, advect sal
 
  ! kuzmin 2D limiting 
 
- double precision, external     :: dslim, setrho, dlimitercentral
+ double precision, external     :: setrho
 
  integer                        :: j, kj, kdj, kuj, kl1j, kl2j, kbj, kij, ki, jastep, kk, kb1, kb2, n1, n2, kkua, kkub, ku2
 

@@ -30,11 +30,12 @@
 ! 
 ! 
 
- subroutine getLbotLtop(LL,Lb,Lt)
+elemental subroutine getLbotLtop(LL,Lb,Lt)
  use m_flow
  use m_flowgeom
  implicit none
- integer :: LL,Lb,Lt
+ integer, intent(in) :: LL
+ integer, intent(out):: Lb,Lt
  if (kmx == 0) then
     Lb = LL
     if (hu(LL) > 0) then

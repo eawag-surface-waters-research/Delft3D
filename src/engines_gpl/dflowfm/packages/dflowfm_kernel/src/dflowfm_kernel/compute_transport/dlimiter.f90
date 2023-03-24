@@ -31,7 +31,7 @@
 ! 
 
 !> limiter function
-double precision function dlimiter(d1,d2,limtyp)
+elemental double precision function dlimiter(d1,d2,limtyp)
    implicit none
 
    double precision, intent(in) :: d1, d2   !< left and right slopes
@@ -48,12 +48,7 @@ double precision function dlimiter(d1,d2,limtyp)
 
    r = d1/d2    ! d1/d2
 
-!   if ( limtyp.eq.1 ) then
-!!     Van Leer
-!      dlimiter = dble(min(limtyp,1)) * (r + abs(r) ) / (1 + abs(r) )
-!   else
 !!     Monotinized Central
       dlimiter = max(0d0, min(TWO*r,TWO,0.5d0*(1d0+r)) )
-!   end if
 
 end function dlimiter

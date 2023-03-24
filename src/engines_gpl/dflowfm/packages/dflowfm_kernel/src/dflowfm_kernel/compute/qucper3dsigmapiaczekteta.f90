@@ -36,6 +36,7 @@
  use m_flowgeom
  use m_flowtimes, only : dts                                !
  use m_sferic
+ use m_nod2lin, only: nod2linx, nod2liny, lin2nodx, lin2nody
  implicit none
 
  integer,          intent(in) :: LL,Lb,Lt                   ! working for basis link LL
@@ -51,8 +52,6 @@
 
  double precision ::  ucinx, uciny
  integer          :: nn12
-
- double precision, external:: lin2nodx, lin2nody, nod2linx, nod2liny
 
  ae = 0d0 ; ai = 0d0
 
