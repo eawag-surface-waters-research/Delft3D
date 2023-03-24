@@ -120,6 +120,8 @@
    ku2  = abs(klnup(5,LL))
    ku   = abs(kku)
 
+   if (kku == 0 .or. (kku > 0 .and. ku2 == 0)) return
+   
    if (kmx /= 0) then !different ku for 3D
       kkua = ku
       ku  = kbot(kkua) + kmxn(kkua) - ( Lb + kmxL(LL) - L)
@@ -131,8 +133,6 @@
          if (ku2 < kbot(kkub) .or. ku2 > ktop(kkub)) return
       endif
    endif
-   
-   if (kku == 0 .or. (kku > 0 .and. ku2 == 0)) return
 
    call setHOAvelocity(ucxu, ucyu, L, LL, Lb, k, kd, is, n12, ib, half, sl1, sl2, sl3, kku, ku2, ku)
 
@@ -163,6 +163,8 @@
    ku2  = abs(klnup(2,LL))
    ku   = abs(kku)
 
+   if (kku == 0 .or. (kku > 0 .and. ku2 == 0)) return
+   
    if (kmx /= 0) then !different ku for 3D
       kkua = ku
       ku  = kbot(kkua) + kmxn(kkua) - ( Lb + kmxL(LL) - L)
@@ -174,9 +176,7 @@
          if (ku2 < kbot(kkub) .or. ku2 > ktop(kkub)) return
       endif
    endif
-   
-   if (kku == 0 .or. (kku > 0 .and. ku2 == 0)) return
-   
+
    call setHOAvelocity(ucxu, ucyu, L, LL, Lb, k, kd, is, n12, ib, half, sl1, sl2, sl3, kku, ku2, ku)
 
    end subroutine
@@ -206,6 +206,8 @@
    ku2  = abs(klnup(5,LL))
    ku   = abs(kku)
 
+   if (kku == 0 .or. (kku > 0 .and. ku2 == 0)) return
+   
    if (kmx /= 0) then !different ku for 3D
       kkua = ku
       ku  = kbot(kkua) + kmxn(kkua) - ( Lb + kmxL(LL) - L)
@@ -217,9 +219,7 @@
          if (ku2 < kbot(kkub) .or. ku2 > ktop(kkub)) return
       endif
    endif
-   
-   if (kku == 0 .or. (kku > 0 .and. ku2 == 0)) return
-   
+
    call setHOAvelocity_jasfer3D(ucxu, ucyu, L, LL, Lb, k, kd, is, n12, ib, half, sl1, sl2, sl3, kku, ku2, ku)
 
    end subroutine
@@ -249,6 +249,8 @@
    kku  =     klnup(1,LL)
    ku2  = abs(klnup(2,LL))
    ku   = abs(kku)
+
+   if (kku == 0 .or. (kku > 0 .and. ku2 == 0)) return
    
    if (kmx /= 0) then !different ku for 3D
       kkua = ku
@@ -261,8 +263,6 @@
          if (ku2 < kbot(kkub) .or. ku2 > ktop(kkub)) return
       endif
    endif
-   
-   if (kku == 0 .or. (kku > 0 .and. ku2 == 0)) return
 
    call setHOAvelocity_jasfer3D(ucxu, ucyu, L, LL, Lb, k, kd, is, n12, ib, half, sl1, sl2, sl3, kku, ku2, ku)
 
