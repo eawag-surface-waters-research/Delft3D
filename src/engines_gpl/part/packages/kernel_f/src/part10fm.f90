@@ -503,7 +503,7 @@ contains
 !!            if ( timon ) call timstop ( ithndl )
             return  ! if a closed boundary is found then return with openbound = false
           else
-            ! ensure a tolerance so that the coordinate is acutally in the next cell.
+            ! ensure a tolerance so that the coordinate is actually in the next cell.
             tolx = sign(1.0D0,(xpart(ipart) - xcr)) * DTOL
             toly = sign(1.0D0,(ypart(ipart) - ycr)) * DTOL
             xpartold = xcr + tolx
