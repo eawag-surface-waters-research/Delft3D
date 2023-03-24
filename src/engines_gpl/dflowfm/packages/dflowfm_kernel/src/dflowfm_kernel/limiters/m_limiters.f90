@@ -34,8 +34,12 @@
    module m_limiters
 
    implicit none
+   
+   double precision, parameter  :: dtol=1d-16
+   double precision, parameter  :: TWO=2.0d0
+   
    contains
-
+   
    elemental double precision function dminmod(d1,d2)                      ! twee maal vergroot vanwege acl
    implicit none
    double precision, intent(in) :: d1, d2
@@ -74,38 +78,26 @@
    elemental double precision function dcminmod(d1,d2)                     ! basic minmod definition
    implicit none
    double precision, intent(in) :: d1, d2
-   logical :: minabs
-   if (d1*d2 > 0) then
-      if (abs(d1) < abs(d2)) then
-         dcminmod = d1
-      else
-         dcminmod = d2
-      endif
-   else
-      dcminmod = 0d0
-   endif
+   double precision r
+   
+   dcminmod = 0d0
+   if ((d1*d2) <= dtol) return 
+   r = d1/d2
+   dcminmod = d2*min(r,1d0)
 
    end function dcminmod
-
-   elemental double precision function dcminmod_nocheck(d1,d2)                     ! basic minmod definition
-   implicit none
-   double precision, intent(in) :: d1, d2
-   integer :: minabs
-
-   minabs = merge(1, 0, abs(d1) < abs(d2))
-   dcminmod_nocheck = minabs*d1 + (1-minabs)*d2
-
-   end function
 
    elemental double precision function dcentral(d1,d2)                     ! twee maal vergroot vanwege acl
    implicit none
    double precision, intent(in):: d1, d2
-   
-   double precision :: d3
-   integer :: pos
+   double precision r 
 
-   pos = merge(1,0,d1*d2 > 0d0)
-   dcentral = pos*dcminmod_nocheck( (d1+d2)*0.5d0 , dcminmod_nocheck( 2d0*d1, 2d0*d2) )
+   dcentral = 0d0
+   if ((d1*d2) <= dtol) return 
+   
+   r = d1/d2 !we divide d1 by d2 to avoid having to call the abs() function.
+             !d1 and d2 are guaranteed to have the same sign so we get the absolute value for free
+   dcentral = d2 * min(2d0*r, 0.5d0*(1d0+r), 2d0)
 
    end function dcentral
 
@@ -115,11 +107,7 @@
 
    double precision, intent(in) :: d1, d2   !< left and right slopes
    integer         , intent(in) :: limtyp   !< first order upwind (0) or MC (>0)
-
    double precision             :: r
-   double precision, parameter  :: dtol=1d-16
-
-   double precision, parameter  :: TWO=2.0d0
 
    dlimiter = 0d0
    if (limtyp == 0)     return
@@ -139,7 +127,6 @@
    integer         , intent(in) :: limtyp   !< first order upwind (0) or MC (>0)
 
    double precision             :: r, d1
-   double precision, parameter  :: dtol=1d-16
 
    dlimitercentral = 0d0
    if (limtyp == 0)     return
@@ -177,8 +164,6 @@
    ! e.g. lax wendroff central: psi=1, dslimiter=d2
 
    select case(LIMTYP)
-   case (4)                        ! monotonized central no division
-      dslim = dcentral(d1,d2)
    case default
       dslim = 0
    case (1)                        ! codering guus, met voorslope
@@ -187,6 +172,8 @@
       dslim = d1*dvanleer(d1,d2)
    case (3)                        ! codering guus, met voorslope
       dslim = d1*dkoren(d1,d2)
+   case (4)                        ! monotonized central no division
+      dslim = dcentral(d1,d2)
    case (5)                        ! monotonized central Sander with division
       dslim = dlimiter(d1,d2,limtyp) * d2
    case (6)                        ! monotonized central Sander with division, upwind slope ds1 at central cel
