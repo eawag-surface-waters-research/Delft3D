@@ -21,9 +21,6 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
       
-      module exception_waq
-      logical :: useexception_waq = .false.
-      end module exception_waq
       
       subroutine srstop ( iexit )
 

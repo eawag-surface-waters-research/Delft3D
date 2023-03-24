@@ -122,9 +122,6 @@ contains
     integer                          :: iarg
     integer                          :: errorcode
 
-    ! do not use stop, but exception when used through bmi
-    useexception_waq = .true.
-    useexception_part = .true.
 
     ! Store the name
     runid_given = char_array_to_string(c_config_file)
