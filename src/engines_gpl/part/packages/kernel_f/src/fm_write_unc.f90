@@ -373,8 +373,6 @@ subroutine unc_write_part(ifile,itime,id_trk_parttime,id_trk_partx,id_trk_party,
 
    integer, save :: icount=0
 
-   ierror = 1
-
    icount = icount+1
 
    !  allocate
