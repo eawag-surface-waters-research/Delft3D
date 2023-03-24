@@ -25,8 +25,6 @@ module gridgeom_version_module
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id: gridgeom_version.F90.svn 7241 2017-05-31 08:38:38Z carniato $
-!  
 
 implicit none
 
