@@ -5194,7 +5194,7 @@ end subroutine count_neighboring_domains
 
 !> get ghost corners 
 subroutine get_ghost_corners(domain_number, min_ghost_level, max_ghost_level, ghost_type, ghost_list)
-use network_data, only : numk, nmk, nod
+use network_data, only : kn, numk, nmk, nod
 use m_alloc
 
 implicit none
@@ -5221,19 +5221,21 @@ call alloc_tghost(ghost_list, max_ghost_level, min_ghost_level)
 allocate( list_of_cells(  maxval(nmk(1:numk)) ) )
 
 loop_over_nodes: &
-    do node = 1, numk      
+  do node = 1, numk      
     number_of_cells = 0
     do index = 1, nmk(node)
         first_link = nod(node)%lin(index)
+        if ( kn(3,first_link) /= 2 ) cycle
         if ( index < nmk(node) ) then
             second_link = nod(node)%lin(index+1)
         else
             second_link = nod(node)%lin(1)
         end if
+        if ( kn(3,second_link) /= 2 ) cycle
         
         cell = common_cell_for_two_net_links(first_link, second_link)
                      
-        if ( cell <= 0 ) cycle  ! no cell
+        if ( cell < 1 ) cycle
         
         if ( idomain(cell) == domain_number ) cycle loop_over_nodes
                 
