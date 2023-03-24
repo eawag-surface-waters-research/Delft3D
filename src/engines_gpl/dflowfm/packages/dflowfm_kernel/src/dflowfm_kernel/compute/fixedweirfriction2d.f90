@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine fixedweirfriction2D(L,k1,k2,frL)                ! frL of fixed weir
  use m_flowgeom

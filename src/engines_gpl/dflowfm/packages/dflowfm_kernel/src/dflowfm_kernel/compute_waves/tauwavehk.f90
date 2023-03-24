@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine tauwavehk(Hrms, Tsig, Depth, Uorbi, rlabd, ust)
  use m_flow, only: plotlin, rhog, rhomean, jased

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>   generate grid between fixed points on a spline that itself is defined by control points
 !>     in:  t(Nt) fixed points on spline

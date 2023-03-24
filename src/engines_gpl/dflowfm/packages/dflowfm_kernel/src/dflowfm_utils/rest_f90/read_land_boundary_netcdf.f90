@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Read land boundary from world vector shoreline files (NetCDF format)
 !! Global Self-consistent Hierarchical High-resolution Shorelines (GSHHS)

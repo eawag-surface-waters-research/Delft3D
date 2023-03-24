@@ -29,8 +29,8 @@ subroutine restart_trim_roller(lundia    ,error     ,fds       ,filename  ,filet
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Reads initial field condition records from a trim-file
 !!--pseudo code and references--------------------------------------------------

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE RMDOUBLE(XS,YS,ZS,IPSAM,NS)
       use m_missing

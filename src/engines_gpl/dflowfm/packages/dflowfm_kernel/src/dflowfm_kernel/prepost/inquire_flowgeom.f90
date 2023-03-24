@@ -26,8 +26,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> This module contains general functions for snapping locations to either flowlink numbers or flownode numbers
 module m_inquire_flowgeom

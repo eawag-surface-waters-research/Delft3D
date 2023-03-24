@@ -25,8 +25,8 @@ subroutine chkcom(lundia    ,error     ,neffil    ,ftype     ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Check the comm-file version by reading the element

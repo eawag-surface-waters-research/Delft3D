@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    subroutine sedmor_write_stats(tim)
    use m_sediment, only: stm_included, stmpar

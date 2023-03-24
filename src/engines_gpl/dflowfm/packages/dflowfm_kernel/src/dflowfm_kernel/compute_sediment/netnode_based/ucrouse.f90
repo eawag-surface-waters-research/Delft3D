@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 double precision function ucrouse(z,z0,h,a,rs)
 use m_einstein_garcia

@@ -25,8 +25,8 @@ subroutine wavenr_htk(h, t, k)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Approximation of the dispersion, original sub-
 ! routine Disp10 (L, T, h, g)

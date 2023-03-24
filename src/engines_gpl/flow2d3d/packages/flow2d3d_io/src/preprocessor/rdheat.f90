@@ -27,8 +27,8 @@ subroutine rdheat(lunmd     ,lundia    ,error     ,nrrec       ,mdfrec    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Reads the time dependent boundary data for the

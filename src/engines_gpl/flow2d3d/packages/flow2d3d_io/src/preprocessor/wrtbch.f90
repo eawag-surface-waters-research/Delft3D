@@ -26,8 +26,8 @@ subroutine wrtbch(lunbch    ,ntof      ,kc        ,omega     ,hydrbc    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: write frequencies, amplitudes and phases to

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>  prescribe link-based aspect ratios in curvi-grids for mesh refinement (obsolete)
 subroutine orthonet_prescribe_aspect(smp_mu, idir, aspect, ic, jc)

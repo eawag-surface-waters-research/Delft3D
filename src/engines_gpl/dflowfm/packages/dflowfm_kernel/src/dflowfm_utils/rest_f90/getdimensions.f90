@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE GETDIMENSIONS(MXD,NXD,MXLN,NSX)
       implicit none

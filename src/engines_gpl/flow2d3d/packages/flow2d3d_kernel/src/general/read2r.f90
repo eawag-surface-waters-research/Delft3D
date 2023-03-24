@@ -27,8 +27,8 @@ subroutine read2r(lunmd     ,error     ,keyw      ,newkw     ,nlook     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads NLOOK real values from a record of MD-file.

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>  set nudge rates [1/s] from input in following order of preference:
 !>     1. nudge time [s]

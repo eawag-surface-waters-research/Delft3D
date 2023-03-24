@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Update the cumulative flow analysis parameters and compute the flow Courant number, just before writing to the netcdf file
 subroutine updateFlowAnalysisParameters()

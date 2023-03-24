@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Check network data for possible errors.
 !! Netlink crossings are stored in linkcross, and can be shown through display menu.

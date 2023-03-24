@@ -27,8 +27,8 @@ subroutine layer_interfaces(zmodel  ,kmax    ,mmax    ,nmaxus  ,s1     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Calculates the vertical coordinates of the layer interfaces

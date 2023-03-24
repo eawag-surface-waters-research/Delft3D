@@ -38,8 +38,8 @@ subroutine santoss(numrealpar, realpar ,par ,npar, dzduu ,dzdvv , i2d3d, &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--declarations----------------------------------------------------------------
     use precision
     use morphology_data_module

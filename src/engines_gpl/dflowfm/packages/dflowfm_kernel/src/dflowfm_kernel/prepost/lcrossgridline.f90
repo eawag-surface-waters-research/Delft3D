@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> check if a line segment crosses the gridline on the center spline
 logical function Lcrossgridline(x1,x2,j)

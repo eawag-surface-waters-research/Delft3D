@@ -26,8 +26,8 @@ subroutine sline(dtn       ,md        ,ndim      ,te        ,xd        , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - calculates streamline in this grid cell

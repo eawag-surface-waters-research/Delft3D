@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: add_internaltidesfrictionforces.f90 142549 2023-02-16 12:28:37Z buwalda $
-! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/add_internaltidesfrictionforces.f90 $
+! 
+! 
 
 !> add internal tides friction forces to adve
    subroutine add_InternalTidesFrictionForces()

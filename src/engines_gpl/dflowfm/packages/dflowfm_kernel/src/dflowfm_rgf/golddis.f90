@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE GOLDDIS(AX,BX,CX,TOL,P,P2,Y,Y2,T, N,NT,XMIN,DIS,SSQ,H)
       implicit none

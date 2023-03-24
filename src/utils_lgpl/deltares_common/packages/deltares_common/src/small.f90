@@ -25,8 +25,8 @@ subroutine small(string    ,lenstr    )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !  Subroutine obsolete; this routine will be removed.

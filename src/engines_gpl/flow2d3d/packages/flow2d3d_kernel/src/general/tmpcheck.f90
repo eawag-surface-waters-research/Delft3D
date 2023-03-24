@@ -25,8 +25,8 @@ subroutine tmpcheck( runid, reusetmp,  tmpexist,  gdp )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Checks if all necessary temporary (unformatted) files

@@ -27,12 +27,12 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine gettaus(typout, kernel)
    use m_flowgeom

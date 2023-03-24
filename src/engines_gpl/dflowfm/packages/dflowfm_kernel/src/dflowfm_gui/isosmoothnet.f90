@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine isosmoothnet(k) ! smooth isolines in net cells
  use m_flowgeom

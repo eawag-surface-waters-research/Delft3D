@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: qufper.f90 142549 2023-02-16 12:28:37Z buwalda $
-! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/qufper.f90 $
+! 
+! 
 
  double precision function QufPer(n12,L)             ! sum of (Q*uc cell centre upwind normal) at side n12 of link L
  use m_flow                                          ! advect the cell center velocities (dimension: m4/s2)

@@ -32,8 +32,8 @@ subroutine mom_waqua &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! This subroutine is part of (called by) UZD. It computes the Horizontal 

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   SUBROUTINE ONELINE(K,RD) ! TWEE LIJNTJES WORDEN 1
   use m_netw

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine flow_f0isf1()                            ! Todo: make pointer stucture and reset pointers
  use m_flowgeom

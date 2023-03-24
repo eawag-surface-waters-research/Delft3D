@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine getprof_1D_min(L, hpr, area, width) ! pressurepipe
 use m_profiles

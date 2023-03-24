@@ -26,8 +26,8 @@ subroutine distance2(sferic    ,x1        ,y1        ,x2        ,y2        , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Calculates distance between two points on earth

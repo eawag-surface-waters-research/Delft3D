@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> derefine mesh
 subroutine derefine_mesh(xp,yp,Lconfirm)

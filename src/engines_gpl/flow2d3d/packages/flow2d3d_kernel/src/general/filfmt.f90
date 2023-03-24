@@ -25,8 +25,8 @@ subroutine filfmt(lundia    ,messag    ,fmttmp    ,error     ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the file format definition ('UN' of 'FR') of

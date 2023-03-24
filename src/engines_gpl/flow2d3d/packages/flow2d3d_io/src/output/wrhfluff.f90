@@ -27,8 +27,8 @@ subroutine wrhfluff(lundia    ,error     ,filename  ,grpnam    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the time varying data for the fluff layer

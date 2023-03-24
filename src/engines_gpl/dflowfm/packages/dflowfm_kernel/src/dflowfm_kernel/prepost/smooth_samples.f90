@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> smooth structured sample data and put it in zss(1,:,:)
 !>    D u/ D t = div grad u

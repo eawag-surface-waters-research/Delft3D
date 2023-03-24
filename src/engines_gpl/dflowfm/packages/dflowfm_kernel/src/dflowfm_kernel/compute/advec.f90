@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: advec.f90 142549 2023-02-16 12:28:37Z buwalda $
-! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/advec.f90 $
+! 
+! 
 
  subroutine advec()                                  ! advection, based on u0, q0 24
  use m_flowtimes

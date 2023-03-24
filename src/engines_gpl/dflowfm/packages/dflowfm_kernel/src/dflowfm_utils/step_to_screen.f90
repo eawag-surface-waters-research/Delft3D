@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 ! Copied and modified from: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/flow2d3d/packages/kernel/src/general/step_to_screen.f90
 ! Original file distributed  GNU General Public License <http://www.gnu.org/licenses/>.
 

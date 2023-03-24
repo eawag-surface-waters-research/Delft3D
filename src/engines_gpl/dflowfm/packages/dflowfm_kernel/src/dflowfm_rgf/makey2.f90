@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE MAKEY2(XR,YR,XO,YO,MMAX,NMAX)  ! Voor tekenen bij JSFERIC SUBROUTINE MAKEY2
       USE M_SFERIC

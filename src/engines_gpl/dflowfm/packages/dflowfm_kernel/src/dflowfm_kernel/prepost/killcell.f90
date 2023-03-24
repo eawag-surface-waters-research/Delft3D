@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> delete cell by merging all its nodes and update administration
 subroutine killcell(xp,yp)

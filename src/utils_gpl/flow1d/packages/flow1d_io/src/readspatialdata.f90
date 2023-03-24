@@ -25,8 +25,8 @@ module m_readSpatialData
 !  Stichting Deltares. All rights reserved.
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !-------------------------------------------------------------------------------
    
    use m_GlobalParameters

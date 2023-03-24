@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: horvic.f90 142549 2023-02-16 12:28:37Z buwalda $
-! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/horvic.f90 $
+! 
+! 
 
  !> compute viscous flux balance of cell ln (n12,L) in coordinate frame of L
  double precision function horvic(n12,L)             ! horizontal viscosity term

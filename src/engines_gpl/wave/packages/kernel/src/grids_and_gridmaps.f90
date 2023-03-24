@@ -25,8 +25,8 @@ subroutine grids_and_gridmaps (n_swan_grids, n_flow_grids, sr, mode)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--pseudo code and references--------------------------------------------------

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>    copy and move a whole spline
       subroutine copyspline(ispline, inode, xp, yp)

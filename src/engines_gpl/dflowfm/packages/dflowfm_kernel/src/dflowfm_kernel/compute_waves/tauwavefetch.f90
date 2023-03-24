@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine tauwavefetch(tim)               ! fetchlength and fetchdepth based significant wave height and period
  use m_sediment                             ! based on Hurdle, Stive formulae

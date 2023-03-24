@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>  smooth the link-based aspect ratios (SLR/R01) along parallel and perpendicular mesh lines (obsolete)
 subroutine orthonet_smooth_aspect(aspect, iexit)

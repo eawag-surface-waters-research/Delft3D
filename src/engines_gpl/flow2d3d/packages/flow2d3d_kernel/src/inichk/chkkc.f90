@@ -27,8 +27,8 @@ subroutine chkkc(lundia    ,error     ,runid     ,fldry     ,fltd      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Sets the mask arrays to indicate active computa-

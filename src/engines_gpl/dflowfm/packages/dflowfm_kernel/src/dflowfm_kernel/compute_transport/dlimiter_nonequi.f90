@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> MC limiter function for non-equidistant grid
 double precision function dlimiter_nonequi(d1,d2,alpha,s)

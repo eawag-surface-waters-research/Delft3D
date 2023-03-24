@@ -25,8 +25,8 @@ subroutine iwecof(kmxt      ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Sets parameters for subprogram TAYLOR.

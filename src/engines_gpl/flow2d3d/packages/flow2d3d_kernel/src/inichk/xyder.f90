@@ -27,8 +27,8 @@ subroutine xyder(j         ,nmmaxj    ,nmmax     ,icx       ,icy       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes the coefficients for the curvature

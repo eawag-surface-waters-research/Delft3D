@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine get2Dnormal(n1,xn1,yn1)  ! get x and y components of land normal vector pointing upward.
 

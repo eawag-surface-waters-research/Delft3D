@@ -36,8 +36,8 @@ subroutine taylor(kmax      ,kmxdt     ,kmxt      ,np        ,nfreqs    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function:-Turbulence production,

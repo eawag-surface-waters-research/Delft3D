@@ -27,8 +27,8 @@ subroutine getcel(filnam    ,grpnam    ,nelems    ,elmnms    ,elmdms    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Detect the number of time steps on filnam (map-

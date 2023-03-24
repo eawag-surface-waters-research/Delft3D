@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>    compute the nearest point on the land boundary
       SUBROUTINE TOLAND(XX, YY, JSTART, JEND, JAINVIEW, XV, YV, DISMIN, JOUT, RLOUT)         ! SHIFT 1 POINT TO LANDBOUNDARY

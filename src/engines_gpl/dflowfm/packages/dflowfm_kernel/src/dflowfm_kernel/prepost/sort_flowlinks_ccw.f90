@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> sort flowlinks in nd%ln counterclockwise (copy-paste and modified from above)
 subroutine sort_flowlinks_ccw()

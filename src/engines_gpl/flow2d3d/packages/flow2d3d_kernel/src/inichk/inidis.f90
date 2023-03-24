@@ -33,8 +33,8 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the time dependent data from file for the first time

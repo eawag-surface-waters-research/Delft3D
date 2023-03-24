@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>    compute the intersection of two splines
       SUBROUTINE SECT3R(     XI,     YI,     XJ,     YJ,    mmax, nmax, imax, CRP,   &

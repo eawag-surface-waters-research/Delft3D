@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine getkbotktopmax(n,kb,kt,ktx)
 ! Variation on getkbotktop. Always returns the maximum possible layer range instead of the actual range.

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine flgtarfm(ng, L0, wuL, bl1, bl2, teken, zs, wstr, w2, wsd, zb2, dg, ds1, ds2, cgf,  &   ! fromgeneral
                     cgd, cwf, cwd, mugf, lambda, strdamf, gatedoorheight)

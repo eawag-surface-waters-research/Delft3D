@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE DPFILLER(X,Y,Z,N,NCOL,NCOLR)
       use gridoperations

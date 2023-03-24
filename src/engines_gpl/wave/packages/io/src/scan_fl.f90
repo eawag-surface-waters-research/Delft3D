@@ -25,8 +25,8 @@ subroutine scan_fl(checkVersionNumber, versionNumberOK)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! SCANFL scans the file "hiswa.out" for a string "SEVERE" or

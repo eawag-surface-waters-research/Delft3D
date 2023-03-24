@@ -25,8 +25,8 @@ function fgyint(a         ,b         ,z         ,eps       ,terfgy    )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! determines fgyint, a contribution to
 ! the bijker transport relation

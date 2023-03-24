@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: qucper3dsigma.f90 142549 2023-02-16 12:28:37Z buwalda $
-! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/qucper3dsigma.f90 $
+! 
+! 
 
  subroutine QucPer3Dsigma(n12,LL,Lb,Lt,cs,sn,quk1)     ! sum of (Q*uc cell centre upwind normal) at side n12 of basis link LL
  use m_flow                                            ! advect the cell center velocities (dimension: m4/s2)

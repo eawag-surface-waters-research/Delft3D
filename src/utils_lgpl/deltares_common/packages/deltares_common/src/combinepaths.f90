@@ -25,8 +25,8 @@ subroutine combinepaths (firstname, secondname)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! This routine appends the secondname to the path part of firstname, and returns
 ! it as an updated version of secondname. Both firstname and secondname may

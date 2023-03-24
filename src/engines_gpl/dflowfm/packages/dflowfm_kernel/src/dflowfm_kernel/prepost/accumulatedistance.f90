@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       !> Stop afstand tussen polygoonpunten vanaf begin in array
       SUBROUTINE accumulateDistance(X,Y,T,MMAX)

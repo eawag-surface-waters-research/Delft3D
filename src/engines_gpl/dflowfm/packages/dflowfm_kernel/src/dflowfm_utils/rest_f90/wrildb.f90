@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       !> Writes a polygon/land boundary/cross section file.
       !! The polyline(s) are written as a sequence of Tekal blocks.

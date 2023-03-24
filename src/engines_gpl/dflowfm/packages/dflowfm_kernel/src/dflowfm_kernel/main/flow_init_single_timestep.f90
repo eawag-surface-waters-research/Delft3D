@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Initializes a single computational timestep, call this prior to flow_perform_single_timestep.
 subroutine flow_init_single_timestep(iresult)

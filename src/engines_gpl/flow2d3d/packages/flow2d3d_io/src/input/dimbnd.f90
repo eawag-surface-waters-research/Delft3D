@@ -27,8 +27,8 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,filtmp    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the dimensions for the open boundary def-

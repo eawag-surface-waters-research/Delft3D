@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine soulsby( tsig, uorbu, z00, fw)
    use m_sferic, only: pi

@@ -27,8 +27,8 @@ subroutine rollu(nmmax     ,kfs       ,sourr     ,df        , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes roller energy source and sink terms, as well as roller energy dissipation

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine lineinterp3(xx, yy, zz, vv, ktx, x,y,z,v,n)
  implicit none

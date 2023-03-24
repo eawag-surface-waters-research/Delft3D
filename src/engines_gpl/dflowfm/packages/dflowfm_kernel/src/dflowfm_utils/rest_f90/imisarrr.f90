@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE IMISARRR(IH,NUMQ,MMAX,NMAX)
       USE M_MISSING

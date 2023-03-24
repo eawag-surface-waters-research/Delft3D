@@ -31,8 +31,8 @@ subroutine z_disbub(kmax    ,nsrcd     ,nsrc      ,nxbub    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! This routine determines mid-field circulation due to the bubble screens.
 !

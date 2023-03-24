@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> construct matrix for first-order upwind discretization of advection
    subroutine fillsystem_advec(ierror)

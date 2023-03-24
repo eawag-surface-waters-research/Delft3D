@@ -27,8 +27,8 @@
    !
    !-------------------------------------------------------------------------------
 
-   ! $Id$
-   ! $HeadURL$
+   ! 
+   ! 
 
    subroutine setdtmaxavalan(dts)
    use m_fm_erosed, only: duneavalan, avaltime

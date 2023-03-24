@@ -26,8 +26,8 @@ subroutine tranb1(utot      ,d50       ,c         ,h         ,npar       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! computes sediment transport according to
 ! engelund hansen

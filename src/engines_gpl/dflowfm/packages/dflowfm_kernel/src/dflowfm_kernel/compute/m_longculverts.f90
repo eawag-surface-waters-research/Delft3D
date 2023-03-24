@@ -27,8 +27,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Module for long culvert data in a dflowfm model.
 !! Long culverts are read from the structures.ini file(s), and converted into

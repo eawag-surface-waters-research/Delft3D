@@ -33,8 +33,8 @@ subroutine drotim(nst       ,j         ,nmmaxj    ,kmax      ,ndro      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - calculates drogues if release time < NST

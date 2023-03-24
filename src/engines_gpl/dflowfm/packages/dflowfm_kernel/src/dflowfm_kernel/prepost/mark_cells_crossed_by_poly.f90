@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> mark the cells that are crossed by the polygon
    subroutine mark_cells_crossed_by_poly(ksize,kmask)

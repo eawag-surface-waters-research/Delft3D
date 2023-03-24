@@ -33,8 +33,8 @@ subroutine cline(hdt       ,j         ,nmmaxj    ,kmax      ,icx       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - calculates position of one drogue if release time < NST

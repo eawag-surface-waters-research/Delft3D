@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !! Initialise net link based kd-tree for trachytopes or calibration
 subroutine netlink_tree(phase)

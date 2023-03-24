@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine getprof2D(             hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,aconv,jaconv,beta,deltaa,hyr)
  use m_flow, only : slotw2D

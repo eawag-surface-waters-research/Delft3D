@@ -25,8 +25,8 @@ function readn(n, u)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! determines whether two or three items
 ! are present on a record. the items are

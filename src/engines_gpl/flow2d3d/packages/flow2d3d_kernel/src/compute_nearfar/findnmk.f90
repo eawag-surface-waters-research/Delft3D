@@ -26,8 +26,8 @@ subroutine findnmk(xz     ,yz     ,dps    ,s1     ,kcs    ,nmmax  ,thick   , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Finds n,m and k coordinates of "jet" points

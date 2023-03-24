@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: horvic3.f90 142549 2023-02-16 12:28:37Z buwalda $
-! $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/horvic3.f90 $
+! 
+! 
 
  double precision function horvic3(n12,L)             ! horizontal viscosity term, out of face normal and tang comp's
  use m_flow

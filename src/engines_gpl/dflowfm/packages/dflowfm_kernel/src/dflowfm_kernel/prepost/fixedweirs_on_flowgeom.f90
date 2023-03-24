@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> TODO: update setfixedweirs to use fxw
 subroutine fixedweirs_on_flowgeom()

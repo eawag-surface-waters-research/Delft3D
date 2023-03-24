@@ -28,8 +28,8 @@ subroutine z_ilu_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      , 
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes ILU decomposition and stores it in dinv

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 MODULE math_tools
   ! MODULE CONTAINS:
   !     1) Singleton fft transform

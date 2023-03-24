@@ -32,8 +32,8 @@ subroutine prtmap(lundia    ,error     ,prsmap    ,lunprt    ,nuprpg    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Print the time varying map data
