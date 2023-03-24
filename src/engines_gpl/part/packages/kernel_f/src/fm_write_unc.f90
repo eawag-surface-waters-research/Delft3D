@@ -163,22 +163,7 @@ subroutine unc_init_map(crs, meshgeom, nosegl, nolay)
 
    cell_method = 'mean' !< Default cell average.
    cell_measures = ''
-   !   cell_measures = 'area: '//trim(mesh2dname)//'_flowelem_ba' ! relies on unc_write_flowgeom_ugrid_filepointer
 
-   !   if (kmx == 1) then
-   !               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_map_depth_averaged_particle_concentration, nf90_double, UNC_LOC_S, 'depth_averaged_particle_concentration', 'depth_averaged_particle_concentration', 'depth-averaged particle concentration', 'm-3', jabndnd=jabndnd_)
-
-   !              function unc_def_var_map(ncid,id_tsp, id_var, itype, iloc,
-   !               var_name = 'depth_averaged_particle_concentration'
-   !               standard_name = 'depth_averaged_particle_concentration'
-   !               long_name = 'depth_averaged_particle_concentration'
-   !               unit = 'm-3'
-   !               , is_timedep, dimids, cell_method, which_meshdim, jabndnd) result(ierr)
-
-
-   !ierr = ug_def_var(imapfile, id_map_depth_averaged_particle_concentration, [meshids%dimids(mdim_face), id_map_timedim], nf90_double, UG_LOC_FACE, &
-   !   trim(meshgeom%meshName), 'depth_averaged_particle_concentration', 'depth_averaged_particle_concentration', &
-   !   'depth_averaged_particle_concentration', 'm-3', cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
    ! add concentrations of all available substances
    ! adapt units for surfcace and sticky oil
     unit = 'm-3'
@@ -205,9 +190,6 @@ subroutine unc_init_map(crs, meshgeom, nosegl, nolay)
       call mess(LEVEL_ERROR, 'Could not create concentration variable in map file')
       return
    end if
-   !   else
-   !      continue
-   !   endif
 
    ierr = nf90_enddef(imapfile)
    ierr = nf90_sync(imapfile)
@@ -318,7 +300,6 @@ subroutine unc_write_part_header(ifile,id_timedim,id_trk_partdim,id_trk_parttime
    if (ierr == nf90_eindefine) jaInDefine = 1 ! Was still in define mode.
    if (ierr /= nf90_noerr .and. ierr /= nf90_eindefine) then
       call mess(LEVEL_ERROR, 'Could not put header in flow geometry file.')
-      !       call check_error(ierr)
       return
    end if
 
@@ -386,7 +367,7 @@ subroutine unc_write_part(ifile,itime,id_trk_parttime,id_trk_partx,id_trk_party,
    double precision                            :: dis2
 
    integer                                     :: i, i0, ii, iglb
-   integer                                     :: ierr, ierror
+   integer                                     :: ierr
 
    double precision,                 parameter :: dtol = 1d-8
 
@@ -395,10 +376,6 @@ subroutine unc_write_part(ifile,itime,id_trk_parttime,id_trk_partx,id_trk_party,
    ierror = 1
 
    icount = icount+1
-
-   if ( icount.ge.24 ) then
-      continue
-   end if
 
    !  allocate
    call realloc(xx, NopartTot, keepExisting=.false., fill = dmiss)
@@ -416,21 +393,20 @@ subroutine unc_write_part(ifile,itime,id_trk_parttime,id_trk_partx,id_trk_party,
    end if
 
    ierr = nf90_put_var(ifile, id_trk_parttime, timepart, (/ itime /))
-   if ( ierr.ne.0 ) goto 1234
-   ierr = nf90_put_var(ifile, id_trk_partx, xx, start=(/ 1,itime /), count=(/ NopartTot,1 /) )
-   if ( ierr.ne.0 ) goto 1234
-   ierr = nf90_put_var(ifile, id_trk_party, yy, start=(/ 1,itime /), count=(/ NopartTot,1 /) )
-   if ( ierr.ne.0 ) goto 1234
+   if ( ierr == 0 ) then
+      ierr = nf90_put_var(ifile, id_trk_partx, xx, start=(/ 1,itime /), count=(/ NopartTot,1 /) )
+      if ( ierr == 0 ) then
+         ierr = nf90_put_var(ifile, id_trk_party, yy, start=(/ 1,itime /), count=(/ NopartTot,1 /) )
+      endif
+   endif
 
+   ! Place holder - we need this for the 2D->3D extension
    if ( kmx.gt.0 ) then
       !     particle vertical coordinate
    end if
 
-   ierror = 0
-1234 continue
-
    !  error handling
-   if ( ierror.ne.0 ) then
+   if ( ierr /= 0 ) then
       call mess(LEVEL_ERROR, 'particles output error')
    end if
 

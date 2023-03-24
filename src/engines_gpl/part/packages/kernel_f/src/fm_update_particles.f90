@@ -80,9 +80,9 @@ subroutine update_particles(q,h0,h1,Dt)
              return
          endif
 
-         write(6,*) 'iter=', iter, 'numremaining=', numremaining(1)
+         write(*,*) 'iter=', iter, 'numremaining=', numremaining(1)
          if ( numremaining(1).eq.0 ) then
-            write(6,*) 'iter=', iter
+            write(*,*) 'iter=', iter
             exit
          end if
       end do
@@ -235,7 +235,6 @@ subroutine update_particles_in_cells(numremaining, ierror)
          ! check inside or outside triangle
          if ( dis.lt.-DTOLd .and. .not.isboundary ) then
             ! outside triangle
-            !!AM tex = 0d0
             Lexit = L
             exit
          else
@@ -293,7 +292,6 @@ subroutine update_particles_in_cells(numremaining, ierror)
       end if
 
       dtremaining(ipart) = dtremaining(ipart) - dt
-      ! Lpart(ipart) = Lexit
 
       if ( dt.eq.0d0 ) then
          numzero(ipart) = numzero(ipart) + 1

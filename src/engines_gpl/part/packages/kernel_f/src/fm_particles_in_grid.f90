@@ -368,11 +368,6 @@ subroutine ini_part(partfile, partrelfile, starttime_loc, timestep_loc, threeDty
    data ithndl / 0 /
    if ( timon ) call timstrt( "ini_part", ithndl )
 
-!! AM   Nopart = 0
-!! AM   Nrpart = 0
-!! AM   irpart = 0
-   !!NopartTot = 0 -- AM: accept the number of particles the user has specified
-
 !  add particle tracer (when tracers are initialized)
    part_iconst = 1
    call realloc(constituents, (/ nosubs, Ndx /), keepExisting=.false., fill=0d0)
@@ -563,8 +558,6 @@ end subroutine add_particles_from_release_file
 subroutine part06fm ( lun    , nodye  , nocont , xwaste ,      &
                       ywaste , zwaste , nwaste , mwaste )
 
-!       Deltares Software Centre
-
 !>\file
 !>            Determines the grid cells and relative coordinates of waste locations
 !>
@@ -572,17 +565,8 @@ subroutine part06fm ( lun    , nodye  , nocont , xwaste ,      &
 !>            This routine determines the n,m grid indices and the local x,y coordinates.\n
 !>            The local x,y coordinates are 0< .. <1 and are store in the old x,y locations
 !
-!     System administration : Antoon Koster
-!
-!     Created               : February 1990, by Leo Postma
-!
-!     Modified              : August   2011, by Leo Postma, only warning if outside grid
-!                           : June     2021, by Arjen Markus, mimick the behaviour suitable for FM
-!
-!     logical unit numbers  : lun    - output log file
-!
-!     Note                  : we need to be careful about the names nwaste and mwaste, nwaste
-!                             is actually a dummy in the case of unstructured grids
+!     Note : we need to be careful about the names nwaste and mwaste, nwaste
+!            is actually a dummy in the case of unstructured grids
 
       use precision_part
       use timers

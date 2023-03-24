@@ -223,13 +223,11 @@ subroutine part_setmesh()
       if ( N.eq.3 ) then
          icell = icell+1
          jcell2edge(icell+1) = jcell2edge(icell) + 3
-!         nod2cell(k) = icell
          cell2nod(icell) = k
       else if ( N.gt.3 ) then
          do j=1,N
             icell = icell+1
             jcell2edge(icell+1) = jcell2edge(icell) + 3
-!            if ( j.eq.1 ) nod2cell(k) = -icell
             cell2nod(icell) = -k
          end do
       else  ! should not happen

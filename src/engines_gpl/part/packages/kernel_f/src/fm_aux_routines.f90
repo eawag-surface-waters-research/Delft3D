@@ -76,7 +76,7 @@ subroutine find_common_node(L1, L2, node)
 
       if ( node.ne.IMISS ) exit
 
-      write(6,*) 'find_common_node: no common node found'
+      write(*,*) 'find_common_node: no common node found'
       exit
    end do
 
