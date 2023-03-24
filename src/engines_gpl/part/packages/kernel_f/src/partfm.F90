@@ -165,8 +165,6 @@ subroutine partfm(lunpr)
 
          call report_progress( lunpr, int(time0), itstrtp, itstopp, nopart, npmax )
 
-
-
          if (time1 .ge. tstop_user) then
             exit
          endif
