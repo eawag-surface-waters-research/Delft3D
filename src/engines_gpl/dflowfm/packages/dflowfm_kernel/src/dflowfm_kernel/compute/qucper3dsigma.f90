@@ -34,7 +34,6 @@
  use m_flow                                            ! advect the cell center velocities (dimension: m4/s2)
  use m_flowgeom                                        ! leaving the cell = +
  use m_sferic
- use m_nod2lin, only: nod2linx, nod2liny, lin2nodx, lin2nody
  implicit none
 
  integer,          intent(in) :: n12,LL,Lb,Lt          ! working for basis link LL
@@ -48,6 +47,8 @@
 
  double precision :: ucinx, uciny
  integer          :: nn12
+
+ double precision, external:: lin2nodx, lin2nody, nod2linx, nod2liny
 
  Quk1  = 0d0
 

@@ -30,36 +30,48 @@
 ! 
 ! 
 
-! =================================================================================================
-! =================================================================================================
-  subroutine getucxucybarrierzero ( Lf, ku, ucxku, ucyku )
- use m_flow
- use m_flowgeom
+ double precision function dslim(d1,d2,limtyp)
  implicit none
+ double precision d1, d2                             ! voorslope, naslope
+ integer limtyp
+ double precision :: dminmod, dvanleer, dkoren,dcentral,dcminmod, dsuperbee
+ double precision :: dlimiter,dlimitercentral
 
- integer           :: ku, L, LL, Ls, n12, Lf
- double precision  :: ucxku, ucyku, ww, ac1, cs, sn
- double precision, external :: lin2nodx, lin2nody
+ ! In order to translate psi to limiter, you have to multiply the psi function with ds2
+ ! e.g. lax wendroff central: psi=1, dslimiter=d2
 
- ucxku = 0d0  ; ucyku = 0d0
-
- do LL = 1,nd(ku)%lnx
-    Ls = nd(ku)%ln(LL); L = iabs(Ls)
-    if (Ls < 0) then
-       ac1 = acL(L)
-       n12 = 1
-    else
-       ac1 = 1d0 - acL(L)
-       n12 = 2
-    endif
-    ww = ac1*dx(L)*wu(L)
-    cs = ww*csu(L) ; sn = ww*snu(L)
-    if( L /= Lf ) then
-       ucxku = ucxku + lin2nodx(L,n12,cs,sn)*u1(L)
-       ucyku = ucyku + lin2nody(L,n12,cs,sn)*u1(L)
-    endif
- enddo
- ucxku = ucxku/ba(ku)
- ucyku = ucyku/ba(ku)
-
- end subroutine getucxucybarrierzero
+ if (limtyp .eq. 0) then
+    dslim = 0
+ else if (limtyp .eq. 1) then                        ! codering guus, met voorslope
+    dslim = d1*dminmod(d1,d2)
+ else if (limtyp .eq. 2) then                        ! codering guus, met voorslope
+    dslim = d1*dvanleer(d1,d2)
+ else if (limtyp .eq. 3) then                        ! codering guus, met voorslope
+    dslim = d1*dkoren(d1,d2)
+ else if (limtyp .eq. 4) then                        ! monotonized central no division
+    dslim = dcentral(d1,d2)
+ else if (limtyp .eq. 5) then                        ! monotonized central Sander with division
+    dslim = dlimiter(d1,d2,limtyp) * d2
+ else if (limtyp .eq. 6) then                        ! monotonized central Sander with division, upwind slope ds1 at central cel
+    dslim = dlimitercentral(d1,d2,limtyp)
+  else if (limtyp .eq. 11) then                      ! standaard codering
+    dslim = d2*dminmod(d1,d2)
+ else if (limtyp .eq. 12) then                       ! standaard codering
+    dslim = d2*dvanleer(d1,d2)
+ else if (limtyp .eq. 13) then                       ! standaard codering
+    dslim = d2*dkoren(d1,d2)
+ else if (limtyp .eq. 14) then                       ! monotonized central, == 4
+    dslim = dcentral(d2,d1)
+ else if (limtyp .eq. 15) then                       ! minmod central
+    dslim = dcminmod(d2,d1)
+ else if (limtyp .eq. 20) then                       ! leftbiased, beam&warming
+    dslim = d1
+ else if (limtyp .eq. 21) then                       ! central
+    dslim = d2
+ else if (limtyp .eq. 22) then                       ! superbee
+    dslim = dsuperbee(d1,d2)
+ else
+    dslim = 0d0
+ endif
+ return
+end function dslim

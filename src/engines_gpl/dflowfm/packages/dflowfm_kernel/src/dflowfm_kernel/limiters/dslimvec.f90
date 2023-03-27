@@ -30,36 +30,48 @@
 ! 
 ! 
 
-! =================================================================================================
-! =================================================================================================
-  subroutine getucxucybarrierzero ( Lf, ku, ucxku, ucyku )
- use m_flow
- use m_flowgeom
- implicit none
+   !> limited higher-order correction of vector data
+   subroutine dslimvec(ds1x, ds1y, ds2x, ds2y, csu, snu, limtyp, dsx, dsy)
+      use m_flowparameters
+      implicit none
 
- integer           :: ku, L, LL, Ls, n12, Lf
- double precision  :: ucxku, ucyku, ww, ac1, cs, sn
- double precision, external :: lin2nodx, lin2nody
+      double precision, intent(in)  :: ds1x, ds1y   !< "voorslope" components
+      double precision, intent(in)  :: ds2x, ds2y   !< "naslope" components
+      double precision, intent(in)  :: csu, snu     !< orientation vector components
+      integer,          intent(in)  :: limtyp       !< limiter type
+      double precision, intent(out) :: dsx, dsy     !< correction components
 
- ucxku = 0d0  ; ucyku = 0d0
+      double precision              :: ds1n, ds1t   !< normal and tangential component, respectively
+      double precision              :: ds2n, ds2t   !< normal and tangential component, respectively
+      double precision              :: dsn, dst
 
- do LL = 1,nd(ku)%lnx
-    Ls = nd(ku)%ln(LL); L = iabs(Ls)
-    if (Ls < 0) then
-       ac1 = acL(L)
-       n12 = 1
-    else
-       ac1 = 1d0 - acL(L)
-       n12 = 2
-    endif
-    ww = ac1*dx(L)*wu(L)
-    cs = ww*csu(L) ; sn = ww*snu(L)
-    if( L /= Lf ) then
-       ucxku = ucxku + lin2nodx(L,n12,cs,sn)*u1(L)
-       ucyku = ucyku + lin2nody(L,n12,cs,sn)*u1(L)
-    endif
- enddo
- ucxku = ucxku/ba(ku)
- ucyku = ucyku/ba(ku)
+      double precision, external    :: dslim
 
- end subroutine getucxucybarrierzero
+      if ( jalimnor.eq.1 ) then
+         ds1n =  csu*ds1x + snu*ds1y
+         ds1t = -snu*ds1x + csu*ds1y
+
+         ds2n =  csu*ds2x + snu*ds2y
+         ds2t = -snu*ds2x + csu*ds2y
+
+         dsn = 0d0
+         dst = 0d0
+
+         if (abs(ds2n)  > eps10 .and. abs(ds1n) > eps10) then
+             dsn = dslim(ds1n, ds2n, limtyp)
+         endif
+
+         if (abs(ds2y)  > eps10 .and. abs(ds1y) > eps10) then
+             dst =  dslim(ds1t, ds2t, limtyp)
+         endif
+
+         dsx = csu*dsn - snu*dst
+         dsy = snu*dsn + csu*dst
+
+      else
+         dsx = dslim(ds1x, ds2x, limtyp)
+         dsy = dslim(ds1y, ds2y, limtyp)
+      end if
+
+      return
+   end subroutine dslimvec
