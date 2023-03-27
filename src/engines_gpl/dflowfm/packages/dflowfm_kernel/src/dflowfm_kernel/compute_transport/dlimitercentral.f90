@@ -30,7 +30,7 @@
 ! 
 ! 
 
-   elemental double precision function dlimitercentral(dc,d2,limtyp)  ! as dlimiter, now for central gradient instead of slope
+   double precision function dlimitercentral(dc,d2,limtyp)  ! as dlimiter, now for central gradient instead of slope
    implicit none
 
    double precision, intent(in) :: dc, d2   !< central and right slopes
@@ -41,6 +41,10 @@
 
    dlimitercentral = 0d0
    if (limtyp == 0)     return
+!   if ( d1*d2.lt.dtol ) return
+!
+!   r = d1/d2    ! d1/d2
+!   r = 2d0*r - 1d0
 
 !  compute left slope (assume uniform mesh)
    d1 = 2d0*dc - d2

@@ -38,8 +38,6 @@
  use m_fixedweirs
  use m_sferic
  use unstruc_channel_flow, only: network
- use m_limiters, only: dlimiter, dslim
- use m_nod2lin, only: lin2nodx, lin2nody, nod2linx, nod2liny
 
  implicit none
 
@@ -108,6 +106,10 @@
  double precision                  :: quuk1(0:kmxx), quuk2(0:kmxx), volk1(0:kmxx), volk2(0:kmxx), sqak1(0:kmxx), sqak2(0:kmxx)
  double precision                  :: quuL1(0:kmxx), quuL2(0:kmxx), volL1(0:kmxx), volL2(0:kmxx), sqaL1(0:kmxx), sqaL2(0:kmxx)
  double precision                  :: sigk1(0:kmxx), sigk2(0:kmxx), siguL(0:kmxx)
+
+ double precision,        external :: lin2nodx, lin2nody
+ double precision,        external :: nod2linx, nod2liny
+ double precision,        external :: dlimiter, dslim
 
  japiaczek33 = 0
 

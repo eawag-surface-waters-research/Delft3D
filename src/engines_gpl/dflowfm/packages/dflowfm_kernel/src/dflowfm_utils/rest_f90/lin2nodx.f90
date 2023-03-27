@@ -30,36 +30,21 @@
 ! 
 ! 
 
-! =================================================================================================
-! =================================================================================================
-  subroutine getucxucybarrierzero ( Lf, ku, ucxku, ucyku )
- use m_flow
- use m_flowgeom
- implicit none
+!>    return x-component in node coordinate frame of a vector in link coordinate frame
+      double precision function lin2nodx(L,i12,ux,uy)
+         use m_flowgeom, only: csb, snb
+         use m_sferic
+         implicit none
 
- integer           :: ku, L, LL, Ls, n12, Lf
- double precision  :: ucxku, ucyku, ww, ac1, cs, sn
- double precision, external :: lin2nodx, lin2nody
+         integer,          intent(in) :: L   !< flowlink number
+         integer,          intent(in) :: i12 !< left (1) or right (2) neighboring cell
+         double precision, intent(in) :: ux, uy !< vector components in flowlink coordinate frame
 
- ucxku = 0d0  ; ucyku = 0d0
+         if ( jsferic.ne.1 .or. jasfer3D.ne.1 ) then
+            lin2nodx = ux
+         else
+            lin2nodx =  csb(i12,L) * ux - snb(i12,L) * uy
+         end if
 
- do LL = 1,nd(ku)%lnx
-    Ls = nd(ku)%ln(LL); L = iabs(Ls)
-    if (Ls < 0) then
-       ac1 = acL(L)
-       n12 = 1
-    else
-       ac1 = 1d0 - acL(L)
-       n12 = 2
-    endif
-    ww = ac1*dx(L)*wu(L)
-    cs = ww*csu(L) ; sn = ww*snu(L)
-    if( L /= Lf ) then
-       ucxku = ucxku + lin2nodx(L,n12,cs,sn)*u1(L)
-       ucyku = ucyku + lin2nody(L,n12,cs,sn)*u1(L)
-    endif
- enddo
- ucxku = ucxku/ba(ku)
- ucyku = ucyku/ba(ku)
-
- end subroutine getucxucybarrierzero
+         return
+      end function lin2nodx
