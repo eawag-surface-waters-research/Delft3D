@@ -27,8 +27,8 @@ subroutine z_updtvol(nmmax     ,kmax      ,kcs       ,kcu       ,kcv       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Update volumes

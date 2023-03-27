@@ -25,8 +25,8 @@ subroutine santoss_rrr12(g, hs, tp, h, sk, as, phi_ab, r_ab, ur, km)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   The SANTOSS practical sand transport model, version 2.08  

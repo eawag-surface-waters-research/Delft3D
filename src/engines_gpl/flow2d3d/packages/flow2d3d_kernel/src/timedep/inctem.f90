@@ -25,8 +25,8 @@ subroutine inctem(ktemp     ,timnow    ,temint    ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determine increments and updates the current time

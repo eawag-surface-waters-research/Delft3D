@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine furu()                                   ! set fu, ru and kfs
  use m_flow                                          ! substitue u1 and q1

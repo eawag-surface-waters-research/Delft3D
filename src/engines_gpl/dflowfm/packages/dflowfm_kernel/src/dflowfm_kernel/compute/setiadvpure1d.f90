@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine setiadvpure1D() ! set 103 on default 1D links if pure1D
 use m_flowgeom

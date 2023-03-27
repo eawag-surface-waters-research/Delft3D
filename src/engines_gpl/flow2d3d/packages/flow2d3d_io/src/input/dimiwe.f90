@@ -26,8 +26,8 @@ subroutine dimiwe(lunmd     ,lundia    ,error     ,nrrec     ,iweflg    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Reads the dimension for Internal Wave Energy

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE LOCALREFINE(num, m1, n1, m2, n2, NOPTION)
       implicit none

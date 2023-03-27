@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Increment the time-splitting upcoming time, if input time argument lies on or beyond that time.
 !! Each output file with name base_timesplit0_.. will contain output for time_split0 < time1 <= time_split.

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE TRAROT(XX,YY,XG,YG)
       USE M_MAPPROPARAMETERS

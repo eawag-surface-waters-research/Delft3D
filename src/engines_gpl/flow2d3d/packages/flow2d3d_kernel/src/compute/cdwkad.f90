@@ -29,8 +29,8 @@ subroutine cdwkad(nmmax     ,kmax      ,zmodel    ,kspu      ,kfsmax    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes POROSU/V and UBRLSU/V values for gates with fixed position

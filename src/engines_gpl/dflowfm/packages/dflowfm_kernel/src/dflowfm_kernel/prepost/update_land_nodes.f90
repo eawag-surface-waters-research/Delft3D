@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 ! updates zk value at specified net node index using diven delta
 ! TODO: extend it to multiple indices

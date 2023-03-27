@@ -27,8 +27,8 @@ subroutine u_wdro(lundat    ,first     ,header    ,runid     ,itime     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Example user routine to write drogue data for a

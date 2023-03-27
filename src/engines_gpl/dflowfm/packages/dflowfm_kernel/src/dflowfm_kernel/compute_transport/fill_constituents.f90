@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> fill constituent array
 subroutine fill_constituents(jas) ! if jas == 1 do sources

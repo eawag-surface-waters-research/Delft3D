@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !-------------------------------------------------------------------------------
 
 !> Functionality to store user input for forcings (e.g., time series), to be processed later by a kernel.

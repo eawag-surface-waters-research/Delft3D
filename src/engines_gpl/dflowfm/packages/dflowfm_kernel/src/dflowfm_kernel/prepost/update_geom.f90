@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !  update geometry data that may have been incorrectly computed in the ghost area
    subroutine update_geom(iphase)

@@ -25,8 +25,8 @@ subroutine dfupdd_nm_pos2 ( field, ks, ke, gdp )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Updates field array of type double precision through exchanging halo values

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>  determine optimum nmk in fliplinks, depending on link L
 integer function nmk_opt(k)

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    ! todo: MERGE THIS WITH UNSTRUC_BOUNDARIES
 module m_bnd   !< boundary-type module

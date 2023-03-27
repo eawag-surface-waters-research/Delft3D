@@ -27,8 +27,8 @@ subroutine soursin_2d(umod      ,ustarc    ,h0        ,h1        , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes the sour and sink terms for the 2D case

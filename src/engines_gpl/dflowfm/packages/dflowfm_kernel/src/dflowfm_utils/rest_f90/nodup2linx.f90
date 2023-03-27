@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>    return x-component in link coordinate frame of vector in "klnup"-node coordinate frame
       double precision function nodup2linx(L,ib,ux,uy)

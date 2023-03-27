@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE GETSPL2(X,XI2,XJ2,MC,NC,MMAX,NMAX)
       USE M_MISSING

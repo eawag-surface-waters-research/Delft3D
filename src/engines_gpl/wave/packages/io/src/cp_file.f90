@@ -25,8 +25,8 @@ subroutine cp_file(filnm1    ,filnm2    ,filtype      ,nuerr         )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Copy or append file FILNM1 to file FILNM2

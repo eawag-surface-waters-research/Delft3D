@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
       PROGRAM test5
       INTEGER start, stop, incr
       PARAMETER (start=1, stop=2, incr=3)

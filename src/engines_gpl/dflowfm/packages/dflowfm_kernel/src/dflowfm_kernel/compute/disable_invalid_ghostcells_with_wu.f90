@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> disable ghostcells that have no internal cells in the other subdomains by setting the wu of their flowlinks to zero
 !>   and rely on sethu to disable the flowlinks

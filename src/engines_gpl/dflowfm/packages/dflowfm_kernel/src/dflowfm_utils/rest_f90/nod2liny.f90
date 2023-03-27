@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>    return y-component in link coordinate frame of a vector in node coordinate frame
       double precision function nod2liny(L,i12,ux,uy)

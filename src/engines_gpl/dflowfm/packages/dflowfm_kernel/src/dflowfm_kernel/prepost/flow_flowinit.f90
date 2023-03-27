@@ -27,8 +27,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> Initialise flow model time dependent parameters
  !! @return Integer error status (0) if succesful.

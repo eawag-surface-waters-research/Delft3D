@@ -25,8 +25,8 @@ function realfileversion(versionstring, lenstring)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Converts a version number string (format mm.nn.xx.yy)

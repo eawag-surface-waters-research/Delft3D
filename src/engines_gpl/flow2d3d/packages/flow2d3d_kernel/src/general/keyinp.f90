@@ -25,8 +25,8 @@ subroutine keyinp(string    ,rdpar     )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Gets a character parameter contents from the

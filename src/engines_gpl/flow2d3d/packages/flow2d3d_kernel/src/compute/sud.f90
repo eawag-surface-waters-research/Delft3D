@@ -49,8 +49,8 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: SUD evaluates/solves the implicitly coupled

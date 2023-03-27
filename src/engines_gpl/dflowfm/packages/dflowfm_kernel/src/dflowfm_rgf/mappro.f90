@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE MAPPRO(XX,YY,XG,YG,IZONE,NZONE,IHEM,ITYPE,JSFERIC,INIA)
       USE M_MISSING

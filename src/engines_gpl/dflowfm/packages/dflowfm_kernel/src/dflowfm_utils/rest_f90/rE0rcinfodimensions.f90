@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE RE0RCINFODIMENSIONS(MINP,MMAX,NMAX,DX,X0,Y0)
       implicit none

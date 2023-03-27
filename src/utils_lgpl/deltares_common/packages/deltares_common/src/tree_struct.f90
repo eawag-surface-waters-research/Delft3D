@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 ! tree_struct.f90 --
 !    Module that implements a general tree structure in Fortran 90
 !

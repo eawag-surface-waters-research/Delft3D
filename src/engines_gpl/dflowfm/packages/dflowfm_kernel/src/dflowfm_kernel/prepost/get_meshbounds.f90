@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> get mesh bounding box coordinates (useful for spherical, periodic coordinates)
 !>   2D part of the mesh only

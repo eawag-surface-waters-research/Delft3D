@@ -28,8 +28,8 @@ subroutine wapar(hrm       ,dir       ,deph      ,tp        ,fxhis     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !     Input:

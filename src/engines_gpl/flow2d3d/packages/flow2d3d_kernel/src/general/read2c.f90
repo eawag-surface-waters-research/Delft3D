@@ -27,8 +27,8 @@ subroutine read2c(lunmd     ,error     ,keyw      ,newkw     ,nlook     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads NLOOK character values with a fixed length

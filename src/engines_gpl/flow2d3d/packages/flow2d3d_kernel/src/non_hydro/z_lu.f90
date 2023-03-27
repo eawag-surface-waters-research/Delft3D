@@ -27,8 +27,8 @@ subroutine z_lu(bbka      ,bbk       ,bbkc      ,kmax      ,icx       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes LU decomposition

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine solve_jacobi(s1,ndx,itsol)               ! uses both s0 and s1
  use m_flowgeom, only : lnx, ln, kfs, kcs, nd

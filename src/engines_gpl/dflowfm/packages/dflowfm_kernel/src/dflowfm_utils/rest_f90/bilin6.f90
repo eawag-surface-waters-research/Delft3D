@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>    bilineair interpolation between four nodes
       subroutine bilin6(x, y, z, xp, yp, zp)

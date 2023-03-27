@@ -30,8 +30,8 @@ subroutine z_difhor_nhfull(j         ,nmmaxj    ,kmax      ,lstsci    ,nmmax    
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes horizontal diffusion. Explicit in u-direction,

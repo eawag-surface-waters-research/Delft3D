@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
     subroutine RDGEO(xrd,yrd,xgeo,ygeo,JAPARIJS)
       use m_sferic

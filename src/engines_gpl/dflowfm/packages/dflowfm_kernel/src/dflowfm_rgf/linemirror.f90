@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE LINEMIRROR()!X, Y, mmax, nmax, MC, NC, IJC,IJYES)
       use m_missing

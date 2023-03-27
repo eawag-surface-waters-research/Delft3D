@@ -26,8 +26,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
    subroutine fm_wq_processes_ini_sub()
       use m_fm_wq_processes
       use m_alloc

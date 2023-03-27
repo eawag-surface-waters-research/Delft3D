@@ -25,8 +25,8 @@ subroutine search2(mcmp      ,keywrd    ,ier       ,rec       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Looking for a keyword

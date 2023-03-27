@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> add particles
 subroutine add_particles(Nadd, xadd, yadd, jareplace, jadomain)

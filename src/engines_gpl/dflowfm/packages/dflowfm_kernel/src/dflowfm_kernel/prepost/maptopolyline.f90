@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       !> Maps a list of distances to a list of points.
       !! The points are placed onto a polyline at the distances measured along

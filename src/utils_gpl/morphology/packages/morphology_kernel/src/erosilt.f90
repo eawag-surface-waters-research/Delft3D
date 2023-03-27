@@ -34,8 +34,8 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes sediment fluxes for cohesive sediment fractions

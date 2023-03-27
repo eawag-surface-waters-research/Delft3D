@@ -26,8 +26,8 @@ subroutine txtstr(record    ,ibeg      ,iend      ,ltxt      ,txtvar    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Searches a text in a string between position

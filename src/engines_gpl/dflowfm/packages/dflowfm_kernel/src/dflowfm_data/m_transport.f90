@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> transport of many (scalar) constituents is performed with the transport module
 !!   -constituents are stored in the constituents array

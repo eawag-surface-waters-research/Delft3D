@@ -60,8 +60,8 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, runid, &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Main routine for the 2d / 3d program

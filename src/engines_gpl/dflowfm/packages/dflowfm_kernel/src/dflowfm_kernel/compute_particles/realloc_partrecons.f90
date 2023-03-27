@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> (re)allocate flux coefficients et cetera
 subroutine realloc_partrecons()

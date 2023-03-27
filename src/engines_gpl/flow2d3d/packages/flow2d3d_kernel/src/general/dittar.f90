@@ -25,8 +25,8 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    ,gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Determines the dimension nttaru from the

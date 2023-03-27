@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 ! ftnunit_hooks.f90 --
 !     Auxiliary module that provides user-defineable methods
 !

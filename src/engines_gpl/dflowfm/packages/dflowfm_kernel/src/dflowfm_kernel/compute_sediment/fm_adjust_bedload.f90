@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    subroutine fm_adjust_bedload(sbn, sbt, avalan)
    use m_physcoef, only: ag

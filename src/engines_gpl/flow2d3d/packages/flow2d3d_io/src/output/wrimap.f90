@@ -37,8 +37,8 @@ subroutine wrimap(lundia      ,error     ,filename  ,selmap    ,simdat    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the initial group 2 ('map-const') to

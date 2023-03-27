@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> refinecellsandfaces2 parameter menu
 subroutine change_samples_refine_param(jacancelled)

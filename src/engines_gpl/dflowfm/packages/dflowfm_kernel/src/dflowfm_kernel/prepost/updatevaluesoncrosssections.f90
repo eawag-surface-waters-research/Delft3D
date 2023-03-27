@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Sums all monitored data on all cross sections, including time-integrated values.
 !! for sequential/non-MPI models: stored in crs()%sumvalcur/sumvalcum

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>  regularise spline2curvi grid
 !>     note: there is an asymmetry, but this procedure is intended for regularisation only

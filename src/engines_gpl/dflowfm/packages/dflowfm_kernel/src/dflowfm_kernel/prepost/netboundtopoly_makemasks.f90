@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> make the masks for netboundtopoly
 subroutine netboundtopoly_makemasks()

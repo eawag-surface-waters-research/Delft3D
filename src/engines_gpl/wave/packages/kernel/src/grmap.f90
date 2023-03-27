@@ -26,8 +26,8 @@ subroutine grmap(f1        ,n1        ,f2        ,n2        ,iref      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! compute interpolated values for all points on grid 2

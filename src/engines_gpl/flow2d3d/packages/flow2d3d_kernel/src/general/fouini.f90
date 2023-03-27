@@ -25,8 +25,8 @@ subroutine fouini(lundia    ,lunfou    ,error     ,nofou     ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Checks if fourier analysis are requested

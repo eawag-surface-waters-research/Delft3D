@@ -26,8 +26,8 @@ subroutine ua_rvr(facas,    facsk,    sws,    h,    hrms, &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! computes velocity asymmetry due to waves according to
 ! Ruessink et al. 2009 JGR

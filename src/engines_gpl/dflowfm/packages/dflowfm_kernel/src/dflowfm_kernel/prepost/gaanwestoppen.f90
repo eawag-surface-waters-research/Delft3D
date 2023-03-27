@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   SUBROUTINE GAANWESTOPPEN(K,KN316,JASTOP,LO)  !SET JASTOP = 1 ALS WE GAAN STOPPEN
   USE M_NETW

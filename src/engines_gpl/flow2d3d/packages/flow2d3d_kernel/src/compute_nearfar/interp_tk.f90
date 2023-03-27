@@ -25,8 +25,8 @@ subroutine interp_tk  (x    ,y     ,noval ,xx    ,yy    )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Interpolate to the y-value at xx

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   !> Parses a manually preprocessed SVG file into 1D network 'drawing'.
     !!

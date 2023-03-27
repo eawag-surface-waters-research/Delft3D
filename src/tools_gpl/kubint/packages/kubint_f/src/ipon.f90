@@ -26,8 +26,8 @@ subroutine ipon(xpoly     ,ypoly     ,n         ,xp        ,yp        , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !--description----------------------------------------------------------------
 !
 ! Detect whether point (xp,yp) lies inside polygon (x,y) of n points.

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> compute maximum allowable grid layer growth time; self crossings
 subroutine comp_tmax_self(mc, xc, yc, vel, tmax)

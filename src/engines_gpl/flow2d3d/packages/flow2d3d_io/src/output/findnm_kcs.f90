@@ -27,8 +27,8 @@ subroutine findnm_kcs (xp    , yp    , x     , y     , mlb   , mub   , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Locate a point in a curvilinear mesh

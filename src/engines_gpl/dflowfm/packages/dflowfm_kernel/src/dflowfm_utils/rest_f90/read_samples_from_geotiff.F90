@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Read samples from a GeoTIFF file.
 !! Samples are being stored in the global dataset of m_samples.

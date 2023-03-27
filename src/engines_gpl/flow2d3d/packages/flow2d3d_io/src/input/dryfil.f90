@@ -26,8 +26,8 @@ subroutine dryfil(lundia    ,lundry    ,error     ,fildry    ,fmttmp    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Reads the dam points from the attribute file

@@ -25,8 +25,8 @@ module sync_flowcouple
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Organizes the communication between the FLOW
 ! executable and the COUPLE executable.

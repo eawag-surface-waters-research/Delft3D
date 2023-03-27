@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
        SUBROUTINE MAKESSQ(S,A,SR,SL,SSQ,NT,MFAC,IMAX)
        implicit none

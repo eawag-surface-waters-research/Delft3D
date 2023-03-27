@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Finalizes a single time step, should be called directly after flow_run_single_timestep
 subroutine flow_finalize_single_timestep(iresult)

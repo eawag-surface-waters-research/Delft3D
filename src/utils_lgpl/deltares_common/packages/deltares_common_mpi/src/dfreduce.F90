@@ -28,8 +28,8 @@ subroutine dfreduce ( iptr, ilen, itype, ityprd, error, msgstr )
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Performs a global reduction of type ITYPRD on

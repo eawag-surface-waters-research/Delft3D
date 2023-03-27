@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  SUBROUTINE TEXTFLOW()
  use time_module, only : seconds_to_datetimestring

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Read samples from an ASCII file.
 !! Samples are being stored in a global dataset of m_samples.
