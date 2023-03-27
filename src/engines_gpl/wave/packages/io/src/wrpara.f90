@@ -26,8 +26,8 @@ subroutine wrpara(filnm1    ,rdwr      ,xpar      ,ipar      ,l         , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! reading of special parameters from nefis
 ! communication file

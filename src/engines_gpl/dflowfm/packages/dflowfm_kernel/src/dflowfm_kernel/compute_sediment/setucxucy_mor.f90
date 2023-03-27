@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    ! =================================================================================================
    ! =================================================================================================
@@ -41,6 +41,7 @@
    use m_missing
    use m_flowparameters, only: jabarrieradvection
    use m_sferic
+   use m_nod2lin, only: lin2nodx, lin2nody, nod2linx, nod2liny
    implicit none
    double precision, dimension(lnkx), intent(in ) :: u1_loc
 
@@ -49,9 +50,6 @@
    double precision :: uu, vv, uucx, uucy, wcxu, wcyu, cs, sn, adx, ac1, ac2, wuw, hdx, hul, dzz, uin, duxdn, duydn
    double precision :: dischcorrection
    double precision :: uinx, uiny
-
-   double precision, external :: nod2linx, nod2liny
-   double precision, external :: lin2nodx, lin2nody
 
    ucxq_mor = 0d0 ; ucyq_mor = 0d0           ! zero arrays
    ucx_mor  = 0d0 ; ucy_mor  = 0d0

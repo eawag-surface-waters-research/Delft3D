@@ -26,8 +26,8 @@ subroutine cucdp(kfu       ,irocol    ,norow     ,j         ,nmmaxj    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Re-computes system of equations for discharge

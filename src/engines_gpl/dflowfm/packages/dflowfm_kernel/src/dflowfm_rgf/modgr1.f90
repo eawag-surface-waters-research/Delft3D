@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       !> This routine operates directly on active grid data from m_grid
       SUBROUTINE MODGR1(NPUT, MP, NP, IN, JN)!, NCOL)!XH, YH, mmax, nmax, MC, NC,

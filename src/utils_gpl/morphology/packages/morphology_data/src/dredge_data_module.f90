@@ -25,8 +25,8 @@ module dredge_data_module
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !-------------------------------------------------------------------------------
 !
 ! Contains parameters and types related to dredging and dumping facilities

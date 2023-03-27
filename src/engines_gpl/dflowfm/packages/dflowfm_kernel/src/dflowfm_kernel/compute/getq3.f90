@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine getq3(hg,d,a,h1,h2,q)                  ! momentumbehoud bovenstrooms
 implicit none                                   ! bepaal q gegeven a,hg,h1,h2

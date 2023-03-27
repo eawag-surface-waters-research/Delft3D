@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
       SUBROUTINE WR_TABP3 ( DEFFDS      ,
      +                      NO_FORT     , FORT_ID     ,

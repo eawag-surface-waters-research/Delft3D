@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Reads and sets cell-centered bed levels directly from the net file (when present).
 !! _net.nc file should contain a variable with standard_name=altitude

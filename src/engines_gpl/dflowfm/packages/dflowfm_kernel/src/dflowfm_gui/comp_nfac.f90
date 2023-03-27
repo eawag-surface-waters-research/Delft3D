@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> compute the number of grid layers for a given grow factor, first grid layer height and total grid height
 integer function comp_nfac(h_h0, dgrow)

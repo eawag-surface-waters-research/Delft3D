@@ -29,8 +29,8 @@ subroutine updbar(nsluv     ,mnbar     ,cbuv      ,cbuvrt    ,nmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Calculates for all barrier points :

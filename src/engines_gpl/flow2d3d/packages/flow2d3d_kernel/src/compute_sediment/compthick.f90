@@ -25,8 +25,8 @@ subroutine compthick(dps, s1, nmmax, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Function:   Compute new thickness of transport and exchange layer

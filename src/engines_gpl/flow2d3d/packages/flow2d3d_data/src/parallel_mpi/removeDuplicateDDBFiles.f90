@@ -25,8 +25,8 @@ subroutine removeDuplicateDDBFiles(runid, ddbfile, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !!--pseudo code and references--------------------------------------------------

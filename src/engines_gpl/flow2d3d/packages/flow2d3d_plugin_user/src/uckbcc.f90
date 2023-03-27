@@ -26,8 +26,8 @@ subroutine uckbcc(ltur      ,kmax      ,nto       ,nrob      ,nob       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Test values of user defined boundary conditions

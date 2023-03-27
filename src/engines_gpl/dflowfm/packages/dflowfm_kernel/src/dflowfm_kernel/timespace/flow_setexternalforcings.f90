@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> set field oriented boundary conditions
 subroutine flow_setexternalforcings(tim, l_initPhase, iresult)

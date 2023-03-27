@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> find the frontline of the old (static) grid
 subroutine findfront(mc, nc, mmax, nmax, xc, yc, num, xf, yf, idxf, nf)

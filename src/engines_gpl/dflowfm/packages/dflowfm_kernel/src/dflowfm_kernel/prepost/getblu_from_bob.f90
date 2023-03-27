@@ -27,8 +27,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Determines the bed level at a u-point for a given flowlink,
 !! based on the bob(1:2,L) values, the kcu link type and conveyance2D setting.

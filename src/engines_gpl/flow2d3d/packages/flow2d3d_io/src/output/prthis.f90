@@ -32,8 +32,8 @@ subroutine prthis(lundia    ,error     ,prshis    ,grdang    ,lunprt    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Print the time varying history data

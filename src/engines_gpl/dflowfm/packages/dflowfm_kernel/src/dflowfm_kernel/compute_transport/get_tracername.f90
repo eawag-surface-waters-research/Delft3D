@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Convert qid (from .ext file) to tracer name (split in generic qidname and specific tracer name).
 !! If the input qid is not tracer, then the same qid is returned (and no tracer name)

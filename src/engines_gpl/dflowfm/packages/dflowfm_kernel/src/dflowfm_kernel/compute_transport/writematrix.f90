@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    !> output matrix in CRS format to file
    subroutine writeMatrix(FNAM, N, ia, ja, a, VARNAM, jaappend)

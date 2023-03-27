@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> connect netboundary paths
 recursive subroutine connect_boundary_paths(Lstart, nodemask, init, numnodes, nodelist)

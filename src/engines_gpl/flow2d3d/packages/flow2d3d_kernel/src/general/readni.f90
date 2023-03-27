@@ -26,8 +26,8 @@ subroutine readni(record    ,lrec      ,ibeg      ,iend      ,nvar      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads NVAR (specified) integers from a RECORD

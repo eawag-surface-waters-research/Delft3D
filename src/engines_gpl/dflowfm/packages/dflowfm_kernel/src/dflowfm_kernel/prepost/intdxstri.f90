@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE INTDXSTRI(XH,YH,DXS,NPH,JDLA)
       use m_missing

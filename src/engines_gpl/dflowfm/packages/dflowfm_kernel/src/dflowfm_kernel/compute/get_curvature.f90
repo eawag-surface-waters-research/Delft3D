@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !    Secondary Flow
 subroutine get_curvature         ! Find the curvature of the bend, to be used in secondary flow

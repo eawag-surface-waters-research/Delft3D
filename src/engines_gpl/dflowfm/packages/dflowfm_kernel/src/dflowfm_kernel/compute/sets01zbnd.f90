@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> Sets s1 or s0 water levels at zbndz-type boundaries.
  subroutine sets01zbnd(n01, jasetBlDepth)

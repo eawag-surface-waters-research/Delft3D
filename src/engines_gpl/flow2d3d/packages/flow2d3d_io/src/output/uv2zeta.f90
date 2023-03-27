@@ -26,8 +26,8 @@ subroutine uv2zeta(mmax        ,nmaxus     ,kcs        ,divByCellWidth   ,ucompu
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Averaging of the parameters on which the Fourier Analysis is performed

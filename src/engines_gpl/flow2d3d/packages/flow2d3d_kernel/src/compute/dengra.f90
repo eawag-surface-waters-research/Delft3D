@@ -31,8 +31,8 @@ subroutine dengra(icreep    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes horizontal pressure gradient due

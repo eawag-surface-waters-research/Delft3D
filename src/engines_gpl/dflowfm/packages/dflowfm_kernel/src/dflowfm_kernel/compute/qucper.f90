@@ -27,12 +27,13 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  double precision function QucPer(n12,L)             ! sum of (Q*uc cell centre upwind normal) at side n12 of link L
  use m_flow                                          ! advect the cell center velocities (dimension: m4/s2)
  use m_flowgeom                                      ! leaving the cell = +
+ use m_nod2lin, only: nod2linx, nod2liny, lin2nodx, lin2nody
  implicit none
 
  integer :: L                                        ! for link L,
@@ -44,8 +45,6 @@
  double precision :: cs, sn, ucin, ucinx, uciny
 
  integer :: nn12
-
- double precision, external:: lin2nodx, lin2nody, nod2linx, nod2liny
 
  QucPer = 0d0
  cs     = csu(L)

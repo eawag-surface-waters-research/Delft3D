@@ -26,8 +26,8 @@ subroutine santoss_bsscurrent(i2d3d, g, d, d50, d90, delta, unet, ang, &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   The SANTOSS practical sand transport model, version 2.08  

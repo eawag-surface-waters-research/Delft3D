@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 module m_xbeach_filefunctions
 !! Contains logging functions and file administration functions
 !! Merge of logging_module and filefunctions_module

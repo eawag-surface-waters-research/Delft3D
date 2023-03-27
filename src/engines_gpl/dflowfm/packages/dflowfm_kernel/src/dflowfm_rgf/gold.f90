@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE GOLD(AX,BX,CX,TOL,XMIN,P,P2,Q,Q2,XX,YY,N,DIS)
       implicit none

@@ -25,8 +25,8 @@ subroutine dattim(rundat    )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Determine system date and time, HARDWARE dpendent
 ! routine.

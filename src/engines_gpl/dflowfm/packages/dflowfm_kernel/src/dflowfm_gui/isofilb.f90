@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    SUBROUTINE ISOFILb(X,Y,Z,n4,NCOLR) ! as isofil, now for depmax2
       implicit none

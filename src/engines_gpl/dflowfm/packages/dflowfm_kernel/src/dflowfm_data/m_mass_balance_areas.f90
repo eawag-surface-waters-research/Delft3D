@@ -27,8 +27,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 module m_mass_balance_areas
    integer, parameter                        :: NAMMBALEN = 128             !< maximum length of mass balance area names

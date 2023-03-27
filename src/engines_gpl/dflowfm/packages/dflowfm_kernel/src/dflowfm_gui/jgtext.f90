@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   SUBROUTINE JGTEXT(TEX,X,Y,NCOL,WIC,HIC,JAHOOG) ! grafische tekst, grafische posities, met kleurblokjes ERONDER
     use unstruc_colors

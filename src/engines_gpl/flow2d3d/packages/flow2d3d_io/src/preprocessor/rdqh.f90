@@ -27,8 +27,8 @@ subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads QH boundary condition from the .bcq file

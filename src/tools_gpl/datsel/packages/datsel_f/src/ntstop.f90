@@ -25,8 +25,8 @@ subroutine ntstop
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Stops program but ask user to close window
 ! - PC/SALFORD/WIN32

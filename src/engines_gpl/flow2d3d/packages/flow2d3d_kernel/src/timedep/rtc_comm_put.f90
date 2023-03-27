@@ -28,8 +28,8 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! This routine sends data to the RTC module

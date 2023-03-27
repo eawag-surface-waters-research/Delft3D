@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> reconstruct velocity in cells
 subroutine reconst_vel(q, s0, s1, ierror)

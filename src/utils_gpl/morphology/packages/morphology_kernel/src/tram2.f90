@@ -34,8 +34,8 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! computes sediment transport according to

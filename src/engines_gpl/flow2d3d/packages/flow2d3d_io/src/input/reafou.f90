@@ -26,8 +26,8 @@ subroutine reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Read fourier input file and stores the

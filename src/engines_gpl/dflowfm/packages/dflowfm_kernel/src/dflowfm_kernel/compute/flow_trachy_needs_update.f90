@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> helper function to make sure that the check for updating cross sections is in line with the flow_trachyupdate
 logical function flow_trachy_needs_update(time1)

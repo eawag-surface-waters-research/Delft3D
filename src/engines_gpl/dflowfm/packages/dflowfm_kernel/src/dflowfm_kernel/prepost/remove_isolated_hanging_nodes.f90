@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> delete hanging nodes on net boundary
 !>   and update netcell admin (no need for setnodadm)

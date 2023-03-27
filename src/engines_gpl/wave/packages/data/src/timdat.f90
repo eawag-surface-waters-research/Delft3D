@@ -25,8 +25,8 @@ subroutine timdat(julday    ,timsec    ,idate    ,itime     )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function:  returns date and time according actual time

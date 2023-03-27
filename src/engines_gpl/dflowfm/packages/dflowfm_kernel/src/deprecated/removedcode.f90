@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 !module unused_code_from_meteo1
 !   function reaspwtim(minp,d,mx,nx,tread,x0r,y0r) result(success)
 !   !

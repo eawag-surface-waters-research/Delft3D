@@ -26,8 +26,8 @@ subroutine angle(sferic    ,x1        ,y1        ,x2        ,y2        , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Calculates the angle between a line through two

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine setdtorg(jareduced)                            ! set computational timestep dts
  use m_flowgeom

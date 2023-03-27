@@ -30,8 +30,8 @@ subroutine inivol(j         ,nmmaxj    ,nmmax     ,kmax      ,zmodel    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes volumes and areas from depth values at water level

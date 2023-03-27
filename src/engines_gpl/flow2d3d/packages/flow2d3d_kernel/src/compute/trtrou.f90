@@ -28,8 +28,8 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Calculate rougness due to trachytopes.

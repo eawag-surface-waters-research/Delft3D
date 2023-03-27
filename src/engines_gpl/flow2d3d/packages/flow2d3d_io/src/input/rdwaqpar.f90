@@ -25,8 +25,8 @@ subroutine rdwaqpar(lundia, error, kmax, lsed, dt, itcomf, itcomi, itcoml, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Read waq parameters from mdf file

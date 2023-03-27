@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> Resets the current flow- and time-state, as well as all related (phys) parameters.
  !! To be called prior to loading a new MDU and upon program startup.

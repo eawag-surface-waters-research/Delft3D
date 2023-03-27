@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine step_reduce(key)                         ! do a flow timestep dts guus, reduce once, then elimin conjugate grad substi
  use m_flow                                          ! when entering this subroutine, s1=s0, u1=u0, etc
@@ -112,6 +112,7 @@
     !    call tekrai(nsiz,ja)
     !    call toemaar()
     ! endif
+
 !    synchronise all water-levels
     if ( jampi == 1 ) then
        if ( jatimer == 1 ) call starttimer(IUPDSALL)

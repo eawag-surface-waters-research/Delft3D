@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 module m_xbeach_typesandkinds
   integer, parameter :: slen = 1024
   integer, parameter :: dimnamelen = 20

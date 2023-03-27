@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> compose right-hand side
 subroutine make_rhs(NUMCONST, thetavert, Ndkx, Lnkx, kmx, vol1, kbot, ktop, Lbot, Ltop, sumhorflux, fluxver, source, sed, nsubsteps, jaupdate, ndeltasteps, rhs)

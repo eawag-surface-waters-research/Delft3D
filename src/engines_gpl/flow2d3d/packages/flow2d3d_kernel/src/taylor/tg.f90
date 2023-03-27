@@ -29,8 +29,8 @@ subroutine tg(kmxdt     ,kmxt      ,angle     ,atg       ,btg       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !      Function: If TGFIND is false then compute criterion CRIT

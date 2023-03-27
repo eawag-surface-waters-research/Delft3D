@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    SUBROUTINE CHANGEgeometryPARAMETERS()
    use m_netw

@@ -25,8 +25,8 @@ subroutine srckey(string    ,istart    ,iend      ,ifound    ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Search a keywrd in the specified string

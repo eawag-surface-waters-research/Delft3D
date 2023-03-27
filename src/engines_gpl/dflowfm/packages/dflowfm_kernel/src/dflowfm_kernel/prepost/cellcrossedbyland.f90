@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> check if a cell is close to a land boundary segment
 subroutine cellcrossedbyland(k, jstart, jend, jland, jacross)

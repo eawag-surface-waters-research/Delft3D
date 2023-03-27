@@ -25,8 +25,8 @@ subroutine dfreduce_gdp ( iptr, ilen, itype, ityprd, gdp )
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Performs a global reduction of type ITYPRD on

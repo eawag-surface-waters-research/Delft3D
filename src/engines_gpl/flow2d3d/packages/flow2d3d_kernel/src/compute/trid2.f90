@@ -28,8 +28,8 @@ subroutine trid2(lundia    ,s1        ,kcs       ,mmax      ,nmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: TRID2 solves tridiagonal systems of equations

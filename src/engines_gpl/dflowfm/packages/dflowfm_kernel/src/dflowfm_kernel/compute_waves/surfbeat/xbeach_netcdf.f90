@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 module m_xbeach_netcdf
 !! xbeach time-averaged spatial output
 !! to do for the future: add flexibility to add variables using mnemonics

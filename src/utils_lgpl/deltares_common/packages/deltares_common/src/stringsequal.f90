@@ -25,8 +25,8 @@ function stringsequalinsens(string1, string2) result(retval)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !  Subroutine obsolete; this routine will be removed.

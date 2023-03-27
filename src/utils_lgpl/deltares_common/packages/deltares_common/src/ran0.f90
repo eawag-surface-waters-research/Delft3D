@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  double precision FUNCTION ran0(idum)
  INTEGER idum,IA,IM,IQ,IR,MASK

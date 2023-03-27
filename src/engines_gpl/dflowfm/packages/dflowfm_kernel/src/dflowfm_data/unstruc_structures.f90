@@ -28,8 +28,8 @@ module m_structures
 !
 !-------------------------------------------------------------------------------
    
-! $Id$
-! $HeadURL$
+! 
+! 
 
 use properties
 use unstruc_channel_flow, only: network

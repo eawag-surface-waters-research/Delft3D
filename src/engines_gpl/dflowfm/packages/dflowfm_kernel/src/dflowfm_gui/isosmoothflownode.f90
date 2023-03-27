@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine isosmoothflownode(k) ! smooth isolines in flow cells
  use m_flowgeom

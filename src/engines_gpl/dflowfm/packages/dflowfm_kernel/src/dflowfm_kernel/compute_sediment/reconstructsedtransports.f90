@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    subroutine reconstructsedtransports()
    ! Reconstructs cell centre transports from link based values for output purposes

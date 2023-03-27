@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine linkstocenterstwodoubles2(vnod,vlin,vlin2)      ! both vlin and vlin2 to vnod(1,* and vnod(2,*
  use m_flow

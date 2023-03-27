@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> set boundary conditions
 subroutine flow_setexternalforcingsonboundaries(tim, iresult)

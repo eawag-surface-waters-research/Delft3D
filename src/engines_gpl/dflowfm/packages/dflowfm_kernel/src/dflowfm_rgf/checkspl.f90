@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
      !> Checks spline points in X and Y.
      !! Counts the number of splines and the maximum length and moves all

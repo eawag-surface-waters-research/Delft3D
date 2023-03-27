@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    SUBROUTINE NFILES(MODE, NUM,  NWHAT,  KEY)
 !  grid lijst

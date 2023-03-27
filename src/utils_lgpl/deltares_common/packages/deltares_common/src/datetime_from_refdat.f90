@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> Calculate absolute date time values, given a time in seconds since refdat.
  !! \see seconds_to_datetimestring

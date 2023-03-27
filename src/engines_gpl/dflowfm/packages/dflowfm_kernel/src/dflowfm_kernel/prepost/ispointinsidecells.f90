@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine ispointinsidecells( xz, yz, nn )         ! check if certain point is inside other cells
 

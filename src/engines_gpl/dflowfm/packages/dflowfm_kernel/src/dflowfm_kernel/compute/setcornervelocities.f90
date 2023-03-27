@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine setcornervelocities()                    ! set corner related velocity x- and y components
 
@@ -36,14 +36,13 @@
  use m_netw
  use m_flowgeom
  use m_sferic
- 
+ use m_nod2lin, only: nod2linx, nod2liny, lin2nodx, lin2nody
+
  implicit none
 
  integer                    :: L, k1, k2, k3, k4, k, kk, LL, Lb, Lt, kw
  integer                    :: m, n
  double precision           :: uLx, uLy, csk, snk, sg
-
- double precision, external :: nod2linx, nod2liny, lin2corx, lin2cory
 
  ucnx = 0 ; ucny = 0
 

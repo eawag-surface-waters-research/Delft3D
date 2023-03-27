@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    SUBROUTINE CLOSEIN(XA,YA,INNUMP,KIN,NKIN,KK)  ! KK IS HET MEEST DICHTBIJ GELEGEN POINT VAN INNUMP
    use m_netw

@@ -27,8 +27,8 @@ subroutine search(lunmd     ,error     ,newkw     ,nrrec     ,found     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Searches a record containing KEYW from the MD-file

@@ -25,8 +25,8 @@ subroutine det_qjet(q, v, b)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Numerical integration to determine jet discharge

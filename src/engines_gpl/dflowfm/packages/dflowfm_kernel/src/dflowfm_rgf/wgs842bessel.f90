@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> convert from WGS84 to Bessel
 subroutine wgs842bessel(phiwgs, lamwgs, phibes, lambes)

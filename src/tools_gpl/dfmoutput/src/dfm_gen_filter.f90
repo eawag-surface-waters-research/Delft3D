@@ -27,8 +27,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> DFM_GEN_FILTER : apply more general filter (compared to max13/max25)
 !!

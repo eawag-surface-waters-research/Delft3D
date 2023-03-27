@@ -30,7 +30,7 @@ subroutine z_vermom_horadv_iupw(kmax  , icx   , icy    , icxy   , kcs   , &
 !                                                                               
 !-------------------------------------------------------------------------------
 !  $Id: z_vermom_horadv_iupw.f90 1044 2011-11-21 21:22:12Z platzek $
-!  $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20111115_13532_z-model_improvements_oss-merge/engines_gpl/flow2d3d/packages/kernel/src/nonhydro/z_vermom_horadv_iupw.f90 $
+!  : https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20111115_13532_z-model_improvements_oss-merge/engines_gpl/flow2d3d/packages/kernel/src/nonhydro/z_vermom_horadv_iupw.f90 $
 !!--description-----------------------------------------------------------------
 !
 !

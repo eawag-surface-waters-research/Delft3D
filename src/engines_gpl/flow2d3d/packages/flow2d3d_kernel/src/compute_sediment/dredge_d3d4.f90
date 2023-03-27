@@ -25,8 +25,8 @@ subroutine dredge_d3d4(dps, s1, timhr, nst, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--declarations----------------------------------------------------------------
     use precision
     use dfparall, only: parll, nproc

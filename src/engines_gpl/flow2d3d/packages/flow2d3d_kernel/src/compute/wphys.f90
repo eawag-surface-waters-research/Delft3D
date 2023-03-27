@@ -31,8 +31,8 @@ subroutine wphys(s1        ,u1        ,v1        ,w1        ,wphy      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: The omega velocities are transformed to vertical

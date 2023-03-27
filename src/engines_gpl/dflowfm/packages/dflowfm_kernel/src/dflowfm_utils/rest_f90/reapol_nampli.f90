@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       !> Read polygon file (or cross section/pli file) and store in global polygon.
       !! File should contain Tekal block(s) with two or three columns.

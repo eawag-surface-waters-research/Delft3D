@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       DOUBLE PRECISION FUNCTION SPLDIST(X,X2,Y,Y2,XX,YY,TV,N)
       implicit none

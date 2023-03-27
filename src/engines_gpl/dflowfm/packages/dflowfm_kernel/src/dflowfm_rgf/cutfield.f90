@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE CUTFIELD(X,Y,mmax, nmax, MC,NC)
       use m_missing

@@ -23,8 +23,8 @@
 !  are registered trademarks of Stichting Deltares, and remain the property of
 !  Stichting Deltares. All rights reserved.
 
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
 !> This module contains all the methods for the datatype tEcConverter.
 !! @author adri.mourits@deltares.nl

@@ -31,8 +31,8 @@ subroutine radstr(ewave1    ,eroll1    ,sinkr     ,c         ,cgc       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! calculation of wave forces from the divergence of

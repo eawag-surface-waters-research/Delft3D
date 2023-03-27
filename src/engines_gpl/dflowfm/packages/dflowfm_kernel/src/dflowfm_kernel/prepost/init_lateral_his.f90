@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Initializes all administration necessary for writing lateral discharge output to his-files.
 subroutine init_lateral_his()

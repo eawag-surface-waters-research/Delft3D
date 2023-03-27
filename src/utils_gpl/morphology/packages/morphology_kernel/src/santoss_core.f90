@@ -30,8 +30,8 @@ subroutine santoss_core(pl_effects, sw_effects, g, d50, d, hw, rhos, rhow, &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   The SANTOSS practical sand transport model, version 2.08  
