@@ -44,7 +44,7 @@ set(oss_dependencies    wave_data
                         wave_io
                         wave_kernel) 
 
-oss_include_libraries(${library_name} oss_dependencies)
+oss_include_libraries(${library_name} ${oss_dependencies})
 target_link_libraries(${library_name} ${oss_dependencies})
 
 include_directories(${mpi_include_path})
