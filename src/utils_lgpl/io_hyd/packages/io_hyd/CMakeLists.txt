@@ -22,14 +22,14 @@ if(WIN32)
     set(oss_dependencies    deltares_common
                             io_netcdf
                             netcdf4
-                            netcdff) 
+                            netcdff)
 endif(WIN32)
 
 if(UNIX)
     # Add dependency
     set(oss_dependencies deltares_common
                          io_netcdf)
-    target_compile_definitions(${library_name} PRIVATE LINUX64)    
+    target_compile_definitions(${library_name} PRIVATE LINUX64)
 
     target_link_libraries(${library_name} ${oss_dependencies} PkgConfig::NETCDF PkgConfig::NETCDF_FTN)
 endif(UNIX)
@@ -39,5 +39,3 @@ oss_include_libraries(${library_name} oss_dependencies)
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})
 set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/io_hyd)
-
-target_compile_options(${library_name} PRIVATE "${waq_default_flags}")
