@@ -1370,6 +1370,7 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     real(fp)                               , pointer :: bermslopefac
     real(fp)                               , pointer :: bermslopegamma
     real(fp)                               , pointer :: bermslopedepth
+    real(fp)                               , pointer :: suscorfac
     real(fp)              , dimension(:)   , pointer :: xx
     logical                                , pointer :: bedupd
     logical                                , pointer :: cmpupd
