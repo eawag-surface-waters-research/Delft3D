@@ -96,8 +96,8 @@ subroutine getdps ( lunpr  , lundp  , lnam   , nmax   , mmax   ,      &
                call stop_exit(1)
             endif
          else
-            write ( lunpr, * ) 'ERROR: Depths file does not exist. The calculation is terminated'
-            write ( *,     * ) 'ERROR: Depths file does not exist. The calculation is terminated'
+            write ( lunpr, * ) 'ERROR: Depth file does not exist. The calculation is terminated'
+            write ( *,     * ) 'ERROR: Depth file does not exist. The calculation is terminated'
             call stop_exit(1)
          endif
       endif
