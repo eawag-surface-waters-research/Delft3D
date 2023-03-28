@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Read options and files from command line
 !>  autostart/autostartstop is not filled in directly, needs to be merged with MDU-file option

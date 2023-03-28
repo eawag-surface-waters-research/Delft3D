@@ -25,8 +25,8 @@ subroutine fluff_burial(flufflyr, dbodsd, lsed, lsedtot, nmlb, nmub, dt, morfac)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Update fluff layer.

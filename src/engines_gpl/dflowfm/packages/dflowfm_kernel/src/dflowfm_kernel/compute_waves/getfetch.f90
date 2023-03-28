@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine getfetch(k,U10,FetchL,FetchD) !and windspeed
 use m_flow,  only:  Hs, Wx, Wy

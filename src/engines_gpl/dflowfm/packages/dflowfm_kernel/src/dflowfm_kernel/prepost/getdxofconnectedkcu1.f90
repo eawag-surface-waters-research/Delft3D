@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine getdxofconnectedkcu1(Lf,wuL)    ! width of connection link has lenght of connected 1D links
  use geometry_module

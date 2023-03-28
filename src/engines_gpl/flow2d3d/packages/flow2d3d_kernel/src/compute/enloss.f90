@@ -27,8 +27,8 @@ subroutine enloss(ag        ,d1        ,eweir     ,hkruin    ,hov       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Function: Determines additional energy loss due to weir.

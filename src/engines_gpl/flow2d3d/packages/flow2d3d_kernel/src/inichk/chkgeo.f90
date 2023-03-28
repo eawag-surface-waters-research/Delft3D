@@ -25,8 +25,8 @@ subroutine chkgeo(lundia    ,error     ,kmax      ,thick     ,sig       ,gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Checks the geometry parameters of the model.

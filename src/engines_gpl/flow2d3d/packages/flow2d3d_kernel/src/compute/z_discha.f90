@@ -30,8 +30,8 @@ subroutine z_discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j    
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: The discharges are added to the right hand side of

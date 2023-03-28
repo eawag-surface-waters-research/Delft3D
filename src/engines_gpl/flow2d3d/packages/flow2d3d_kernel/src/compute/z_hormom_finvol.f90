@@ -31,8 +31,8 @@ subroutine z_hormom_finvol(nmmax     ,kmax      ,icx       ,icy       ,kcs      
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: The coefficient for the momentum equations are

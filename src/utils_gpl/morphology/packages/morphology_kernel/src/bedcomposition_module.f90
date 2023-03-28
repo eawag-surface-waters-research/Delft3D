@@ -25,8 +25,8 @@ module bedcomposition_module
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--module description----------------------------------------------------------
 !
 ! This module keeps track of the bed composition at one or more locations. The
@@ -192,7 +192,7 @@ subroutine bedcomposition_module_info(messages)
     !
     type(message_stack) :: messages
     !
-    call addmessage(messages,'$Id$')
+    call addmessage(messages,'')
     call addmessage(messages,'$URL$')
 end subroutine bedcomposition_module_info
 !

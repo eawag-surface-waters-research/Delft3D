@@ -27,8 +27,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
  use m_flowgeom                                     ! Todo: higher order + limiter, see transport

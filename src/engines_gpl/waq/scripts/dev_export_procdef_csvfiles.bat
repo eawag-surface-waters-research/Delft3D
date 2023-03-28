@@ -1,8 +1,8 @@
 @echo off
-set version=5.10
-set serial=20221128
+set version=6.0
+set serial=20230315
 set toolFound=false
-set cmakeConfiguration=build_all
+set cmakeConfiguration=build_dwaq
 
 if exist ..\..\..\..\%cmakeConfiguration%\waqpb_export\Release\waqpb_export.exe     set toolFound=true
 echo Searching in cmake build: %cmakeConfiguration%

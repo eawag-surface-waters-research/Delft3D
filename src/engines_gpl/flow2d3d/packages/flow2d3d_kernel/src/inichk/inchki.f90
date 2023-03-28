@@ -30,8 +30,8 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Initialises and checks various params. and arrays

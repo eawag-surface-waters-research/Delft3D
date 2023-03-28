@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine setrhokk(kk)    ! fill rho of one column  
 use m_flow, only : rho, idensform, kmxn

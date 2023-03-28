@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> copy spline to resampled polygon
 subroutine copySplinesToFinePol(numk)

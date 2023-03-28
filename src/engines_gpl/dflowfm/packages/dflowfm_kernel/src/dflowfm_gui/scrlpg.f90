@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !
       SUBROUTINE SCRLPG(HLPTXT,NUMTXT,NUMTOP,NUMCHC,IH)

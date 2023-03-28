@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Module for maintaining (time-integral) statistics on flow quantities.
 !! NOTE: could be the successor of Fourier analysis. Just maintain some first max/avg quantities for now.

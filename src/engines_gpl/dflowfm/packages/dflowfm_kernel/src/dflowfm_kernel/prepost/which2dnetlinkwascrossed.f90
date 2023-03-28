@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> Find the 2D netlink (edge of a given 2D net cell) that is intersected
  !! by another given netlink (typically a 1D2D net link).

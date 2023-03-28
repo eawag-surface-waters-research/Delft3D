@@ -25,8 +25,8 @@ subroutine dfpartit ( ipown, icom, mmax, nmax, gdp )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Carries out the partitioning of the computational grid

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    SUBROUTINE MIRRORLINEPOINT (X0,Y0,X3,Y3,X1,Y1,X2,Y2,JA,DIS,XN,YN)
    use geometry_module, only: getdxdy, dlinedis

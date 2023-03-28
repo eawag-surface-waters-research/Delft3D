@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  double precision function dkoren(d1,d2)                       ! nog naar kijken
  implicit none

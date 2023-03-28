@@ -27,8 +27,8 @@ subroutine trab11(u         ,v         ,hrms      ,h         ,tp        , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! computes sediment transport according to
 ! the transport formula of Soulsby / Van Rijn

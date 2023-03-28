@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   subroutine cutcell_list(n12,FILNAM,lenf,jamasks) ! filnam = mask
 

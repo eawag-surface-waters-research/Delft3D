@@ -28,8 +28,8 @@ subroutine dfbroadc ( iptr, ilen, itype, error, msgstr )
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Broadcasts data from the master to all other processes

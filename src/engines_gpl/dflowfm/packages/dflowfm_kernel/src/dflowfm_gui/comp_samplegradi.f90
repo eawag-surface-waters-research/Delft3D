@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> compute sample gradient at (j=constant) or (i=constant) edges
 subroutine comp_samplegradi(IDIR, i, j, grad, Sn, DareaL, DareaR)

@@ -26,8 +26,8 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Reads trachytope data from the
 ! trachytopes area file in U-direction.

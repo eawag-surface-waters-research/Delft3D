@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> deallocate auxiliary fluxes
 subroutine dealloc_auxfluxes()

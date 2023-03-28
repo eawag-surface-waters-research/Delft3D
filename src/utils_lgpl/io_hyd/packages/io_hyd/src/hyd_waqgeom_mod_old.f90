@@ -277,7 +277,7 @@ end module wqm_partitioninfo
 !> Reads and writes unstructured net/flow data in netCDF format.
 module wq_unstruc_netcdf
 
-! $Id$
+! 
 
 use precision
 use netcdf

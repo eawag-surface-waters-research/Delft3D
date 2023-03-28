@@ -29,8 +29,8 @@ subroutine calksc(nmmax     ,dps       ,s1        ,lsedtot   , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Calculate ripple height, mega ripple height and dune height Van Rijn (2004)

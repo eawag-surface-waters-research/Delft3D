@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  double precision function QucPercu(n12,L)             ! sum of (Q*uc cell centre upwind normal) at side n12 of link L
  use m_flow                                          ! advect the cell center velocities (dimension: m4/s2)

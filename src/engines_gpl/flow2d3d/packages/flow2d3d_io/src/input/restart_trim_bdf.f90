@@ -27,8 +27,8 @@ subroutine restart_trim_bdf(lundia    ,nmaxus    ,mmax      ,bdfh      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Reads initial field condition records from a trim-file
 !!--pseudo code and references--------------------------------------------------

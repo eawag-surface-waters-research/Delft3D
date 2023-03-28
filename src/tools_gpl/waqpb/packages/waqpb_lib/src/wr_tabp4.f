@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
       SUBROUTINE WR_TABP4 ( DEFFDS      ,
      +                      NO_PROC     , PROC_ID     ,

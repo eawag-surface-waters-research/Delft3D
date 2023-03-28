@@ -25,8 +25,8 @@ module time_module
    !  Stichting Deltares. All rights reserved.                                     
    !                                                                               
    !-------------------------------------------------------------------------------
-   !  $Id$
-   !  $HeadURL$
+   !  
+   !  
    !!--description-----------------------------------------------------------------
    !
    !    Function: - Various time processing routines
@@ -112,7 +112,7 @@ module time_module
           !
           !! executable statements ---------------------------------------------------
           !
-          call addmessage(messages,'$Id$')
+          call addmessage(messages,'')
           call addmessage(messages,'$URL$')
       end subroutine time_module_info
 

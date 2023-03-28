@@ -26,8 +26,8 @@ subroutine rbsig(ncmax     ,ampbc     ,ombc      ,phibc     ,thetbc    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! The subroutine reads the input file 'wavcmp' which

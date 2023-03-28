@@ -28,8 +28,8 @@ subroutine comvol(nmmax     ,kmax      ,zmodel    ,kcs       ,kcu       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes volumes and areas from depth values at water level

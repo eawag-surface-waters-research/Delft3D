@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !!> Converts the current polylines to flux cross sections.
 !!! This means, finding shortest path of connected netlinks

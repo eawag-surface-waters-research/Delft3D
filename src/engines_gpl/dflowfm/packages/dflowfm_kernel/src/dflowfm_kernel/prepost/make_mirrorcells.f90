@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> make the mirror cells for open boundaries
 subroutine make_mirrorcells(Nx, xe, ye, xyen, kce, ke, ierror)

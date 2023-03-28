@@ -28,8 +28,8 @@ subroutine rdtdt(lundia    ,lunout    ,lunrd     ,error     ,filbct    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: reads the time dependent hydro dynamic data from

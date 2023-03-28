@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   subroutine tegenovernodesandlink(np,LL,k1a,k2a,La)
   use m_netw

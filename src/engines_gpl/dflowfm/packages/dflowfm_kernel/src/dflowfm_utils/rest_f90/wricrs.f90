@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       !> Writes active cross sections to a polyline file.
       subroutine wricrs(mpol)

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine getcz(h1, frcn, ifrctyp, cz, L)         ! basic get chezy coefficient,  this routine is not safe for frcn == 0
  use m_physcoef, only : sag, vonkar, ee

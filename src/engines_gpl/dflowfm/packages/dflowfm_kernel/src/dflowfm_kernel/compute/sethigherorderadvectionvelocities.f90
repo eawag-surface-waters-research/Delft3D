@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 Subroutine sethigherorderadvectionvelocities()
 use m_flowgeom

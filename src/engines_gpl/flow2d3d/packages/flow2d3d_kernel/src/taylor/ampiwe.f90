@@ -28,8 +28,8 @@ subroutine ampiwe(angle     ,az        ,h0        ,kbed      ,ktop      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !      Function: Amplitude profiles of several IW variables

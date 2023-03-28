@@ -33,8 +33,8 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
 !  Stichting Deltares. All rights reserved.                                     
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Compute flux corresponding to Z_DIFU

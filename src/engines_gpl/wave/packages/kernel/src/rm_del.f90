@@ -25,8 +25,8 @@ subroutine rm_del( filnamin )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Test existence of file and if delete file, using
 ! status='delete' in close statement

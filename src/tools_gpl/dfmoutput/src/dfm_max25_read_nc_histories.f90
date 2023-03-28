@@ -27,8 +27,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> READ_NC_HISTORIES - Subroutine to read the histories from a NetCDF file
 

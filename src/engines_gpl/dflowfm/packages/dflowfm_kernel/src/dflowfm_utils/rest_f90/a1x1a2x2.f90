@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 ! compute coordinates (xu, yu) from (x1,y1) and (x2,y2) with
 !    weights alpha1 and alpha2

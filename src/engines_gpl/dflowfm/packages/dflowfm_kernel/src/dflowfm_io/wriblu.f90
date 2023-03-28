@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine wriblu(mout)                                ! write bottom level u points
  USE M_FLOWGEOM

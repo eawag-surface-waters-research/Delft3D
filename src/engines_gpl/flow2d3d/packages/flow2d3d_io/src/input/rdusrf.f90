@@ -26,8 +26,8 @@ subroutine rdusrf(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Reads the user defined files from the MD-file:

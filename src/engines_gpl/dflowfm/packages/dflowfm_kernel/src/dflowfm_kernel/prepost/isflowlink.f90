@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 SUBROUTINE ISflowlink(XP, YP, LL) ! IS THIS A flow NODE OR A flow LINK ?
  use m_netw

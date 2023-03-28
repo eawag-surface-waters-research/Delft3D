@@ -34,8 +34,8 @@ subroutine z_hormom_fls(nmmax     ,kmax      ,icx       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! This subroutine solves the momentum equation with a

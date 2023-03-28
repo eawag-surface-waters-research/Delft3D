@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine widarhyr(hpr,dz,wu2,wid,ar,hyr)
  use m_flow, only :  slotw2D

@@ -28,8 +28,8 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Initialises and checks various params. and arrays

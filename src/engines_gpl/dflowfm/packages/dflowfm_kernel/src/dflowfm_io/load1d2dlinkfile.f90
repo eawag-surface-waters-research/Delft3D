@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    !> Reads custom parameters for 1D2D links from a *.ini file,
    !! and assigns them to the correct flow links.

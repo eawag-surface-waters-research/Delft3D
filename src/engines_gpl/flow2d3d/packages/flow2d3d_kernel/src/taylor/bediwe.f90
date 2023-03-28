@@ -31,8 +31,8 @@ subroutine bediwe(kmax      ,kmxdt     ,kmxt      ,h0        ,scale     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !      Function: Power transfer of lee waves to TKE. The latter

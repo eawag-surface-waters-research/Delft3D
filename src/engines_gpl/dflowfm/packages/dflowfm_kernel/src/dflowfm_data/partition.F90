@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! $Id: partition.F90 142612 2023-03-01 18:35:31Z markelov $
+! : https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20230301_UNST_4401_neumann/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_data/partition.F90 $
    
 !------------------------------------------------------------------------
 !  THOUGHTS:
@@ -419,13 +419,6 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
             end do
          end do   ! do ipol=1,npartition_pol
       end do   ! do idmn=0,ndomains
-      
-      if ( janet.eq.0 ) then  ! flow mode
-!        get fictitious boundary cells in own domain
-         do i=Ndxi+1,Ndx
-            idomain(i) = my_rank
-         end do
-      end if
 
       ierror = 0
 1234  continue
@@ -535,17 +528,11 @@ use meshdata, only : ug_idsLen, ug_idsLongNamesLen
       call partition_setghost_params(icgsolver)
       
 !     the following subroutine will determine the number of domains and generate the domain numbering
-     if ( npartition_pol.lt.1 ) then ! If do not use polygon (the domain numbers have been read from the partition nc file)
-!        get fictitious boundary cells in own domain
-         if (Ndx > nump1d2d) then
-            call realloc(idomain, Ndx, keepExisting=.true.)
-            do i=Ndxi+1,Ndx
-               idomain(i) = my_rank
-            end do
-         endif
-     else
-        call partition_pol_to_idomain(0) ! for flow geom.
+     if ( npartition_pol > 0 ) then 
+        call partition_pol_to_idomain(0)
      endif
+     
+    call set_idomain_for_all_open_boundaries()
      
 !     check the number of ranks
       if ( ndomains.ne.numranks .and. jampi.eq.1 ) then
@@ -6570,3 +6557,43 @@ recursive subroutine set_edge_weights_and_vsize_with_halo(halo_level, vertex, hi
    end if
 end subroutine set_edge_weights_and_vsize_with_halo
     
+!> set idomain values for all open boundary cells
+subroutine set_idomain_for_all_open_boundaries()
+   use m_flowexternalforcings, only: nbndz, kez, nbndu, keu, ke1d2d
+   use m_sobekdfm            , only: nbnd1d2d
+   use m_cell_geometry       , only: ndx 
+   use m_partitioninfo       , only: idomain
+   use m_alloc               , only: realloc
+   implicit none
+   
+   if ( size(idomain) < ndx ) then
+       call realloc(idomain, ndx, keepExisting=.true.)
+   end if
+   call set_idomain_for_open_boundary_points(nbndz, size(kez), kez, ndx, idomain)
+   call set_idomain_for_open_boundary_points(nbndu, size(keu), keu, ndx, idomain)
+   call set_idomain_for_open_boundary_points(nbnd1d2d, size(ke1d2d), ke1d2d, ndx, idomain)
+
+end subroutine set_idomain_for_all_open_boundaries
+
+!> set idomain values for a set of open boundary cells
+subroutine set_idomain_for_open_boundary_points(number_of_boundary_points, links_array_size, &
+    links_to_boundary_points, ndx, idomain)
+   use m_flowgeom     , only: ln, lne2ln
+   implicit none
+   
+   integer, intent(in)     :: number_of_boundary_points                  !< number of boundary points
+   integer, intent(in)     :: links_array_size                           !< size of the links array
+   integer, intent(in)     :: links_to_boundary_points(links_array_size) !< links to boundary cells
+   integer, intent(in)     :: ndx                                        !< number of flow nodes (internal + boundary)
+   integer, intent(inout)  :: idomain(ndx)                               !< cell-based domain number
+
+   integer                 :: boundary_cell, boundary_point_number, internal_cell, link
+   
+   do  boundary_point_number  = 1, number_of_boundary_points
+       link                   = links_to_boundary_points(boundary_point_number)
+       boundary_cell          = ln(1,lne2ln(link)) 
+       internal_cell          = ln(2,lne2ln(link))
+       idomain(boundary_cell) = idomain(internal_cell)
+   end do
+   
+end subroutine set_idomain_for_open_boundary_points

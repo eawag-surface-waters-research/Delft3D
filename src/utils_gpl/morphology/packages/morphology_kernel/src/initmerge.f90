@@ -29,8 +29,8 @@ subroutine initmerge (iresult, nmmax, lsed, runidIn, gdmorpar)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !

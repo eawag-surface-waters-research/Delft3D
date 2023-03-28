@@ -25,8 +25,8 @@ function ulim(du1,du2)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! This routine computes a limiter value based on the velocity gradients du1 & 

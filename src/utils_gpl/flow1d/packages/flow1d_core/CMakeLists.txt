@@ -24,7 +24,8 @@ if(UNIX)
 endif()
 
 # Set additional compilation properties, specific for Debug mode
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointers_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exception_flag}>")
 
 # Create the structure in Visual Studio
 source_group("Include" FILES ${include_files}) 

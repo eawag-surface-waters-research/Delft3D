@@ -28,8 +28,8 @@ subroutine inicdw(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Function:

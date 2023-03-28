@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE TEKgrd(XC, YC, MMAX, NMAX, m1,n1,m2,n2,NCOL,MET,key,MC)
       implicit none

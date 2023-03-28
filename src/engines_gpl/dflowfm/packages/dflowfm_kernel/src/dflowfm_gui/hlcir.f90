@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       !> Draw a highlighted circle at current position.
       !! Highlighted means: blank center, coloured outline.

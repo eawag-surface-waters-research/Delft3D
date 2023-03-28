@@ -39,8 +39,8 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! The difference equations for the non-hydrostatic

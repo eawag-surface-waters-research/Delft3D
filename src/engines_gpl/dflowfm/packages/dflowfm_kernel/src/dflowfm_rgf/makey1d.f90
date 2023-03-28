@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE MAKEY1D(XR,YR,MNMAX)  ! terug naar graden SUBROUTINE MAKEY1D
       USE M_SFERIC

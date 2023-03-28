@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine sincosdis(x1,y1,x2,y2,s,c,d)    ! get sin, cos, length of a line segment
  use m_missing

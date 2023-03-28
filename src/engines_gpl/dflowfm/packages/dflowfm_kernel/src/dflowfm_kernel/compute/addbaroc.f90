@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine addbaroc(LL,Lb,Lt)  ! this routine is wrong, here only for backward comp
  use m_flowgeom

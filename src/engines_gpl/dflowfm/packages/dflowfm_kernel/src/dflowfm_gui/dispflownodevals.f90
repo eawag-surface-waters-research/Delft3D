@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 SUBROUTINE DISPFLOWNODEVALS(KP)
   use m_flowgeom

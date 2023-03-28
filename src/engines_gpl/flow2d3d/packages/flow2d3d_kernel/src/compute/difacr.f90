@@ -31,8 +31,8 @@ subroutine difacr(icx       ,icy       ,j         ,nmmaxj    ,nmmax     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes horizontal diffusion along Z-planes.

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 ! update the bed levels due to subsidence/uplift
 subroutine apply_subsupl()

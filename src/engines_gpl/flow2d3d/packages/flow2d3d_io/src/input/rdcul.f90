@@ -25,8 +25,8 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Reads dimensions, allocates space for data and reads data from INI file for
 ! culverts.

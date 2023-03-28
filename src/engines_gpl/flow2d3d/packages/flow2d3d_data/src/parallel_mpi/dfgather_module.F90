@@ -29,8 +29,8 @@ module dfgather_module
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: regroups functionalities for operations spanning all partitions

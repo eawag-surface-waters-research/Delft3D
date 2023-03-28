@@ -25,8 +25,8 @@ subroutine datumi(jaar      ,jdate    ,t         )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Calculates the number of hours referred to

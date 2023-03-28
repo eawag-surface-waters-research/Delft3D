@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 module m_partrecons
    double precision,  dimension(:),   allocatable :: qe           !< fluxes at all edges, including internal

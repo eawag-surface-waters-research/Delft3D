@@ -28,8 +28,8 @@ subroutine dfmassc (s1        ,u1        ,qxk       ,hu        ,d0        , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   adapts waterlevels and velocities at coupling boundaries

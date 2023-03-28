@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 SUBROUTINE getwavenrqn(DEPTH,Period, RK)
 use m_sferic

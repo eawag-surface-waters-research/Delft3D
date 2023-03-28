@@ -28,8 +28,8 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads rigid sheet/weir data from attribute file

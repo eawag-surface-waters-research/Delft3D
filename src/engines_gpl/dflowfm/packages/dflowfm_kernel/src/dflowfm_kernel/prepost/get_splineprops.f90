@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> derive center spline propererties from cross splines
 subroutine get_splineprops(mcs_old, id, iLRmfac)

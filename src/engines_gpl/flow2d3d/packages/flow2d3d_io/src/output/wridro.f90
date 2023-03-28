@@ -28,8 +28,8 @@ subroutine wridro(lundia    ,error     ,filename  ,ndro      ,itdrof    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the initial group 1 ('dro-const') to

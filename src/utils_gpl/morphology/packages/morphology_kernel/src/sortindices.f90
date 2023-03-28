@@ -25,8 +25,8 @@ subroutine sortindices(nm     ,npnt   ,val    ,nmlb   ,nmub   ,increasing)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! if argument increasing=true then

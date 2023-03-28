@@ -26,8 +26,8 @@ subroutine updwaqflxsed(nst       ,nm        ,l         ,trndiv    ,sedflx    , 
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Update cumulative sedimentation and resuspension fluxes for WAQ

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine addlinkship2D(L,japerim)  ! but substract, nested Newton
  use m_ship

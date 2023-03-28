@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> determine if the cells have to be updated (1) or not (0)
 subroutine get_jaupdate(istep,nsubsteps,Ndxi,Ndx,ndeltasteps,jaupdate)

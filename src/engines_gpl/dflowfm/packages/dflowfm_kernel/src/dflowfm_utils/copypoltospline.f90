@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> copy polygon to spline
   SUBROUTINE COPYPOLTOSPLINE()

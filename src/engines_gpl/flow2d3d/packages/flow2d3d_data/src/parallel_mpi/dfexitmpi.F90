@@ -28,8 +28,8 @@ subroutine dfexitmpi ( iexit )
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Exit or abort parallel application

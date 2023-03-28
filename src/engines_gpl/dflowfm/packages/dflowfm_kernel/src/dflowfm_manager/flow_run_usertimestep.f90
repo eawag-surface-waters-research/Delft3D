@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Runs a user-timestep (do computational flowsteps until timeuser), but not the init and finalize.
 !!

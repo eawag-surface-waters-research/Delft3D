@@ -7,7 +7,6 @@ if (WIN32)
     # Set global Fortran compiler flags that apply for each Fortran project
     set(nologo_flag /nologo)
     set(compiler_flags "/W1 ${nologo_flag} /libs:dll /threads")
-    set(debug_flags "/check:uninit /check:stack /check:pointers /check:bounds /traceback /fpe:0")
 
     # Set optional flags:
     message(STATUS "Setting optional Intel Fortran compiler flags in Windows")
@@ -18,11 +17,13 @@ if (WIN32)
     set(heap_arrays_100_flag /heap-arrays:100)
     set(real_size_64_flag /real-size:64)
 
+    set(linker_debug_flag /debug)
     set(check_bounds_flag /check:bounds)
     set(check_nobounds_flag /check:nobounds)
-    set(linker_debug_flag /debug)
     set(check_pointers_flag /check:pointers)
     set(check_nopointers_flag /check:nopointers)
+	set(check_uninit_flag /check:uninit)
+    set(check_stack_flag /check:stack)	
     set(openmp_flag /Qopenmp)
     set(generate_reentrancy_threaded_flag /reentrancy:threaded)
     set(floating_point_exception_flag /fpe:0)

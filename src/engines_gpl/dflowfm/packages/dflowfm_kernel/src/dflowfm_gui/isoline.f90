@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       subroutine isoline(xa,ya,za,xb,yb,zb)
       use unstruc_display

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine triarea3D(xx,yy,zz,triarea)                      ! input: two vectors starting from zero
  implicit none

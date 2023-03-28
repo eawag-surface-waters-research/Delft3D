@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> Reads xyz profiles (and stores them as yz profiles).
  !! When the model is in spherical coordinates, the x,y pairs (lon,lat) are translated

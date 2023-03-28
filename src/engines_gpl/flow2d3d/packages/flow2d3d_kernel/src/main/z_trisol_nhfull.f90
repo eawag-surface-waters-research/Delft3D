@@ -31,8 +31,8 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   ,ithisc    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Z-model

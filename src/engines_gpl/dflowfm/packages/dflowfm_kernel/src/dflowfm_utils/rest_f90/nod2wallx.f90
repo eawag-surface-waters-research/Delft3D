@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>    return x-component in link coordinate frame of vector in wall coordinate frame
       double precision function nod2wallx(nw,ux,uy)

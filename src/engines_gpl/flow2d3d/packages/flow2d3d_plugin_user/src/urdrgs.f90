@@ -27,8 +27,8 @@ subroutine urdrgs(lundia    ,error     ,filusr    ,nmax      ,mmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Test existence of user defined file for

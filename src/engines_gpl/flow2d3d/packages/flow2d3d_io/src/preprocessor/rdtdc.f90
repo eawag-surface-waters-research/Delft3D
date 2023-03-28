@@ -27,8 +27,8 @@ subroutine rdtdc(lundia    ,lunout    ,lunrd     ,error     ,filbcc    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads time dependent constituent data from old

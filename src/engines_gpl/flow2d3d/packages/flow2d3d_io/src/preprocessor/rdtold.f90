@@ -26,8 +26,8 @@ subroutine rdtold(lunrd     ,lundia    ,error     ,filnam    ,ntimrd    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the times from old time dependent data file
