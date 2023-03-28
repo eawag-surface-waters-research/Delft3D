@@ -30,11 +30,11 @@ if (WIN32)
                             netcdff
                             triangle_c
                             swan
-                            ) 
+                            )
 
-    oss_include_libraries(${executable_name} exe_dependencies)
+    oss_include_libraries(${executable_name} ${exe_dependencies})
     target_link_libraries(${executable_name} ${exe_dependencies})
-    
+
     include_directories(${mpi_include_path})
 
 endif(WIN32)
@@ -64,7 +64,7 @@ if(UNIX)
                             swan
                             esmfsm
                             )
-    
+
     oss_include_libraries(${executable_name} exe_dependencies)
 
     target_link_libraries(${executable_name}
@@ -73,7 +73,7 @@ if(UNIX)
          PkgConfig::NETCDF_FTN)
 
     include_directories(${mpi_include_path})
-    
+
 endif(UNIX)
 
 
@@ -86,7 +86,7 @@ if (WIN32)
                             "${checkout_src_root}/third_party_open/pthreads/bin/x64"
                             "${mpi_library_path}")
 
-    target_link_libraries(${executable_name}                                                   
+    target_link_libraries(${executable_name}
                             "pthreadVC2.lib"
                             "netcdf.lib"
                             "${mpi_fortran_library}")
@@ -100,7 +100,7 @@ if (UNIX)
     # Set linker properties
     message(STATUS "netcdf lib dir is ${NETCDF_LIBRARY_DIRS}")
     target_link_directories(${executable_name} PRIVATE ${NETCDF_LIBRARY_DIRS})
-    
+
     #target_link_options(${executable_name} PRIVATE ${openmp_flag})
     set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)
 endif(UNIX)
@@ -123,9 +123,9 @@ set(install_dir ${CMAKE_BINARY_DIR})
 set(build_dir ${CMAKE_BINARY_DIR})
 
 post_build_target (${executable_name}
-                   ${install_dir} 
-                   ${build_dir} 
-                   ${checkout_src_root} 
+                   ${install_dir}
+                   ${build_dir}
+                   ${checkout_src_root}
                    ${executable_name})
 
 install(TARGETS ${executable_name} RUNTIME  DESTINATION bin)

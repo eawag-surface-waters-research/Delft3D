@@ -13,7 +13,7 @@ if (WIN32)
     set(oss_dependencies    wave_data
                             deltares_common
                             netcdf4
-                            netcdff) 
+                            netcdff)
     oss_include_libraries(${library_name} oss_dependencies)
 endif(WIN32)
 
@@ -28,7 +28,7 @@ if (UNIX)
     set(oss_dependencies    wave_data
                             deltares_common)
 
-    oss_include_libraries(${library_name} oss_dependencies)
+    oss_include_libraries(${library_name} ${oss_dependencies})
     target_link_libraries(${library_name} ${oss_dependencies}
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN)

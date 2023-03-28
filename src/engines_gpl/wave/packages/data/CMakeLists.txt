@@ -17,12 +17,12 @@ if (WIN32)
                             io_netcdf
                             nefis
                             netcdf4
-                            netcdff) 
+                            netcdff)
     oss_include_libraries(${library_name} oss_dependencies)
 
     include_directories(${mpi_include_path})
 
-    # Define preprocessor definitions     
+    # Define preprocessor definitions
     target_compile_definitions(${library_name} PRIVATE "WIN32;HAVE_MPI")
 
 endif(WIN32)
@@ -42,7 +42,7 @@ if (UNIX)
                             io_netcdf
                             nefis)
 
-    oss_include_libraries(${library_name} oss_dependencies)
+    oss_include_libraries(${library_name} ${oss_dependencies})
     target_link_libraries(${library_name} ${oss_dependencies}
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN)
@@ -50,7 +50,7 @@ if (UNIX)
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include"
                         ${mpi_include_path})
 
-    # Define preprocessor definitions 
+    # Define preprocessor definitions
     target_compile_definitions(${library_name} PRIVATE "HAVE_MPI")
 
 endif(UNIX)
