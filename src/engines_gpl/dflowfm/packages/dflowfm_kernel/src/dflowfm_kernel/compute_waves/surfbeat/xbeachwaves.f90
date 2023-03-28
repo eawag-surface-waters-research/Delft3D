@@ -1443,7 +1443,7 @@ subroutine xbeach_wave_compute_flowforcing2D()
 
    end subroutine xbeach_wave_compute_flowforcing2D
 
-   subroutine xbeach_wave_maxtimestep()
+subroutine xbeach_wave_maxtimestep()
    use m_flowtimes
    use m_flow
    use m_flowgeom
@@ -1464,39 +1464,28 @@ subroutine xbeach_wave_compute_flowforcing2D()
          !            do not include ghost cells
          if ( idomain(k).ne.my_rank ) cycle
       end if
-      !
-      dum = 0.d0
-      !
-      do kk = 1, nd(k)%lnx
-         L = iabs(nd(k)%ln(kk))
-         k1 = ln(1,L)
-         k2 = ln(2,L)
-         do itheta = 1, ntheta
+      do itheta = 1, ntheta
+         dum = 0.d0
+         do kk = 1, nd(k)%lnx
+            L = iabs(nd(k)%ln(kk))
+            k1 = ln(1,L)
+            k2 = ln(2,L)
+            
+            cgwavL = acL(L)*cgwav(k1) + (1-acL(L))*cgwav(k2)
+            cwuL    = cgwavL*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )
 
-            !if (windmodel .eq. 0) then
-               cgwavL = acL(L)*cgwav(k1) + (1-acL(L))*cgwav(k2)
-               cwuL    = cgwavL*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )
-            !else
-            !   cgwavL = acL(L)*cgwavt(itheta,k1) + (1-acL(L))*cgwavt(itheta,k2)
-            !   cwuL    = cgwavL*( csu(L)*csx(itheta) + snu(L)*snx(itheta) ) 
-            !endif
-        
             if (ln(2,L) .eq. k) cwuL = -cwuL
-        
+
             if (cwuL .ge. 0.) then        ! outgoing velocities only
                dum = dum + cwuL*wu(L)
             end if
          end do
-      end do
-      !
-      if (dum > tiny(0d0)) then
-         dt = cflmx*ba(k) / dum
-         if ( dt.lt.dtmaxwav ) then
-            dtmaxwav = dt
+         if (dum > tiny(0d0)) then
+            dt = cflmx*ba(k) / dum
+            if ( dt.lt.dtmaxwav ) then
+               dtmaxwav = dt
+            end if
          end if
-      end if
-      
-      do itheta = 1, ntheta
          dum = ctheta(itheta, k)/dtheta
          if (dum > tiny(0d0)) then
             dt = cflmx / dum
@@ -1505,7 +1494,7 @@ subroutine xbeach_wave_compute_flowforcing2D()
                kkcflmxloc = k
             end if
          end if
-      enddo
+      end do
    end do
    !
    if (dtmaxwav > dts) then
