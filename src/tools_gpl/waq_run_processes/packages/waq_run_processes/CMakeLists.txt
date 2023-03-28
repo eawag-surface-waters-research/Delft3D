@@ -21,8 +21,8 @@ target_link_libraries(${executable_name} ${oss_dependencies})
 
 # Set additional compilation properties
 target_compile_options(${executable_name} PRIVATE "${extend_source132_flag}")
-target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
 target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointer}>")
+target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exception_flag}>")
 
 if(UNIX)
     set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)

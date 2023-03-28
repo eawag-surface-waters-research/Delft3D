@@ -39,7 +39,8 @@ if(UNIX)
 endif(UNIX)
 
 # Set additional compilation properties, specific for Debug mode
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointers_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exception_flag}>")
 
 set_source_files_properties(${fortran_version_file}
                             ${src_path}/system_utils.F90
