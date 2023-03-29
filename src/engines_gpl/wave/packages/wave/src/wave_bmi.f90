@@ -113,7 +113,7 @@ subroutine get_attribute(c_att_name, c_att_value) bind(C, name="get_attribute")
 
    select case (att_name)
    case ('model_name'   )
-      att_value = component_name
+      att_value = product_name
    case ('version')
       call getfullversionstring_dwaves(att_value)
       from = index(att_value,'Version ') + 8

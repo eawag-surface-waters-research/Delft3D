@@ -29,10 +29,13 @@ module dwaves_static_version_info
     character(*),  public, parameter :: company      = COMPANY_NAME
     character(*),  public, parameter :: company_url  = COMPANY_URL
 
+    character(*),  public, parameter :: product_name = PRODUCT_NAME
+
     character(*),  public, parameter :: build_nr     = BUILD_NR
     character(*),  public, parameter :: major        = MAJOR_STR
     character(*),  public, parameter :: minor        = MINOR_STR
     character(*),  public, parameter :: revision     = REVISION_STR
+    character(*),  public, parameter :: branch       = BRANCH
 
     character(*),  public, parameter :: version_full = trim(major)//'.'//trim(minor)//'.'//trim(revision)//'.'//trim(build_nr)
     character(*),  public, parameter :: version_suffix      = version_full

@@ -1070,7 +1070,7 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
     ierror = nf90_put_att(idfile, nf90_global,  'source', trim(full_version)); call nc_check_err(ierror, "put_att global source", filename_tmp)
     ierror = nf90_put_att(idfile, nf90_global,  'history', &
            'Created on '//cdate(1:4)//'-'//cdate(5:6)//'-'//cdate(7:8)//'T'//ctime(1:2)//':'//ctime(3:4)//':'//ctime(5:6)//czone(1:5)// &
-           ', '//trim(component_name)); call nc_check_err(ierror, "put_att global history", filename_tmp)
+           ', '//trim(product_name)); call nc_check_err(ierror, "put_att global history", filename_tmp)
     if (.not.sferic) then
        ierror = nf90_put_att(idfile, nf90_global,  'gridType', 'unstructured'); call nc_check_err(ierror, "put_att global gridType", filename_tmp)
        ierror = nf90_put_att(idfile, nf90_global,  'version', '0.9'); call nc_check_err(ierror, "put_att global version", filename_tmp)

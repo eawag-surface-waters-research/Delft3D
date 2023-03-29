@@ -30,10 +30,9 @@ module dwaves_version_module
 
     implicit none
 
-    character(*),  public, parameter :: component_name      = 'DWAVES'
-
-    character(*),  public, parameter :: dwaves_version_full = version_prefix // ', ' // component_name // version_suffix
-    character(*),  public, parameter :: dwaves_version_id   = version_prefix_id // ', ' // component_name // ' ' // version_suffix_full
+    character(*),  public, parameter :: dwaves_version_full = version_prefix // ', ' // product_name // version_suffix
+    character(*),  public, parameter :: dwaves_version_id   = version_prefix_id // ', ' // product_name // ' ' // version_suffix_full
+    character(*),  public, parameter :: dwaves_branch       = version_prefix_id // ', ' // branch
 
 contains
 
@@ -42,5 +41,11 @@ contains
 
         stringout = dwaves_version_id(offset:)
     end subroutine getfullversionstring_dwaves
+
+    subroutine getbranch_dwaves(stringout)
+        character(*), intent(out) :: stringout
+
+        stringout = dwaves_branch(offset:)
+    end subroutine getbranch_dwaves
 
 end module dwaves_version_module
