@@ -2,7 +2,6 @@
 set(src_path src) 
 
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to the location of where this CMakeLists file is defined in.
-set(ini_version_file "${CMAKE_CURRENT_SOURCE_DIR}/include/version_number.ini")
 set(fortran_version_file "${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/gridgeom_version.F90")
 set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
 
@@ -13,8 +12,7 @@ list(REMOVE_ITEM source_files ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/gridgeom_a
 
 set(library_name gridgeom)
 add_library(${library_name} ${source_files}
-                            ${fortran_version_file}
-                            ${ini_version_file})
+                            ${fortran_version_file})
 
 set_source_files_properties(${fortran_version_file}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
