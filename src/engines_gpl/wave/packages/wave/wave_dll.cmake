@@ -34,8 +34,6 @@ if (WIN32)
     oss_include_libraries(${library_name} library_dependencies)
     target_link_libraries(${library_name} ${library_dependencies})
 
-    include_directories(${mpi_include_path})
-
     # Set linker properties
     message(STATUS "Setting linker properties in windows")
     target_link_directories(${library_name}
@@ -87,8 +85,6 @@ if(UNIX)
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN)
 
-    include_directories(${mpi_include_path})
-    
     message(STATUS "netcdf lib dir is ${NETCDF_LIBRARY_DIRS}")
     target_link_directories(${library_name} PRIVATE ${NETCDF_LIBRARY_DIRS})
     
@@ -96,6 +92,8 @@ if(UNIX)
     set_property(TARGET ${library_name} PROPERTY LINKER_LANGUAGE Fortran)
 
 endif(UNIX)
+
+include_directories(${mpi_include_path} ${version_include_dir})
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${library_files})

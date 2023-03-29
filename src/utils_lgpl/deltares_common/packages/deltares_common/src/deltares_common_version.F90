@@ -25,26 +25,24 @@ module deltares_common_version_module
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  
-!  
-#INCLUDE "version_definition.h"
-
+!  $Id$
+!  $HeadURL$
 
 implicit none
 
     character(*),  public, parameter :: deltares_common_major        = '1'
     character(*),  public, parameter :: deltares_common_minor        = '00'
     character(*),  public, parameter :: deltares_common_revision     = '00'
-    character(*),  public, parameter :: deltares_common_build_number = BUILD_NR
+    character(*),  public, parameter :: deltares_common_build_number = '000000'
 
-    character(*),  public, parameter :: deltares_common_company      = COMPANY_NAME
-    character(*),  public, parameter :: deltares_common_company_url  = COMPANY_URL
+    character(*),  public, parameter :: deltares_common_company      = 'Deltares'
+    character(*),  public, parameter :: deltares_common_company_url  = 'http://www.deltares.nl'
     character(*),  public, parameter :: deltares_common_program      = 'DELTARES_COMMON'
 
     character(*),  public, parameter :: deltares_common_version      = deltares_common_major//'.'//deltares_common_minor//'.'//deltares_common_revision//'.'//deltares_common_build_number
     character(*),  public, parameter :: deltares_common_version_full = 'Deltares, '//deltares_common_program//' Version '//deltares_common_version//', '//__DATE__//', '//__TIME__
     character(*),  public, parameter :: deltares_common_version_id   = '@(#)'//deltares_common_version_full
-    character(*),  public, parameter :: deltares_common_source_code  = '@(#) '//char(0)
+    character(*),  public, parameter :: deltares_common_source_code  = '@(#) $HeadURL$'//char(0)
 
 contains
 
