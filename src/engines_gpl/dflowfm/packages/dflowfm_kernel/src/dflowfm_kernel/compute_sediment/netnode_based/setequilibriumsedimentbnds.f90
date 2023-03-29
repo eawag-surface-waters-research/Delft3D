@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 Subroutine setequilibriumsedimentbnds(nbnd,n4,kbnd,kban,i01)
 use m_flow

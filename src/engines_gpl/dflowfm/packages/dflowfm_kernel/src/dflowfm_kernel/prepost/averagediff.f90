@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       !> Computes the average segment size at polyline points.
       !! by averaging between left and right neighbouring points at each point.

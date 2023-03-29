@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   SUBROUTINE COPYLDBPIECETOPOL(M1,M2)
   USE M_POLYGON

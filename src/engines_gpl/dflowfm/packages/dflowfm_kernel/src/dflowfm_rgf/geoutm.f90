@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       subroutine GEOUTM (xgeo,ygeo,xutm,yutm,Izone,nzone,IERR)
       implicit none

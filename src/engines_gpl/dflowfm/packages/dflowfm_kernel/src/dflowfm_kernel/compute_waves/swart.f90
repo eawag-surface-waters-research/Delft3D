@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine Swart(Tsig, uorbu, z00, fw, ustw2)
 use m_flow,  only : rhomean

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> find flow cells with kdtree2
   subroutine find_flowcells_kdtree(treeinst,Ns,xs,ys,inod,jaoutside,iLocTp, ierror)

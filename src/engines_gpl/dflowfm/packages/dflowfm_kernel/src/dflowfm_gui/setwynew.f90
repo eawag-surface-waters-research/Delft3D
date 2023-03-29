@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE SETWYnew(X,Y,DY)
 !     Set zoomwindow limits at proper aspect ratio

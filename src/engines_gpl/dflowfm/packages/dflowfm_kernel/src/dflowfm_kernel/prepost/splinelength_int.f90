@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> approximate spline pathlength in interval
 double precision function splinelength_int(num, xspl, yspl, s0, s1)

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       subroutine UTMGeo(xutm,yutm,xgeo,ygeo,IZONE,ierr)
       implicit none

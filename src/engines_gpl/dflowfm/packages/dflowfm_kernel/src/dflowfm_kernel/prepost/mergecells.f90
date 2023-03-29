@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> merge two cells with a common link and update administration
 subroutine mergecells(ic1, ic2, jatek)

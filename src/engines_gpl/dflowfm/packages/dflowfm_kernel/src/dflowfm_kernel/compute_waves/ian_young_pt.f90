@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  SUBROUTINE ian_young_pt(U10,x,d,Hsig,Tsig)
   use m_physcoef

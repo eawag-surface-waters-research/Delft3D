@@ -36,8 +36,8 @@ subroutine calbf(stage     ,nmmax     ,nmaxddb   ,dps       ,s1        , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Calculate bedform height and length using bedform.f90

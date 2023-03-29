@@ -25,8 +25,8 @@ subroutine restart_trim_fluff (lundia, mfluff, rst_fluff, lsed, rdum, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Reads initial field condition records from a trim-file
 !!--pseudo code and references--------------------------------------------------

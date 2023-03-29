@@ -28,8 +28,8 @@ subroutine dfinitmpi
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Join parallel application within Delft3D-FLOW

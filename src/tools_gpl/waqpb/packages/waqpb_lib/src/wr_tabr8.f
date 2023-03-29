@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
       SUBROUTINE WR_TABR8 ( DEFFDS      ,
      +                      NO_DSTO     , R8_DID      ,

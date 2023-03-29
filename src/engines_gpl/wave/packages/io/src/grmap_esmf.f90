@@ -25,8 +25,8 @@ subroutine grmap_esmf(i1, f1, n1, f2, mmax, nmax, f2s, f2g)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! http://www.earthsystemmodeling.org/esmf_releases/last_built/ESMF_refdoc/node3.html

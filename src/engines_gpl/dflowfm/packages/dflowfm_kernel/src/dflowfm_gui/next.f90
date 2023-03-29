@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE NEXT(NAHEAD,NLEVEL,NUMCHC,HLPTXT,NUMTXT)
       implicit none

@@ -28,8 +28,8 @@ subroutine protke(j         ,nmmaxj    ,nmmax     ,icx       ,icy       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determines horizontal production term for

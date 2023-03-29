@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> sample a spline
 subroutine sample_spline(num, xs, ys, numref, Nr, xr, yr, ierror)

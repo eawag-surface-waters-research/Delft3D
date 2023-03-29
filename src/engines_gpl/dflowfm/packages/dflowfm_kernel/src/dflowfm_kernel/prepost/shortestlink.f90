@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   DOUBLE PRECISION FUNCTION SHORTESTLINK(K)
   use m_netw

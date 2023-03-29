@@ -26,8 +26,8 @@ subroutine sysini(error     ,runid     ,filmrs    ,prgnm     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Initialises the FLOW system (EXCEPT for the

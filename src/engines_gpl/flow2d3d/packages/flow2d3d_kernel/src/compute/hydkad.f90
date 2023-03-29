@@ -26,8 +26,8 @@ subroutine hydkad(j         ,nmmaxj    ,nmmax     ,kmax      ,kspu      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes KADU/V values for hydrodynamic routine

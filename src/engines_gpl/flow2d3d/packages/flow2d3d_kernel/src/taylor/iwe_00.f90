@@ -31,8 +31,8 @@ subroutine iwe_00(nmax      ,mmax      ,kmax      ,kmxdt     ,npiwe     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Main routine to calculate internal wave energy

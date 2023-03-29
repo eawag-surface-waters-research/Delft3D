@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Reorders a 1D array obsArray in valobs, so that values on inactive layers get fillValue. For sigma-layer model, obsArray are actually not changed.
 subroutine reorder_valobs_array(n,obsArray, kb, kt, nlayb, fillValue)

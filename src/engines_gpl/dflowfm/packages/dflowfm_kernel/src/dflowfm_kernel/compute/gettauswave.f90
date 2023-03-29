@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 
 ! Make output arrays for bed shear stress icm jawave>0, depending on waq coupling and 2D/3D

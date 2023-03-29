@@ -26,8 +26,8 @@ subroutine get_dep (dps    ,mmax     ,nmax   ,filnam)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! When running online with Delft3D-FLOW, Delft3D-FLOW writes DPS to group BOTTIM,

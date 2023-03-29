@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    SUBROUTINE MIRRORLINE (X0,Y0,X1,Y1,X2,Y2,JA,DIS,XN,YN)
    use geometry_module, only: dlinedis

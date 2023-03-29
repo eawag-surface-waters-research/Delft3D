@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> Write solution data to output files (map/his/restart/waq).
  !! Each output type has its own interval (see m_flowtimes),

@@ -26,8 +26,8 @@ subroutine usrptr(lundia    ,error      ,pntnam    ,partyp    ,length    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Get pointer of user defined array defined by

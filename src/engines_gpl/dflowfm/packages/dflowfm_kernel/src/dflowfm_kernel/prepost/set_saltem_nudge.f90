@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    !> fill initial salinity and temperature with nudge variables
    subroutine set_saltem_nudge()

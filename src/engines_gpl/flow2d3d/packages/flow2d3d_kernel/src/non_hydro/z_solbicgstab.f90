@@ -30,8 +30,8 @@ subroutine z_solbicgstab(aak       ,bbk       ,cck      ,aak2      ,cck2      , 
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Solves system of equations.

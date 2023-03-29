@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  ! Delete dry points from netgeom based on drypoints files and grid enclosure file
  subroutine delete_dry_points_and_areas()

@@ -29,8 +29,8 @@ function deletehotfile(wavedata) result (dodelete)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Return true if the hotfile with time hotfiletime can be deleted

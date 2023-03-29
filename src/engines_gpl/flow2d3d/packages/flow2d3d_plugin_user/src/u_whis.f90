@@ -34,8 +34,8 @@ subroutine u_whis(lundat    ,header    ,runid     ,itime     ,idate     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Example user routine to write history data for the computed bed stress term

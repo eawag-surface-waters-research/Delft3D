@@ -26,8 +26,8 @@ subroutine rdtimc(comfil    ,lundia    ,error     ,commrd    ,itlen     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Read time parameters from communication file

@@ -25,8 +25,8 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata, selectedtime)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--pseudo code and references--------------------------------------------------

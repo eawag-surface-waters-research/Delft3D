@@ -27,8 +27,8 @@ subroutine eqsettle(dll_function, dll_handle, max_integers, max_reals, max_strin
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: 

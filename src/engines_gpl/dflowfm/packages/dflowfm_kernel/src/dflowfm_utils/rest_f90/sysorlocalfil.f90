@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   SUBROUTINE SYSORLOCALFIL(LUNID,FILNAM,MUSTBE)
   use string_module, only: find_first_char

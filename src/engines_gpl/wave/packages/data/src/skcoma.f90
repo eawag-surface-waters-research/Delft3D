@@ -25,8 +25,8 @@ subroutine skcoma(iuni      )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! skips comment in the input file
 ! -

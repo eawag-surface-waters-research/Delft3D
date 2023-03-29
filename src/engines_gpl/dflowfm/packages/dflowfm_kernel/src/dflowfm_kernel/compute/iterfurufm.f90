@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 logical function iterfurufm(m, su, sd, ustru, cu, rhsc, dxdt, lambda)
 

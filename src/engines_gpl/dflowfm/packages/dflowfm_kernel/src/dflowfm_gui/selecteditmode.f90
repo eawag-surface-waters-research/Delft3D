@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
     !> Selects the edit mode for a given keypress code.
     !! Alt-P/-N/-S/-G/-B/-F for the respective modes.

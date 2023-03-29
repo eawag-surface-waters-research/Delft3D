@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> Calculates the relative time in seconds since refdat, given an absolute datetime.
  !! The input datetime is in separate year/month/../seconds values.

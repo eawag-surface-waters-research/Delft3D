@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> Compute and set source and sink values for the 'intake-outfall' structures.
  subroutine setsorsin()                                ! links in continuity eq.

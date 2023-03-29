@@ -25,8 +25,8 @@ subroutine skipstarlines(lunfil)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Skips lines starting with an asterisk (*), not only at the

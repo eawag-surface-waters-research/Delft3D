@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 module unstruc_startup
 !! Separates some startup/initialization procedures from the main program in net.f90

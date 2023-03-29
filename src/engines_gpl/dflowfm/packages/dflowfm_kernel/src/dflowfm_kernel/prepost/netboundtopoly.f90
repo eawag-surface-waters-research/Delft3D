@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> copy netboundary to polygon, starting from a specified point
 subroutine netboundtopoly(kstart)

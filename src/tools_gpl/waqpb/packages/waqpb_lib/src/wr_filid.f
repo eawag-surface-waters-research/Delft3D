@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
       SUBROUTINE WR_FILID ( DEFFDS, FFORM , VFFORM, CONTEN,
      +                      VERSIO, SERIAL, RUNDAT, SOURCE, REMARK,

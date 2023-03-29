@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    subroutine init_1dinfo()
    use m_flowgeom, only: lnx1D, ln, ndx

@@ -41,8 +41,8 @@ subroutine wav2tr(fx        ,fy        ,alfas     ,guu       ,gvv       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !     Subroutine wav2tr converts vector fx,fy  (wave forces or mass

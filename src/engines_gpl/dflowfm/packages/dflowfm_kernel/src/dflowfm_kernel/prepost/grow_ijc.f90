@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> grow ijc with blocksize to satisfy objective lower- and upperbound
 subroutine grow_ijc(lowold, uppold, lowobj, uppobj, init)

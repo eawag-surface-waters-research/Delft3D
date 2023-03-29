@@ -26,8 +26,8 @@ subroutine inirgl(riglid    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Reduces storage in cell with floating structure

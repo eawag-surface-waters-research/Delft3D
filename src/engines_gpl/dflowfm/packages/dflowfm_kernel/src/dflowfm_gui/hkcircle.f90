@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine hkcircle(x,y,r) ! plotdevice routine interacter is niet goed, zie file fout.bmp
  implicit none

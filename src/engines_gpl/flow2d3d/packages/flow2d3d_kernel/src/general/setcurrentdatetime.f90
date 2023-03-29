@@ -25,8 +25,8 @@ subroutine setcurrentdatetime(timnow, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Print the time varying history data
 ! Selection is done using PRSHIS. For elements like

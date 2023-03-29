@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>    return y-component in link coordinate frame of a vector in corner (netnode) coordinate frame
       double precision function cor2liny(L,i12,ux,uy)

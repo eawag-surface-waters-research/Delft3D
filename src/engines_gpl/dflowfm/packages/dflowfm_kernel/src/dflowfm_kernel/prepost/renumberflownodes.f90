@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
     !> Renumber flow nodes in an early stage.
     !! Called only from withing flow_geominit, it operates on lne, kn and netcell

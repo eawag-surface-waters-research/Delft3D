@@ -25,8 +25,8 @@ subroutine santoss_sfltd99(d50, sc, st, swc, swt, udeltanet, sfltc, sfltt)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   The SANTOSS practical sand transport model, version 2.08  

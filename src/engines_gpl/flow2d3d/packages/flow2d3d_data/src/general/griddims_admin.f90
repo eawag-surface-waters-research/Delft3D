@@ -25,8 +25,8 @@ subroutine griddims_admin( kcs, xz, yz, xcor, ycor, gdp )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: ...

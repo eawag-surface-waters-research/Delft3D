@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> add internal tides friction forces to adve
    subroutine add_InternalTidesFrictionForces()

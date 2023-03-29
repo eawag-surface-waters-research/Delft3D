@@ -27,8 +27,8 @@ subroutine fouana(mmax      ,nmaxus    ,nofou     ,ifou      ,kcs      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - performs fourier analysis i.e. computes suma

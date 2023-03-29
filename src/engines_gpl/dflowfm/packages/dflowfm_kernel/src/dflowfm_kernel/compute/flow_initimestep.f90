@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine flow_initimestep(jazws0, iresult)                     ! intialise flow timestep, also called once after flowinit
  use timers

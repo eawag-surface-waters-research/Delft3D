@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Writes the current water balance quantities to file.
 !! File format is ascii, one time per line, all quantities in columns.

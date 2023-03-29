@@ -27,8 +27,8 @@ subroutine chkic(lundia    ,error     ,mmax      ,nmax      ,kmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Checks for negative values of array r1 and of

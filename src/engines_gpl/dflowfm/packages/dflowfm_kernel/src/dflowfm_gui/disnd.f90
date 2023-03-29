@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  SUBROUTINE DISND(NN, netorflow)   ! print net or flow node values
  use m_devices

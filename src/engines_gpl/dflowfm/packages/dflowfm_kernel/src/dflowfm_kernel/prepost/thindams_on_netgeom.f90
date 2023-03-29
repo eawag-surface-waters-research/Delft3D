@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Put the polyline thin dams on the network links.
 !! All crossed net links are set to kn(3,L) = 0, such that flow_geominit

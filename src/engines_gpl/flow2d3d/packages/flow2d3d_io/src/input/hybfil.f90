@@ -26,8 +26,8 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the bed stress coefficient arrays CFUROU

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 double precision function upwsalslope(L,k,ds2)          ! k is upwind cell for link L, find slope upwind of k
  use m_flowgeom                                          ! limit upwind slopes for all inflowing links

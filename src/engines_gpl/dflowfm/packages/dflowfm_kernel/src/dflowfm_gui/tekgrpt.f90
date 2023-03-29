@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE TEKGRPT(      X,      Y,     mmax, nmax, MC,     NC,  MP,     NP,   NCOL        )
 !     TEKEN GRIDLIJNEN UITKOMEND OP DIT PUNT

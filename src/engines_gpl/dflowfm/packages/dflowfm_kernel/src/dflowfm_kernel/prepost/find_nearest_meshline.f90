@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> find meshline nearest to land boundary
 subroutine find_nearest_meshline(jasnap)

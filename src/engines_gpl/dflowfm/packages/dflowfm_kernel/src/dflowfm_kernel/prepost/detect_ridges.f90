@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> detect ridges and reduce structured sample set
 subroutine detect_ridges(jadeleteHessians)

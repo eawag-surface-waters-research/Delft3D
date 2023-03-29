@@ -26,8 +26,8 @@ subroutine wrthisbal(ithisc    ,filename  ,lundia    ,error     ,irequest  , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Writes the time varying mass balance data to the FLOW HIS file

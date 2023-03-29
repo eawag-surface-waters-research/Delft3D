@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine getucxucynoweirs( ku, ucxku, ucyku, ischeme )
  use m_flow

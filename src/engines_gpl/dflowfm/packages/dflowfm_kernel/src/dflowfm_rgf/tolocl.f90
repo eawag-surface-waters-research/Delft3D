@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE TOLOCL(    DX0,    DY0,      X,      Y,  mmax, nmax, MP,     NP,    NTO        )
       use m_missing

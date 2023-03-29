@@ -44,8 +44,8 @@ recursive subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! This subroutine evaluates/solves at each half time

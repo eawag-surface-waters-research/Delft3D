@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine setupwslopes()                           ! set upwind slope pointers and weightfactors
  ! TODO: 1D upwind slope pointers (gewoon de vorige)

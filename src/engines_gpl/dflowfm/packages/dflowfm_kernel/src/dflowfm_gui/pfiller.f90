@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
     SUBROUTINE PFILLER(X,Y,N_,NCOL,NCLR)
     use unstruc_opengl

@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
       SUBROUTINE RD_TABM1 ( DEFFDS      ,
      +                      n_old_items_max,

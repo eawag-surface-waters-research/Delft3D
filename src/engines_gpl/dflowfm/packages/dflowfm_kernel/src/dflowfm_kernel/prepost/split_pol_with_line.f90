@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> split polygon with line through two points (xa,ya) and (xb,yb)
  subroutine split_pol_with_line(xa,ya,xb,yb,idir)

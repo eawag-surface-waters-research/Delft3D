@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
       subroutine merge_domains(hyd, domain_hyd_coll)
 
       ! function : merge the domains, make pointers to final domain

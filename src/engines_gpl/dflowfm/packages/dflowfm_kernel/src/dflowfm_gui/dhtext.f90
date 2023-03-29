@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
     SUBROUTINE DHTEXT(VAL,XD,YD,ZD)
       use gridoperations

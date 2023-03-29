@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine allocateandset1Dnodexyarrays( n )          ! only for plotting ....
  use m_netw
