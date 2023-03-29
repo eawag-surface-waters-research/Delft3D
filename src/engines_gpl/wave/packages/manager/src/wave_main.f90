@@ -40,6 +40,7 @@ module wave_main
    use wave_data
    use wave_mpi
    use meteo
+   use dwaves_version_module
 
    implicit none
 
