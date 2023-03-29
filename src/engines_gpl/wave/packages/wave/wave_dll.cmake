@@ -31,9 +31,9 @@ if (WIN32)
                                 netcdff
                                 triangle_c
                                 swan
-                                )
+                                ) 
 
-    oss_include_libraries(${library_name} ${library_dependencies})
+    oss_include_libraries(${library_name} library_dependencies)
     target_link_libraries(${library_name} ${library_dependencies})
 
     include_directories(${mpi_include_path})
@@ -46,7 +46,7 @@ if (WIN32)
                             "${checkout_src_root}/third_party_open/pthreads/bin/x64"
                             "${mpi_library_path}")
 
-    target_link_libraries(${library_name}
+    target_link_libraries(${library_name}                                                   
                             "pthreadVC2.lib"
                             "netcdf.lib"
                             "${mpi_fortran_library}")
@@ -81,7 +81,7 @@ if(UNIX)
                                 swan
                                 esmfsm
                                 )
-
+                                
     oss_include_libraries(${library_name} library_dependencies)
 
     target_link_libraries(${library_name}
@@ -90,10 +90,10 @@ if(UNIX)
          PkgConfig::NETCDF_FTN)
 
     include_directories(${mpi_include_path})
-
+    
     message(STATUS "netcdf lib dir is ${NETCDF_LIBRARY_DIRS}")
     target_link_directories(${library_name} PRIVATE ${NETCDF_LIBRARY_DIRS})
-
+    
     #target_link_options(${library_name} PRIVATE ${openmp_flag})
     set_property(TARGET ${library_name} PROPERTY LINKER_LANGUAGE Fortran)
 
@@ -112,9 +112,9 @@ set(install_dir ${CMAKE_BINARY_DIR})
 set(build_dir ${CMAKE_BINARY_DIR})
 
 post_build_target (${library_name}
-                   ${install_dir}
-                   ${build_dir}
-                   ${checkout_src_root}
+                   ${install_dir} 
+                   ${build_dir} 
+                   ${checkout_src_root} 
                    ${library_name})
 
 install(TARGETS ${library_name} DESTINATION lib)
