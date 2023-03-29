@@ -35,8 +35,8 @@ subroutine incrbc(timsec    ,j         ,nmmaxj    ,nmax      ,norow     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Determine from the incoming signals the coefficients for the Riemann Boundary 

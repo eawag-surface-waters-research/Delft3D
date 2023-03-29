@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> output illegal cells to polygon file
 subroutine write_illegal_cells_to_pol(jausekc)

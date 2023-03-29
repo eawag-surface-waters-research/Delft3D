@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !>   write an error-message to the log-file and GUI
       SUBROUTINE QNERROR(W1,W2,W3)

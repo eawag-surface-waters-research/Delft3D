@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Fourier Analysis, copied from Delft3D:
 !! Opens and reads .fou file (md_foufile, specified in the mdu)

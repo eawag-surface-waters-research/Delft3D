@@ -25,8 +25,8 @@ subroutine dimtrt(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Reads the dimensions ntrt, nttaru, nttarv
 ! Initializes nroupa

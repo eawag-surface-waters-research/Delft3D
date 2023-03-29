@@ -21,8 +21,8 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
 ! maptonetcdf.f90 --
 !      Program to convert a traditional binary map file into a NetCDF map file

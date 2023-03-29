@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> converts UTM coords to lat/long.  Equations from USGS Bulletin 1532
 !! East Longitudes are positive, West longitudes are negative.

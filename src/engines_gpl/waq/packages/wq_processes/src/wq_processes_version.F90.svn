@@ -25,7 +25,7 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 !  $Id: io_netcdf_version.F90.svn 6659 2016-10-18 09:04:07Z dam_ar $
-!  $HeadURL$
+!  
 
 module wq_processes_version_module
 

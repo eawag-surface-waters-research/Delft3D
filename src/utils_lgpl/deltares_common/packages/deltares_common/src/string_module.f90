@@ -25,8 +25,8 @@ module string_module
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Various string processing routines
@@ -92,7 +92,7 @@ module string_module
           !
           !! executable statements ---------------------------------------------------
           !
-          call addmessage(messages,'$Id$')
+          call addmessage(messages,'')
           call addmessage(messages,'$URL$')
       end subroutine string_module_info
 

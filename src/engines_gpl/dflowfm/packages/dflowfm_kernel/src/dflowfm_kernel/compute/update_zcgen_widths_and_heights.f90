@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Computes and sets the widths and gate lower edge levels on each of the flow links
 !! crossed by a general structure (gate/weir/true genstru).

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine einstein_garcia(da,rs,dj1,dj2)
 use m_einstein_garcia

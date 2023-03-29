@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> compute edge grow velocities, grow factors and number of grid layers in the subintervals
 subroutine comp_edgevel(mc, edgevel, dgrow1, nfac1, ierror)

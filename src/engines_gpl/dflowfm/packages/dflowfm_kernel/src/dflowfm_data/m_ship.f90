@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 module m_ship
  integer                       :: nshiptxy = 0, iniship                             !< nr of ships / initialised 0,1

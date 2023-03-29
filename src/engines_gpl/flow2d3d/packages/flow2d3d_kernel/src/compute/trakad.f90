@@ -27,8 +27,8 @@ subroutine trakad(nmmax     ,kmax      ,kcs       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes KADU/V values for transport routines

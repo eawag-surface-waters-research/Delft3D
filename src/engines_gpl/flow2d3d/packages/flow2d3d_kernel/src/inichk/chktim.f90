@@ -30,8 +30,8 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itfinish  , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: checks various output times

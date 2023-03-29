@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 ! update overlapping ghost-parts of matrix
  subroutine update_matrix(ierror)

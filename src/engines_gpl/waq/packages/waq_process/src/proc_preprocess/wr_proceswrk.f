@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
       subroutine wr_proceswrk( lurep , procesdef, nodef , defaul, idpnw ,
      +                         ivpnw , dsto     , vsto  , locnam, nopred,

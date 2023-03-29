@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine minmxnds()
  use unstruc_display                                                    ! bepaal minimum en maximum van znod in viewing area

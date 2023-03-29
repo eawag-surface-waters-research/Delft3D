@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> get number of subtimesteps and delta subtimesteps
 subroutine get_ndeltasteps()

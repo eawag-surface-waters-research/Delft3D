@@ -29,8 +29,8 @@ subroutine brkbed(kmxdt     ,kmxt      ,np        ,nfreqs    ,atg       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Bracketing ANGLE of horizontal IW wave number

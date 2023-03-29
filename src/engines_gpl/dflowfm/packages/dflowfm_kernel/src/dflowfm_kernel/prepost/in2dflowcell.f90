@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine in2Dflowcell(xp,yp,k)                      ! is this point in a 2Dflowcell
 

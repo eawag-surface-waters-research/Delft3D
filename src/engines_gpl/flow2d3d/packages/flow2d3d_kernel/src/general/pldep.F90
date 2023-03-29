@@ -25,8 +25,8 @@ subroutine pldep
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Contains platform dependent code:
 ! - On w32:

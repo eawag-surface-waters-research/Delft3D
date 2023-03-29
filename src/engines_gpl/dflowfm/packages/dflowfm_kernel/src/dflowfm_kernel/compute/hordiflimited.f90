@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 double precision function hordiflimited(LL,L,rho_,nx)  ! used to compute a strict horizontal gradient see vkester,stelling 1994
 use m_flow

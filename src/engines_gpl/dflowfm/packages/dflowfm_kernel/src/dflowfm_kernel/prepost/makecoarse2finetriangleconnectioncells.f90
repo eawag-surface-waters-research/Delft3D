@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   SUBROUTINE MAKECOARSE2FINETRIANGLECONNECTIONCELLS()
   use m_netw

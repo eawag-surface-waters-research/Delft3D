@@ -32,8 +32,8 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Initialises the grid and process

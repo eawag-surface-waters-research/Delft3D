@@ -26,8 +26,8 @@ subroutine ksieta2xy(mmax    ,nmaxus    ,kcs      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Rotate the vector components from (ksi-eta)-coordinates 

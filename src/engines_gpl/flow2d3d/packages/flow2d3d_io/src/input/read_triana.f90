@@ -25,8 +25,8 @@ subroutine read_triana(lundia    ,error     ,kc       ,statns    ,nto        ,gd
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: compose FLOW boundary conditions from cross ref

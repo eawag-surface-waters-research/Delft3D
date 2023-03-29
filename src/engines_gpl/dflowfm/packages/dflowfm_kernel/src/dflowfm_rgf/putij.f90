@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE PUTIJ(X,XH,MMAX,NMAX,MNMAX,I1,I2,J1,J2)
       implicit none

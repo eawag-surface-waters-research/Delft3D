@@ -26,8 +26,8 @@ subroutine layerdep(dep   , thick, kmax, nm    , dp    , wlev, &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Calculate depth of all layers

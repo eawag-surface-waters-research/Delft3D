@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Finds indices of netcells that relate to structures.
 !! The indices will be used when partitioning the mesh with METIS, by giving a special weight on the netcells.

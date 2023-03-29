@@ -27,8 +27,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine flgsfm( n, ng, L, firstiter, jarea)
 use m_flowgeom

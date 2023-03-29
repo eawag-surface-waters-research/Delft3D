@@ -25,8 +25,8 @@ module swan_input
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! WAVE-GUI version number dependencies:
@@ -369,6 +369,7 @@ module swan_input
 
     contains
 !
+!
 !==============================================================================
 subroutine dealloc_swan(sr)
    implicit none
@@ -639,21 +640,20 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     sr%nonstat_interval = -999.0
     parname  = ''
        
-       !    REMOVE checks for quality of INPUTTemplateFile from update_swan_inp? (it is done twice)
     if(swan_run%inputtemplatefile /= '') then
-        ! Read ModSim from SWAN INPUT file when using a template
+    ! Read ModSim from SWAN INPUT file when using a template
         open (newunit=old_input, file = swan_run%inputtemplatefile, form = 'formatted', status = 'old',iostat=ierr)
         if(ierr /= 0) then
-        write(*,'(2a)') '*** ERROR: Unable to find file ',trim(swan_run%inputtemplatefile)
-        close(old_input)
-        call wavestop(1, 'Unable to find file '//trim(swan_run%inputtemplatefile))
+            write(*,'(2a)') '*** ERROR: Unable to find file ',trim(swan_run%inputtemplatefile)
+            close(old_input)
+            call wavestop(1, 'Unable to find file '//trim(swan_run%inputtemplatefile))
         endif
         
         read(old_input,'(a)',iostat=ierr) rec
         if (ierr /= 0) then
-        write(*,'(2a)') '*** ERROR: Unable to read file ',trim(swan_run%inputtemplatefile)
-        close(old_input)
-        call wavestop(1, 'Unable to read file '//trim(swan_run%inputtemplatefile))
+            write(*,'(2a)') '*** ERROR: Unable to read file ',trim(swan_run%inputtemplatefile)
+            close(old_input)
+            call wavestop(1, 'Unable to read file '//trim(swan_run%inputtemplatefile))
         endif
         do while (ierr == 0) 
             loc_tag = index(rec, 'MODE ')
@@ -2284,6 +2284,8 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
 999 continue
 end subroutine read_keyw_mdw
 !
+!
+!==============================================================================
 subroutine handle_errors_mdw(sr)
     implicit none
     type(swan_type)             :: sr
@@ -2362,12 +2364,12 @@ subroutine update_swan_inp(filnam,itide,nttide,calccount,inest,sr,wavedata)
 !
 ! Local variables
 !
-    integer           :: old_input
-    integer           :: new_input
-    integer           :: loc_tag
-    integer           :: ierr
-    character(256)    :: rec
-    character(256)    :: line
+    integer                     :: old_input
+    integer                     :: new_input
+    integer                     :: loc_tag
+    integer                     :: ierr
+    character(256)              :: rec
+    character(256)              :: line
     character(15)               :: tbegc
     character(15)               :: tendc
     character(15), external     :: datetime_to_string
@@ -4091,7 +4093,8 @@ end subroutine outputCurvesFromFile
 
 end subroutine write_swan_inp
 !
-!===============================================================================
+!
+!==============================================================================
 subroutine create_hotfile_line(fname,inest,line,sr,wavedata)
     use precision_basics
     use wave_data
@@ -4118,22 +4121,20 @@ subroutine create_hotfile_line(fname,inest,line,sr,wavedata)
     ! hotfile= true: use hotfile
     ! modsim = 2   : quasi-stationary
     ! modsim = 3   : non-stationary
+    ! 
+    if (sr%modsim == 2) then 
+        ! quasi-stationary
+        sr%writehottime = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)
+    elseif (sr%modsim == 3) then
+        ! non-stationary 
+        sr%writehottime = datetime_to_string(wavedata%time%refdate, wavedata%time%calctimtscale* real(wavedata%time%tscale,hp))
+    else
+    endif
     !
-    !if(sr%hotfile) then 
-       if (sr%modsim == 2) then 
-           ! quasi-stationary
-           sr%writehottime = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)
-       elseif (sr%modsim == 3) then
-          ! non-stationary 
-           sr%writehottime = datetime_to_string(wavedata%time%refdate, wavedata%time%calctimtscale* real(wavedata%time%tscale,hp))
-       else
-       endif
-       !
-       ! line to ensure that SWAN is going to produce a hotfile
-       !
-       write (fname,'(a,i0,5a)') 'hot_', inest, '_', trim(sr%writehottime(1:8)), '_', trim(sr%writehottime(10:15)), '.nc'
-       line = "SPEC 'COMPGRID' RELATIVE '" // trim(fname) // "' MDGRID"
-    !endif
+    ! line to ensure that SWAN is going to produce a hotfile
+    !
+    write (fname,'(a,i0,5a)') 'hot_', inest, '_', trim(sr%writehottime(1:8)), '_', trim(sr%writehottime(10:15)), '.nc'
+    line = "SPEC 'COMPGRID' RELATIVE '" // trim(fname) // "' MDGRID"
     
     
     
@@ -4141,7 +4142,8 @@ subroutine create_hotfile_line(fname,inest,line,sr,wavedata)
     
 end subroutine create_hotfile_line
 !
-!===============================================================================
+!
+!==============================================================================
 subroutine create_hotstart_line(inest,fname,line,sr)
     implicit none
     
@@ -4185,7 +4187,8 @@ subroutine create_hotstart_line(inest,fname,line,sr)
 
 end subroutine create_hotstart_line
 !
-!===============================================================================
+!
+!==============================================================================
 subroutine adjustinput(sr)
     use properties
     implicit none
@@ -4245,7 +4248,9 @@ subroutine adjustinput(sr)
     enddo
     !
 end subroutine adjustinput
-
+!
+!
+!==============================================================================
 !> pointname is pntfilnam without path, spaces and extension
 function get_pointname(pntfilnam) result (pointname)
    character(len=*), intent(in) :: pntfilnam  !< input filename

@@ -27,8 +27,8 @@ subroutine wrsedd(lundia    ,error     ,mmax      ,nmaxus    ,irequest  , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the time varying data for the bedforms to the sediment

@@ -25,8 +25,8 @@ subroutine write_wave_grid_netcdf (i_grid, sg, gridname, filename)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !  Write SWAN grid to a temporary NetCDF file, to be used by ESMF_RegridWeightsGen

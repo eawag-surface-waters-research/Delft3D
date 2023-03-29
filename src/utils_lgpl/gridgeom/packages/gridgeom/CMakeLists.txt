@@ -48,7 +48,8 @@ if (WIN32)
 endif(WIN32)
 
 # Set additional compilation properties, specific for Debug mode
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointers_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exception_flag}>")
 
 # Create the folder structure in vfproj
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files} ${fortran_version_file})
@@ -87,7 +88,8 @@ if (WIN32)
 endif(WIN32)
 
 # Set additional compilation properties, specific for Debug mode
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointers_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exception_flag}>")
 
 # Create the folder structure in vfproj
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${src_path}/gridgeom_api.F90)
@@ -100,14 +102,15 @@ set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/gridgeom)
 if(WIN32)
     if (CMAKE_GENERATOR MATCHES "Visual Studio") # for visual studio
       SET(library_renamed ${CMAKE_BINARY_DIR}/gridgeom/$<CONFIG>/gridgeom.dll)
+      ADD_CUSTOM_COMMAND(TARGET gridgeom_dll POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E rename
+                       $<TARGET_FILE:${library_name}>
+                       ${library_renamed}
+                   COMMENT "Renaming '${library_name}' library to '${library_renamed}'")
     else() # for Ninja generator on Windows
       SET(library_renamed ${CMAKE_BINARY_DIR}/gridgeom/gridgeom.dll)
     endif()
-    ADD_CUSTOM_COMMAND(TARGET gridgeom_dll POST_BUILD
-                       COMMAND ${CMAKE_COMMAND} -E rename
-                           $<TARGET_FILE:${library_name}>
-                           ${library_renamed}
-                       COMMENT "Renaming '${library_name}' library to '${library_renamed}'")
+
 endif(WIN32)
 
 if(UNIX)
@@ -129,5 +132,7 @@ if(WIN32)
 
 endif(WIN32)
 
-# Install the shared library in the lib folder with rename
-install(PROGRAMS $<TARGET_FILE:${library_name}> RENAME ${library_renamed} DESTINATION lib)
+if ((CMAKE_GENERATOR MATCHES "Visual Studio") OR UNIX)
+    # Install the shared library in the lib folder with rename
+    install(PROGRAMS $<TARGET_FILE:${library_name}> RENAME ${library_renamed} DESTINATION lib)  
+endif()

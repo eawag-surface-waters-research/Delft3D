@@ -28,8 +28,8 @@ subroutine wrmorst(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the morphology statistics

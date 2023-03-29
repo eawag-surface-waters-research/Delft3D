@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> add polygon and fill cutcell mask with "kc"
    subroutine store_cutcellmasks(numk, kc, numL, Lmask, xmL, ymL)

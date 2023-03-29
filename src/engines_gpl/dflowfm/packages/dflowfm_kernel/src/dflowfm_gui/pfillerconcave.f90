@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
     SUBROUTINE PFILLERconcave(X,Y,N_,NCOL,NCLR)
     use unstruc_opengl

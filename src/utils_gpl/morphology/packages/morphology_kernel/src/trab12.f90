@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !> computes sediment transport according to the bed load transport formula of Soulsby;
 !! first implementation assumes transport in current direction only.
 subroutine trab12(u         ,v         ,hrms      ,h         ,tp        , &

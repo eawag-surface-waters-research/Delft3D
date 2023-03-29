@@ -31,8 +31,8 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Reads numerical parameters ITER, DRYFLC and

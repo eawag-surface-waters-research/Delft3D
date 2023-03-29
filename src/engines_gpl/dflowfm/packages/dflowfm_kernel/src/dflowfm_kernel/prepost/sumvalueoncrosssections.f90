@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> compute cross-section data, summed across all flow links for each cross-section.
 !! In parallel models, only summed across flow links in own domain.

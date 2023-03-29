@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Sets the bob values on the flow links that are overridden by a fixed weir.
 !! This is based on the interpolated pliz values from the fixed weir definition.

@@ -31,8 +31,8 @@ subroutine inicut(lundia    ,error     ,runid     ,nmax      ,mmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Reads the file that defines stair case (closed) boundary

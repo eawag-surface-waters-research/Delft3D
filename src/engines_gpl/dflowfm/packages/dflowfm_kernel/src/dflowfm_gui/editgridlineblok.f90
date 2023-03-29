@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE EDITGRIDLINEBLOK(MODE,NFLD,KEY)
       use unstruc_colors

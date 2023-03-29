@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !< set jaopengl module variable
 subroutine iset_jaopengl(jaopengl_loc)

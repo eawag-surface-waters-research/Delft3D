@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 ! ftnunit_store.f90 --
 !     Module to store and retrieve arrays of data for the
 !     "ftnunit" framework:

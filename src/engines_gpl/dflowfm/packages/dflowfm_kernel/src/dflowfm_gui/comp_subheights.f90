@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> compute the height of the subintervals of grid layers on a cross spline, w.r.t. a center spline
 subroutine comp_subheights(is, Lorient, num, xs, ys, ncs, ics, t, cosphi, nsubL, nsubR, hL, hR)

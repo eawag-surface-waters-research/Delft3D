@@ -34,8 +34,8 @@ subroutine intpol(kmax      ,kmxdt     ,kmxt      ,h0        ,zeta      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Interpolation on vertical profiles of:

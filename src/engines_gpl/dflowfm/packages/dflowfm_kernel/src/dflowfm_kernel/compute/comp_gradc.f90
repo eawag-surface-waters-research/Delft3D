@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> computer cell-centered gradient from cell-centered data
 !>   note: since we use wcx1 etc., it is assumed that normal components at the closed boundary are zero

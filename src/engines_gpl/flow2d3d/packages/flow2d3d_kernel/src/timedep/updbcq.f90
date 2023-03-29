@@ -26,8 +26,8 @@ subroutine updbcq(lunbcq    ,lundia    ,itbct     ,ito       ,nto       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the QH-rel. hydrodynamic BC FROM FILE

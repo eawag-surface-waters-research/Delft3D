@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE DISP3CAB(X,Y,Z,NCL,N,RCIR,NCOL,A,B)
       USE M_MISSING

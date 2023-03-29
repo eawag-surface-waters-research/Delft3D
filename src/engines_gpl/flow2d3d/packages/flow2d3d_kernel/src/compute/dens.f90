@@ -28,8 +28,8 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax       ,lstsci    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes water density from temperature and

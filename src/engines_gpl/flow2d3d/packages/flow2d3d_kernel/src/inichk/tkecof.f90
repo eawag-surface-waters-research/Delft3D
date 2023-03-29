@@ -26,8 +26,8 @@ subroutine tkecof(lturi     ,vonkar    ,sigdif    ,sigmol    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: initialises RTUR1 and RTU2D1

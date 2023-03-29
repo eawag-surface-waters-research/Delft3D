@@ -25,8 +25,8 @@ subroutine santoss_ripple(d50, uwc, uwt, delta, g, aw, rh, rl)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   The SANTOSS practical sand transport model, version 2.08  

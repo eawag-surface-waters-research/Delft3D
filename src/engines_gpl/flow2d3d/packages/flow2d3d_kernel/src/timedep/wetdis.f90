@@ -27,8 +27,8 @@ subroutine wetdis(i         ,isrc      ,jsrc      ,dp        ,xcor      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! NONE

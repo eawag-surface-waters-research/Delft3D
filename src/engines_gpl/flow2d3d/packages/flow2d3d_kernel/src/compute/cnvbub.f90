@@ -27,8 +27,8 @@ subroutine cnvbub(kmax    ,nsrcd     ,nsrc      ,nbub      ,nxbub    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! This routine converts the discharges of the sources (including bubble screens)
 ! to the new positions in the DISCH array.

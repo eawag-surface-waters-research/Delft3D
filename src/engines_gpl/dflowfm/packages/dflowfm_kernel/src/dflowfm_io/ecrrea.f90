@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> read from rfg grid file
       SUBROUTINE ECRREA(X,MMAX,NMAX,MC,NC,MRGF,HALF)

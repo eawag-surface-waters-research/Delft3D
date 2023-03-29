@@ -27,8 +27,8 @@ subroutine factor3d2d(kmax      ,aks       ,kmaxsd    ,sig       ,thick     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Determine conversion factor between reference concentration caks at aks and

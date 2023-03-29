@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 module m_partparallel
    double precision, dimension(:,:), allocatable :: worksnd, workrecv   ! work arrays for sending/receiving data

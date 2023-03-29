@@ -31,8 +31,8 @@ subroutine z_cucbp_nhfull(kmax      ,norow     ,icx       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: For the fully non-hydrostatic approach, boundary 
