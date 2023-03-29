@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine rectan2D(hpr, br, hr, area, width, japerim, perim)
 use m_flow, only : slotw1D

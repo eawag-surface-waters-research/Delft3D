@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 function flow_initwaveforcings_runtime() result(retval)              ! This is the general hook-up to wave conditions
 

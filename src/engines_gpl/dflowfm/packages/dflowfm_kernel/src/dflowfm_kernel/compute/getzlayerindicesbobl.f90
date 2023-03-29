@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine getzlayerindicesbobL(n,nlayb,nrlay,bobL)
  use m_flowgeom

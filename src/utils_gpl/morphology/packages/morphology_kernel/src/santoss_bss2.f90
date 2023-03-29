@@ -28,8 +28,8 @@ subroutine santoss_bss2(sw_effects, as_effects, g, d, rhow, rhos, delta, &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   The SANTOSS practical sand transport model, version 2.08  

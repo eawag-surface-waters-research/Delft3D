@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE CLOSETO1Dnetlink(XP1,YP1,N1,XN1,YN1,DIST,kn3channelonly) !
 

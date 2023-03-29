@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    SUBROUTINE read_restart_from_map(filename,ierr)
    use unstruc_netcdf, only : unc_read_map_or_rst

@@ -25,8 +25,8 @@ function newlun()
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! This routine gets an available unit specifier. It
 ! returns an error if it didn't succeed.

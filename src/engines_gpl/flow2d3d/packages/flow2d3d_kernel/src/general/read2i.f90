@@ -27,8 +27,8 @@ subroutine read2i(lunmd     ,error     ,keyw      ,newkw     ,nlook     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads NLOOK integer values from a record of MD-

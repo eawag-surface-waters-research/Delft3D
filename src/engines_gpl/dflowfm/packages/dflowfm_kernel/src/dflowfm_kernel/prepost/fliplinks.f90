@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> flip links in quads, when appropriate
 !>   note: we look for a local optimum, which is not necessarily the global one

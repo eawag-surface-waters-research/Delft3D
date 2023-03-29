@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       !> Operates on active grid from m_grid directly!
       SUBROUTINE SHIFXY(IS,     JS,     MP,     NP        )

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !! Initialise trachytope module containing FM data for trachytopes.
 !! Note that arrays are dimensioned on the number of net links

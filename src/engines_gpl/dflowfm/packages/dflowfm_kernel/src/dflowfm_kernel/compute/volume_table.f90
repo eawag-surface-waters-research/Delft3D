@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! $Id: volume_table.f90 142608 2023-03-01 15:48:13Z buwalda $
+! : https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dflowfm_kernel/compute/volume_table.f90 $
 
 !> Module for using volume tables at 1d nodes for the computation of the total volume of water in a node.
 module m_VolumeTables
@@ -350,7 +350,7 @@ module m_VolumeTables
       ! determine the highest level for the storage nodes
       call calculateHighestLevelOnStorageNodes(vltb)
       
-      call initializeVltb(vltb, ndx1d)
+      call initializeVltb(vltb)
 
       call addStorageToVltb(vltb)
 
@@ -414,14 +414,13 @@ module m_VolumeTables
    !> ** number of levels
    !> ** number of summerdikes
    !> * allocate the arrays in the volume tables.
-   subroutine initializeVltb(vltb, ndx1d)
+   subroutine initializeVltb(vltb)
       use m_flowparameters
       use m_flowgeom
       use unstruc_channel_flow
       
       type(t_voltable), dimension(:), intent(inout) :: vltb    !< Volume tables.
-      integer,                        intent(in   ) :: ndx1d   !< Number of 1d nodes.
-
+      
       integer :: n, nod
       integer :: LL, L
       integer :: index
@@ -567,7 +566,7 @@ module m_VolumeTables
       type(t_voltable), dimension(:),     intent(in   ) :: vltb         !< Volume tables on nodes.
       type(t_voltable), dimension(:, :),  intent(inout) :: vltbOnLinks  !< Volume tables on links.
 
-      integer :: n, ndx1d, nod, L, LL, numlinks
+      integer :: n, nod, L, LL, numlinks
       integer :: Lindex, dir
 
       do n = 1, ndx1d

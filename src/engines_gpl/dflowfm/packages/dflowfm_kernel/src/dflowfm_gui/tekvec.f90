@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE TEKVEC(NSC,X,Y,U,V,X1,X2,Y1,Y2,NCOL,TITLE)
       implicit none

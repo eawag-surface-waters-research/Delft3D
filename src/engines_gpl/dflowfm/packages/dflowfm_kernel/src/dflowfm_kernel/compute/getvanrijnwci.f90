@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine getvanrijnwci(LL, umod, u2dh, taubpuLL, z0urouL)
    use m_flow

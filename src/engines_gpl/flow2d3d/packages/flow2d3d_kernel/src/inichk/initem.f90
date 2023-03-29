@@ -25,8 +25,8 @@ subroutine initem(runid, cyclic, timnow, ktemp, temint, patm, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the time dependent data for heat models

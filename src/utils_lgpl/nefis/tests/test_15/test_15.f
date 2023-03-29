@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
       program test15
       INTEGER ntimes, mmax, nmax, kmax, nsrc
       parameter (ntimes = 3,

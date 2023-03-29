@@ -27,8 +27,8 @@ subroutine compvel(wavetime ,layer_model ,flowVelocityType ,kfu       ,kfv     ,
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--pseudo code and references--------------------------------------------------

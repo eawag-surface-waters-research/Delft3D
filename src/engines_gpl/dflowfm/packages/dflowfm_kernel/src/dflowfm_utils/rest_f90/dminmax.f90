@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE DMINMAX(      X, MXLAN,   XMIN,   XMAX, MAXLAN)
       USE M_MISSING

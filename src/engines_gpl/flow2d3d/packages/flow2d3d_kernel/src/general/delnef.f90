@@ -25,8 +25,8 @@ subroutine delnef(filnam, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Delete NEFIS and NetCDF output files if they exist

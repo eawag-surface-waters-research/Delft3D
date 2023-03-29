@@ -30,8 +30,8 @@ subroutine chkphy(lundia     ,error     ,salin     ,temp      ,wind      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Checks all physical coefficients

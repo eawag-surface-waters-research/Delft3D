@@ -25,8 +25,8 @@ subroutine checkmeteoresult(success, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Handle the occurence of an error generated in the meteo module

@@ -26,8 +26,8 @@ subroutine qkwbn(qxkw      ,cgc       ,kfu       ,irocol    ,norow     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Transport velocities at boundary points are set.

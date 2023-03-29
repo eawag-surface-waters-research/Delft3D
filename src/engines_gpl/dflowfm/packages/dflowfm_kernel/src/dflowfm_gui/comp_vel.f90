@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> compute growth velocity vectors at grid points
 subroutine comp_vel(mc, xc, yc, edgevel, vel)

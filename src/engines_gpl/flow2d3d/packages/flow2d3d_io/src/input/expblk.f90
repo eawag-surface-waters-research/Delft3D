@@ -26,8 +26,8 @@ subroutine expblk(lundia    ,ittaru    ,rttaru    ,nttaru    ,iblbeg    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Expands block trachytope data to
 ! N, M data

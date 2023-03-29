@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine reallocsrc(n)
  use m_transport, only: NUMCONST, ISALT, ITEMP, ISED1, ITRA1, itrac2const

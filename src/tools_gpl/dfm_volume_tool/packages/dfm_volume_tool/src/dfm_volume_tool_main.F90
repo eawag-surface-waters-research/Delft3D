@@ -27,15 +27,15 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> DFMOUTPUT - A postprocessing tool for output files from D-Flow Flexible Mesh.
 !! Combines several commands/operations into a single program.
 !!
 !! Available commands:
 !!
-!! $Id$
+!! 
 program dfm_volume_tool
 !-----------------------------------------------------------------------------------------------------------------------------------
 

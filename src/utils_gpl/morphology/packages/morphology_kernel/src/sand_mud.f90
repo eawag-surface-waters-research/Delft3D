@@ -26,8 +26,8 @@ subroutine sand_mud(nfrac, E, frac, mudfrac, sedtyp, pmcrit)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes erosion velocities based

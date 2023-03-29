@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>    plot a statusbar in the GUI
       SUBROUTINE READYY(TEXT,AF)

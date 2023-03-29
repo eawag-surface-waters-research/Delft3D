@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> Resets the current flow- and time-state, but keeps al active parameter settings.
  !! To be called upon flow_modelinit().

@@ -25,8 +25,8 @@ subroutine prhead(lunprt    ,header    ,nuprpg    ,nuprln    )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! NONE

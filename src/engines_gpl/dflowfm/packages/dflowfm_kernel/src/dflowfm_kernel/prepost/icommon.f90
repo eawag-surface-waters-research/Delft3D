@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> find common neighboring cell of two links (0: no cell found)
 integer function icommon(L1, L2)

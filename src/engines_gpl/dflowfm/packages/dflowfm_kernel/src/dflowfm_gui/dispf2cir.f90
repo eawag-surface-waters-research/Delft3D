@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE DISPF2cir(X,Y,N,Rcx,Rcy,NCOL)
       implicit none

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>  prescribe link-based aspect ratios in nets for mesh refinement (obsolete)
 subroutine orthonet_prescribe_aspect_net(smp_mu, idir, aspect)

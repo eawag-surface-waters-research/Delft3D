@@ -25,8 +25,8 @@ subroutine shearx(tau       ,nm        ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Adds extra bottom stress according to user input

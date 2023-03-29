@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       !> Draw a filled circle at current position.
       !! Filled means: one colour for inside, one colour for edge.

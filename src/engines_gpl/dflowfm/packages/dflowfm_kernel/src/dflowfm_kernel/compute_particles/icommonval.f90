@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> find common value of two-dimensional arrays i1 and i2
 !>   it is assumed there is at most one common value

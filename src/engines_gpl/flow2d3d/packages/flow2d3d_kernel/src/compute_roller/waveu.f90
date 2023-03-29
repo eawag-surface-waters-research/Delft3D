@@ -27,8 +27,8 @@ subroutine waveu(nmmax     ,kfs       ,sourw     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes wave energy dissipation terms due to breaking and bottom friction

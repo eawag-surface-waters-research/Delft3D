@@ -35,8 +35,8 @@ subroutine u_wmap(lundat    ,header    ,runid     ,itime     ,idate     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Example routine to write vertical eddy viscosity at

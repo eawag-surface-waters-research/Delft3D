@@ -26,8 +26,8 @@ subroutine strgrd ( icom, runid, mmax, nmax, mmaxgl, nmaxgl, &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Stores array ICOM for own subdomain in scratch file to be later used

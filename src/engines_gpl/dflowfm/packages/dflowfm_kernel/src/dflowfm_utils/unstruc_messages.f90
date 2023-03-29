@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 !> Info and error messages within Unstruc.
 !! Messages will be printed on stdout and the diagnostics file.
 !! A buffer 'msgbuf' is available to write to.

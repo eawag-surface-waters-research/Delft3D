@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   SUBROUTINE GAANWESTARTEN(L,K1,KN316,JASTART)
   USE M_NETW

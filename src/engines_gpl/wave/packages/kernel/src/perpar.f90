@@ -25,8 +25,8 @@ subroutine perpar(gamma0, factor, ier)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! This routine as used in Delft3D-WAVE is based on subroutine PERPAR in 

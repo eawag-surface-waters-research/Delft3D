@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE DISVALCOLORS(NUMCOL,N1,N2,N3,IC)
       USE M_DEVICES

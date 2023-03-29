@@ -28,8 +28,8 @@ subroutine drychk(idry      ,s1        ,qxk       ,qyk       ,icx       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: This subroutine checks for drying in water level

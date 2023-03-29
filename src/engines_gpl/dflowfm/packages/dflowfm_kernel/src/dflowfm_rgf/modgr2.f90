@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE MODGR2(     XH,     YH,      X,      Y, mmax, nmax,  MC,     NC,   NUMP)
       implicit none

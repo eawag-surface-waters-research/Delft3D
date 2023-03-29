@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> get left and right neighboring grid layer points
 subroutine get_LR(mc, xc, yc, i, iL, iR)

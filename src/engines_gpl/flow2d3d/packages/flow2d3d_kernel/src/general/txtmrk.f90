@@ -25,8 +25,8 @@ subroutine txtmrk(record    ,lrec      ,ibeg      ,iend      ,error     )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Searches a text in a string which begins and

@@ -43,7 +43,7 @@ implicit none
     character(*),  public, parameter :: mormerge_version      = mormerge_major//'.'//mormerge_minor//'.'//mormerge_revision//'.'//mormerge_build_number
     character(*),  public, parameter :: mormerge_version_full = 'Deltares, '//mormerge_program//' Version '//mormerge_version//', '//__DATE__//', '//__TIME__
     character(*),  public, parameter :: mormerge_version_id   = '@(#)'//mormerge_version_full
-    character(*),  public, parameter :: mormerge_source_code  = '@(#) $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/tools_gpl/mormerge/packages/mormerge/src/mormerge_version.F90.svn $'//char(0)
+    character(*),  public, parameter :: mormerge_source_code  = '@(#) : https://svn.oss.deltares.nl/repos/delft3d/trunk/src/tools_gpl/mormerge/packages/mormerge/src/mormerge_version.F90.svn $'//char(0)
 
 contains
 
@@ -67,7 +67,7 @@ contains
     subroutine get_mormerge_source(stringout)
         character(len=*), intent(out) :: stringout
         integer :: L
-        ! '@(#) $HeadURL: http://.../rootdir/src/tools_gpl/...'
+        ! '@(#) : http://.../rootdir/src/tools_gpl/...'
         !  ^1   ^6        ^16:              ^L
         L = index(mormerge_source_code, '/src/tools_gpl/mormerge')
         stringout = mormerge_source_code(16:L)

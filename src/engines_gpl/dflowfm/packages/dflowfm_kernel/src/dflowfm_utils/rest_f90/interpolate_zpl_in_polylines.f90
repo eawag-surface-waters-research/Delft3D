@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> linear interpolation of z-values in polylines
 subroutine interpolate_zpl_in_polylines()

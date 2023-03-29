@@ -27,8 +27,8 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Update meteo related items

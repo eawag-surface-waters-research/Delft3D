@@ -27,8 +27,8 @@ subroutine caldpu_dd(nmaxus ,mmax   ,kcs    ,kcu    ,kcv    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !     Correction for coupling points. Apply this only at the subdomain

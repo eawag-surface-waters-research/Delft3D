@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 module m_einstein_garcia              ! integral polynomial coefficients, (sedimentation engineering garcia table 2.5
 implicit none

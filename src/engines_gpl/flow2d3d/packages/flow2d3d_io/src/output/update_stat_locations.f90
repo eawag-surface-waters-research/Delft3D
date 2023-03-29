@@ -26,8 +26,8 @@ subroutine update_stat_locations(nostat    ,ndro      ,mndro     ,xydro     ,tim
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Updates the monitoring locations

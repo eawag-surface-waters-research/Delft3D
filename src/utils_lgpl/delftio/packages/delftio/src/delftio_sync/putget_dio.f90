@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
       subroutine putdio ( StreamName, DataSetName, first, dioOutSet )
 !     
 !     Created             : jan  2001 by J.v.Gils

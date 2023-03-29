@@ -27,8 +27,8 @@ subroutine bccor(j         ,nmmaxj    ,kmax      ,norow     ,icx       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Correction for discharge boundaries so that the incoming

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE ARROWSXYzfac(X0,Y0,UX,UY,VFAC,JW,zfac)
       implicit none

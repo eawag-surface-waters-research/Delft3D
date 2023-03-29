@@ -26,8 +26,8 @@ subroutine dimfou(lunmd     ,lundia    ,error     ,nrrec     ,filfou    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the dimension for fourier analysis output

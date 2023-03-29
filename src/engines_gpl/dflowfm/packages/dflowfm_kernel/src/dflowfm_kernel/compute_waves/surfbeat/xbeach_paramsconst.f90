@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 module m_xbeach_paramsconst
   integer, parameter :: TURB_NONE                   =  0

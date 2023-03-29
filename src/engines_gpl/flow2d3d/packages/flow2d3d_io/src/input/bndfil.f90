@@ -28,8 +28,8 @@ subroutine bndfil(lundia    ,error     ,kmax      ,lnto      ,lntof     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the following boundary definitions from the
