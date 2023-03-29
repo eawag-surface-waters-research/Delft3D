@@ -33,7 +33,6 @@ module bmi
 ! NONE
 !!--declarations----------------------------------------------------------------
   use iso_c_binding
-  use dwaves_version_module
 
   implicit none
 
@@ -89,11 +88,11 @@ subroutine get_version_string(c_version_string) bind(C, name="get_version_string
   character(kind=c_char), intent(out) :: c_version_string(MAXSTRLEN)
   !
   ! Local
-  character(len=MAXSTRLEN) :: full_version
+  character(len=MAXSTRLEN) :: version_full
   !
   ! Body
-  call getfullversionstring_dwaves(full_version) 
-  c_version_string = string_to_char_array(trim(full_version), len(trim(full_version)))
+  call getfullversionstring_WAVE(version_full) 
+  c_version_string = string_to_char_array(trim(version_full), len(trim(version_full)))
 end subroutine get_version_string
 !
 !
@@ -115,12 +114,12 @@ subroutine get_attribute(c_att_name, c_att_value) bind(C, name="get_attribute")
    case ('model_name'   )
       att_value = product_name
    case ('version')
-      call getfullversionstring_dwaves(att_value)
+      call getfullversionstring_WAVE(att_value)
       from = index(att_value,'Version ') + 8
       thru = index(att_value(from:len(versionstr)),',')-1
       att_value=att_value(from:from+thru-1)
    case ('author_name')
-      att_value = company
+      call getcompany_WAVE(att_value)
    end select
 
    c_att_value = string_to_char_array(trim(att_value), len(trim(att_value)))

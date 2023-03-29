@@ -36,7 +36,6 @@ subroutine write_wave_his_netcdf (sg, sof, n_swan_grids, i_swan, wavedata)
     use swan_flow_grid_maps
     use swan_input
     use netcdf
-    use dwaves_version_module
     !
     implicit none
 !
@@ -108,16 +107,19 @@ subroutine write_wave_his_netcdf (sg, sof, n_swan_grids, i_swan, wavedata)
     real(hp), dimension(:)  , allocatable       , save :: xcor
     real(hp), dimension(:)  , allocatable       , save :: ycor
     character(8)                                       :: cdate
+    character(256)                                     :: company
+    character(256)                                     :: companyurl
     character(10)                                      :: ctime
     character(5)                                       :: czone
     character(256)                                     :: filename
     character(256)                                     :: gridnam
     character(500)                                     :: line
+    character(256)                                     :: programname
     character(NAMLEN), dimension(:), allocatable, save :: statnam
     character(NAMLEN), dimension(:), allocatable, save :: statid
     character(100)                                     :: string
     character(50)                                      :: tabfil
-    character(256)                                     :: full_version
+    character(256)                                     :: version_full
     logical                                            :: formatok
 !
 !! executable statements -------------------------------------------------------
@@ -173,7 +175,10 @@ subroutine write_wave_his_netcdf (sg, sof, n_swan_grids, i_swan, wavedata)
           endif
        enddo
        !
-       call getfullversionstring_dwaves(full_version)
+       call getfullversionstring_WAVE(version_full)
+       call getprogramname_WAVE(programname)
+       call getcompany_WAVE(company)
+       call getcompanyurl_WAVE(companyurl)
        call date_and_time(cdate, ctime, czone)
        year  = wavedata%time%refdate / 10000
        month = (wavedata%time%refdate - year*10000) / 100
@@ -281,8 +286,8 @@ subroutine write_wave_his_netcdf (sg, sof, n_swan_grids, i_swan, wavedata)
        ! global attributes
        !
        ierror = nf90_put_att(idfile, nf90_global,  'institution', trim(company)); call nc_check_err(ierror, "put_att global institution", filename)
-       ierror = nf90_put_att(idfile, nf90_global,  'references', trim(company_url)); call nc_check_err(ierror, "put_att global references", filename)
-       ierror = nf90_put_att(idfile, nf90_global,  'source', trim(full_version)); call nc_check_err(ierror, "put_att global source", filename)
+       ierror = nf90_put_att(idfile, nf90_global,  'references', trim(companyurl)); call nc_check_err(ierror, "put_att global references", filename)
+       ierror = nf90_put_att(idfile, nf90_global,  'source', trim(version_full)); call nc_check_err(ierror, "put_att global source", filename)
        ierror = nf90_put_att(idfile, nf90_global,  'history', &
               'Created on '//cdate(1:4)//'-'//cdate(5:6)//'-'//cdate(7:8)//'T'//ctime(1:2)//':'//ctime(3:4)//':'//ctime(5:6)//czone(1:5)// &
               ', '//trim(product_name)); call nc_check_err(ierror, "put_att global history", filename)
