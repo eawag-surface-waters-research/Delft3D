@@ -87,7 +87,7 @@ function wave_main_init(mode_in, mdw_file) result(retval)
 !
    integer                :: n
    character(256)         :: full_version  !  Version nr. of the module of the current package
-   character(1024)        :: txthlp        !  Help var.
+   character(1024)        :: branch        !  Git branch containing the source code
    !
    ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
    ! Activate the following line
@@ -108,21 +108,12 @@ function wave_main_init(mode_in, mdw_file) result(retval)
    !
    full_version  = ' '
    call getfullversionstring_dwaves(full_version)
-   txthlp = deltares_common_source_code
-   n = index(txthlp,'/src/utils_lgpl') ! regular checkout with src and examples level
-   if (n==0) then
-       n = index(txthlp,'/utils_lgpl') ! reduced checkout with src and examples level
-   endif
-   if (n==0) then
-       txthlp = 'unknown source code location'
-   else
-       txthlp = txthlp(16:n-1)
-   endif
+   call getbranch_dwaves(branch)
    write (*,'(a)')
    write (*,'(80a1)') ('*', n = 1, 80)
    write (*,'(a)')    '***'
    write (*,'(2a)')   '*** ',trim(full_version)
-   write (*,'(2a)')   '***           built from : ', trim(txthlp)
+   write (*,'(2a)')   '***           built from : ', trim(branch)
    write (*,'(a)')    '***'
    write (*,'(2a)')   '***           runid      : ', trim(mdw_file)
    write (*,'(a)')    '***'

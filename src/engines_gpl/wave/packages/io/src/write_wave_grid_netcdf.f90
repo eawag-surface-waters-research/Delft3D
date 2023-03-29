@@ -311,7 +311,7 @@ subroutine write_wave_grid_netcdf (i_grid, sg, gridname, filename)
     ierror = nf90_put_att(idfile, nf90_global,  'source', trim(full_version)); call nc_check_err(ierror, "put_att global source", filename)
     ierror = nf90_put_att(idfile, nf90_global,  'history', &
            'Created on '//cdate(1:4)//'-'//cdate(5:6)//'-'//cdate(7:8)//'T'//ctime(1:2)//':'//ctime(3:4)//':'//ctime(5:6)//czone(1:5)// &
-           ', '//trim(component_name)); call nc_check_err(ierror, "put_att global history", filename)
+           ', '//trim(product_name)); call nc_check_err(ierror, "put_att global history", filename)
     if (.not.sg%sferic) then
        ierror = nf90_put_att(idfile, nf90_global,  'gridType', 'unstructured'); call nc_check_err(ierror, "put_att global gridType", filename)
        ierror = nf90_put_att(idfile, nf90_global,  'version', '0.9'); call nc_check_err(ierror, "put_att global version", filename)
