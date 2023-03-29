@@ -36,9 +36,8 @@ LANGUAGE LANG_DUTCH, SUBLANG_DUTCH
 #ifdef BRANCH
 #define DESCRIPTION BRANCH
 #else
-#define DESCRIPTION "Processor Water Quality Modelling Engine (1D,2D,3D)\0"
+#define DESCRIPTION "Waq process library export tool\0"
 #endif
-
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION MAJOR,MINOR
  FILEFLAGSMASK 0x3fL
@@ -62,9 +61,9 @@ BEGIN
             VALUE "InternalName", COMPANY_NAME
             VALUE "LegalCopyright", LEGAL_COPYRIGHT
             VALUE "LegalTrademarks", LEGAL_TRADEMARKS
-            VALUE "OriginalFilename", "delwaq2.exe\0"
+            VALUE "OriginalFilename", "waqpb_export.exe\0"
             VALUE "PrivateBuild", "-\0"
-            VALUE "ProductName", PRODUCT_NAME
+            VALUE "ProductName", "Waqpb export\0"
             VALUE "ProductVersion", VERSION_FULL
             VALUE "SpecialBuild", "-\0"
         END

@@ -2,11 +2,8 @@
 set(src_path src) 
 
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to the location of where this CMakeLists file is defined in.
-set(ini_version_file "${CMAKE_CURRENT_SOURCE_DIR}/include/version_number.ini")
 set(fortran_version_file "${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/gridgeom_version.F90")
-
-# Generate the F90 version file
-generate_version_files(${fortran_version_file} ${ini_version_file})
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
 
 # Gather source files
 get_fortran_source_files(${src_path} source_files)
@@ -15,16 +12,11 @@ list(REMOVE_ITEM source_files ${CMAKE_CURRENT_SOURCE_DIR}/${src_path}/gridgeom_a
 
 set(library_name gridgeom)
 add_library(${library_name} ${source_files}
-                            ${fortran_version_file}
-                            ${ini_version_file})
+                            ${fortran_version_file})
 
 set_source_files_properties(${fortran_version_file}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
-# Add prebuild events
-prebuild_version_number(${library_name} ${fortran_version_file} 
-                                        ${checkout_src_root} 
-                                        ${ini_version_file})
 
 # Set the dependencies of this library
 set(oss_dependencies    deltares_common
@@ -33,6 +25,8 @@ set(oss_dependencies    deltares_common
                         kdtree2
                         triangle_c)
 oss_include_libraries(${library_name} oss_dependencies)
+
+target_include_directories(${library_name}  PRIVATE ${version_include_dir})
 
 if (UNIX)
     message(STATUS "Setting oss_target_link_libraries in Unix")

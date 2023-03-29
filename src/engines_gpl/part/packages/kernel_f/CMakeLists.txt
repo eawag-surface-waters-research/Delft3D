@@ -12,6 +12,7 @@ set(oss_dependencies_general deltares_common
                              part_data_f
                              part_utils_f
                              part_io_f
+                             waq_utils_f
                              gridgeom
                              kdtree_wrapper
                              kdtree2

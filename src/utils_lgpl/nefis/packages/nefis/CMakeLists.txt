@@ -4,7 +4,6 @@ set(src_path src)
 # Set version file variables
 # These variables are necessary when the version files need to be generated and be present for configuring the project file.
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to the location of where this CMakeLists file is defined in.
-set(ini_version_file "${CMAKE_CURRENT_SOURCE_DIR}/include/version_number.ini")
 set(header_version_file "${CMAKE_CURRENT_SOURCE_DIR}/include/nefis_version.h")
 set(rc_version_file "${CMAKE_CURRENT_SOURCE_DIR}/include/nefis_version.rc")
 
@@ -18,9 +17,6 @@ if (UNIX)
     add_definitions(-DHAVE_LSEEK64)
 endif(UNIX)
 
-# Generate the version files
-generate_version_files(${header_version_file} ${ini_version_file})
-generate_version_files(${rc_version_file} ${ini_version_file})
 
 # Gather source files
 file(GLOB headers include/*.h)
@@ -34,13 +30,6 @@ add_library(${library_name} ${headers}
                             ${source}
                             ${ini_version_file})
 
-# Define prebuild events
-prebuild_version_number(${library_name} ${header_version_file} 
-                                        ${checkout_src_root} 
-                                        ${ini_version_file})
-prebuild_version_number(${library_name} ${rc_version_file} 
-                                        ${checkout_src_root} 
-                                        ${ini_version_file})
 
 # Set additional dependencies
 target_include_directories(${library_name}  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")

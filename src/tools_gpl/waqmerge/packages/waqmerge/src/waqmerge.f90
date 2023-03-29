@@ -27,6 +27,7 @@ program waqmerge
       use hydmod
       use hyd_waqgeom_old
       use m_alloc
+      use delwaq_version_module
 
       implicit none
 
@@ -67,7 +68,7 @@ program waqmerge
       ! Version string
 
       version_temp = ' '
-      call getfullversionstring_waqmerge(version_temp)
+      call getfullversionstring_delwaq(version_temp)
       version = version_temp(5:)
       write(*,*)
       write (*,'(a)') ' ', trim(version)
