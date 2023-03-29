@@ -1,16 +1,12 @@
 //Microsoft Developer Studio generated resource script.
 //
+#include "resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-// to make sure we work well on XP:
-#define WINVER 0x0501
-#define _WIN32_WINNT 0x0501
-#define WIN_LEAN_AND_MEAN
-
 #include "afxres.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -31,16 +27,8 @@ LANGUAGE LANG_DUTCH, SUBLANG_DUTCH
 // Version
 //
 
-#include "wave_version.h"
-
-#ifdef BRANCH
-#define DESCRIPTION BRANCH
-#else
-#define DESCRIPTION "D-HYDRO wrapper around SWAN\0"
-#endif
-
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION MAJOR,MINOR,REVISION
+ FILEVERSION 4,06,00,000000
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x29L
@@ -56,16 +44,16 @@ BEGIN
         BLOCK "041304b0"
         BEGIN
             VALUE "Comments", "-\0"
-            VALUE "CompanyName", COMPANY_NAME
-            VALUE "FileDescription", DESCRIPTION
-            VALUE "FileVersion", VERSION_FULL
-            VALUE "InternalName", COMPANY_NAME
-            VALUE "LegalCopyright", LEGAL_COPYRIGHT
-            VALUE "LegalTrademarks", LEGAL_TRADEMARKS
-            VALUE "OriginalFilename", "wave.exe\0"
+            VALUE "CompanyName", "Deltares\0"
+            VALUE "FileDescription", "Easy Shared Memory and/or Fortran Shared Memory\0"
+            VALUE "FileVersion", "4.06.00.000000\0"
+            VALUE "InternalName", "ESMFSM\0"
+            VALUE "LegalCopyright", "Copyright (© 2011-2023\0"
+            VALUE "LegalTrademarks", "Copyright © Stichting Deltares\0"
+            VALUE "OriginalFilename", "esmfsm.dll\0"
             VALUE "PrivateBuild", "-\0"
-            VALUE "ProductName", PRODUCT_NAME
-            VALUE "ProductVersion", VERSION_FULL
+            VALUE "ProductName", "ESMFSM\0"
+            VALUE "ProductVersion", "4.06.00.000000\0"
             VALUE "SpecialBuild", "-\0"
         END
     END
@@ -105,16 +93,4 @@ END
 
 #endif    // Dutch (Netherlands) resources
 /////////////////////////////////////////////////////////////////////////////
-
-
-
-#ifndef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// Generated from the TEXTINCLUDE 3 resource.
-//
-
-
-/////////////////////////////////////////////////////////////////////////////
-#endif    // not APSTUDIO_INVOKED
 

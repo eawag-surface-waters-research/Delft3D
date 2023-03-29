@@ -31,16 +31,8 @@ LANGUAGE LANG_DUTCH, SUBLANG_DUTCH
 // Version
 //
 
-#include "wave_version.h"
-
-#ifdef BRANCH
-#define DESCRIPTION BRANCH
-#else
-#define DESCRIPTION "D-HYDRO wrapper around SWAN\0"
-#endif
-
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION MAJOR,MINOR,REVISION
+ FILEVERSION 41,31A,1,000000
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x29L
@@ -56,16 +48,14 @@ BEGIN
         BLOCK "041304b0"
         BEGIN
             VALUE "Comments", "-\0"
-            VALUE "CompanyName", COMPANY_NAME
-            VALUE "FileDescription", DESCRIPTION
-            VALUE "FileVersion", VERSION_FULL
-            VALUE "InternalName", COMPANY_NAME
-            VALUE "LegalCopyright", LEGAL_COPYRIGHT
-            VALUE "LegalTrademarks", LEGAL_TRADEMARKS
-            VALUE "OriginalFilename", "wave.exe\0"
+            VALUE "CompanyName", "Deltares\0"
+            VALUE "FileDescription", "SWAN\0"
+            VALUE "FileVersion", "41.31A.1.000000\0"
+            VALUE "InternalName", "SWAN\0"
+            VALUE "OriginalFilename", "swan_omp.exe\0"
             VALUE "PrivateBuild", "-\0"
-            VALUE "ProductName", PRODUCT_NAME
-            VALUE "ProductVersion", VERSION_FULL
+            VALUE "ProductName", "D-WAVES\0"
+            VALUE "ProductVersion", "41.31A.1.000000\0"
             VALUE "SpecialBuild", "-\0"
         END
     END

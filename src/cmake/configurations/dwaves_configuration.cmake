@@ -91,6 +91,10 @@ if(NOT TARGET kdtree_wrapper)
     add_subdirectory(${checkout_src_root}/${kdtree_wrapper_module} kdtree_wrapper)
 endif()
 
+if(NOT TARGET shp)
+    add_subdirectory(${checkout_src_root}/${shp_module} shp)
+endif()
+
 # Swan
 if(NOT TARGET swan)
     add_subdirectory(${checkout_src_root}/${swan_mpi_lib_module} swan_mpi_lib)
