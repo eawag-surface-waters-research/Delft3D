@@ -3535,7 +3535,7 @@ endif
    subroutine unc_addglobalatts(ncid)
    use netcdf
    use MessageHandling
-   use part_version_module
+   use delwaq_version_module
 
    integer, intent(in) :: ncid
 
@@ -3554,13 +3554,13 @@ endif
       return
    end if
 
-   ierr = nf90_put_att(ncid, nf90_global,  'institution', trim(part_company))
-   ierr = nf90_put_att(ncid, nf90_global,  'references', trim(part_company_url))
-   ierr = nf90_put_att(ncid, nf90_global,  'source', part_version_full)
+   ierr = nf90_put_att(ncid, nf90_global,  'institution', trim(company))
+   ierr = nf90_put_att(ncid, nf90_global,  'references', trim(company_url))
+   ierr = nf90_put_att(ncid, nf90_global,  'source', version_full)
 
    call date_and_time(cdate, ctime, czone)
    ierr = nf90_put_att(ncid, nf90_global,  'history', &
-      'Created on '//cdate(1:4)//'-'//cdate(5:6)//'-'//cdate(7:8)//'T'//ctime(1:2)//':'//ctime(3:4)//':'//ctime(5:6)//czone(1:5)// ', '//trim(part_program))
+      'Created on '//cdate(1:4)//'-'//cdate(5:6)//'-'//cdate(7:8)//'T'//ctime(1:2)//':'//ctime(3:4)//':'//ctime(5:6)//czone(1:5)// ', PART')
    ierr = nf90_put_att(ncid, nf90_global,  'date_created',  cdate(1:4)//'-'//cdate(5:6)//'-'//cdate(7:8)//'T'//ctime(1:2)//':'//ctime(3:4)//':'//ctime(5:6)//czone(1:5))
    ierr = nf90_put_att(ncid, nf90_global,  'date_modified', cdate(1:4)//'-'//cdate(5:6)//'-'//cdate(7:8)//'T'//ctime(1:2)//':'//ctime(3:4)//':'//ctime(5:6)//czone(1:5))
 

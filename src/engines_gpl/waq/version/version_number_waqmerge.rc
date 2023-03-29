@@ -11,6 +11,7 @@
 #define _WIN32_WINNT 0x0501
 #define WIN_LEAN_AND_MEAN
 
+
 #include "windows.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -36,7 +37,7 @@ LANGUAGE LANG_DUTCH, SUBLANG_DUTCH
 #ifdef BRANCH
 #define DESCRIPTION BRANCH
 #else
-#define DESCRIPTION "Processor Water Quality Modelling Engine (1D,2D,3D)\0"
+#define DESCRIPTION "Waqmerge tool\0"
 #endif
 
 VS_VERSION_INFO VERSIONINFO
@@ -62,7 +63,7 @@ BEGIN
             VALUE "InternalName", COMPANY_NAME
             VALUE "LegalCopyright", LEGAL_COPYRIGHT
             VALUE "LegalTrademarks", LEGAL_TRADEMARKS
-            VALUE "OriginalFilename", "delwaq2.exe\0"
+            VALUE "OriginalFilename", "waqmerge.exe\0"
             VALUE "PrivateBuild", "-\0"
             VALUE "ProductName", PRODUCT_NAME
             VALUE "ProductVersion", VERSION_FULL
