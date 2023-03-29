@@ -25,18 +25,19 @@ module io_netcdf_version_module
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!
+!
+#INCLUDE "version_definition.h"
 
 implicit none
 
     character(*),  public, parameter :: io_netcdf_major        = '1'
-    character(*),  public, parameter :: io_netcdf_minor        = '00'
+    character(*),  public, parameter :: io_netcdf_minor        = '01'
     character(*),  public, parameter :: io_netcdf_revision     = '00'
-    character(*),  public, parameter :: io_netcdf_build_number = '000000'
+    character(*),  public, parameter :: io_netcdf_build_number = BUILD_NR
 
-    character(*),  public, parameter :: io_netcdf_company      = 'Deltares'
-    character(*),  public, parameter :: io_netcdf_company_url  = 'http://www.deltares.nl'
+    character(*),  public, parameter :: io_netcdf_company      = COMPANY_NAME
+    character(*),  public, parameter :: io_netcdf_company_url  = COMPANY_URL
     character(*),  public, parameter :: io_netcdf_program      = 'IO_NETCDF'
 
 #if defined(WIN32)

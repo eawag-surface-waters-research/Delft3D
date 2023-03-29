@@ -7,7 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+#include "windows.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -26,9 +26,10 @@ LANGUAGE LANG_DUTCH, SUBLANG_DUTCH
 //
 // Version
 //
+#include "version_number.h"
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 5,09,00,000000
+ FILEVERSION VN_MAJOR,VN_MINOR,VN_REVISION,VN_BUILD_NUMBER
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x29L
@@ -46,14 +47,14 @@ BEGIN
             VALUE "Comments", "-\0"
             VALUE "CompanyName", "Deltares\0"
             VALUE "FileDescription", "Neutral FIile System for data storage and retrieval\0"
-            VALUE "FileVersion", "5.09.00.000000\0"
+            VALUE "FileVersion", "VN_MAJOR.VN_MINOR.VN_REVISION.VN_BUILD_NUMBER\0"
             VALUE "InternalName", "NEFIS\0"
             VALUE "LegalCopyright", "Copyright © 2011-2023\0"
             VALUE "LegalTrademarks", "Copyright © Stichting Deltares\0"
             VALUE "OriginalFilename", "nefis.dll\0"
             VALUE "PrivateBuild", "-\0"
             VALUE "ProductName", "NEFIS\0"
-            VALUE "ProductVersion", "5.09.00.000000\0"
+            VALUE "ProductVersion", "VN_MAJOR.VN_MINOR.VN_REVISION.VN_BUILD_NUMBER\0"
             VALUE "SpecialBuild", "-\0"
         END
     END
@@ -79,7 +80,7 @@ END
 
 2 TEXTINCLUDE DISCARDABLE
 BEGIN
-    "#include ""afxres.h""\r\n"
+    "#include ""windows.h""\r\n"
     "\0"
 END
 
