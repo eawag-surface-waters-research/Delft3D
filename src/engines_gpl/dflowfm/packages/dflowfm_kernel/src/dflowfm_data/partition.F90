@@ -6524,3 +6524,5 @@ subroutine set_idomain_for_open_boundary_points(number_of_boundary_points, links
    end do
    
 end subroutine set_idomain_for_open_boundary_points
+
+    
