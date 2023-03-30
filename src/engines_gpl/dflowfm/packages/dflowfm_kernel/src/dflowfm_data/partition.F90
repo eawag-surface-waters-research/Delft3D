@@ -1671,6 +1671,7 @@ implicit none
       
       integer                             :: jafound
       double precision, parameter         :: TOLERANCE=1d-4
+      character(len=80)                   :: message2, message3
 
       ierror = 1
       if ( own_domain_number < 0 ) then
@@ -1713,7 +1714,9 @@ implicit none
          end do search_loop
 !        check if flownode/link/corner was found
          if ( jafound == 0 ) then
-            call qnerror('partition_fill_sendlist: numbering error', ' ', ' ')
+            write(message2,*) 'my_rank=', my_rank,' itype=',itype
+            write(message3,*) 'j=',j,' N_req=',N_req,' num=',num
+            call qnerror('partition_fill_sendlist: numbering error', message2, message3)
             goto 1234
          endif
       end do
@@ -5225,16 +5228,14 @@ loop_over_nodes: &
     number_of_cells = 0
     do index = 1, nmk(node)
         first_link = nod(node)%lin(index)
-        if ( kn(3,first_link) /= 2 ) cycle
         if ( index < nmk(node) ) then
             second_link = nod(node)%lin(index+1)
         else
             second_link = nod(node)%lin(1)
         end if
-        if ( kn(3,second_link) /= 2 ) cycle
         
         cell = common_cell_for_two_net_links(first_link, second_link)
-                     
+                
         if ( cell < 1 ) cycle
         
         if ( idomain(cell) == domain_number ) cycle loop_over_nodes
