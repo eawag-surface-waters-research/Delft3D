@@ -45,7 +45,7 @@ module rdhydr_mod
    contains
       subroutine rdhydr ( nmax   , mmax   , mnmaxk , nflow  , noseg  ,  &
                           noq    , itime  , itstrt , idelt  , volume ,  &
-                          vdiff  , hsurf  , flow   , vol1   , vol2   ,  &
+                          vdiff  , area   , flow   , vol1   , vol2   ,  &
                           flow1  , flow2m , vdiff1 , update , cellpnt, flowpnt,  &
                           tau    , tau1   , caltau , salin  , salin1 ,  &
                           temper , temper1, nfiles , lunit  , fname  ,  &
@@ -88,7 +88,7 @@ module rdhydr_mod
       integer  (ip), intent(  out) :: idelt            !< time step of hydrodynamic files
       real     (sp), intent(  out) :: volume (mnmaxk)  !< a grid with volumes
       real     (sp), intent(  out) :: vdiff  (mnmaxk)  !< a grid with vertical diffusions
-      real     (sp), intent(in   ) :: hsurf  (mnmaxk)  !< a grid with horizontal surfaces
+      real     (sp), intent(in   ) :: area   (nflow )  !< a grid with horizontal surfaces
       real     (sp), intent(  out) :: flow   (nflow )  !< a grid with flows
       real     (sp), intent(  out) :: vol1   (noseg )  !< first volume record
       real     (sp), intent(  out) :: vol2   (noseg )  !< second volume record
@@ -205,8 +205,7 @@ module rdhydr_mod
              volume(cellpnt(i)) = vol1(i)
          enddo
 
-         flow   = 0.0
-         flow2m = 0.0
+         flow = 0.0
          do i = 1, noq
             if ( flowpnt(i,1) .gt. 0 ) flow(flowpnt(i,1)) = flow(flowpnt(i,1)) + flow1(i)
             if ( flowpnt(i,2) .gt. 0 ) flow(flowpnt(i,2)) = flow(flowpnt(i,2)) + flow1(i)
@@ -296,7 +295,7 @@ module rdhydr_mod
                i0 = lgrid(i1, i2)
                if (i0  >  0) then
                   i03d = i0 + (laybot(i1, i2)-1)*nmax*mmax
-                  volume(i03d) = max(volume(i03d), hsurf(i0) * depmin)
+                  volume(i03d) = max(volume(i03d), area(i0) * depmin)
                end if
             end do
          end do
@@ -307,7 +306,7 @@ module rdhydr_mod
 
            i2 = mod(i,nmax*mmax)
            if(i2==0) i2 = nmax*mmax
-           volume(i) = max(volume(i), hsurf(i2) * depmin)
+           volume(i) = max(volume(i), area(i2) * depmin)
 
 !          apply scaling to vertical diffusion
 !          the .vdf file at the moment contains the D3D-FLOW dicww array in m2/s.

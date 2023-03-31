@@ -244,13 +244,13 @@ endif
 
       mapfil = .true.
       trkfil = .true.
-      if ( notrak .eq. 0 ) trkfil = .false.
+      if ( notrak .eq. 0 ) trkfil = .false. 
       if (icwste                     < 1     ) mapfil = .false.
       if (itime                      < icwsta) mapfil = .false.
       if (itime - idelt              >=  icwsto) mapfil = .false.
       if (mod(itime-icwsta, icwste)  >=  idelt ) mapfil = .false.
 
-      if ( trkfil .and. mod(itime, notrak * idelt) .ge. idelt) trkfil = .false.
+      if ( trkfil .and. mod(itime, notrak * idelt) .ge. idelt) trkfil = .false. 
       if ( trkfil ) call unc_write_trk()
       if (mapfil) call unc_write_map()
 
@@ -440,8 +440,6 @@ endif
    ierror = 0
    numremaining = 0
 
-   dt = 0.0
-
 !$OMP PARALLEL DO PRIVATE (i, k, k1, k2, L, ja, Lexit, d, un, t, tex, dt,          &
 !$OMP                      ux0, uy0, uz0, cs, sn, xn, yn, zn, rl, dvar, dis, dn,   &
 !$OMP                      ddn, isboundary),                                       &
@@ -499,7 +497,6 @@ endif
                call dlinedis2(xpart(ipart),ypart(ipart),xnode(k1),ynode(k1),xnode(k2),ynode(k2),ja,d,xn,yn,rl)
             end if
             dis = (xn-xpart(ipart))*cs + (yn-ypart(ipart))*sn
-
          else
             if ( isboundary ) then ! boundary: add tolerance
                call dlinedis3D(xpart(ipart),ypart(ipart),zpart(ipart),xnode(k1)+DTOLd*ddn(1),  &
@@ -515,10 +512,20 @@ endif
             dis = (xn-xpart(ipart))*ddn(1) + (yn-ypart(ipart))*ddn(2) + (zn-zpart(ipart))*ddn(3)
          end if
 
+!        BEGIN DEBUG
+!         if ( ipart.eq.1 .and. kpart(ipart).eq.5298 ) then
+!            write(6,*) i, ':', d, rL, dis
+!         end if
+!
+!         if ( abs(dis-d).gt.1d-1 ) then
+!            write(6,*) i, dis, d
+!         end if
+!        END DEBUG
+
          ! check inside or outside triangle
          if ( dis.lt.-DTOLd .and. .not.isboundary ) then
             ! outside triangle
-            !!AM tex = 0d0
+            tex = 0d0
             Lexit = L
             exit
          else
@@ -529,6 +536,16 @@ endif
             else
                un =  ux0*ddn(1) + uy0*ddn(2) + uz0*ddn(3)
             end if
+
+!!           BEGIN DEBUG
+!!           check normal velocity at closed boundary
+!            if ( edge2cell(1,L).eq.0 .or. edge2cell(2,L).eq.0 ) then
+!               dvar = (u0x(k) + alpha(k)* (xn-xzwcell(k)))*ddn(1) + (u0y(k) + alpha(k)*(yn-yzwcell(k)))*ddn(2) + (u0z(k) + alpha(k)*(zn-zzwcell(k)))*ddn(3)
+!               if ( abs(dvar) .gt. 1d-4 ) then
+!                  continue
+!               end if
+!            end if
+!!           END DEBUG
 
             if ( un.gt.max(DTOLun_rel*d,DTOLun) ) then   ! normal velocity does not change sign: sufficient to look at u0.n
                ! compute exit time for this edge: ln(1+ d/un alpha) / alpha
@@ -548,14 +565,15 @@ endif
                   tex = t
                   Lexit = L
                end if
+            else
+               continue
             end if
 
          end if
       end do
 
       if ( dtremaining(ipart).eq.0d0 ) then
-         !continue
-         cycle
+         continue
       end if
 
       ! compute timestep in cell (flownode)
@@ -575,6 +593,18 @@ endif
          zpart(ipart) = zpart(ipart) + dvar * uz0
       end if
 
+!!     BEGIN DEBUG
+!      if ( jsferic.eq.1 ) then
+!!        project node on triangle
+!         dn = (xpart(ipart) - xzwcell(k)) * dnn(1,k) +  &
+!              (ypart(ipart) - yzwcell(k)) * dnn(2,k) +  &
+!              (zpart(ipart) - zzwcell(k)) * dnn(3,k)
+!         xpart(ipart) = xpart(ipart) - dn * dnn(1,k)
+!         ypart(ipart) = ypart(ipart) - dn * dnn(2,k)
+!         zpart(ipart) = zpart(ipart) - dn * dnn(3,k)
+!      end if
+!!     END DEBUG
+
       dtremaining(ipart) = dtremaining(ipart) - dt
       ! Lpart(ipart) = Lexit
 
@@ -592,7 +622,6 @@ endif
          numremaining = numremaining + 1  ! number of remaining particles for next substep
          if ( edge2cell(1,Lexit).gt.0 .and. edge2cell(2,Lexit).gt.0 ) then   ! internal edge (netlink)
             mpart(ipart) = edge2cell(1,Lexit) + edge2cell(2,Lexit) - k
-
 
             if ( mpart(ipart).eq.0 ) then
                continue
@@ -1723,6 +1752,7 @@ endif
 
          if ( inside.eq.1 ) then
             kpart = k
+   !         write(2003, '(I)') nres
             exit
          end if
       end do
@@ -2460,12 +2490,12 @@ endif
       hyd%cnv_step_sec = -999 ! To properly initialise the reading procedure
    endif
                                                ! Was: lnx - AM
-   call rdhydr( hyd%nmax, hyd%mmax,  hyd%noseg, hyd%noq,          hyd%noseg,  &
-                hyd%noq,  itime,     itstrtp,   hyd%cnv_step_sec, hyd%volume, &
-                hyd%vdf,  hyd%surf,  hyd%flow,  vol1,             vol2,       &
-                flow1,    flow2m,    vdiff1,    update,           cellpnt,          flowpnt,    &
-                hyd%tau,  tau1,      caltau,    hyd%sal,          salin1,     &
-                hyd%tem,  temper1,   nfiles,    lunit,            fname,      &
+   call rdhydr( hyd%nmax, hyd%mmax, hyd%noseg, hyd%noq,          hyd%noseg,  &
+                hyd%noq,  itime,    itstrtp,   hyd%cnv_step_sec, hyd%volume, &
+                hyd%vdf,  hyd%area, hyd%flow,  vol1,             vol2,       &
+                flow1,    flow2m,   vdiff1,   update,    cellpnt,          flowpnt,    &
+                hyd%tau,  tau1,     caltau,    hyd%sal,          salin1,     &
+                hyd%tem,  temper1,  nfiles,    lunit,            fname,      &
                 flow2,    rhowatc                                  )
 
    istat = 0 ! Assume it goes well
@@ -2558,6 +2588,7 @@ endif
                          nplay    , kwaste   , nolayp   ,                          &
                          modtyp   , zwaste   , track    , nmdyer   , substi   ,    &
                          rhopart)
+
       endif
 
 !     add continuous release (from input file directly)
@@ -2584,6 +2615,7 @@ endif
             call update_particles(qfreesurf,bl+huni,bl+huni,dts)
          end if
          timepart = time1
+
       else
 
          !        check if timestep has been started
@@ -2613,7 +2645,6 @@ endif
                call update_particles(q0, bl+huni, bl+huni, time1-timelast)
 
             end if
-
             timepart = time1
 
             !           start new particle timestep
