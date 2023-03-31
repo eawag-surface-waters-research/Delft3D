@@ -36,15 +36,15 @@ module delpar_version_module
     ! The component name must be public because it is used by the BMI module
     character(*),  public, parameter :: component_name      = 'PART'
 
-    character(*),  public, parameter :: delwaq_version_full = version_prefix // ', ' // component_name // version_suffix
-    character(*),  public, parameter :: delwaq_version_id   = version_prefix_id // ', ' // component_name // ' ' // version_suffix_full
+    character(*),  public, parameter :: delpar_version_full = version_prefix // ', ' // component_name // version_suffix
+    character(*),  public, parameter :: delpar_version_id   = version_prefix_id // ', ' // component_name // ' ' // version_suffix_full
 
 contains
 
     subroutine getfullversionstring_delpar(stringout)
         character(*), intent(out) :: stringout
 
-        stringout = delwaq_version_id(offset:)
+        stringout = delpar_version_id(offset:)
     end subroutine getfullversionstring_delpar
 
 end module delpar_version_module
