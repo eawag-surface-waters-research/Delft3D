@@ -52,5 +52,3 @@ integer function common_cell_for_two_net_links(L1, L2)
 
    return
 end function common_cell_for_two_net_links
-    
-    
