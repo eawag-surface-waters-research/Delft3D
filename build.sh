@@ -308,6 +308,6 @@ fi
 BuildCMake ${config} ${buildDirExtension}
 
 InstallAll ${config} ${buildDirExtension}
-InstallDWaq ${config} ${buildDirExtension}
+InstallDwaq ${config} ${buildDirExtension}
 
 echo Finished
