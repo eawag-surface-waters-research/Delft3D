@@ -159,6 +159,26 @@ function InstallDwaq () {
 }
 
 
+# =========================
+# === InstallDimr        ===
+# =========================
+function InstallDimr () {
+    if [ ${1} = "dimr"  ]; then
+        echo
+        echo "Installing in build_$1$2 ..."
+        cd     $root
+        rm -rf $root/build_$1$2/lnx64
+        mkdir -p $root/build_$1$2/lnx64/bin
+        mkdir -p $root/build_$1$2/lnx64/lib
+
+
+        # CMaked stuff
+        cp -rf $root/build_$1$2/install/* $root/build_$1$2/lnx64/ &>/dev/null
+    fi
+
+    return
+}
+
 # ============
 # === MAIN ===
 # ============
@@ -309,5 +329,6 @@ BuildCMake ${config} ${buildDirExtension}
 
 InstallAll ${config} ${buildDirExtension}
 InstallDwaq ${config} ${buildDirExtension}
+InstallDimr ${config} ${buildDirExtension}
 
 echo Finished
