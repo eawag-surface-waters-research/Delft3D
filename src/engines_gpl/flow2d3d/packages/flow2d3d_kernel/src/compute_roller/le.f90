@@ -25,8 +25,8 @@ function le(d1        ,d2        ,f1        ,f2        )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! linear extrapolation

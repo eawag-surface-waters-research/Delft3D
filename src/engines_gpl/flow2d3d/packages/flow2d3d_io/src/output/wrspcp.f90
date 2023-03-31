@@ -26,8 +26,8 @@ subroutine wrspcp(comfil    ,lundia    ,error     ,nsrc      ,namsrc    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !

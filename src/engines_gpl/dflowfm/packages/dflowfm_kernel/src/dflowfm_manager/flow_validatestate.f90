@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Validates the current flow state and returns whether simulation should be aborted.
 !! Moreover, a final snapshot is written into the output files before aborting.

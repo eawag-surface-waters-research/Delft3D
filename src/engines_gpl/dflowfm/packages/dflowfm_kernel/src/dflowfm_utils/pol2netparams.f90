@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> get uniform curvilinear grid parameters in "makenet" from polygon
  subroutine pol2netparams()

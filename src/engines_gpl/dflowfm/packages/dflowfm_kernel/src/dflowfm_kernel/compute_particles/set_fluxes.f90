@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> set all fluxes, including internal
 subroutine set_fluxes(Lnx,q,qe)

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> copy the network boundaries to polygon
 !! The polygon will be placed in global m_polygon::XPL, etc.

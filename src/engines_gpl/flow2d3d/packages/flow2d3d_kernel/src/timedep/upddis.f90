@@ -30,8 +30,8 @@ subroutine upddis(lundis    ,lundia    ,sferic    ,itdis     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the time dependent discharges from FILE

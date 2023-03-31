@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 ! compose an orthogonal dual mesh (cell centers), while keeping the primary mesh (net nodes) fixed
 subroutine make_orthocenters(dmaxnonortho,maxiter)

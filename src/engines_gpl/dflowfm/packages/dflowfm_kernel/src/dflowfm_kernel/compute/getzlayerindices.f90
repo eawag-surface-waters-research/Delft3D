@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> Gets the local layer numbers for a given grid cell.
  subroutine getzlayerindices(n,nlayb,nrlay)

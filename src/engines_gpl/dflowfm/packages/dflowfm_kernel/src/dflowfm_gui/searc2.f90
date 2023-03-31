@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE SEARC2(NAHEAD,NLEVEL,HLPTXT,NUMTXT,LOOKUP,NUMCHC,JOFND)
       implicit none

@@ -25,8 +25,8 @@ function getdy(sferic,x1,y1,x2,y2,gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Calculates "north-south" distance between two points on earth

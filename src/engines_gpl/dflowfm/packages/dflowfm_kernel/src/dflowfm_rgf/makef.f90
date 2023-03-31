@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE MAKEF(XR,YR,MMAX,NMAX) ! naar rekenvlak SUBROUTINE MAKEF
       USE M_SFERIC

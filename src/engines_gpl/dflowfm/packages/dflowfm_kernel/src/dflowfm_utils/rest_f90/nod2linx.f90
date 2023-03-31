@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>    return x-component in link coordinate frame of vector in node coordinate frame
       double precision function nod2linx(L,i12,ux,uy)

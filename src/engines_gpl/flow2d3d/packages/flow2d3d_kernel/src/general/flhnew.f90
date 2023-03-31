@@ -28,8 +28,8 @@ subroutine flhnew(lunrd     ,lundia    ,error     ,record    ,access    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads keywords in the Direct access file (new)

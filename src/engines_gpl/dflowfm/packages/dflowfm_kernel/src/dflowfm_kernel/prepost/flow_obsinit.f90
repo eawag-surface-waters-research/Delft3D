@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> Initializes all administration encessary for writing output to his-files.
  !! That is: snap observation stations to flow cells, cross sections to flow links.

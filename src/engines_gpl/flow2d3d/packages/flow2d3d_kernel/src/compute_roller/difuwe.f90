@@ -33,8 +33,8 @@ subroutine difuwe(timest    ,lundia    ,nst       ,icx       ,icy       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes transport of wave energy in u- and

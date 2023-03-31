@@ -25,8 +25,8 @@ subroutine eoferr(srttdd    ,lundia    ,iocond    ,tlread    ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Checks IO condition from reading time varying

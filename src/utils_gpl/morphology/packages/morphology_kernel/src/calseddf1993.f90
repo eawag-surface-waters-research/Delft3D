@@ -28,8 +28,8 @@ subroutine calseddf1993(ustarc    ,ws        ,h1        ,kmax      ,sig       , 
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Compute sediment diffusion coefficient

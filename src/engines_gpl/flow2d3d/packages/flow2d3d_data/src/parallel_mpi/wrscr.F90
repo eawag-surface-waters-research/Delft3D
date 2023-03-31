@@ -25,8 +25,8 @@ subroutine wrscr ( tekst, gdp )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Writes line to screen done by master i.c. of parallel Delft3D-FLOW

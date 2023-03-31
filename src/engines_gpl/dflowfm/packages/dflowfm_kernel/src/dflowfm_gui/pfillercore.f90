@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
     SUBROUTINE PFILLERCORE(XR,YR,N)
     use unstruc_opengl

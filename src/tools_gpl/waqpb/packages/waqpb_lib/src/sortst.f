@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
       subroutine sortst ( c10a , c10b , val , nr )
 c     Subroutine to sort (part of) tables R6-R7-R8

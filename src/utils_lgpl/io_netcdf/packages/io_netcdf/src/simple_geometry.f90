@@ -25,8 +25,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> simple_geometry module for operations on simple geometry representation
 !! in NetCDF data sets, as defined in the CF-1.8 conventions:

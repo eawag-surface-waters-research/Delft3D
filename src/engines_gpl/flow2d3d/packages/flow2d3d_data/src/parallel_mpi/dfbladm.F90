@@ -25,8 +25,8 @@ subroutine dfbladm(ipown, icom, mmax, nmax, runid, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   For the present node, carries out the block administration

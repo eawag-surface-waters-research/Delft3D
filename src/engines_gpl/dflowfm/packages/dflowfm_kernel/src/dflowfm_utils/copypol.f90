@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>    copy and move a polygon orthogonally
       subroutine copypol(ipol, xp, yp)

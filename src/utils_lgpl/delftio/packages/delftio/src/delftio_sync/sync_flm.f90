@@ -25,8 +25,8 @@ module sync_flm
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Organizes the communication between two Delft3D-FLOW executables for a 2 layer
 ! fluid mud model: one doing the calculation for the (3D) water phase on top and

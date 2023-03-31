@@ -28,8 +28,8 @@ subroutine cptdis(lundia     ,ag         ,area       ,alfa       ,cd1        , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes the discharge relation through a culverts for five flow regimes 

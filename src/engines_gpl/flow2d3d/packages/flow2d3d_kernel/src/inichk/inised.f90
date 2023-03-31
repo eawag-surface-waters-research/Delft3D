@@ -26,8 +26,8 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Initialisation total sediment at bed in each

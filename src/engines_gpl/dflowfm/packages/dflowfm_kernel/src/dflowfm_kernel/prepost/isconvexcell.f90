@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> check and see if the cell is convex (1) or not (0)
 integer function isconvexcell(k)

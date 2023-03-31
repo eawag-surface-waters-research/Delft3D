@@ -25,8 +25,8 @@ subroutine dens_unes(temp, salt, rhouns, rhods, rhodt)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes water density from temperature and

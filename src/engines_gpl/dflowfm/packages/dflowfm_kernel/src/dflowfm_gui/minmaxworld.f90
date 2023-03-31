@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE MINMAXWORLD(XMI,YMI,XMA,YMA)
       ! ASPECT RATIO VAN HET DEFAULTGEBIED GOED ZETTEN

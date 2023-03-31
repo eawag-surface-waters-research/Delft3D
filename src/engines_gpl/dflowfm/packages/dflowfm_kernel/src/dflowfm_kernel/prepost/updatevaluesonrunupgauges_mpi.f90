@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !< Reduce runup values over domains
 subroutine updateValuesOnRunupGauges_mpi()

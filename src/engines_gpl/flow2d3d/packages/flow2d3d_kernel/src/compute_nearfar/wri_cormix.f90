@@ -26,8 +26,8 @@ subroutine wri_cormix(u1    ,v1    ,rho    ,thick ,kmax  ,dps   ,&
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes input for cormix (corjet)

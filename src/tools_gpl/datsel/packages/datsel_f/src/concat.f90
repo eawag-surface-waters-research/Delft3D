@@ -25,8 +25,8 @@ function concat(txta      ,txtb      )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! concatenuates two strings to one string
 ! without blanks

@@ -25,8 +25,8 @@ function slim(ds1,ds2)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! This routine computes the Van Leer limiter value based on the water elevation

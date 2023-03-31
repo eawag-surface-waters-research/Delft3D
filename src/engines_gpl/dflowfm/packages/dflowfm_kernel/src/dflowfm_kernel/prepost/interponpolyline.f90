@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       !> Performs linear interpolation between two values along a polyline.
       !! The interpolation is done along a polyline at the distances

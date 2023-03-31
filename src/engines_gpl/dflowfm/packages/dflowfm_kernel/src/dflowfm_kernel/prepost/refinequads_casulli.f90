@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> "Casulli"-type refinement of quads
 subroutine refinequads_casulli
@@ -859,3 +859,5 @@ subroutine refinequads_casulli
    end function isleftright
 
 end subroutine refinequads_casulli
+
+    

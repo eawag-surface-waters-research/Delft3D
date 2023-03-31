@@ -27,8 +27,8 @@ subroutine constwave(nmmax     ,dps       ,s0        ,alfas     ,ubot      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !

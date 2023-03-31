@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 double precision function comp_cross_time_2(x1,x3,x4,v1,v3,v4,dclear)
 

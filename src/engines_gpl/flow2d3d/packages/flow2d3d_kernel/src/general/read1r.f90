@@ -26,8 +26,8 @@ subroutine read1r(record    ,lrec      ,ibeg      ,iend      ,rvar      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads ONE real variable from an arbitrary string/

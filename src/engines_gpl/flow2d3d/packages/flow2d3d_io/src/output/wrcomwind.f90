@@ -27,8 +27,8 @@ subroutine wrcomwind(error     ,comfil    ,itcur    ,itimc     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !

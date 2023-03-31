@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    SUBROUTINE MINMAXPOL(XMIN, YMIN, XMAX, YMAX)
    USE M_POLYGON

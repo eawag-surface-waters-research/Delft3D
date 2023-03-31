@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> (re)allocate
 subroutine realloc_particles(Nsize, LkeepExisting, ierror)

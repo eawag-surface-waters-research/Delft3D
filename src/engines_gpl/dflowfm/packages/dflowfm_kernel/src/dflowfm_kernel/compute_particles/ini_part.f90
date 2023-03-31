@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> initialize particles
 subroutine ini_part(japartfile, partfile, partrelfile, jatracer_loc, starttime_loc, timestep_loc, threeDtype_loc)

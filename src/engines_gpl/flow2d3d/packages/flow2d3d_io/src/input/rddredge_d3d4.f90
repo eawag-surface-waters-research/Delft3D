@@ -25,8 +25,8 @@ subroutine rddredge_d3d4(gsqs      ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Reads Dredge and Dump input file.

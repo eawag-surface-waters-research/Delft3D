@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> get the cross splines that have valid grid height
 subroutine get_index(ncs, isvalid, ndx, idx)

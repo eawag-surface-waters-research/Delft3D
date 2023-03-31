@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> this module contains the real flow times, only to be managed by setting times in module m_usertimes
  module m_flowtimes

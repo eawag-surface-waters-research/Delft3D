@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !
       SUBROUTINE SCROLH(NUMCHC,HLPTXT,NUMTXT,NLEVEL,IH,JOFND,JATAB)

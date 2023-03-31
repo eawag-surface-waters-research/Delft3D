@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       subroutine dateandtimenow(iyear, month, iday, ihour, minute, isecnd)
       implicit none

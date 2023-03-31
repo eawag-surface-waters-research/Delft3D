@@ -25,8 +25,8 @@ subroutine wavenr(h         ,t         ,k         ,ag        )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Approximation of the dispersion, original sub-

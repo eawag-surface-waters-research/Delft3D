@@ -28,8 +28,8 @@ subroutine dfscatter_lowlevel ( iiptr, iilen, ioptr, iolen, itype, gdp )
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Scatters different amounts of data from the master to each processor

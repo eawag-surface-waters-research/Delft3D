@@ -28,8 +28,8 @@ subroutine chkdis(lundia    ,error     ,nsrc      ,zmodel    ,nmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Checks the location of the following points (if

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
           ! NOTE: japes is disabled [AvD]
       SUBROUTINE SHWXYZ(X,Y,RD1,mmax, nmax, MC,NC,JAPERS,KEY,M,N)

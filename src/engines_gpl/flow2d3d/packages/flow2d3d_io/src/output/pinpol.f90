@@ -25,8 +25,8 @@ subroutine pinpol (x0    , y0    , n     , x     , y     , inside)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Check whether a point lies within (or on) a polygon

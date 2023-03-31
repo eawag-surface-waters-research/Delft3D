@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine poshcheck(key)
  use m_flow                                          ! when entering this subroutine, s1=s0, u1=u0, etc

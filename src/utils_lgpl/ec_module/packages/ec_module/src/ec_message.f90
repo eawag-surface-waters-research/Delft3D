@@ -23,8 +23,8 @@
 !  are registered trademarks of Stichting Deltares, and remain the property of
 !  Stichting Deltares. All rights reserved.
 
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
 !> This module contains the messaging system.
 !! @author arjen.markus@deltares.nl

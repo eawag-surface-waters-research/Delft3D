@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 !> @file model_specific.f90
 !! A set of predefined routines that may contain model-specific actions.
 !! Selection is based on global md_ident, and subroutines are automatically

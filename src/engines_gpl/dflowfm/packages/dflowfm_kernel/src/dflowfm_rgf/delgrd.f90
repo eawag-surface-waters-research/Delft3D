@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
      SUBROUTINE delgrd(KEY,JASAVE,jadelpol)
 !    delete grid

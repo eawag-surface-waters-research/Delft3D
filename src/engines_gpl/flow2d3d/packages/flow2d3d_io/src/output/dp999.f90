@@ -25,8 +25,8 @@ subroutine dp999(dp        ,nmax      ,mmax      ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Replace the -999.0 from QUICKIN default value  by 0.0.

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    module m_subsidence
       logical                                              :: sdu_first     !< Flag indicating whether this is the first call to obtain the 'bedrock_surface_elevation'

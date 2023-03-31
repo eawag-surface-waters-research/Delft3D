@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine hurdlestive(U10,fetchL,fetchD,Hsig,Tsig)
  use m_physcoef

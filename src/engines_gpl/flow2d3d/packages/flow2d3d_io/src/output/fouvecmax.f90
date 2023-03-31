@@ -26,8 +26,8 @@ subroutine fouvecmax(mmax       ,nmaxus      ,kcs        ,nofou     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Determines the maximum of the different vector parameters

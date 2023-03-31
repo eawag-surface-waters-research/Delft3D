@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine reaobs2stat(mobs, mout)   ! convert d3d obs file to model independent
  use m_grid

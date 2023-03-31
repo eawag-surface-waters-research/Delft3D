@@ -30,8 +30,8 @@ subroutine brksur(kmxdt     ,kmxt      ,nfreqs    ,angle     ,atg       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Bracketing largest angluar fequency OMEG of TG

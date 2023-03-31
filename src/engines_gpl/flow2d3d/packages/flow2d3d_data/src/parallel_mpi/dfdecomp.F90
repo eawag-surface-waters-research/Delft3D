@@ -25,8 +25,8 @@ subroutine dfdecomp ( lunmd, lundia, error, runid, gdp )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Carries out domain decomposition meant for parallel Delft3D-FLOW

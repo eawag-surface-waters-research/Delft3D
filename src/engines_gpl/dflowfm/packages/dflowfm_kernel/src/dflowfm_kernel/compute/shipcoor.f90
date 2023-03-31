@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine shipcoor(n,sx1,sy1,sx2,sy2)          ! get absolute shipcoordinates in sx2, sy2), input sx1, sy1 : ( 1, -1) = (bow  , portside )
  use m_ship                                      !                                                             (-1,  1) = (stern, starboard)

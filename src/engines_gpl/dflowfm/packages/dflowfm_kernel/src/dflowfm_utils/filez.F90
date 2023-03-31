@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 !> Opens an existing file for reading.
 !!
 !! When file does not exist or is already open, program stops with

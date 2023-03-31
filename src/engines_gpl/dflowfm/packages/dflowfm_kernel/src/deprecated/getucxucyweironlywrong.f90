@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine getucxucyweironlywrong ( ku, ucxku, ucyku, ischeme )
  use m_flow

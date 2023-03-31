@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE SMEERFUNCTIE(I,J,MP,NP,FR,IN,JN)
       implicit none

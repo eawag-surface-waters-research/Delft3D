@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE FIRSTLIN(MRGF)
       use unstruc_version_module, only: unstruc_version_full, get_unstruc_source

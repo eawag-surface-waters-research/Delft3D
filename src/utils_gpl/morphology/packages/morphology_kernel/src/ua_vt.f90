@@ -27,8 +27,8 @@ subroutine ua_vt(facas,      facsk,        sws,      h,   &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! computes velocity asymmetry due to waves according to
 ! PhD van Thiel 2009

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine QucPer3Dsigma(n12,LL,Lb,Lt,cs,sn,quk1)     ! sum of (Q*uc cell centre upwind normal) at side n12 of basis link LL
  use m_flow                                            ! advect the cell center velocities (dimension: m4/s2)

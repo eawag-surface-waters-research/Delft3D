@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Gets hydraulic radius at a flow link intended for use in flow area
 !! calculation for velocities, optionally ignoring any hydraulic structure

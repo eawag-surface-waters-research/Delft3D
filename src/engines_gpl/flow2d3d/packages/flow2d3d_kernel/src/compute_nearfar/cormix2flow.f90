@@ -27,8 +27,8 @@ subroutine cormix2flow(thick  ,kmax  ,dps   ,s1    ,disch_nf ,sour_nf , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Converts cormix output to delft3d sources

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  double precision function dcentral(d1,d2)                     ! twee maal vergroot vanwege acl
  implicit none

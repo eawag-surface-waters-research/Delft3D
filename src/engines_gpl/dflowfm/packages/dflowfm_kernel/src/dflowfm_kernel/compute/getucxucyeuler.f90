@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Computes the Eulerian horizontal velocities.
 !! In absence of waves, these are equal to the Lagrangian ucx/ucy.

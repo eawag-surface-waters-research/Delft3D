@@ -111,8 +111,6 @@ contains
     use iso_c_utils
     use delwaq2_global_data
     use dhcommand
-    use exception_waq
-    use exception_part
     use m_actions
 
     implicit none
@@ -122,9 +120,6 @@ contains
     integer                          :: iarg
     integer                          :: errorcode
 
-    ! do not use stop, but exception when used trough bmi
-    useexception_waq = .true.
-    useexception_part = .true.
 
     ! Store the name
     runid_given = char_array_to_string(c_config_file)

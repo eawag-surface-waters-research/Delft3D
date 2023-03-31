@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Reading + initializing of initial and parameter fields.
 !! The IniFieldFile from the MDU is the successor of the old

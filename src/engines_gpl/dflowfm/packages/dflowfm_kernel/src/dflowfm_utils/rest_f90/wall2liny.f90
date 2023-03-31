@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>    return y-component in link coordinate frame of vector in wall coordinate frame
       double precision function wall2liny(nw,i12,ux,uy)

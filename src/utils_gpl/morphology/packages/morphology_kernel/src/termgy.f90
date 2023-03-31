@@ -25,8 +25,8 @@ function termgy(n         ,y         ,z         )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! determines termgy
 ! a contribution to the bijker transport

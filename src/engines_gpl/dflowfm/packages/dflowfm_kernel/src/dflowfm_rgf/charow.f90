@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE CHAROW(      X,     mmax, nmax, I1,     I2, NUMSPL)
 !     VERWISSEL RIJ I1 EN I2

@@ -25,8 +25,8 @@ subroutine delfil(runid     ,filmd     ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Deletes all the temporary (unformatted) files

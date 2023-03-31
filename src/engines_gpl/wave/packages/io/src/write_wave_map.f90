@@ -25,8 +25,8 @@ subroutine write_wave_map (sg, sof, sif, n_swan_grids, wavedata, casl, prevtime,
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--pseudo code and references--------------------------------------------------
