@@ -139,7 +139,7 @@ function InstallAll () {
 
 
 # =========================
-# === InstallDwaq        ===
+# === InstallDwaq       ===
 # =========================
 function InstallDwaq () {
     if [ ${1} = "dwaq"  ]; then
@@ -160,7 +160,7 @@ function InstallDwaq () {
 
 
 # =========================
-# === InstallDimr        ===
+# === InstallDimr       ===
 # =========================
 function InstallDimr () {
     if [ ${1} = "dimr"  ]; then
