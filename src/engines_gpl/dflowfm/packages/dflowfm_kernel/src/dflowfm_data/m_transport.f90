@@ -117,6 +117,7 @@ module m_transport
    integer :: jalimitdtdiff
 
    double precision :: dsum
+   double precision :: maserrsed
 
 
    double precision, dimension(:),   allocatable :: u1sed

@@ -69,6 +69,7 @@ subroutine extract_constituents()
             !
             if (constituents(iconst,k)>upperlimitssc) then
                limmax = limmax + 1
+               maserrsed = maserrsed + vol1(k)*(constituents(iconst,k)-upperlimitssc)
                constituents(iconst,k) = upperlimitssc
             endif
             sed(i,k) = constituents(iconst,k)

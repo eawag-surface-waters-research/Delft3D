@@ -595,13 +595,13 @@
       call fm_adjust_bedload(e_sswn, e_sswt, .false.)
    endif
    !!
-   !if (duneavalan) then
-   !   call duneaval(error)         ! only on current related bed transport
-   !   if (error) then
-   !      write(errmsg,'(a)') 'fm_bott3d::duneavalan returned an error. Check your inputs.'
-   !      call write_error(errmsg, unit=mdia)
-   !   end if
-   !end if
+   if (duneavalan) then
+      call duneaval(error)         ! only on current related bed transport
+      if (error) then
+         write(errmsg,'(a)') 'fm_bott3d::duneavalan returned an error. Check your inputs.'
+         call write_error(errmsg, unit=mdia)
+      end if
+   end if
    !
    ! Summation of current-related and wave-related transports on links
    !
@@ -1421,13 +1421,13 @@
       endif
    endif
    !
-   if (duneavalan) then
-      call duneaval(error)         ! only on current related bed transport
-      if (error) then
-         write(errmsg,'(a)') 'fm_bott3d::duneavalan returned an error. Check your inputs.'
-         call write_error(errmsg, unit=mdia)
-      end if
-   end if
+   !if (duneavalan) then
+   !   call duneaval(error)         ! only on current related bed transport
+   !   if (error) then
+   !      write(errmsg,'(a)') 'fm_bott3d::duneavalan returned an error. Check your inputs.'
+   !      call write_error(errmsg, unit=mdia)
+   !   end if
+   !end if
    !
    if (istat == 0) deallocate(qb_out, stat = istat)
    if (istat == 0) deallocate(width_out, stat = istat)

@@ -389,7 +389,7 @@
           endif
     call xbeach_wave_init()
     call timstop(handle_extra(27))
-       endif
+ endif
 
  call timstrt('Observations init 2 ', handle_extra(28)) ! observations init 2
  call flow_obsinit()                                 ! initialise stations and cross sections on flow grid + structure his (2nd time required to fill values in observation stations)

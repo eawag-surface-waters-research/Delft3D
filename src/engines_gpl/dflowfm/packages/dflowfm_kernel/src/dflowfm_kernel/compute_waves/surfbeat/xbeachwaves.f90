@@ -3681,7 +3681,7 @@ subroutine rollerturbulence(k)
       disrol = DR(k)
       rol    = R(k)
       cw     = max(cwav(k),sqrt(ag*epshu))
-      Tw     = 2.*pi/sigmwav(k)
+      Tw     = max(2.*pi/sigmwav(k),1d0)
       if (turb==TURB_BORE_AVERAGED) then
          Tb = Tbore(k)
       else 
