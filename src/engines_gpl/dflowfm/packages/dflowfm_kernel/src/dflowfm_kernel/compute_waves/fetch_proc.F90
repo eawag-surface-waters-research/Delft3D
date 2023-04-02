@@ -258,7 +258,7 @@ subroutine set_mpi_environment_wwo_fetch_proc()
 use mpi
 use fetch_proc_operation_data
 use m_partitioninfo,    only : jampi, my_rank, numranks, fetch_proc_rank, use_fetch_proc, &
-                               NAMECLASH_MPI_COMM_WORLD, DFM_COMM_DFMWORLD, DFM_COMM_ALLWORLD
+                               DFM_COMM_DFMWORLD, DFM_COMM_ALLWORLD
 #endif
 use unstruc_display,    only : jagui
 
@@ -268,15 +268,13 @@ integer, dimension (:), allocatable :: list_of_procs    ! a list of procs to cre
 integer                             :: error
 
 #ifdef HAVE_MPI
+DFM_COMM_ALLWORLD = DFM_COMM_DFMWORLD
 if ( use_fetch_proc == 0 ) then
     ! all processors are used for the flow modelling
-    DFM_COMM_DFMWORLD = NAMECLASH_MPI_COMM_WORLD
-    DFM_COMM_ALLWORLD = NAMECLASH_MPI_COMM_WORLD
     call mpi_comm_rank(DFM_COMM_DFMWORLD, my_rank, error)
     call mpi_comm_size(DFM_COMM_DFMWORLD, numranks, error)
 else
    ! the last proc is the fetch proc that is dedicated for the fetch parameters calculation. It is not used for the flow modelling
-   DFM_COMM_ALLWORLD = NAMECLASH_MPI_COMM_WORLD
    call mpi_comm_rank(DFM_COMM_ALLWORLD, my_rank, error)
    call mpi_comm_size(DFM_COMM_ALLWORLD, numranks, error)
    if (numranks > 2) then
@@ -295,7 +293,6 @@ else
        endif
     else
         use_fetch_proc = 0
-        DFM_COMM_DFMWORLD = NAMECLASH_MPI_COMM_WORLD
     endif
 endif
 #endif

@@ -77,8 +77,8 @@ implicit none
    !! In case of C/C++ calling side, construct an MPI communicator, and call
    !! MPI_Fint MPI_Comm_c2f(MPI_Comm comm) to convert the C comm handle
    !! to a FORTRAN comm handle.
-   integer, target :: DFM_COMM_DFMWORLD ! = NAMECLASH_MPI_COMM_WORLD !< [-] The MPI communicator for dflowfm (FORTRAN handle). {"rank": 0}
-   integer, target :: DFM_COMM_ALLWORLD                              !< [-] The MPI communicator for dflowfm including the fetch proc (FORTRAN handle). {"rank": 0}#endif
+   integer, target :: DFM_COMM_DFMWORLD  = NAMECLASH_MPI_COMM_WORLD !< [-] The MPI communicator for dflowfm (FORTRAN handle). {"rank": 0}
+   integer         :: DFM_COMM_ALLWORLD                             !< [-] The MPI communicator for dflowfm including the fetch proc (FORTRAN handle). {"rank": 0}#endif
 #endif
 
    type tghost
