@@ -123,26 +123,6 @@ function InstallAll () {
         mkdir -p $root/build_$1$2/lnx64/share/delft3d/esmf/lnx64/bin
         mkdir -p $root/build_$1$2/lnx64/share/delft3d/esmf/lnx64/bin_COS7
 
-        ## The traditional build is not executed anymore
-        ## Start with artifacts from traditional build
-        #cp -rf $root/src/bin/ $root/build_$1$2/lnx64/ &>/dev/null
-        #cp -rf $root/src/lib/ $root/build_$1$2/lnx64/ &>/dev/null
-        #cp -rf $root/src/share/ $root/build_$1$2/lnx64/ &>/dev/null
-        ## Delete DIMR/D-Flow FM/D-WAQ/D-WAVES related files: they will be added from the CMake build tasks
-        #rm -f $root/build_$1$2/lnx64/bin/dflowfm        &>/dev/null
-        #rm -f $root/build_$1$2/lnx64/bin/dimr           &>/dev/null
-        #rm -f $root/build_$1$2/lnx64/lib/libdflowfm.so* &>/dev/null
-        #rm -f $root/build_$1$2/lnx64/lib/libdimr.so*    &>/dev/null
-        #
-        #rm -f $root/build_$1$2/lnx64/bin/delwaq*                      &>/dev/null
-        #rm -f $root/build_$1$2/lnx64/lib/libdelwaq.so*                &>/dev/null
-        #rm -f $root/build_$1$2/lnx64/lib/libwaq_plugin_wasteload.so*  &>/dev/null
-        #rm -f $root/build_$1$2/lnx64/share/delft3d/bloom*             &>/dev/null
-        #rm -f $root/build_$1$2/lnx64/share/delft3d/proc_def*          &>/dev/null
-        #
-        #rm -f $root/build_$1$2/lnx64/bin/wave*                        &>/dev/null
-        #rm -f $root/build_$1$2/lnx64/bin/swan*                        &>/dev/null
-        #rm -f $root/build_$1$2/lnx64/lib/libwave*                     &>/dev/null
 
         # CMaked stuff
         cp -rf $root/build_$1$2/install/* $root/build_$1$2/lnx64/ &>/dev/null
@@ -158,6 +138,46 @@ function InstallAll () {
 }
 
 
+# =========================
+# === InstallDwaq       ===
+# =========================
+function InstallDwaq () {
+    if [ ${1} = "dwaq"  ]; then
+        echo
+        echo "Installing in build_$1$2 ..."
+        cd     $root
+        rm -rf $root/build_$1$2/lnx64
+        mkdir -p $root/build_$1$2/lnx64/bin
+        mkdir -p $root/build_$1$2/lnx64/lib
+
+
+        # CMaked stuff
+        cp -rf $root/build_$1$2/install/* $root/build_$1$2/lnx64/ &>/dev/null
+    fi
+
+    return
+}
+
+
+# =========================
+# === InstallDimr       ===
+# =========================
+function InstallDimr () {
+    if [ ${1} = "dimr"  ]; then
+        echo
+        echo "Installing in build_$1$2 ..."
+        cd     $root
+        rm -rf $root/build_$1$2/lnx64
+        mkdir -p $root/build_$1$2/lnx64/bin
+        mkdir -p $root/build_$1$2/lnx64/lib
+
+
+        # CMaked stuff
+        cp -rf $root/build_$1$2/install/* $root/build_$1$2/lnx64/ &>/dev/null
+    fi
+
+    return
+}
 
 # ============
 # === MAIN ===
@@ -308,5 +328,7 @@ fi
 BuildCMake ${config} ${buildDirExtension}
 
 InstallAll ${config} ${buildDirExtension}
+InstallDwaq ${config} ${buildDirExtension}
+InstallDimr ${config} ${buildDirExtension}
 
 echo Finished
