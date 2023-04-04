@@ -69,8 +69,8 @@
             ! Apply upwind sediment availability for structures
             !
             if (L > lnxi .and. hu(L) > epshu) then          ! wet boundary link
-               fixf = fixfac(k2, l)
-               frc  = frac(k2, l)
+               fixf = fixfac(k2, lsd)
+               frc  = frac(k2, lsd)
             else                                              ! interior link
                if (avalflux(L,lsd) >= 0) then
                   fixf = fixfac(k1, lsd)                        ! outward positive
