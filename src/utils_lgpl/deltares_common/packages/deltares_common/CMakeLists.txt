@@ -3,18 +3,14 @@ set(deltares_common_include_path ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Set version file variables
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
-set(ini_version_file "${deltares_common_include_path}/version_number.ini")
 set(fortran_version_file "${CMAKE_CURRENT_SOURCE_DIR}/src/deltares_common_version.F90")
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
 
 # Set include path to have it accessible for other components
 set(public_include_path ${deltares_common_include_path})
 
 # Set the directory of where the source code is located
 set(src_path src) 
-
-# Generate the F90 version file
-generate_version_files(${fortran_version_file} ${ini_version_file} TRUE)
-set(svn_version_file ${fortran_version_file}.svn)
 
 # Set the source files
 file(GLOB rd_token_source   ${src_path}/rd_token/*.f90
@@ -27,9 +23,7 @@ file(GLOB source    ${src_path}/*.f90
 set(library_name deltares_common)
 add_library(${library_name} ${source} 
                             ${rd_token_source} 
-                            ${fortran_version_file}
-                            ${ini_version_file}
-                            ${svn_version_file})
+                            ${fortran_version_file})
 
 if(UNIX)
    set(oss_dependencies deltares_common_c)
@@ -38,8 +32,12 @@ if(UNIX)
    add_definitions(-DHAVE_CONFIG_H=1)
 endif(UNIX)
 
+target_include_directories(${library_name}  PRIVATE ${version_include_dir})
+
+
 # Set additional compilation properties, specific for Debug mode
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointers_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exception_flag}>")
 
 set_source_files_properties(${fortran_version_file}
                             ${src_path}/system_utils.F90
@@ -47,18 +45,12 @@ set_source_files_properties(${fortran_version_file}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
 
-# Prebuild events
-prebuild_version_number(deltares_common ${fortran_version_file} 
-                                        ${checkout_src_root} 
-                                        ${ini_version_file})
            
            
 # Create the folder structure in vfproj
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source}  
                                                     ${rd_token_source} 
-                                                    ${fortran_version_file}  
-                                                    ${ini_version_file} 
-                                                    ${svn_version_file})
+                                                    ${fortran_version_file})
                                                     
- set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/deltares_common)
+set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/deltares_common)
  

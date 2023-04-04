@@ -45,10 +45,6 @@ if(NOT TARGET waqmerge)
 endif()
 
 # Ddcouple
-if(NOT TARGET ddcouple_version_number)
-    add_subdirectory(${checkout_src_root}/${ddcouple_module} ddcouple_version_number)
-endif()
-
 if(NOT TARGET ddcouple)
     add_subdirectory(${checkout_src_root}/${ddcouple_module} ddcouple)
 endif()

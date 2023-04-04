@@ -47,7 +47,8 @@ add_library(${netcdf_library_name} ${fortran_sources})
 target_compile_options(${netcdf_library_name} PRIVATE ${file_preprocessor_flag})
 
 # Set additional compilation properties, specific for Debug mode
-target_compile_options(${netcdf_library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${netcdf_library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointers_flag}>")
+target_compile_options(${netcdf_library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exception_flag}>")
 
 # Set dependencies
 set(oss_dependencies netcdf4)
