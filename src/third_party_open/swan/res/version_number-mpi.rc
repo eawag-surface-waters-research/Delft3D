@@ -31,12 +31,12 @@ LANGUAGE LANG_DUTCH, SUBLANG_DUTCH
 // Version
 //
 
-#include "wave_version.h"
+#include "version_number_swan.h"
 
 #ifdef BRANCH
 #define DESCRIPTION BRANCH
 #else
-#define DESCRIPTION "D-HYDRO wrapper around SWAN\0"
+#define DESCRIPTION "SWAN\0"
 #endif
 
 VS_VERSION_INFO VERSIONINFO
@@ -62,7 +62,7 @@ BEGIN
             VALUE "InternalName", COMPANY_NAME
             VALUE "LegalCopyright", LEGAL_COPYRIGHT
             VALUE "LegalTrademarks", LEGAL_TRADEMARKS
-            VALUE "OriginalFilename", "wave.exe\0"
+            VALUE "OriginalFilename", "swan_omp.exe\0"
             VALUE "PrivateBuild", "-\0"
             VALUE "ProductName", PRODUCT_NAME
             VALUE "ProductVersion", VERSION_FULL
