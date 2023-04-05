@@ -480,9 +480,8 @@ contains
    data ithndl / 0 /
 
    if (mpartold == 0) return  ! if the particle was not in the grid then skip
-!! if ( timon ) call timstrt( "checkpart_openbound", ithndl )
+
    dmiss = -999.D0
- ! k = kpartold
    openbound = .TRUE.
    !go along the path between new and old to find a closed boundary
    mpart_tmp = mpartold
@@ -500,10 +499,9 @@ contains
           ! check whether the bondary is closed
           if (abs(qe(L)) == 0.0D0) then
             openbound = .FALSE.
-!!            if ( timon ) call timstop ( ithndl )
             return  ! if a closed boundary is found then return with openbound = false
           else
-            ! ensure a tolerance so that the coordinate is acutally in the next cell.
+            ! ensure a tolerance so that the coordinate is actually in the next cell.
             tolx = sign(1.0D0,(xpart(ipart) - xcr)) * DTOL
             toly = sign(1.0D0,(ypart(ipart) - ycr)) * DTOL
             xpartold = xcr + tolx
@@ -515,7 +513,6 @@ contains
               mpart_tmp = 0  ! this is outside the grid exit the routine
               mpart(ipart) = 0
               openbound = .TRUE. ! has to be an open boundary because the q is greater than 0
-!!              if ( timon ) call timstop ( ithndl )
               return
             endif
           endif
@@ -525,12 +522,9 @@ contains
       end do
        ! if no boundary found, then we are in the same segment,  exit the routine
       if (.not.isboundary) then
-!!        if ( timon ) call timstop ( ithndl )
         return
       endif
    end do
 
-!!    if ( timon ) call timstop ( ithndl )
-
-      end subroutine
+   end subroutine
 end module
