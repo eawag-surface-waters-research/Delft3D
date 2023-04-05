@@ -72,7 +72,7 @@ module m_network
       
       integer, allocatable            :: lin2grid(:)
       type(t_chainage2cross), pointer :: line2cross(:,:) => null()         !< List containing cross section indices per flow link: (L,1) for gridpoint at 
-                                                                           !< the start of the flow link, (L,2) for the flow link itself and (L,3) for gridpoint at 
+                                                                           !< the start of the flow link, (L,2) for the flow link itself and (L,1) for gridpoint at 
                                                                            !< the end of the flow link.
       type(t_chainage2cross), pointer :: gpnt2cross(:) => null()         !< list containing cross section indices per gridpoint-chainage at begin and end of a link
       logical, allocatable            :: hysteresis_for_summerdike(:,:)    !< array indicating for hysteresis in summerdikes
@@ -189,22 +189,23 @@ contains
       integer :: m
       integer :: icrs1
       integer :: icrs2
+      integer :: L
       
       double precision                   :: f
       double precision                   :: chainage1
       double precision                   :: chainage2
       double precision                   :: chainage
       double precision                   :: chainageg
-      type(t_administration_1d), pointer :: adm
+      type(t_administration_1d), pointer          :: adm
       type(t_branch), pointer            :: pbran
-      type(t_CrossSection),  pointer     :: c1, c2 
+      type(t_CrossSection), pointer      :: C1, C2
       integer, allocatable, dimension(:) :: crossOrder
       integer, allocatable, dimension(:) :: lastAtBran
       integer                            :: icrsBeg
       integer                            :: icrsEnd
       double precision                   :: xBeg
       double precision                   :: xEnd
-      integer                            :: i, j, L
+      integer                            :: i, j
       integer                            :: timerHandle
       logical                            :: interpolDone
       logical                            :: initError = .false.
@@ -418,15 +419,17 @@ contains
          call resetMaxerrorLevel()
          do L = 1, linall_1d
             do i = 1,3
-               c1 => network%crs%cross(adm%line2cross(L,i)%C1)
-               c2 => network%crs%cross(adm%line2cross(L,i)%C2)
-               if (c1%crosstype /= c2%crosstype) then
-                  call SetMessage(LEVEL_WARN, 'Incorrect CrossSection input for CrossSections '''//trim(c1%csid)//''', '''//trim(c2%csid)//''' on branch '''//trim(pbran%id)// &
-                     '''. CrossSections must be of the same type!')
-               endif
-               if (c1%closed /= c2%closed) then
-                  call SetMessage(LEVEL_WARN, 'Incorrect CrossSection input for CrossSections '''//trim(c1%csid)//''', '''//trim(c2%csid)//''' on branch '''//trim(pbran%id)// &
-                     '''. CrossSections must have same closed state!')
+               if (adm%line2cross(L,i)%C1 > 0 .and. adm%line2cross(L,i)%C2 > 0) then
+                  c1 => network%crs%cross(adm%line2cross(L,i)%C1)
+                  c2 => network%crs%cross(adm%line2cross(L,i)%C2)
+                  if (c1%crosstype /= c2%crosstype) then
+                     call SetMessage(LEVEL_WARN, 'Incorrect CrossSection input for CrossSections '''//trim(c1%csid)//''', '''//trim(c2%csid)//''' on branch '''//trim(pbran%id)// &
+                        '''. CrossSections must be of the same type!')
+                  endif
+                  if (c1%closed /= c2%closed) then
+                     call SetMessage(LEVEL_WARN, 'Incorrect CrossSection input for CrossSections '''//trim(c1%csid)//''', '''//trim(c2%csid)//''' on branch '''//trim(pbran%id)// &
+                        '''. CrossSections must have same closed state!')
+                  endif
                endif
             enddo
          enddo

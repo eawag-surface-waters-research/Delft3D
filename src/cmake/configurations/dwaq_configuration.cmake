@@ -49,6 +49,10 @@ if(NOT TARGET waq_delftio)
     add_subdirectory(${checkout_src_root}/${waq_delftio_module} waq_delftio)
 endif()
 
+if(NOT TARGET wq_processes)
+    add_subdirectory(${checkout_src_root}/${wq_processes_module} wq_processes)
+endif()
+
 #
 # WAQ Tools
 #=============
