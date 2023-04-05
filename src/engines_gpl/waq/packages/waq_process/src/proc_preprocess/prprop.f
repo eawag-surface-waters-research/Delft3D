@@ -427,10 +427,10 @@
       IF ( LASWI ) THEN
          DO IACT = 1 , NO_ACT
             IF ( ACTUSE(IACT) .NE. 1 ) THEN
-               WRITE(lunrep,*) ' ERROR: activated process not found ',
+               WRITE(lunrep,*) ' WARNING: activated process not found ',
      +           'in process definition file'
                WRITE(lunrep,*) ' process ID: ',ACTLST(IACT)
-               ierror = 1
+               NOWARN = NOWARN + 1
             ENDIF
          ENDDO
       ENDIF
