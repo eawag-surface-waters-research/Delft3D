@@ -40,9 +40,9 @@
 
 subroutine delwaq1_read_input_data()
     use m_delwaq1_data
-
+      
     implicit none
-
+      
 
     cchar   = ' '
     ilun    = 0
@@ -67,8 +67,8 @@ subroutine delwaq1_read_input_data()
     endif
     syname = psynam
     imultp = multp
-    if ( associated(psynam) ) deallocate(psynam)
-    if ( associated(multp) )  deallocate(multp )
+    deallocate(psynam)
+    deallocate(multp )
     deltim = otime
     car(1) = ' '
     k = 2
@@ -157,7 +157,7 @@ subroutine delwaq1_read_input_data()
     call dlwq09 ( lun    , lchar  , filtype, car    , iar    , &
                   icmak  , iimax  , iwidth , ibflag , vrsion , &
                   ioutpt , ioutps , outputs, ierr   , iwar   )
-
+    
     call dlwqs1 ( lunrep       , npos         , &
                   cchar        , vrsion       , &
                   ilun         , lch          , &
@@ -181,6 +181,6 @@ subroutine delwaq1_read_input_data()
 
     deallocate(syname)
     deallocate(imultp)
-
-
+    
+    
 end subroutine delwaq1_read_input_data
