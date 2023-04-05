@@ -23,7 +23,7 @@
 
       subroutine write_version(lun)
 
-      use delwaq_version_module
+      use delpar_version_module
       use timers
 !
       implicit none    ! force explicit typing
@@ -59,7 +59,7 @@
 !     Get version string from file version_number.h.svn
 !     (see also version_number project)
 !
-      call getfullversionstring_delwaq(version_string)
+      call getfullversionstring_delpar(version_string)
 !
       if (lun==0) then
 !        scherm uitvoer
