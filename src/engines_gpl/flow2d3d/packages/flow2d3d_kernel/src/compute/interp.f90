@@ -25,8 +25,8 @@ function interp (x, y, kfmin, kfmax, kfstep, kmax, xval)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! interpolate y values for xval in the range of x array

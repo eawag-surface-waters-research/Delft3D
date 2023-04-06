@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
       subroutine write_data ( afile , itime , notim , noq1  , noq2  , &
                               noq3  , noval , nosca , flagsf, valnam, &

@@ -30,8 +30,8 @@ subroutine disper(kmxdt     ,kmxt      ,np        ,nfreqs    ,angle     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !      Function: Finding extreme levels of critical layers for

@@ -27,8 +27,8 @@ subroutine chkstr(lundia    ,nmax      ,mmax      ,nmaxus    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Check position structure for Local Weirs, Rigid Sheets, (Fixed) Gates and

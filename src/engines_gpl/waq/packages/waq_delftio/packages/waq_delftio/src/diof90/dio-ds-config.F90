@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!
 !!! Dio-setting: Dio Config
@@ -41,7 +41,7 @@ module waq_Dio_ds_config
 
 
 use waq_dio_prop
-use waq_delftio_version_module
+use delwaq_version_module
 
 implicit none
 
@@ -600,7 +600,7 @@ subroutine DioGetVersion(retVal)
 
     ! body
     retVal = ' '
-    call getfullversionstring_delftio(retval)
+    call getfullversionstring_delwaq(retval)
 
 end subroutine DioGetVersion
 
@@ -615,7 +615,7 @@ subroutine DioGetIdent(retVal)
 
     ! body
     retVal = ' '
-    call getfullversionstring_delftio(retval)
+    call getfullversionstring_delwaq(retval)
 
 end subroutine DioGetIdent
 

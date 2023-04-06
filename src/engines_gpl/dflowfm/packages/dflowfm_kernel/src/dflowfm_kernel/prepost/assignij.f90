@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> assign indices to the nodes of the cell neighboring cell kcell in kdir direction
 subroutine assignij(kcell, kdir, kneighbor, ic, jc)

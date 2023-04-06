@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    subroutine wave_makeplotvars
    use m_waves, only: ustokes, vstokes, ust_mag, fwav_mag, ustx_cc, usty_cc

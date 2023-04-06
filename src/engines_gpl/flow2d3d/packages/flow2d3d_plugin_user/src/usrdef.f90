@@ -25,8 +25,8 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Initialisation of array's used by user defined

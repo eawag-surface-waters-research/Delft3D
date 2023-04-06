@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine getAVCOR( n, xz, yz, zz )                  ! average coordinate values
  use m_netw

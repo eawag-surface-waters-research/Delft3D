@@ -25,8 +25,8 @@ subroutine tstat_bed(nostat, lsedtot, nmax, zdpsed, zbdsed, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determines the bed composition at stations

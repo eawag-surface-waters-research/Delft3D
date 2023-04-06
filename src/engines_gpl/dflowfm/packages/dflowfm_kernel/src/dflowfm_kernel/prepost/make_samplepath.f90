@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 ! make a heighest walk in a structured sample set
 subroutine make_samplepath(xp,yp)

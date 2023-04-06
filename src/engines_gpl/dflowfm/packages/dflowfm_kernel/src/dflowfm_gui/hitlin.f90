@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE HITLIN(P1,P2,X1,Y1,X2,Y2,V,XHIT,YHIT,JA)
       implicit none

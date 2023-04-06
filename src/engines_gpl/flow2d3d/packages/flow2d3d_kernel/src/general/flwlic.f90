@@ -25,8 +25,8 @@ subroutine flwlic(lunscr    ,version_full ,prgnm     ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Obtains list of user defined functions.

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE MODLN2( X, Y, Z, MMAX, NUMPI, MP, XP, YP, NPUT)
       USE M_MISSING

@@ -16,7 +16,8 @@ set(fortranc_library_name fortranc)
 add_library(${fortranc_library_name} ${fortranc_sources})
 
 # Set additional compilation properties, specific for Debug mode
-target_compile_options(${fortranc_library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${fortranc_library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointers_flag}>")
+target_compile_options(${fortranc_library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exception_flag}>")
 
 # Create the folder structure in project
 source_group("${visual_studio_source_group_name}" FILES ${fortranc_sources})
@@ -74,7 +75,8 @@ target_compile_definitions(${fortrangis_library_name} INTERFACE HAVE_SHAPELIB)
 target_compile_definitions(${fortrangis_library_name} INTERFACE HAVE_GDAL)
 
 # Set additional compilation properties, specific for Debug mode
-target_compile_options(${fortrangis_library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${fortrangis_library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointers_flag}>")
+target_compile_options(${fortrangis_library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exception_flag}>")
 
 # Create the folder structure in vfproj
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/.." FILES ${fortran_sources})

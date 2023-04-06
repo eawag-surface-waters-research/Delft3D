@@ -26,8 +26,8 @@ subroutine avalan(dps       ,depchg    ,gvu       ,guv       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Smooth bottom, using avalance effect

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Orthogonalisation settings, both for regular grids and unstructured nets.
 module m_orthosettings

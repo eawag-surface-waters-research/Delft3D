@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine setbobsongullies()      ! override bobs along pliz's, jadykes == 0: only heights, 1 = also dyke attributes
  use m_netw

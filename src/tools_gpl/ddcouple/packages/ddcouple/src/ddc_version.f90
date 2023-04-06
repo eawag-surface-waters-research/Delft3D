@@ -23,6 +23,8 @@
 
 subroutine ddc_version(lunrep)
 
+    use delwaq_version_module
+       
     ! print version to report file
 
     integer, intent(in)      :: lunrep        ! unit number report file
@@ -35,7 +37,7 @@ subroutine ddc_version(lunrep)
 
     ! set version
 
-    call getfullversionstring_DDCOUPLE(idstr)
+    call getfullversionstring_delwaq(idstr)
     k = len_trim(idstr)
 
     ! write credentials to report file

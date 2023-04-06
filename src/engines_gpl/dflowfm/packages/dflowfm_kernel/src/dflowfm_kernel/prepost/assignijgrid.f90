@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>  assign indices (i,j) to the curvi-linear grid
 subroutine assignijgrid(k, ic, jc)

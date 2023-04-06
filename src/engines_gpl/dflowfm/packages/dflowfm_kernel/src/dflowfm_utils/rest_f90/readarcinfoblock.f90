@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE READARCINFOBLOCK(MINP,D,MC,NC,RMIS)
       USE M_MISSING

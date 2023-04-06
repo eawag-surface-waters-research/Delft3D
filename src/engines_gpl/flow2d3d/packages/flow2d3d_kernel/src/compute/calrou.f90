@@ -27,8 +27,8 @@ subroutine calrou(kn_sum    ,fracto    ,fracbu      ,depth     ,ch_lin_ser, &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Finalize rougness calculation.

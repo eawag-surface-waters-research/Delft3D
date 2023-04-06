@@ -28,8 +28,8 @@ subroutine wrdwqt(comfil    ,lundia    ,error     ,itcur     ,itimc     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !

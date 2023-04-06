@@ -41,8 +41,8 @@ subroutine difu(icreep    ,timest    ,lundia    ,nst       ,icx       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes transport in the u, v and w-direction.

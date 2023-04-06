@@ -27,8 +27,8 @@ subroutine chksit(lundia    ,error     ,nostat    ,ntruv     ,ntru      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Checks the location of the following points (if

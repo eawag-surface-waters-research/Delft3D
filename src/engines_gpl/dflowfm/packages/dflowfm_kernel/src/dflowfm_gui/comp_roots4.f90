@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> solves the quartic equation Ax^4+Bx^3+Cx^2+Dx+E=0
 subroutine comp_roots4(coeffs,x)

@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
       subroutine set_old_items( lurep , old_items, notot , nopa  , nofun    ,
      +                          nosfun, nodisp   , novelo, syname, paname   ,

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine getlinkareawid2D(L,wu2,dz,ai,hpr,ar,wid)
  use m_flow, only : slotw2D

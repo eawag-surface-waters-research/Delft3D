@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> A complete single user time step (init-run-finalize).
  subroutine flow_usertimestep(key, iresult)                   ! do computational flowsteps until timeuser

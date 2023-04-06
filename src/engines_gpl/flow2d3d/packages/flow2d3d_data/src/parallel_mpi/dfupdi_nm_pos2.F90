@@ -25,8 +25,8 @@ subroutine dfupdi_nm_pos2 ( field, ks, ke, gdp )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Updates field array of type integer through exchanging halo values

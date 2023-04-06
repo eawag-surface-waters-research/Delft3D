@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   subroutine crosspoly(xa,ya,xb,yb,xpl,ypl,npl,XM,YM,CRPM,JA,isec, distanceStartPolygon)
 

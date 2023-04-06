@@ -27,8 +27,8 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads initial field conditions record from an

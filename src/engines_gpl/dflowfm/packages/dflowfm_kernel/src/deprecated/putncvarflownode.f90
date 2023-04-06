@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine putncvarflownode( ncid, idq, fnod, kx, nx, itim, jint)
 use netcdf

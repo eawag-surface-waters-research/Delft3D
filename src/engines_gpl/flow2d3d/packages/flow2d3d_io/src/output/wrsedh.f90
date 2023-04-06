@@ -33,8 +33,8 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    ,ntruv     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the time varying data for sediment to the Delft3D-FLOW

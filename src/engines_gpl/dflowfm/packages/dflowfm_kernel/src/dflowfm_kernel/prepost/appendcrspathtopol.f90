@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Appends the polyline of a cross section path to the current global
 !! polyline. Useful for converting cross sections, thin dams or thin

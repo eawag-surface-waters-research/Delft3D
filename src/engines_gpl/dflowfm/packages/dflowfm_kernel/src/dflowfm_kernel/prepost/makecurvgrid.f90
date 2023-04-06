@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> generate the curvi-grid from the node indices (ic,jc)
 subroutine makecurvgrid(ic, jc)

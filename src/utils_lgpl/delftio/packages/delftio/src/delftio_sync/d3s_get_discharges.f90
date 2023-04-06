@@ -25,8 +25,8 @@ subroutine d3s_get_discharges( nst, nto, kcd, hydrbc )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !

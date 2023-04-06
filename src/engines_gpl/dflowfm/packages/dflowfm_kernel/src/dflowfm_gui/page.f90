@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE PAGE(HLPTXT,NUMTXT,NUMTOP,IH)
       implicit none

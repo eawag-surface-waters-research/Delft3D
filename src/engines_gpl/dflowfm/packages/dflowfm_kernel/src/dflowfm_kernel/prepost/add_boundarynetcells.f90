@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !  increase netcell admin. to include boundary nodes (safety)
    subroutine add_boundarynetcells()

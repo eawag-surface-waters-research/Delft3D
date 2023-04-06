@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE MENUV2(NWHAT,OPTION,MAXOPT,EXP,MAXEXP)
       use unstruc_files

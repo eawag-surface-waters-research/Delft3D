@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> check if structures on flowlinks are unique
 subroutine check_structures_and_fixed_weirs()

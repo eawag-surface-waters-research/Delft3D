@@ -28,8 +28,8 @@ subroutine distri(ttkiw     ,tiwtk     ,tkepro    ,tkedis    ,futg      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Redistributes the TKE-IWE energy transfer rates

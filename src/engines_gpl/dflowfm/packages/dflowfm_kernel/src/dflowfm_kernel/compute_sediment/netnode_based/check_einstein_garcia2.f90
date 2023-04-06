@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine check_einstein_garcia2(aref,h,z0,rs,ein)
 use m_sediment, only : numintverticaleinstein

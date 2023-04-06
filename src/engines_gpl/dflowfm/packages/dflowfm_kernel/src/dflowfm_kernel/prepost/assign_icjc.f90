@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> assign node-based indices (ic,jc) in the net
 subroutine assign_icjc(xp,yp, ic, jc, iexit)

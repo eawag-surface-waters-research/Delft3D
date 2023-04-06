@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>    return y-component in link coordinate frame of vector in "klnup"-node coordinate frame
       double precision function nodup2liny(L,ib,ux,uy)

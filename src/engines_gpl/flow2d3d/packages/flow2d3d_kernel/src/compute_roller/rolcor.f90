@@ -30,8 +30,8 @@ subroutine rolcor(hrms      ,tp        ,theta     ,hu        ,hv         , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! 
 ! Computes correction for mass fluxes (used in difu.f90) due to roller mass flux

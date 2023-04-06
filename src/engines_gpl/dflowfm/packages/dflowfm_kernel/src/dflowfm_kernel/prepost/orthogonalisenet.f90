@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> net orthogonalisation and smoothing
 SUBROUTINE ORTHOGONALISENET(jarerun)

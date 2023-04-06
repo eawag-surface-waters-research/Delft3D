@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE WRIDEP(MMDD,ZC,M1,N1,MC,NC,mmax,nmax)
       implicit none

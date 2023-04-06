@@ -31,7 +31,7 @@
 #include "config.h"
 #endif
 
-subroutine partfm(lunpr)
+   subroutine partfm(lunpr)
 
    use precision_part
    use MessageHandling
@@ -123,6 +123,7 @@ subroutine partfm(lunpr)
 
    call ini_part(partinifile, partrelfile, tstart_user, dts, 0)
 
+
    call realloc(xrpart, npmax)
    call realloc(yrpart, npmax)
    call realloc(zrpart, npmax)
@@ -130,6 +131,7 @@ subroutine partfm(lunpr)
    call realloc_particles(npmax, .true., ierror)
    irpart = 1
    ptref = 0.0D0
+   !call part_findcell(Nrpart,xrpart,yrpart,mrpart,ierror)
 
    if ( notrak > 0 ) call unc_init_trk()
    call unc_init_map(hyd%crs, hyd%waqgeom, hyd%nosegl, hyd%nolay)
@@ -138,64 +140,72 @@ subroutine partfm(lunpr)
    time1 = time0
    istat = -1 ! skip copying of data durin the first stime stap
    call part_readhydstep(hyd,itime,istat)
-   if ( istat /= 0 ) then
-      if (istat == 99) then
-         write ( lunpr, * ) ' Timing mismatch between input and actual data:', time0, itime
-         write (   *  , * ) ' Timing mismatch between input and actual data:', time0, itime
-      else
-         write ( lunpr, * ) ' Error during reading of the hydrodynamic time step data', time0, itime
-         write (   *  , * ) ' Error during reading of the hydrodynamic time step data', time0, itime
-      end if
-   else
 
-      do while (istat == 0)
-         ! determine if map and track files must be produced
+   if (istat == 99) then
+      write ( lunpr, * ) ' Timing mismatch between input and actual data:', time0, itime
+      write (   *  , * ) ' Timing mismatch between input and actual data:', time0, itime
+      goto 1234
+   else if (istat /= 0) then
+      write ( lunpr, * ) ' Error during reading of the hydrodynamic time step data', time0, itime
+      write (   *  , * ) ' Error during reading of the hydrodynamic time step data', time0, itime
+      goto 1234
+   end if
 
-         mapfil = .true.
-         trkfil = .true.
-         if ( notrak .eq. 0 ) trkfil = .false.
-         if (icwste                     < 1     ) mapfil = .false.
-         if (itime                      < icwsta) mapfil = .false.
-         if (itime - idelt              >=  icwsto) mapfil = .false.
-         if (mod(itime-icwsta, icwste)  >=  idelt ) mapfil = .false.
+   do while (istat == 0)
+   !     determine if map and track files must be produced
 
-         if ( trkfil .and. mod(itime, notrak * idelt) .ge. idelt) trkfil = .false.
-         if ( trkfil ) call unc_write_trk()
-         if (mapfil) call unc_write_map()
+      mapfil = .true.
+      trkfil = .true.
+      if ( notrak .eq. 0 ) trkfil = .false.
+      if (icwste                     < 1     ) mapfil = .false.
+      if (itime                      < icwsta) mapfil = .false.
+      if (itime - idelt              >=  icwsto) mapfil = .false.
+      if (mod(itime-icwsta, icwste)  >=  idelt ) mapfil = .false.
 
-         call report_progress( lunpr, int(time0), itstrtp, itstopp, nopart, npmax )
+      if ( trkfil .and. mod(itime, notrak * idelt) .ge. idelt) trkfil = .false.
+      if ( trkfil ) call unc_write_trk()
+      if (mapfil) call unc_write_map()
 
-         if (time1 .ge. tstop_user) then
-            exit
-         endif
-         time0 = time1
-         time1 = min(tstop_user, time0 + dts)
-         call part_readhydstep(hyd,itime,istat)
-         if ( idtset .gt. 0 )                                                    &
-            call part17 ( itime    , nosubs   , idtset   , idtime   , decay    ,    &
-                          decays   )
-         call partfm_decay()
+      call report_progress( lunpr, int(time0), itstrtp, itstopp, nopart, npmax )
 
-         ! interpolation for wind speed/direction in the wind table
-         call part15 ( lun(2)   , itime    , spawnd   , numcells , nowind   ,    &
-                       iwndtm   , wveloa   , wdira    , wvelo    , wdir     )
 
-         ! transport (advection, dispersion, winddrag)
-         call update_part(itime)
-         call part10fm()
-         call oildspfm(itime)
-      end do
-   endif
 
-   !
-   ! Finish the calculation in all cases
-   !
+      if (time1 .ge. tstop_user) then
+         exit
+      endif
+      time0 = time1
+      time1 = min(tstop_user, time0 + dts)
+      call part_readhydstep(hyd,itime,istat)
+      if ( idtset .gt. 0 )                                                    &
+         call part17 ( itime    , nosubs   , idtset   , idtime   , decay    ,    &
+                       decays   )
+      call partfm_decay()
+
+!     interpolation for wind speed/direction in the wind table
+      call part15 ( lun(2)   , itime    , spawnd   , numcells , nowind   ,    &
+                    iwndtm   , wveloa   , wdira    , wvelo    , wdir     )
+
+!     transport (advection, dispersion, winddrag)
+!      jsfer_old = jsferic
+!      jsferic = 0 ! everything in part10fm is in meters
+      call update_part(itime)
+      call part10fm()
+!      jsferic = jsfer_old ! back to what it should be
+      call oildspfm(itime)
+!     interpolation for wind speed/direction in the wind table
+   end do
+
+1234 continue
+
+
    call unc_close_trk()
    call unc_close_map()
 
    if ( timon ) call timstop ( ithndl )
 
-contains
+   return
+
+   contains
 
    subroutine report_progress( lunpr, itime, itstrtp, itstopp, nopart, npmax )
    integer, intent(in) :: lunpr, itime, itstrtp, itstopp, nopart, npmax
@@ -215,5 +225,6 @@ contains
                  i6.4 ,'D-', i2.2 ,'H-', i2.2 ,'M-', i2.2 ,'S. (', f5.1, '% completed) ',   &
                  i11,' part. (of',i11,')')
 
-end subroutine report_progress
-end subroutine partfm
+
+   end subroutine report_progress
+   end subroutine partfm

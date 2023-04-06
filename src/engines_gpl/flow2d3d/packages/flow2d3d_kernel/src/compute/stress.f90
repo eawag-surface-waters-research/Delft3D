@@ -27,8 +27,8 @@ subroutine stress(u0        ,v0        ,usus      ,vsus      ,windu     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: The interface stress between the suspension layer

@@ -11,7 +11,7 @@
 #define _WIN32_WINNT 0x0501
 #define WIN_LEAN_AND_MEAN
 
-#include "afxres.h"
+#include "windows.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -40,7 +40,7 @@ LANGUAGE LANG_DUTCH, SUBLANG_DUTCH
 #endif
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION MAJOR,MINOR,REVISION
+ FILEVERSION MAJOR,MINOR
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x29L
@@ -91,7 +91,7 @@ END
 
 2 TEXTINCLUDE DISCARDABLE
 BEGIN
-    "#include ""afxres.h""\r\n"
+    "#include ""windows.h""\r\n"
     "\0"
 END
 

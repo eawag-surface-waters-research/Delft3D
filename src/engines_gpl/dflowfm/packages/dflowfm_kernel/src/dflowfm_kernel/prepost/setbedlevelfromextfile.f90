@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old cell centre bottom level file
  use timespace_data

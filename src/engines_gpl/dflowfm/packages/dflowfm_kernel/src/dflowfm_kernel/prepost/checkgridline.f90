@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> check if a connection from node1 to node2 exists
 subroutine checkgridline(node1, node2, lconflict)

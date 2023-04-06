@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> set wall to flowlinks and wall to flownode oientations
  subroutine setwallorientations()

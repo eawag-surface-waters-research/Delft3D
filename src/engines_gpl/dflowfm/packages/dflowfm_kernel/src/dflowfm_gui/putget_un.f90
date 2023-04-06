@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE putget_un(NUM,NWHAT,NPUT,NUMB,XP,YP,KEY)
       implicit none

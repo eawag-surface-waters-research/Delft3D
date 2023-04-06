@@ -31,8 +31,8 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Sets the geometry parameters of the model. if the

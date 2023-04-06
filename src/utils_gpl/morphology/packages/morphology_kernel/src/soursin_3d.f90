@@ -28,8 +28,8 @@ subroutine soursin_3d(h1          ,thick0      ,thick1      ,sigsed      ,thicks
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes the sour and sink terms for the 3D case

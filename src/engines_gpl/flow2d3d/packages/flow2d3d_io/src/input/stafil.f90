@@ -26,8 +26,8 @@ subroutine stafil(lundia    ,filsta    ,fmttmp    ,error     ,nostat    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the monitoring station definitions from the

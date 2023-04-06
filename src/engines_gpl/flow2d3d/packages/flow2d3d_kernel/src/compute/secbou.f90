@@ -28,8 +28,8 @@ subroutine secbou(j         ,nmmaxj    ,kmax      ,icx       ,icy       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Horizontal boundary conditions for secondary

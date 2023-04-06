@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !     plot stencil for higher-order corrections to screen
       subroutine plotklnup(L)

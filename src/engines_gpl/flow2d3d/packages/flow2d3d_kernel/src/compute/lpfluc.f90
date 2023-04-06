@@ -27,8 +27,8 @@ subroutine lpfluc(j         ,nmmaxj    ,nmmax     ,kfu       ,kfv       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determines horizontal fluctuating velocities

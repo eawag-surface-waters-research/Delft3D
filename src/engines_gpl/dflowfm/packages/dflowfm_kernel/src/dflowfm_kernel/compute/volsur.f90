@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine volsur()                                 ! volsur entirely in s1 because of s1 iteration
  use timers

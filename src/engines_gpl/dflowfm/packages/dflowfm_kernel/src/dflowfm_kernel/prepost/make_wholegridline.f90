@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> generate the first gridline of the whole grid, i.e. on all center splines
 subroutine make_wholegridline(ierror)
