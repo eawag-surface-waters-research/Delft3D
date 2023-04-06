@@ -256,12 +256,12 @@ subroutine set_fluxes(Lnx,q,qe)
 
    implicit none
 
-   integer,                               intent(in)  :: Lnx
-   double precision, dimension(Lnx),      intent(in)  :: q
+   integer,                        intent(in)  :: Lnx
+   double precision, dimension(*), intent(in)  :: q
 
-   double precision, dimension(numedges), intent(out) :: qe
+   double precision, dimension(*), intent(out) :: qe
 
-   integer                                            :: j, L, Lf, lay, l3d
+   integer                                     :: j, L, Lf, lay, l3d
 
    integer(4) ithndl              ! handle to time this subroutine
    data ithndl / 0 /
@@ -489,6 +489,7 @@ end subroutine dealloc_partfluxes
 
 !> (re)allocate flux coefficients et cetera
 subroutine realloc_partrecons()
+   use partmem, only: hyd
    use m_partmesh
    use m_partrecons
    use m_alloc
@@ -496,15 +497,15 @@ subroutine realloc_partrecons()
    use m_sferic, only: jsferic
    implicit none
 
-   call realloc(qe, numedges, keepExisting=.false., fill=DMISS)
-   call realloc(qbnd, numedges, keepExisting=.false., fill=0)
+   call realloc(qe, numedges*hyd%nolay, keepExisting=.false., fill=DMISS)
+   call realloc(qbnd, numedges*hyd%nolay, keepExisting=.false., fill=0)
    call realloc(cell_closed_edge, numedges, keepExisting=.false., fill=0)
-   call realloc(u0x, numcells, keepExisting=.false., fill=DMISS)
-   call realloc(u0y, numcells, keepExisting=.false., fill=DMISS)
+   call realloc(u0x, numcells*hyd%nolay, keepExisting=.false., fill=DMISS)
+   call realloc(u0y, numcells*hyd%nolay, keepExisting=.false., fill=DMISS)
    if ( jsferic.eq.1 ) then
-      call realloc(u0z, numcells, keepExisting=.false., fill=DMISS)
+      call realloc(u0z, numcells*hyd%nolay, keepExisting=.false., fill=DMISS)
    end if
-   call realloc(alphafm, numcells, keepExisting=.false., fill=DMISS)
+   call realloc(alphafm, numcells*hyd%nolay, keepExisting=.false., fill=DMISS)
 
    call realloc(ireconst, numcells+1, keepExisting=.false., fill=0)
    return
