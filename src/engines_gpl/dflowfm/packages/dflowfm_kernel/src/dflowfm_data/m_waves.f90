@@ -46,7 +46,7 @@ module m_waves
  double precision, allocatable, target      :: hwavcom(:)           !< [m] root mean square wave height (m) from external source
  double precision, allocatable, target      :: twav(:)              !< [s] wave period {"location": "face", "shape": ["ndx"]}
  double precision, allocatable, target      :: phiwav(:)            !< [degree] mean wave direction (degrees) from external source
- double precision, allocatable, target      :: Uorb(:)              !< [m/s] orbital velocity {"location": "face", "shape": ["ndx"]}
+ double precision, allocatable, target      :: uorb(:)              !< [m/s] orbital velocity {"location": "face", "shape": ["ndx"]}
  double precision, allocatable, target      :: ustokes(:)           !< [m/s] wave induced velocity, link-based and link-oriented
  double precision, allocatable, target      :: vstokes(:)           !< [m/s] wave induced velocity, link-based and link-oriented
  double precision, allocatable              :: rlabda(:)            !< [m] wave length
