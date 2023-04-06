@@ -250,10 +250,10 @@ subroutine unc_write_map()
       !     then we can make the structure of the netCDF file nicer
       if ( hyd%nolay == 1 ) then
          ierr = nf90_put_var(imapfile, id_map_depth_averaged_particle_concentration(isub), &
-                    constitutents(isub,:,1), start = [1, it_map])
+                    constituents(isub,:,1), start = [1, it_map])
       else
          ierr = nf90_put_var(imapfile, id_map_depth_averaged_particle_concentration(isub), &
-                    constitutents(isub,:,:), start = [1, 1, it_map])
+                    constituents(isub,:,:), start = [1, 1, it_map])
       endif
 
       if (ierr /= nf90_noerr) then
@@ -370,7 +370,7 @@ subroutine unc_write_part(ifile, itime, id_trk_parttime, id_trk_partx, id_trk_pa
    integer,                        intent(in)  :: itime
    integer,                        intent(in)  :: id_trk_parttime, id_trk_partx, id_trk_party, id_trk_partz
 
-   double precision, dimension(:), allocatable :: xx, yy
+   double precision, dimension(:), allocatable :: xx, yy, zz
 
    double precision                            :: dis2
 
@@ -401,14 +401,6 @@ subroutine unc_write_part(ifile, itime, id_trk_parttime, id_trk_partx, id_trk_pa
       end do
    end if
 
-   !
-   ! Compute the height of the particles in the water from the layer (lpart)
-   ! and the position within the layer
-   !
-   if ( kmx > 0 ) then
-       call comp_height( zz, kpart, hpart )
-   endif
-
    ierr = nf90_put_var(ifile, id_trk_parttime, timepart, (/ itime /))
    if ( ierr == 0 ) then
       ierr = nf90_put_var(ifile, id_trk_partx, xx, start=(/ 1,itime /), count=(/ NopartTot,1 /) )
@@ -422,7 +414,7 @@ subroutine unc_write_part(ifile, itime, id_trk_parttime, id_trk_partx, id_trk_pa
    ! and the position within the layer. Then write it to the file
    !
    if ( kmx > 0 ) then
-      !call comp_height( zz, kpart, hpart )
+      !call comp_height( zz, lpart, hpart )
       ierr = nf90_put_var(ifile, id_trk_partz, zz, start=(/ 1,itime /), count=(/ NopartTot,1 /) )
    end if
 
@@ -505,7 +497,7 @@ subroutine comp_concentration(h, nconst, iconst, c)
    use m_partmesh
    use m_flowgeom, only : Ndx, ba, bl
    use m_flowparameters, only: epshs
-   use m_flow, only: Ndkx
+   use m_flow, only: Ndkx, kmx
    use timers
 
    implicit none
@@ -536,18 +528,17 @@ subroutine comp_concentration(h, nconst, iconst, c)
 
    !  compute concentration (parts per unit volume) , but for the oil module should it be per m2 (ie divided by the depth of the segment), for sticky and surface oil
    do lay = 1,kmx
-     do k=1,Ndx
-        if ( h(k) .gt. epshs ) then
-           c(iconst,k,lay) = c(iconst,k,lay) / (ba(k)*(h(k,lay)-bl(k,lay)))
-           if (oil) then
-              do ifract = 1 , nfract
-                 c(1 + 3 * (ifract - 1), k, lay) =  c(1 + 3 * (ifract - 1), k, lay) * (h(k,lay)-bl(k,lay))  ! surface floating oil per m2
-                 c(3 + 3 * (ifract - 1), k, lay) =  c(3 + 3 * (ifract - 1), k, lay) * (h(k,lay)-bl(k,lay))  ! surface floating oil per m2
-              end do
+      do k=1,Ndx
+         if ( h(k) .gt. epshs ) then
+            c(iconst,k,lay) = c(iconst,k,lay) / (ba(k)*(h(k,lay)-bl(k,lay)))
+            if (oil) then
+               do ifract = 1 , nfract
+                  c(1 + 3 * (ifract - 1), k, lay) =  c(1 + 3 * (ifract - 1), k, lay) * (h(k,lay)-bl(k,lay))  ! surface floating oil per m2
+                  c(3 + 3 * (ifract - 1), k, lay) =  c(3 + 3 * (ifract - 1), k, lay) * (h(k,lay)-bl(k,lay))  ! surface floating oil per m2
+               end do
+            endif
          endif
-      else
-         c(iconst,k) = 0d0
-      end if
+      end do
    end do
 
    if ( timon ) call timstop ( ithndl )
