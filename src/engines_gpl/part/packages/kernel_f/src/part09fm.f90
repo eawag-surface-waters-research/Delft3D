@@ -246,6 +246,8 @@ contains
                      nulay = nolay
                      exit
                   endif
+               else
+                  exit
                endif
             enddo
             if ( nulay .gt. nolay ) then
@@ -260,7 +262,6 @@ contains
                laypart(i) = nulay
             endif
 
-            laypart(i) = nulay
 !    for one layer models (2dh), the release will be in the user-defined location
             if ( modtyp .eq. model_oil .and. laywaste(id) .eq. 1 ) then
                hpart(i) = zwasth

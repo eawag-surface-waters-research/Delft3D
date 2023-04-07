@@ -380,6 +380,8 @@ module part14fm_mod
                      nulay = nolay
                      exit
                   endif
+               else
+                  exit
                endif
             enddo
 
