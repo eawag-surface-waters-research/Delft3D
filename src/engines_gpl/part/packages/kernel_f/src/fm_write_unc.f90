@@ -492,7 +492,7 @@ end subroutine setTUDUnitString
 
 !> compute concentrations of particles (parts per unit volume) in flownodes
 subroutine comp_concentration(h, nconst, iconst, c)
-   use partmem, only: mpart, wpart, oil, nfract, nopart
+   use partmem, only: mpart, wpart, oil, nfract, nopart, hyd
    use m_particles, laypart => kpart
    use m_partmesh
    use m_flowgeom, only : Ndx, ba, bl
@@ -528,9 +528,9 @@ subroutine comp_concentration(h, nconst, iconst, c)
 
    !  compute concentration (parts per unit volume) , but for the oil module should it be per m2 (ie divided by the depth of the segment), for sticky and surface oil
    do lay = 1,kmx
-      do k=1,Ndx
+      do k=1,hyd%nosegl
          if ( h(k,lay) .gt. epshs ) then
-            kl = k + (lay-1) * Ndx
+            kl = k + (lay-1) * hyd%nosegl
             c(iconst,k,lay) = c(iconst,k,lay) / (ba(kl)*(h(k,lay)-bl(kl)))
             if (oil) then
                do ifract = 1 , nfract

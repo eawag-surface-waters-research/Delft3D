@@ -116,11 +116,12 @@ end subroutine update_particles
 !> update positions of particles within triangles
 subroutine update_particles_in_cells(numremaining, ierror)
    use partmem, only: nopart, mpart
-   use m_particles
+   use m_particles, laypart => kpart
    use m_partrecons
    use m_partmesh
    use MessageHandling
    use m_sferic, only: jsferic
+   use m_flowgeom, only: lnx
    use timers
 
    implicit none
@@ -129,7 +130,7 @@ subroutine update_particles_in_cells(numremaining, ierror)
    integer,        intent(out) :: ierror       !< error (1) or not (0)
 
    integer                     :: ipart
-   integer                     :: i, k, k1, k2, L
+   integer                     :: i, k, k1, k2, L, kl
    integer                     :: ja
    integer                     :: Lexit
 
@@ -170,6 +171,7 @@ subroutine update_particles_in_cells(numremaining, ierror)
       if ( dtremaining(ipart).eq.0d0 .or. mpart(ipart).lt.1 ) cycle
       ! get cell (flownode) particle in in
       k = mpart(ipart)
+      kl = k + (laypart(ipart) - 1) * lnx
 
       ! compute exit time <= dtremaining
       tex = dtremaining(ipart)
@@ -177,10 +179,10 @@ subroutine update_particles_in_cells(numremaining, ierror)
       Lexit = 0   ! exit edge (flowlink)
 
       ! compute velocity at current position
-      ux0 = u0x(k) + alphafm(k)*(xpart(ipart)-xzwcell(k))
-      uy0 = u0y(k) + alphafm(k)*(ypart(ipart)-yzwcell(k))
+      ux0 = u0x(kl) + alphafm(kl)*(xpart(ipart)-xzwcell(k))
+      uy0 = u0y(kl) + alphafm(kl)*(ypart(ipart)-yzwcell(k))
       if ( jsferic.ne.0 ) then
-         uz0 = u0z(k) + alphafm(k)*(zpart(ipart)-zzwcell(k))
+         uz0 = u0z(kl) + alphafm(kl)*(zpart(ipart)-zzwcell(k))
       end if
 
       ! loop over edges (netlinks) of cells
@@ -248,7 +250,7 @@ subroutine update_particles_in_cells(numremaining, ierror)
 
             if ( un.gt.max(DTOLun_rel*d,DTOLun) ) then   ! normal velocity does not change sign: sufficient to look at u0.n
                ! compute exit time for this edge: ln(1+ d/un alpha) / alpha
-               dvar = alphafm(k)*dis/un
+               dvar = alphafm(kl)*dis/un
                if ( dvar.gt.-1d0) then
                   t = dis/un
                   if ( abs(dvar).ge.DTOL ) then
@@ -278,10 +280,10 @@ subroutine update_particles_in_cells(numremaining, ierror)
       dt = min(dtremaining(ipart), tex)
 
       ! update particle
-      if ( abs(alphafm(k)).lt.DTOL ) then
+      if ( abs(alphafm(kl)).lt.DTOL ) then
          dvar = dt
       else
-         dvar = (exp(alphafm(k)*dt)-1d0)/alphafm(k)
+         dvar = (exp(alphafm(kl)*dt)-1d0)/alphafm(kl)
       end if
 
       xpart(ipart) = xpart(ipart) + dvar * ux0
