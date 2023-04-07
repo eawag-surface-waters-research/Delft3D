@@ -635,7 +635,8 @@ module oildspfm_mod
 
          enddo
 
-         ic = mpart(i)
+         ic   = mpart(i)
+         ilay = lpart(i)
          if (ic > 0) ic = iabs(cell2nod(ic))
 ! references to the gridcell (is in this case can be replaced by kpart (segment number)         ic = lgrid3(npart(i), mpart(i))
          if ( ic .gt. 0 ) then !che
@@ -718,7 +719,7 @@ module oildspfm_mod
                      endif
                      cdelv = cdelv * voil
                      qentr = cdelv * wfact
-                     cfloat = constituents(ioilt(ifrac),ic)                  ! from the map file
+                     cfloat = constituents(ioilt(ifrac),ic,ilay)      ! from the map file
 !                     if ( lplgr ) then                               ! but if possible, from the
 !                        ix = int((xa(i) - windw1) / xpf) + 1         ! more detailed plot grid
 !                        iy = int((ya(i) - windw3) / ypf) + 1

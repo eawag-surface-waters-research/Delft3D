@@ -98,8 +98,8 @@
 
    integer                           :: ndx            !< [-] Number of flow nodes (internal + boundary). {"rank": 0}
    integer                           :: ndxi           !< [-] Number of internal flowcells  (internal = 2D + 1D ). {"rank": 0}
-   double precision, allocatable     :: ba (:)         !< [m2] bottom area, if < 0 use table in node type {"location": "face", "shape": ["ndx"]}
-   double precision, allocatable     :: bl(:,:)        !< [m] bottom level (m) (positive upward) {"location": "face", "shape": ["ndx", "kmx"]}
+   double precision, allocatable     :: ba(:)          !< [m2] bottom area, if < 0 use table in node type {"location": "face", "shape": ["ndx*kmx"]}
+   double precision, allocatable     :: bl(:)          !< [m] bottom level (m) (positive upward) {"location": "face", "shape": ["ndx*kmx"]}
    integer                           :: lnxi           !< [-] nr of flow links (internal, 1D+2D    ). {"rank": 0}
    integer                           :: lnx            !< [-] nr of flow links (internal + boundary). First we have 1D links, next 2D links, next boundary links (first 1D, then 2D). {"rank": 0}
    integer,          allocatable     :: ln    (:,:)    !< [-] 1D link (2,*) node   administration, 1=nd1,  2=nd2   linker en rechter celnr {"shape": [2, "lnkx"]}

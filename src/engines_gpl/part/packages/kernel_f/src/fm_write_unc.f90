@@ -507,7 +507,7 @@ subroutine comp_concentration(h, nconst, iconst, c)
    integer,                                     intent(in)  :: iconst !< particle tracer constituent number
    double precision, dimension(Nconst,Ndx,kmx), intent(out) :: c      !< constituents
 
-   integer :: i, k, ifract, lay
+   integer :: i, k, kl, ifract, lay
 
    integer(4) ithndl              ! handle to time this subroutine
    data ithndl / 0 /
@@ -529,12 +529,13 @@ subroutine comp_concentration(h, nconst, iconst, c)
    !  compute concentration (parts per unit volume) , but for the oil module should it be per m2 (ie divided by the depth of the segment), for sticky and surface oil
    do lay = 1,kmx
       do k=1,Ndx
-         if ( h(k) .gt. epshs ) then
-            c(iconst,k,lay) = c(iconst,k,lay) / (ba(k)*(h(k,lay)-bl(k,lay)))
+         if ( h(k,lay) .gt. epshs ) then
+            kl = k + (lay-1) * Ndx
+            c(iconst,k,lay) = c(iconst,k,lay) / (ba(kl)*(h(k,lay)-bl(kl)))
             if (oil) then
                do ifract = 1 , nfract
-                  c(1 + 3 * (ifract - 1), k, lay) =  c(1 + 3 * (ifract - 1), k, lay) * (h(k,lay)-bl(k,lay))  ! surface floating oil per m2
-                  c(3 + 3 * (ifract - 1), k, lay) =  c(3 + 3 * (ifract - 1), k, lay) * (h(k,lay)-bl(k,lay))  ! surface floating oil per m2
+                  c(1 + 3 * (ifract - 1), k, lay) =  c(1 + 3 * (ifract - 1), k, lay) * (h(k,lay)-bl(kl))  ! surface floating oil per m2
+                  c(3 + 3 * (ifract - 1), k, lay) =  c(3 + 3 * (ifract - 1), k, lay) * (h(k,lay)-bl(kl))  ! surface floating oil per m2
                end do
             endif
          endif
