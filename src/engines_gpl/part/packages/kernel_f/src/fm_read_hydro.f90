@@ -41,7 +41,7 @@ subroutine part_readhydstep(hyd,itime,istat)
    integer            ,intent(inout) :: istat
 
    !  local declarations
-   integer iseg, iq, L
+   integer iseg, iq, L, K, iql
 
    integer(4) ithndl              ! handle to time this subroutine
    data ithndl / 0 /
@@ -67,15 +67,29 @@ subroutine part_readhydstep(hyd,itime,istat)
          vol1(iseg) = real(hyd%volume(iseg),8)
          h1(iseg) = vol1(iseg)/ba(iseg)
       end do
-      do L = 1, lnx !hyd%noq
-         iq = lne2ln(L)
-         if (iq > 0) then
-            if (hyd%edge_type(iq) == 2 .or. hyd%edge_type(iq) == 22) then
-               q1(iq) = real(hyd%flow(iq),8)
-            else
-               q1(iq) = real(-hyd%flow(iq),8)
-            endif
-         endif
+      do K = 1, hyd%nolay
+          do L = 1, lnx  ! horizontal
+             iql = lne2ln(L)  !loop at boundary cells
+             iq  = lne2ln(L) + (K-1)*lnx  !
+             if (iql > 0) then
+                if (hyd%edge_type(iql) == 2 .or. hyd%edge_type(iql) == 22) then  ! upstream boundary?
+                   q1(iq) = real(hyd%flow(iq),8)
+                else
+                   q1(iq) = real(-hyd%flow(iq),8)
+                endif
+             endif
+          end do
+      end do
+      !
+      ! vertical exchanges:
+      ! - ndx is the total number of segments
+      ! - we have hyd%nosegl segments per layer
+      ! - the number of interfaces between the layers is one less than the number of layers,
+      !   hence the correction.
+      !
+      do L = 1, ndx-hyd%nosegl
+         iq  = hyd%noq1 + hyd%noq2 + L
+         q1(iq) = real(hyd%flow(iq),8)
       end do
    end if
 

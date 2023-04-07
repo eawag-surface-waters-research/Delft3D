@@ -30,7 +30,7 @@
 !> add particles
 subroutine add_particles(Nadd, xadd, yadd)
    use partmem, only: nopart, mpart
-   use m_particles
+   use m_particles, laypart => kpart
    use m_alloc
    use m_sferic, only: jsferic
    use geometry_module, only: sphertocart3D
@@ -42,7 +42,7 @@ subroutine add_particles(Nadd, xadd, yadd)
    double precision, dimension(Nadd), intent(in)  :: xadd       !< x-coordinates of particles to be added
    double precision, dimension(Nadd), intent(in)  :: yadd       !< y-coordinates of particles to be added
 
-   call calculate_position_in_grid( nadd, xadd, yadd, nopart, xpart, ypart, zpart, mpart )
+   call calculate_position_in_grid( nadd, xadd, yadd, nopart, xpart, ypart, zpart, mpart, laypart, hpart )
 end subroutine add_particles
 
 
@@ -280,7 +280,7 @@ end subroutine part_findcell
 !> (re)allocate
 subroutine realloc_particles(Nsize, LkeepExisting, ierror)
    use partmem, only: mpart
-   use m_particles
+   use m_particles, laypart => kpart, laypart_prevt => kpart_prevt
    use m_alloc
    use m_missing
    use m_sferic, only: jsferic
@@ -305,6 +305,10 @@ subroutine realloc_particles(Nsize, LkeepExisting, ierror)
    call realloc(dtremaining, npmargin, keepExisting=LkeepExisting, fill=0d0)
    call reallocp(mpart, npmargin, keepExisting=LkeepExisting, fill=0)
    call realloc(mpart_prevt, npmargin, keepExisting=LkeepExisting, fill=0)
+   call realloc(laypart, npmargin, keepExisting=LkeepExisting, fill=0)
+   call realloc(laypart_prevt, npmargin, keepExisting=LkeepExisting, fill=0)
+   call realloc(hpart, npmargin, keepExisting=LkeepExisting, fill=DMISS)
+   call realloc(hpart_prevt, npmargin, keepExisting=LkeepExisting, fill=DMISS)
 
    call realloc(numzero, npmargin, keepExisting=LkeepExisting, fill=0)
    numzero = 0
@@ -323,6 +327,8 @@ subroutine dealloc_particles()
    if ( allocated(zpart)       ) deallocate(zpart)
    if ( allocated(dtremaining) ) deallocate(dtremaining)
    if ( associated(mpart)      ) deallocate(mpart)
+   if ( allocated(kpart)       ) deallocate(kpart)
+   if ( allocated(hpart)       ) deallocate(hpart)
 
    if ( allocated(numzero)     ) deallocate(numzero)
 
@@ -332,6 +338,8 @@ subroutine dealloc_particles()
    if ( allocated(xrpart)       ) deallocate(xrpart)
    if ( allocated(yrpart)       ) deallocate(yrpart)
    if ( allocated(zrpart)       ) deallocate(zrpart)
+   if ( allocated(krpart)       ) deallocate(krpart)
+   if ( allocated(hrpart)       ) deallocate(hrpart)
    Nrpart = 0
 end subroutine dealloc_particles
 

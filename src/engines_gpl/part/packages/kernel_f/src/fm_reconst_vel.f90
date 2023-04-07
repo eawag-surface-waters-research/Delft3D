@@ -155,6 +155,7 @@ end subroutine reconst_vel_coeffs_fmx
 
 !> reconstruct velocity in cells
 subroutine reconst_vel(q, h0, h1, ierror)
+   use partmem, only: hyd
    use m_flowgeom, only: Ndx, Lnx, bl
    use m_flowparameters, only: epshs
    use m_partrecons
@@ -173,7 +174,7 @@ subroutine reconst_vel(q, h0, h1, ierror)
 
    integer,                          parameter   :: N = 4
 
-   integer                                       :: icell, j, k, L
+   integer                                       :: icell, icell3d, j, k, L, lay, L3d
 
    double precision                              :: hk0, hk1, h, un
 
@@ -196,45 +197,50 @@ subroutine reconst_vel(q, h0, h1, ierror)
    end if
    alphafm = 0d0
 
-   do icell=1,numcells
-      ! get flownode number (for s, bl)
-      k = iabs(cell2nod(icell))
+   do lay = 1,hyd%nolay
+      do icell=1,numcells
+         ! get flownode number (for s, bl)
+         k = iabs(cell2nod(icell)) + (lay-1) * hyd%nosegl
+         icell3d = icell + (lay-1) * numcells
 
-      ! get water depth
-      hk0 = h0(k) !s0(k)-bl(k)
-      hk1 = h1(k) !s1(k)-bl(k)
-      if ( abs(hk1-hk0).gt.DTOL ) then
-         if ( hk0.gt.epshs .and. hk1.gt.epshs ) then
-            h = (hk1-hk0)/(log(hk1)-log(hk0))
-         else if ( hk0.gt.epshs .or. hk1.gt.epshs ) then
-            h = 0.5d0*(hk0+hk1)
+         ! get water depth
+         hk0 = h0(k) !s0(k)-bl(k)
+         hk1 = h1(k) !s1(k)-bl(k)
+         if ( abs(hk1-hk0).gt.DTOL ) then
+            if ( hk0.gt.epshs .and. hk1.gt.epshs ) then
+               h = (hk1-hk0)/(log(hk1)-log(hk0))
+            else if ( hk0.gt.epshs .or. hk1.gt.epshs ) then
+               h = 0.5d0*(hk0+hk1)
+            else
+               h = 0d0
+            end if
          else
-            h = 0d0
+            h = 0.5d0*(hk0+hk1)
          end if
-      else
-         h = 0.5d0*(hk0+hk1)
-      end if
 
-      if ( h.le.epshs ) cycle
+         if ( h.le.epshs ) cycle
 
-      if ( jsferic.eq.0 ) then
-         do j=jreconst(icell),jreconst(icell+1)-1
-            L = ireconst(j)
-            un = qe(L)/(h*w(L))
-            u0x(icell)     = u0x(icell)   + Areconst(1,j)*un
-            u0y(icell)     = u0y(icell)   + Areconst(2,j)*un
-            alphafm(icell) = alphafm(icell) + Areconst(3,j)*un
-         end do
-      else
-         do j=jreconst(icell),jreconst(icell+1)-1
-            L = ireconst(j)
-            un = qe(L)/(h*w(L))
-            u0x(icell)     = u0x(icell)   + Areconst(1,j)*un
-            u0y(icell)     = u0y(icell)   + Areconst(2,j)*un
-            u0z(icell)     = u0z(icell)   + Areconst(3,j)*un
-            alphafm(icell) = alphafm(icell) + Areconst(4,j)*un
-         end do
-      end if
+         if ( jsferic.eq.0 ) then
+            do j=jreconst(icell),jreconst(icell+1)-1
+               L   = ireconst(j)
+               L3d = L + (lay-1) * numedges
+               un = qe(L3d)/(h*w(L))
+               u0x(icell3d)     = u0x(icell3d)   + Areconst(1,j)*un
+               u0y(icell3d)     = u0y(icell3d)   + Areconst(2,j)*un
+               alphafm(icell3d) = alphafm(icell3d) + Areconst(3,j)*un
+            end do
+         else
+            do j=jreconst(icell),jreconst(icell+1)-1
+               L   = ireconst(j)
+               L3d = L + (lay-1) * numedges
+               un = qe(L3d)/(h*w(L))
+               u0x(icell3d)     = u0x(icell3d)   + Areconst(1,j)*un
+               u0y(icell3d)     = u0y(icell3d)   + Areconst(2,j)*un
+               u0z(icell3d)     = u0z(icell3d)   + Areconst(3,j)*un
+               alphafm(icell3d) = alphafm(icell3d) + Areconst(4,j)*un
+            end do
+         end if
+      end do
    end do
 
    ierror = 0
@@ -243,30 +249,34 @@ end subroutine reconst_vel
 
 !> set all fluxes, including internal
 subroutine set_fluxes(Lnx,q,qe)
+   use partmem, only: hyd
    use m_partmesh
    use m_partfluxes
    use timers
 
    implicit none
 
-   integer,                               intent(in)  :: Lnx
-   double precision, dimension(Lnx),      intent(in)  :: q
+   integer,                        intent(in)  :: Lnx
+   double precision, dimension(*), intent(in)  :: q
 
-   double precision, dimension(numedges), intent(out) :: qe
+   double precision, dimension(*), intent(out) :: qe
 
-   integer                                            :: j, L, Lf
+   integer                                     :: j, L, Lf, lay, l3d
 
    integer(4) ithndl              ! handle to time this subroutine
    data ithndl / 0 /
    if ( timon ) call timstrt( "set_fluxes", ithndl )
 
-   do L=1,numedges
-      qe(L) = 0d0
-      do j=jflux2link(L),jflux2link(L+1)-1
-         Lf = iflux2link(j)
-         if ( Lf.gt.0 ) then
-            qe(L) = qe(L) + Aflux2link(j)*q(Lf)
-         end if
+   do lay=1,hyd%nolay
+      do L=1,numedges
+         L3d = L + (lay-1) * numedges
+         qe(L3d) = 0d0
+         do j=jflux2link(L),jflux2link(L+1)-1
+            Lf = iflux2link(j) + (lay-1) * lnx
+            if ( Lf.gt.0 ) then
+               qe(L3d) = qe(L) + Aflux2link(j)*q(Lf)
+            end if
+         end do
       end do
    end do
 
@@ -479,6 +489,7 @@ end subroutine dealloc_partfluxes
 
 !> (re)allocate flux coefficients et cetera
 subroutine realloc_partrecons()
+   use partmem, only: hyd
    use m_partmesh
    use m_partrecons
    use m_alloc
@@ -486,15 +497,15 @@ subroutine realloc_partrecons()
    use m_sferic, only: jsferic
    implicit none
 
-   call realloc(qe, numedges, keepExisting=.false., fill=DMISS)
-   call realloc(qbnd, numedges, keepExisting=.false., fill=0)
+   call realloc(qe, numedges*hyd%nolay, keepExisting=.false., fill=DMISS)
+   call realloc(qbnd, numedges*hyd%nolay, keepExisting=.false., fill=0)
    call realloc(cell_closed_edge, numedges, keepExisting=.false., fill=0)
-   call realloc(u0x, numcells, keepExisting=.false., fill=DMISS)
-   call realloc(u0y, numcells, keepExisting=.false., fill=DMISS)
+   call realloc(u0x, numcells*hyd%nolay, keepExisting=.false., fill=DMISS)
+   call realloc(u0y, numcells*hyd%nolay, keepExisting=.false., fill=DMISS)
    if ( jsferic.eq.1 ) then
-      call realloc(u0z, numcells, keepExisting=.false., fill=DMISS)
+      call realloc(u0z, numcells*hyd%nolay, keepExisting=.false., fill=DMISS)
    end if
-   call realloc(alphafm, numcells, keepExisting=.false., fill=DMISS)
+   call realloc(alphafm, numcells*hyd%nolay, keepExisting=.false., fill=DMISS)
 
    call realloc(ireconst, numcells+1, keepExisting=.false., fill=0)
    return

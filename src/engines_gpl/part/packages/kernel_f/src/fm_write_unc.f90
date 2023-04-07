@@ -410,11 +410,11 @@ subroutine unc_write_part(ifile, itime, id_trk_parttime, id_trk_partx, id_trk_pa
    endif
 
    !
-   ! Compute the height of the particles in the water from the layer (lpart)
+   ! Compute the height of the particles in the water from the layer (laypart)
    ! and the position within the layer. Then write it to the file
    !
    if ( kmx > 0 ) then
-      !call comp_height( zz, lpart, hpart )
+      !call comp_height( zz, laypart, hpart )
       ierr = nf90_put_var(ifile, id_trk_partz, zz, start=(/ 1,itime /), count=(/ NopartTot,1 /) )
    end if
 
@@ -493,7 +493,7 @@ end subroutine setTUDUnitString
 !> compute concentrations of particles (parts per unit volume) in flownodes
 subroutine comp_concentration(h, nconst, iconst, c)
    use partmem, only: mpart, wpart, oil, nfract, nopart
-   use m_particles
+   use m_particles, laypart => kpart
    use m_partmesh
    use m_flowgeom, only : Ndx, ba, bl
    use m_flowparameters, only: epshs
@@ -521,7 +521,7 @@ subroutine comp_concentration(h, nconst, iconst, c)
       if ( k.eq.0 ) cycle
 
       k   = iabs(cell2nod(k))
-      lay = lpart(i)
+      lay = laypart(i)
 
       c(iconst,k,lay) = c(iconst,k,lay) + wpart(iconst, i)
    end do
