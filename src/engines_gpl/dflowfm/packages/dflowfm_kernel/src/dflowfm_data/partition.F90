@@ -1732,10 +1732,10 @@ implicit none
                        exit
                    end if
                 end do  
-            end if
-            if ( jafound == 0 ) then
-               call qnerror('partition_fill_sendlist: numbering error', message2, message3)
-               goto 1234
+               if ( jafound == 0 ) then
+                  call qnerror('partition_fill_sendlist: numbering error', message2, message3)
+                  goto 1234
+               end if
             end if
          endif
       end do
