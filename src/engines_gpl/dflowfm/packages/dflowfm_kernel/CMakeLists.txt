@@ -268,7 +268,8 @@ set_source_files_properties(${fortran_version_file}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
 # Set additional compilation properties, specific for Debug mode
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointers_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exception_flag}>")
 
 # Define preprocessor definitions 
 if (WIN32)

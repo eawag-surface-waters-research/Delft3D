@@ -167,6 +167,10 @@
          enddo
       enddo
 
+      if ( ierr > 0 ) then
+         goto 1000
+      endif
+
 !     allocate
 
       !jvb max_ntdmpq = 6 * ndmpar
