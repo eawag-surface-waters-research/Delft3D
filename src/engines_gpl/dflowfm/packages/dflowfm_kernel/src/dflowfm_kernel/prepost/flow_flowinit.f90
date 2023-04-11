@@ -1054,6 +1054,14 @@ end if
     zbndz0(n) = max(bl(k2), s1(k2)) ! NOTE: the s1=max(bl, s1) step can only be done later, so do it here as well.
  end do
 
+   ihandle = 0
+ call timstrt('makeVolumeTables', ihandle)
+ if (useVolumeTables) then
+     filename = defaultFilename('volumeTables')
+     call makeVolumeTables(filename)
+ endif
+ call timstop(ihandle)
+ 
  ! Load restart file (*_map.nc) assigned in the *.mdu file OR read a *.rst file
  jawel = .false.
  if (len_trim(md_restartfile) > 0 ) then
@@ -1369,14 +1377,6 @@ end if
        endif
     enddo
  endif
-
-  ihandle = 0
- call timstrt('makeVolumeTables', ihandle)
- if (useVolumeTables) then
-     filename = defaultFilename('volumeTables')
-     call makeVolumeTables(filename)
- endif
- call timstop(ihandle)
 
  call volsur()          ! flowinit
  call a1vol1tot()
