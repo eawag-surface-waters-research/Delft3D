@@ -77,8 +77,10 @@ implicit none
    !! In case of C/C++ calling side, construct an MPI communicator, and call
    !! MPI_Fint MPI_Comm_c2f(MPI_Comm comm) to convert the C comm handle
    !! to a FORTRAN comm handle.
-   integer, target :: DFM_COMM_DFMWORLD = NAMECLASH_MPI_COMM_WORLD !< [-] The MPI communicator for dflowfm (FORTRAN handle). {"rank": 0}
+   integer, target :: DFM_COMM_DFMWORLD  = NAMECLASH_MPI_COMM_WORLD !< [-] The MPI communicator for dflowfm (FORTRAN handle). {"rank": 0}
+   integer         :: DFM_COMM_ALLWORLD                             !< [-] The MPI communicator for dflowfm including the fetch proc (FORTRAN handle). {"rank": 0}#endif
 #endif
+
    type tghost
       integer, allocatable       :: list(:)            !< list of ghost nodes or links, in order of their corresponding other domain, dim(1:number of ghost nodes/links)
       integer, allocatable       :: N(:)               !< cumulative number of ghost nodes/links per domain in the list, starts with fictitious domain 0, dim(0:numdomains)
@@ -91,6 +93,9 @@ implicit none
    integer                       :: ndomains = 0       !< number of domains
    integer                       :: numranks = 1       !< number of ranks
    integer                       :: my_rank            !< own rank
+
+   integer                       :: use_fetch_proc = 0   !< if 1, then a separate proc is dedicated to calculate fetch parlength and depth
+   integer                       :: fetch_proc_rank = -1 !< the rank of the fetch proc. it is the last proc of the entire proc group when it is active 
    
    character(len=4)              :: sdmn               !< domain number string
 
@@ -140,6 +145,7 @@ implicit none
    integer, parameter            :: ITAG_U=2           !< communication tag
    integer, parameter            :: ITAG_SALL=3        !< communication tag
    integer, parameter            :: ITAG_SNONOVERLAP=4 !< communication tag
+   integer, parameter            :: ITAG_CN=5          !< communication tag
    
    integer                       :: numghost_s            !< number of water-level ghost nodes
    integer, allocatable, target  :: ighostlist_s(:)       !< list of water-level ghost nodes, in order of their corresponding domain
@@ -1646,7 +1652,7 @@ implicit none
        send_list, nr_send_list, ierror)
       
       use m_alloc
-      use network_data,    only: xzw, yzw, xk, yk
+      use network_data,    only: numk, xzw, yzw, xk, yk
       use m_flowgeom,      only: xu, yu
       use geometry_module, only: dbdistance
       use m_missing,       only: dmiss
@@ -1670,6 +1676,7 @@ implicit none
       integer                             :: numdomains, idum
       
       integer                             :: jafound
+	  integer                             :: node
       double precision, parameter         :: TOLERANCE=1d-4
       character(len=80)                   :: message2, message3
 
@@ -1716,8 +1723,20 @@ implicit none
          if ( jafound == 0 ) then
             write(message2,*) 'my_rank=', my_rank,' itype=',itype
             write(message3,*) 'j=',j,' N_req=',N_req,' num=',num
-            call qnerror('partition_fill_sendlist: numbering error', message2, message3)
-            goto 1234
+            if ( itype == ITYPE_CN ) then
+                do node = 1, numk
+                   if ( dbdistance(x_req(j), y_req(j), xk(node), yk(node), jsferic, jasfer3D, dmiss) < TOLERANCE ) then ! found
+                       num = num + 1
+                       temp_list(num) = node
+                       jafound = 1
+                       exit
+                   end if
+                end do  
+               if ( jafound == 0 ) then
+                  call qnerror('partition_fill_sendlist: numbering error', message2, message3)
+                  goto 1234
+               end if
+            end if
          endif
       end do
 
@@ -1786,6 +1805,8 @@ implicit none
       
       character(len=MAXNAMELEN)               :: filename
       character(len=4)                        :: sdmn       ! domain number string
+      integer, allocatable                    :: nghostlist_cn_temp(:) !< temporal storige of ghost list reference data
+      integer, allocatable                    :: ighostlist_cn_temp(:) !< temporal storige of ghost list
 
       ierror = 1
 
@@ -1836,7 +1857,6 @@ implicit none
          call partition_make_sendlist_MPI(ITYPE_S,   numlay_cellbased+1,numlay_nodebased+1, isendlist_s, nsendlist_s)
          call partition_make_sendlist_MPI(ITYPE_Sall,numlay_cellbased+1,numlay_nodebased+1, isendlist_sall, nsendlist_sall)
          call partition_make_sendlist_MPI(ITYPE_U,   numlay_cellbased+1,numlay_nodebased+1, isendlist_u, nsendlist_u)
-         call partition_make_sendlist_MPI(ITYPE_CN,  numlay_cellbased+1,numlay_nodebased+1, isendlist_cn, nsendlist_cn)
          
 !        communicate sendlist back to obtain (possibly) reduced ghostlist in own domain
 !        deallocate first
@@ -1846,14 +1866,18 @@ implicit none
          if ( allocated(ighostlist_sall) ) deallocate(ighostlist_sall)   
          nghostlist_u = 0
          if ( allocated(ighostlist_u)    ) deallocate(ighostlist_u)
-         nghostlist_cn = 0
-         if ( allocated(ighostlist_cn)   ) deallocate(ighostlist_cn)
          
 !        fill ghostlists
          call partition_make_sendlist_MPI(ITYPE_S,   numlay_cellbased+1,numlay_nodebased+1, ighostlist_s, nghostlist_s, ifromto=1)
          call partition_make_sendlist_MPI(ITYPE_Sall,numlay_cellbased+1,numlay_nodebased+1, ighostlist_sall, nghostlist_sall, ifromto=1)
          call partition_make_sendlist_MPI(ITYPE_u,   numlay_cellbased+1,numlay_nodebased+1, ighostlist_u, nghostlist_u, ifromto=1)
-         call partition_make_sendlist_MPI(ITYPE_CN,  numlay_cellbased+1,numlay_nodebased+1, ighostlist_cn, nghostlist_cn, ifromto=1)
+         
+         nghostlist_cn_temp = nghostlist_cn
+         ighostlist_cn_temp = ighostlist_cn
+         call partition_make_sendlist_MPI(ITYPE_CN,  numlay_cellbased+1,numlay_nodebased+1, isendlist_cn, nsendlist_cn)
+         nghostlist_cn = nghostlist_cn_temp
+         ighostlist_cn = ighostlist_cn_temp
+         
       end if
       
 !     set number of send nodes/links
@@ -2495,7 +2519,7 @@ implicit none
             goto 1234
          end if
          call update_ghost_loc(ndomains, ndim, n, solution, nghostlist_cn(ndomains-1), ighostlist_cn, &
-             nghostlist_cn, nsendlist_cn(ndomains-1), isendlist_cn, nsendlist_cn, ITAG_U, error)
+             nghostlist_cn, nsendlist_cn(ndomains-1), isendlist_cn, nsendlist_cn, ITAG_CN, error)
 !
 !     3D-extension         
       else if ( itype == ITYPE_S3D ) then
@@ -4970,7 +4994,7 @@ end subroutine gatherv_int_data_mpi_dif
       implicit none
       integer :: ierr
 #ifdef HAVE_MPI      
-      call MPI_Abort(DFM_COMM_DFMWORLD, DFM_GENERICERROR, ierr)
+      call MPI_Abort(DFM_COMM_ALLWORLD, DFM_GENERICERROR, ierr)
 #endif
       return
    end subroutine abort_all
@@ -5260,7 +5284,7 @@ loop_over_nodes: &
         end if  
     end do
     
-    if ( min_ghost_level <= max_ghost_level) then
+    if ( min_ghost_level_for_cell <= max_ghost_level) then
         call add_data_to_ghost_list(ghost_level(cell), idomain(cell), ghost_list, node)
     end if
 end do loop_over_nodes
@@ -5317,14 +5341,14 @@ end module m_partitioninfo
 
       integer             :: ierr
 
-      call MPI_barrier(DFM_COMM_DFMWORLD,ierr)
+      call MPI_barrier(DFM_COMM_ALLWORLD,ierr)
 
       if ( my_rank.eq.0 ) then
          write(6,*) "press a key from rank 0..."
          read(5,*)
       end if
 
-      call MPI_barrier(DFM_COMM_DFMWORLD,ierr)
+      call MPI_barrier(DFM_COMM_ALLWORLD,ierr)
 #else
       write(6,*) "press a key..."
       read(5,*)

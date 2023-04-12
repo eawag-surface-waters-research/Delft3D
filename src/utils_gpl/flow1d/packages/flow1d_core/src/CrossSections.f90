@@ -957,88 +957,83 @@ end subroutine interpolateWidths
 subroutine useBranchOrdersCrs(crs, brs)
    ! modules
    use messageHandling
-
+   use sorting_algorithms, only: dpquicksort
    implicit none
    ! variables
    type(t_CrossSectionSet), intent(inout)          :: crs       !< Current cross-section set
    type(t_branchSet)      , intent(in   )          :: brs       !< Set of reaches
 
    ! local variables
-   integer  ibr, orderNumberCount
-   integer  i
-   integer  iorder
-   integer  ics
+   integer  ibr, i
+   integer  ics, iorder, minOrderNumber, OrderNumberCount, currentOrder
    integer  crsCount
-   integer  minindex
-   integer  minOrdernumber
-   integer  minBranchindex
-   double precision  minoffset
-   integer, allocatable, dimension(:,:)   :: orderNumber       !< first index contains orderNumber, second contains start position for this ordernumber
-   type(t_CrossSection)                   :: cross
+   integer, allocatable, dimension(:,:)         :: orderNumber       !< first index contains orderNumber, second contains start position for this ordernumber
+   double precision, allocatable, dimension(:)  :: crsData
+   integer, allocatable, dimension(:)           :: crsIndices
+   type(t_CrossSection)                         :: cross
+   type(t_CrossSectionSet)                      :: tempset
+   integer                                      :: maxBranchOrder
+   double precision                             :: maxChainage
+   double precision                             :: F1, F2 !< sorting multiplication factors
 
-   !program code
-   allocate(crs%crossSectionIndex(crs%count), orderNumber(crs%Count+2,2))
-
-   ! order cross sections, first on order number, then on branch index, last on offset
-   orderNumberCount = 1
+   crsCount = crs%count
+   tempset%size = crsCount
+   tempset%count = crsCount
+   
+   maxBranchOrder = max(1,maxval(brs%branch(:)%ordernumber))
+   maxChainage    = maxval(crs%cross(:)%chainage)
+   
+   ! Multiplication factors for sorting 
+   F2 = maxChainage+1
+   F1 = (maxBranchOrder+1)*F2
+   
+   allocate(crsData(crsCount),crs%crossSectionIndex(crscount),crsIndices(crsCount),tempset%cross(crsCount),orderNumber(maxBranchOrder+2,2))
+   ! We want to sort the array on branchid, followed by order number and finally by chainage.
+   ! To this end we multiply branch id by F1 and branch order by F2 to be able to sort them all at once.
+   ! see: UNST-3680
+   do ics = 1, crsCount
+      crsIndices(ics) = ics
+      ibr = crs%cross(ics)%branchid
+      if (ibr <= 0) then ! crs without branch first
+         crsData(ics) = crs%cross(ics)%chainage
+      else if (getOrderNumber(brs, ibr) <= 0) then
+         crsData(ics) = crs%cross(ics)%branchid*F1 + crs%cross(ics)%chainage
+      else   
+         crsData(ics) = crs%cross(ics)%branchid*F1 + getOrderNumber(brs, ibr)*F2 + crs%cross(ics)%chainage
+      endif
+   enddo
+   
+   call dpquicksort(crsData,crsIndices)
+   
+   do ics = 1, crsCount !copy data to temp array
+      tempset%cross(ics) = crs%cross(crsIndices(ics))
+      crs%crossSectionIndex(crsIndices(ics)) = ics 
+   enddo
+   crs%cross(:) = tempset%cross(:) !copy temp array to real array
+   
+   !check for multiple crossSections on a branch and fill OrderNumber array
+   minordernumber = -1
+   ordernumbercount = 1
    orderNumber(1,1) = -1
    orderNumber(1,2) = 1
-   crsCount = crs%count
-   crs%crossSectionIndex = -1
    do ics = 1, crsCount
-      minindex = ics
-      if (crs%cross(ics)%branchid <= 0 ) then
-         crs%crossSectionIndex(ics) = ics
-      else
-         ibr = crs%cross(ics)%branchid
-         minordernumber = getOrderNumber(brs, ibr)
-         minBranchindex = ibr
-         minoffset = crs%cross(ics)%chainage
-         do i = ics, crsCount
-            if (crs%cross(i)%branchid <= 0) then
-               minindex = i
-               crs%crossSectionIndex(i) = ics
-               minOrderNumber = -1
-               exit
-            else
-               ibr = crs%cross(i)%branchid
-               if (minOrderNumber > getOrdernumber(brs, ibr)) then
-                  minOrderNumber =  getOrdernumber(brs, ibr)
-                  minBranchindex = ibr
-                  minOffset = crs%cross(i)%chainage
-                  minIndex = i
-               elseif (minOrderNumber == getOrdernumber(brs, ibr))then
-                  if (minBranchIndex > ibr) then
-                     minBranchindex = ibr
-                     minOffset = crs%cross(i)%chainage
-                     minIndex = i
-                  elseif (minBranchIndex == ibr) then
-                     if (minoffset > crs%cross(i)%chainage) then
-                        minOffset = crs%cross(i)%chainage
-                        minIndex = i
-                     endif
-                  endif
-               endif
-            endif
-         enddo
-      endif
       cross = crs%cross(ics)
-      crs%cross(ics) = crs%cross(minindex)
-      crs%cross(minindex) = cross
-      ! Check for multiple cross sections at one location.
       if (ics > 1) then
          if ( crs%cross(ics)%branchid > 0 .and. (crs%cross(ics-1)%branchid == crs%cross(ics)%branchid) .and. (crs%cross(ics-1)%chainage == crs%cross(ics)%chainage) ) then
             msgbuf = 'Cross section ''' // trim(crs%cross(ics-1)%csid) // ''' and ''' // trim(crs%cross(ics)%csid) // ''' are exactly at the same location.'
             call err_flush()
          endif
       endif
-      
+      if (crs%cross(ics)%branchid > 0) then
+      minOrderNumber = max(minOrderNumber,getOrderNumber(brs, crs%cross(ics)%branchid))
+      endif
       if (orderNumber(orderNumberCount,1) /= minOrderNumber) then
          orderNumberCount = orderNumberCount + 1
          orderNumber(orderNumberCount, 1) = minOrderNumber
          orderNumber(orderNumberCount, 2) = ics
       endif
    enddo
+
    orderNumber(orderNumberCount+1,1) = -999
    orderNumber(orderNumberCount+1,2) = crsCount+1
    ! Now check all cross sections on branches of the same order (-1 orders can be skipped)
@@ -1070,8 +1065,7 @@ subroutine useBranchOrdersCrs(crs, brs)
          ics = ics +1
       enddo
    enddo
-
-   deallocate(orderNumber)
+   deallocate(orderNumber, crsData, crsIndices)
 
 end subroutine useBranchOrdersCrs
 
@@ -3492,5 +3486,6 @@ subroutine createTablesForTabulatedProfile(crossDef)
          baseLevel  = dmiss
        endif
 
-    end subroutine getSummerDikeData
+   end subroutine getSummerDikeData
+   
 end module m_CrossSections
