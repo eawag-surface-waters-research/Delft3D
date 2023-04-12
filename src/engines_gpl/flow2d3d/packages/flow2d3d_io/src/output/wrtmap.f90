@@ -100,6 +100,7 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
     real(fp) , dimension(:)         , pointer :: clouarr
     real(fp) , dimension(:)         , pointer :: qmis_out
     real(fp), dimension(:,:,:)      , pointer :: disnf
+    real(fp), dimension(:,:,:)      , pointer :: disnf_intake
     real(fp), dimension(:,:,:,:)    , pointer :: sournf
     logical                         , pointer :: nfl
     logical                         , pointer :: rhum_file
@@ -283,6 +284,7 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
     efree_out      => gdp%gdheat%efree_out
     qmis_out       => gdp%gdheat%qmis_out
     disnf          => gdp%gdnfl%disnf
+    disnf_intake   => gdp%gdnfl%disnf_intake
     sournf         => gdp%gdnfl%sournf
     nfl            => gdp%gdprocs%nfl
     rhumarr        => gdp%gdheat%rhumarr

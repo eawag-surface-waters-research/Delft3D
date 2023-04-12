@@ -60,9 +60,11 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,lsts      , &
     character(256)                      , pointer :: filvg3d
     character(256)                      , pointer :: dredgefile
     real(fp)                            , pointer :: dco
+    real(fp)                            , pointer :: nf_timeout
     logical                             , pointer :: tps_from_com  !  Description and declaration in procs.igs    
     logical                             , pointer :: ubot_from_com !  Description and declaration in procs.igs
     logical                             , pointer :: wlen_from_com !  Description and declaration in procs.igs
+	logical                             , pointer :: skipuniqueid
     integer                             , pointer :: numdomains
     integer                             , pointer :: itis
     integer                             , pointer :: rolcorr
@@ -130,6 +132,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,lsts      , &
     filvg3d           => gdp%gdveg3d%filvg3d
     dredgefile        => gdp%gddredge%dredgefile
     dco               => gdp%gdnumeco%dco
+    nf_timeout        => gdp%gdnfl%nf_timeout
     tps_from_com      => gdp%gdprocs%tps_from_com
     ubot_from_com     => gdp%gdprocs%ubot_from_com
     wlen_from_com     => gdp%gdprocs%wlen_from_com
@@ -137,6 +140,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,lsts      , &
     itis              => gdp%gdrdpara%itis
     rolcorr           => gdp%gdbetaro%rolcorr
     sbkConfigFile     => gdp%gdsobek%sbkConfigFile
+    skipuniqueid      => gdp%gdnfl%skipuniqueid
     !
     ! calculate LSTSC
     ! locate 'Sub1' record for 'S'alinity, 'T'emperaure, 'I'secondary flow and 'W'ind

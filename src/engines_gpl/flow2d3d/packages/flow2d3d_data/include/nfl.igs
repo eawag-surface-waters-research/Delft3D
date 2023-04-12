@@ -95,17 +95,6 @@ type gd_nfl
     real(fp)                        :: nf_q_intake ! Qintake as read from NF2FF file
     real(fp)                        :: momrelax    ! Momentum Relaxation parameter
     real(fp)                        :: nf_timeout  ! Minutes to wait for the nearfield files to appear
-    real(fp)                        :: q_diff    ! Diffusor discharge
-    real(fp)                        :: t0_diff   ! temperature (used to compute rho0)
-    real(fp)                        :: s0_diff   ! temperature (used to compute rho0)
-    real(fp)                        :: rho0_diff ! density difference diffusor discharge
-    !
-    ! reals for cormix
-    !
-    real(fp)       :: d0
-    real(fp)       :: h0
-    real(fp)       :: sigma0
-    real(fp)       :: theta0
     !
     ! logicals
     !
