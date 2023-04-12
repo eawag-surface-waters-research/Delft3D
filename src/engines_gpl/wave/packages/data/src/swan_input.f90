@@ -2599,7 +2599,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     ! The following output string is optionally used on several locations
     !
     tbegc = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)
-    write(outfirst,'(3a,f8.2,a)') "OUT ",tbegc, " ", sr%deltc, " MIN"
+    write(outfirst,'(3a,f8.2,a)') "OUT ",tbegc, " ", sr%nonstat_interval, " MIN"
 
     dom => sr%dom(inest)
     !
