@@ -502,10 +502,11 @@ subroutine comp_concentration(h, nconst, iconst, c)
 
    implicit none
 
-   double precision, dimension(Ndx,kmx),        intent(in)  :: h      !< water depth
-   integer,                                     intent(in)  :: nconst !< number of constituents
-   integer,                                     intent(in)  :: iconst !< particle tracer constituent number
-   double precision, dimension(Nconst,Ndx,kmx), intent(out) :: c      !< constituents
+   !! TODO: Make these assumed-shape arrays!
+   double precision, dimension(Ndx/kmx,kmx),        intent(in)  :: h      !< water depth
+   integer,                                         intent(in)  :: nconst !< number of constituents
+   integer,                                         intent(in)  :: iconst !< particle tracer constituent number
+   double precision, dimension(Nconst,Ndx/kmx,kmx), intent(out) :: c      !< constituents
 
    integer :: i, k, kl, ifract, lay
 
