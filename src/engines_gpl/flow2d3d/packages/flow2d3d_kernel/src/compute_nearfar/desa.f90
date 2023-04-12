@@ -31,8 +31,8 @@ subroutine desa(nlb     ,nub     ,mlb     ,mub        ,kmax       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Converts Cosumo output to delft3d sources

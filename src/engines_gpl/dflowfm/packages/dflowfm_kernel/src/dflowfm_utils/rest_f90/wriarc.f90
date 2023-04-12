@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE WRIARC(MARC,DP,MMAX,NMAX,MC,NC,X0,Y0,DX,DY,dmiss)
       implicit none

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE STOPINT()
       use unstruc_files
@@ -39,6 +39,7 @@
       call unc_closeall()
       call close_all_files()
 
+      call finish_fetch_proc()
       if ( jampi.eq.1 ) then
 !        finalize before exit
          call partition_finalize()

@@ -25,8 +25,8 @@ subroutine kompbs(l         )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: SIMULATION OF EXTERNAL KOMPBES-FILE

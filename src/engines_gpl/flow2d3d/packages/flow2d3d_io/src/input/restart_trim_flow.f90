@@ -30,8 +30,8 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Reads initial field condition records from a trim-file
 !!--pseudo code and references--------------------------------------------------
@@ -110,6 +110,8 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
 !
 ! Local variables
 !
+    logical                               :: has_morft
+    logical                               :: has_umean
     integer                               :: fds
     integer                               :: lrid        ! character variables for files Help var., length of restid
     integer, external                     :: crenef
@@ -139,7 +141,6 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     integer                               :: rst_ltur
     integer, dimension(3,5)               :: cuindex
     logical                               :: found
-    integer                               :: has_umean
     real(fp)                              :: dtm          ! time step in tunits  (flexible precision)
     real(fp)                              :: tunit        ! time unit in seconds (flexible precision)
     real(fp)                              :: t_restart
@@ -410,6 +411,9 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
            ! The value is needed to check for consistency when applying the z-model with ZTBML=#Y#, 
            ! see subroutine CHKSET.
            !
+           has_morft = .true.
+           has_umean = .true.
+           !
            if (filetype==FTYPE_NEFIS) then
                ierror = getelt(fds, 'map-const', 'LAYER_MODEL', cuindex, 1, 16, rst_layer_model)
                ierror = getelt(fds, 'map-const', 'LSTCI', cuindex, 1, 4, rst_lstsci)       
@@ -435,21 +439,24 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
                !
                rst_dp = dp_from_map_file
                !
-               has_umean = 1
-               ierror = inqelm (fds, 'UMNLDF', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
-               if (ierror /= 0) then
-                  if (htur2d) then
-                     ierror = neferr(0,error_string)
-                     call prterr(lundia    ,'U190'    , error_string)
+               if (ierror == 0) then
+                  ierror = inqelm (fds, 'UMNLDF', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
+                  if (ierror /= 0) then
+                     has_umean = .false.
+                     ierror = 0
                   endif
-                  has_umean = 0
-                  ierror = 0
                endif
                !
                if (ierror == 0 .and. rst_lstsci > 0) then
                   allocate(rst_namcon(rst_lstsci+rst_ltur), stat = ierror)
                   if (ierror == 0) ierror = getelt(fds, 'map-const', 'NAMCON', cuindex, 1, 20*(rst_lstsci+rst_ltur), rst_namcon)
                   if (ierror /= 0) ierror = neferr(0,error_string)
+               endif
+               !
+               ierror = inqelm (fds, 'MORFT', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
+               if (ierror /= 0) then
+                  has_morft = .false.
+                  ierror = 0
                endif
            else
                ierror = nf90_get_att(fds, nf90_global, 'LAYER_MODEL', rst_layer_model)
@@ -497,13 +504,24 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
                !
                if (ierror == 0) then
                    ierror = nf90_inq_varid(fds, 'UMNLDF', idvar)
-                   if (ierror/= 0) has_umean = 0
+                   if (ierror/= 0) then
+                      has_umean = .false.
+                      ierror = 0
+                   endif
                endif
                !
                if (ierror == 0 .and. rst_lstsci > 0) then
                   allocate(rst_namcon(rst_lstsci), stat = ierror)
                   ierror = nf90_inq_varid(fds, 'NAMCON', idvar)
                   if (ierror == 0) ierror = nf90_get_var(fds, idvar, rst_namcon)
+               endif
+               !
+               if (ierror == 0) then
+                   ierror = nf90_inq_varid(fds, 'MORFT', idvar)
+                   if (ierror/= 0) then
+                      has_morft = .false.
+                      ierror = 0
+                   endif
                endif
            endif
            !
@@ -529,10 +547,14 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
         !
         ! Read morphological time associated with depth from map file.
         !
-        if (ierror == 0 .and. dp_from_map_file) then
-           call rdvar(fds, filename, filetype, 'map-infsed-serie', &
-                    & i_restart, gdp, ierror, lundia, morft0, 'MORFT')
-           if (ierror /= 0) morft0 = 0.0_hp
+        morft0 = 0.0_hp
+        if (dp_from_map_file) then
+           if (has_morft) then
+              call rdvar(fds, filename, filetype, 'map-infsed-serie', &
+                       & i_restart, gdp, ierror, lundia, morft0, 'MORFT')
+           else
+              write(lundia, '(3A)') 'No morphological time found on restart file; starting from TStart.'
+           endif
         endif
         !
         ierror = 0
@@ -584,7 +606,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     !
     ! element 'UMNLDF' & 'VMNLDF'
     !
-    if (has_umean /= 0) then
+    if (has_umean) then
        !
        ! UMNLDF: filtered velocity U-component for subgrid viscosity model
        !

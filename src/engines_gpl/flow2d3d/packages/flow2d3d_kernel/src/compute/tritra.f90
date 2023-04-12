@@ -52,8 +52,8 @@ subroutine tritra(stage     ,lundia    ,nst       ,icreep    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Main routine to compute transports for conserva-

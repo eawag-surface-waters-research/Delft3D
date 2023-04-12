@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 !> @file model_specific.f90
 !! A set of predefined routines that may contain model-specific actions.
 !! Selection is based on global md_ident, and subroutines are automatically
@@ -52,6 +52,7 @@ subroutine textflowspecific()
     use m_equatorial, only : ampliforced, amplifreeL, amplitotal, ndxforced, ndxfreeL, ndtforced, ndtfreeL, cflforced, cflfreeL, tforce, tfreeL, amplicomp
     use m_statistics
     use m_monitoring_crosssections
+    use time_module, only : seconds_to_datetimestring
     implicit none
 
     double precision, external :: znod
@@ -427,6 +428,7 @@ CALL ICTEXT(TRIM(TEX),5,33,NCOLANA)
 end subroutine riverfloodwave
 
 subroutine weirtheo(j12)
+use time_module, only : seconds_to_datetimestring
 use m_flow
 use m_flowgeom
 use unstruc_colors

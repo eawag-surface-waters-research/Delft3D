@@ -25,8 +25,8 @@ subroutine gtptrs(gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Gets the pointers of the dynamically allocated arrays.

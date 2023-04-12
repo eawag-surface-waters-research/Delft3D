@@ -25,8 +25,8 @@ subroutine cparrd ( iarr1, iarr2, length )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Copies double precision array IARR1 to IARR2

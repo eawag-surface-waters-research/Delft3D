@@ -25,8 +25,8 @@ subroutine santoss_abreu(hrms, km, d, r_ab, phi_ab, urms, tp, nt, tw, uorb)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   The SANTOSS practical sand transport model, version 2.08  

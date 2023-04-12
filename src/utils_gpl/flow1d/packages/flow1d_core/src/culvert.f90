@@ -25,8 +25,8 @@ module m_Culvert
 !  Stichting Deltares. All rights reserved.
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !-------------------------------------------------------------------------------
 
    use m_CrossSections
@@ -134,9 +134,7 @@ contains
       double precision               :: inflowCrest         !< zc_1 (at upstream water level)
       double precision               :: outflowCrest        !< zc_2 (at downstream water level)
       double precision               :: du
-      double precision               :: fr
       double precision               :: gl_thickness
-      double precision               :: dummy
       double precision               :: dpt                 !< upstream water depth
       double precision               :: openingfac
       double precision               :: valveOpening

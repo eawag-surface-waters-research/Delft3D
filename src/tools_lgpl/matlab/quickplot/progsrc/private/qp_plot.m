@@ -199,7 +199,7 @@ if ~strcmp(Parent,'loaddata')
         end
     end
     %
-    if isfield(Ops,'zlevel')
+    if isfield(Ops,'zlevel') && ~isequal(Ops.zlevel,'auto')
         Level = Ops.zlevel;
     else
         Level = -1;
@@ -433,6 +433,9 @@ if strcmp(Ops.presentationtype,'vector') || ...
         if isfield(data,'XYZ')
             data(i).X = data(i).XYZ(:,:,:,1);
             data(i).Y = data(i).XYZ(:,:,:,2);
+            if size(data(i).XYZ,4)>2
+                data(i).Z = data(i).XYZ(:,:,:,3);
+            end
         elseif isfield(data,'XY')
             if iscell(data(i).XY)
                 data(i).X = NaN(size(data(i).XY));
@@ -888,6 +891,30 @@ for dir = 1:3
     end
 end
 
+if isfield(Ops,'presentationtype')
+    switch Ops.presentationtype
+        case {'patches','patches with lines'}
+            if isfield(data,'ValLocation')
+                for d = length(data):-1:1
+                    switch data(d).ValLocation
+                        case 'NODE'
+                            % compute face averaged values
+                            FaceNodeConnect = data(d).FaceNodeConnect;
+                            Val = data(d).Val;
+                            %
+                            Msk = isnan(FaceNodeConnect);
+                            FaceNodeConnect(Msk) = 1;
+                            Val = Val(FaceNodeConnect);
+                            Val(Msk) = 0;
+                            Val = sum(Val,2)./sum(~Msk,2);
+                            %
+                            data(d).Val = Val;
+                            data(d).ValLocation = 'FACE';
+                    end
+                end
+            end
+    end
+end
 data = qp_clipvalues(data, Ops);
 
 if ~isempty(Parent) && all(ishandle(Parent)) && strcmp(get(Parent(1),'type'),'axes')

@@ -26,8 +26,8 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !   Reads the Thin dames from the attribute file

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   DOUBLE PRECISION FUNCTION GETRCIR()
   use m_wearelt

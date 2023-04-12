@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 ! update m_wind::vextcum(:) with the realized inflow from m_wind::qextreal(:)
 subroutine updateCumulativeInflow(deltat)

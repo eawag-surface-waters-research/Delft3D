@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Initializes controllers that force structures.
 !! Currently only time series files, in the future also realtime control (RTC).

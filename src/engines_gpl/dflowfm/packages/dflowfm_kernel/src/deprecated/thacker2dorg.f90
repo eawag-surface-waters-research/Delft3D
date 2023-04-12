@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
     subroutine thacker2dorg(t, ini, rms)
     use m_flowgeom

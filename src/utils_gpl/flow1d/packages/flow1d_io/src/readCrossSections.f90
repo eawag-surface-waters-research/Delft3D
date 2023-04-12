@@ -25,8 +25,8 @@ module m_readCrossSections
 !  Stichting Deltares. All rights reserved.
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !-------------------------------------------------------------------------------
 
    use M_newcross
@@ -598,6 +598,7 @@ module m_readCrossSections
       double precision, dimension(:), allocatable :: totalwidth
       integer :: i, j, k
       double precision, parameter   :: eps = 1d-5
+      character(len=IdLen) :: typestr
 
       numlevels = 0
       readTabulatedCS= .false.
@@ -629,6 +630,26 @@ module m_readCrossSections
          call prop_get_doubles(node_ptr, '', 'totalWidths', totalWidth, numlevels, success)
       else
          totalWidth = width
+      endif
+
+      call prop_get_string(node_ptr, '', 'type', typestr, success)
+      if (numlevels > 1) then
+         do i = 1, numlevels-1
+            if (height(i+1) < height(i) ) then
+               call SetMessage(LEVEL_ERROR, 'Incorrect input for tabulated Cross-Section Definition id: '//trim(pCS%id)//'. Levels should be monotonically increasing!')
+               exit
+            endif
+            if (strcmpi(typestr, 'zwRiver')) then ! only for zwRiver does width need to be monotonically increasing
+               if (width(i+1) < width(i) ) then
+                  call SetMessage(LEVEL_ERROR, 'Incorrect input for tabulated Cross-Section Definition id: '//trim(pCS%id)//'. flowWidths should be monotonically increasing!')
+                  exit
+               endif
+               if (totalWidth(i+1) < totalWidth(i) ) then
+                  call SetMessage(LEVEL_ERROR, 'Incorrect input for tabulated Cross-Section Definition id: '//trim(pCS%id)//'. totalWidths should be monotonically increasing!')
+                  exit
+               endif
+            endif
+         enddo
       endif
    
       ! summerdike

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
   !> Finds the crossing of link L with the current polyline.
   !! returns first crossing, if found, JA=1

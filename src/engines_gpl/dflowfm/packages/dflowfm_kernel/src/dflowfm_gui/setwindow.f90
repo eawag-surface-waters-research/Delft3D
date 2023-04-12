@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE SETWINDOW(NSC,X1,Y1,X2,Y2,DXH,DYH)
       implicit none

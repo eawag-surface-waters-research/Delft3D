@@ -25,8 +25,8 @@ function getpointer(pntnam, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! ESM function gtcpnt/gtipnt/gtrpnt can only be used during initialization phase.

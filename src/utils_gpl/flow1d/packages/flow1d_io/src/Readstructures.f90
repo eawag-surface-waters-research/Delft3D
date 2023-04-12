@@ -25,8 +25,8 @@ module m_readstructures
 !  Stichting Deltares. All rights reserved.
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !-------------------------------------------------------------------------------
 
    use MessageHandling
@@ -34,12 +34,10 @@ module m_readstructures
    use m_network
    use m_CrossSections
    use m_1d_structures
-   use m_Weir
    use m_Universal_Weir
    use m_Culvert
    use m_Bridge
    use m_pump
-   use m_Orifice
    use m_General_Structure
    use m_Dambreak
 

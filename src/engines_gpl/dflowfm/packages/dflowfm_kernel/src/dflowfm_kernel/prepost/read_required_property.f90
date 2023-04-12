@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Reads a key=value entry from a property block and tries to interpret the value.
 !! The (single!) property block should come from an already-parsed .ini file.

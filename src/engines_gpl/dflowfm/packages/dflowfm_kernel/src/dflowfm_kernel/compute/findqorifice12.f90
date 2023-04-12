@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine findqorifice12(gateheight,crestheight,h1,h2,q,hg,regime,num,qcrit)     ! bepaal q en hg waterstand links = h1, rechts= h2
 implicit none

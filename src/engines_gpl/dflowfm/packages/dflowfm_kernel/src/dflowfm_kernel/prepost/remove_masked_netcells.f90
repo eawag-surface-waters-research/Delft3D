@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    !> remove "dry"masked netcells (cellmask==1) from netcell administration
    !> typically used in combination with a drypoints file (samples or polygons)

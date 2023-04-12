@@ -124,6 +124,11 @@ rem =================================
         set config=%1
         set mode=quiet
     )
+    if "%1" == "dwaves" (
+        set prepareonly=0
+        set config=%1
+        set mode=quiet
+    )
     if "%1" == "swan" (
         set prepareonly=0
         set config=%1
@@ -144,7 +149,7 @@ rem =================================
         set config=%1
         set mode=quiet
     )
-    
+
   set "options=-vs:0 -ifort:0 -coverage: -prepareonly:"
 
   rem see: https://stackoverflow.com/questions/3973824/windows-bat-file-optional-argument-parsing answer 2.
@@ -188,7 +193,7 @@ rem =================================
     rem # On TeamCity VS2019 is installed without IFORT
 
 
-    
+
     if NOT "%VS2017INSTALLDIR%" == "" (
         set vs=2017
         echo Found: VisualStudio 15 2017
@@ -239,7 +244,7 @@ rem =================================
             echo Found: Intel Fortran 2016
         )
         goto :endfun
-    )   
+    )
     :endfun
     if NOT !-vs! == 0 (
     set vs=!-vs!
@@ -251,7 +256,7 @@ rem =================================
     echo overriding ifort with !-ifort!
     )
     goto :endproc
-   
+
 
 rem ================================
 rem === Check CMake installation ===
@@ -351,7 +356,7 @@ rem =================
     rem # Execute vcvarsall.bat in case of compilation
     if %prepareonly% EQU 1 goto :endproc
     if !ERRORLEVEL! NEQ 0 goto :endproc
-    
+
     echo.
     if !generator! == "Visual Studio 14 2015" (
         echo "Calling vcvarsall.bat for VisualStudio 2015 ..."
@@ -365,7 +370,7 @@ rem =================
         echo "Calling vcvarsall.bat for VisualStudio 2019 ..."
         call "%VS2019INSTALLDIR%\VC\Auxiliary\Build\vcvarsall.bat" amd64
     )
-    
+
     rem # Execution of vcvarsall results in a jump to the C-drive. Jump back to the script directory
     cd /d "%root%\"
     if !ERRORLEVEL! NEQ 0 call :errorMessage
@@ -445,14 +450,14 @@ rem =======================
 :VSbuild
     echo.
     echo "Building with VisualStudio: %~1 ..."
-    
+
     set currentWorkDir=%CD%
     devenv.com %~1.sln /Clean "Release|x64"
     devenv.com %~1.sln /Build "Release|x64" 1>%currentWorkDir%\build_%~1.log 2>&1
     if !ERRORLEVEL! NEQ 0 call :errorMessage
 
     rem # In build.log, replace "error" by TeamCity messages
-    %root%\src\third_party_open\commandline\bin\win32\sed.exe -e "/[Ee]rror[\:\ ]/s/^/\#\#teamcity\[buildStatus status\=\'FAILURE\' text\=\' /g;/buildStatus/s/$/\'\]/g" %currentWorkDir%\build_%~1.log 
+    %root%\src\third_party_open\commandline\bin\win32\sed.exe -e "/[Ee]rror[\:\ ]/s/^/\#\#teamcity\[buildStatus status\=\'FAILURE\' text\=\' /g;/buildStatus/s/$/\'\]/g" %currentWorkDir%\build_%~1.log
     goto :endproc
 
 
@@ -567,7 +572,7 @@ rem =======================
     echo "-ifort: desired intel fortran compiler version.                     Example: -ifort 21
     echo.
     echo "More info  : https://oss.deltares.nl/web/delft3d/source-code"
-    echo "About CMake: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/cmake/doc/README"
+    echo "About CMake: https://git.deltares.nl/oss/delft3d/-/tree/main/src/cmake/doc/README"
     echo.
     set ERRORLEVEL=1
     goto :end
@@ -607,5 +612,5 @@ rem =======================
 :endproc
    rem # No exit  here, otherwise the script exits directly at the first missing artefact
    rem # No pause here, otherwise a pause will appear after each procedure execution
-   
+
 

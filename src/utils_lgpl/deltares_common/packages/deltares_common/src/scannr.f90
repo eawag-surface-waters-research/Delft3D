@@ -27,8 +27,8 @@ subroutine scannr(string    ,stapos    ,endpos    ,nrflds    ,itype     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Split string up into sub-strings driven by

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine initialfield2Dto3D( v2D, v3D, tr13, tr14 )
  use m_flowgeom

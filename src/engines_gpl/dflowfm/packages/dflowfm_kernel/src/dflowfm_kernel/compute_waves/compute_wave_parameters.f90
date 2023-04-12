@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    ! compute uorb, rlabda for input in other subroutines
    subroutine compute_wave_parameters()

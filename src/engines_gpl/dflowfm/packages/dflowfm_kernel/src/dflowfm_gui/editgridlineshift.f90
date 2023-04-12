@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE EDITGRIDLINESHIFT(MODE,NFLD,KEY,M1,N1,M2,N2)
       use m_grid

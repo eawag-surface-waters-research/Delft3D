@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE ATTRACTREPULSE(     XH,     YH,      X,      Y,   mmax, nmax, MC,     NC,   NUMP,     JA)
       use m_missing

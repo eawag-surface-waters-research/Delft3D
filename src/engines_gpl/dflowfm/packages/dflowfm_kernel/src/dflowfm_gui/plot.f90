@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       !> Plot for hardcopy needs to be called twice: one to open hardcopy
       !! driver (file), then perform actual plotting, and second call to

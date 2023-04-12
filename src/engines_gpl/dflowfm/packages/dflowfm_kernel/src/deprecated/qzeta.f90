@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  double precision function qzeta(n12,L)              ! average specific q in zeta point comparable to fls
  use m_flow                                          ! qdo = 0.5*(qleft+qright)

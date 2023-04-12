@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> copy curvigrid boundaries to polygon(s)
 subroutine copycurvigridboundstopol()

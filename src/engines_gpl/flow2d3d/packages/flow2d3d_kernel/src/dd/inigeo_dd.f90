@@ -29,8 +29,8 @@ subroutine inigeo_dd(lundia    ,mmax      ,nmax      ,nmaxus    ,guu       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Sets the geometry parameters of the model running in

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> Writes a set of template component files (_xxxx.cmp) associated with the current polyline.
  !! Should only be called directly after savepol has been called.

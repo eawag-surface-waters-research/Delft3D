@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    SUBROUTINE Triangulatesamplestonetwork(JADOORLADEN)
    use m_netw, only : numk, numl, kn, xk, yk, zk, nb, LMAX, KMAX

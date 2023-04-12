@@ -26,8 +26,8 @@ subroutine chktrt(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! - Checks if trachytope definitions are valid and
 ! if used trachytopes are available in trachytope

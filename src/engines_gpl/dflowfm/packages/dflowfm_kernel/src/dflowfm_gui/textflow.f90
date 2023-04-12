@@ -27,10 +27,11 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  SUBROUTINE TEXTFLOW()
+ use time_module, only : seconds_to_datetimestring
  use m_flowgeom
  use Timers
  !USE M_NETW

@@ -35,8 +35,8 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Method used:

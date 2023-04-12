@@ -27,8 +27,8 @@ subroutine jet3d2flow(thick  ,kmax   ,dps    ,s0     ,r0       ,          &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Converts Jet3D output to delft3d sources following the DESA

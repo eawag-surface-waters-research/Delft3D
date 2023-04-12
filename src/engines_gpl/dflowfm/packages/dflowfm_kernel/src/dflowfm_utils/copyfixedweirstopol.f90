@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Copy the original polygons that define the current fixed weirs
 !! to the active polygons in xpl,...

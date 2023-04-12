@@ -28,8 +28,8 @@ subroutine rdspec(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description----------------------------------------------------------------- 
 ! 
 !    Function: Reads the records from the MD-file related to dis- 

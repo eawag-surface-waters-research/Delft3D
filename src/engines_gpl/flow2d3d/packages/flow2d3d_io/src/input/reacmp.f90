@@ -26,8 +26,8 @@ subroutine reacmp(lundia    ,error     ,filana    ,statns    ,nto       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Reads 'TRIANA' file or 'GETIJSYS' file

@@ -29,8 +29,8 @@ subroutine findnmk(nlb    ,nub    ,mlb    ,mub    ,xz     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Finds n,m and k coordinates of "jet" points

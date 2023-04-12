@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       subroutine GEORD(xgeo,ygeo,xrd,yrd,JAPARIJS)
       implicit none

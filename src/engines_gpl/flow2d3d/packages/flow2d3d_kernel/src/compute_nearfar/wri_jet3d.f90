@@ -26,8 +26,8 @@ subroutine wri_jet3d(u0    ,v0    ,rho    ,thick ,kmax      ,dps   ,&
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes input for jet3d

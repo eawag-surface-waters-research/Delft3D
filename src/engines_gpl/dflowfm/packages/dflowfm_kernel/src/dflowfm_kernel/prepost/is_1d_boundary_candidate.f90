@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !< Returns true when a 1d node can be used as a boundary. By default
 !< the connecting edge should not lead to a bifurcation, unless

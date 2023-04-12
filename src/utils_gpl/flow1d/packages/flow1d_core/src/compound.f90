@@ -25,8 +25,8 @@ module m_compound
 !  Stichting Deltares. All rights reserved.
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !-------------------------------------------------------------------------------
 
    use MessageHandling
@@ -35,10 +35,8 @@ module m_compound
    use m_branch
    use m_tables
    use m_CrossSections
-   use m_Weir
    use m_Culvert
    use m_pump
-   use m_Orifice
    use m_General_Structure
    use m_Universal_Weir
    use m_Bridge
@@ -55,8 +53,6 @@ module m_compound
 
    public initialize_compounds
    public computeCompound
-
-   public printData
 
    interface realloc
       module procedure reallocCompound

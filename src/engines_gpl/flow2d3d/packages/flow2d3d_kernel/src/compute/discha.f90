@@ -29,8 +29,8 @@ subroutine discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j      
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! The discharges are added to the sink and source terms of
 ! the continuity equation.

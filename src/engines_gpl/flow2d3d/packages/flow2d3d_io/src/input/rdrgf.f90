@@ -26,8 +26,8 @@ subroutine rdrgf(filrgf    ,lundia    ,error     ,nmax      ,mmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description----------------------------------------------------------------- 
 ! 
 !    Function: Reads the coordinates of the depth points from the 

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Regular grid generation settings. All orthogonalisation settings are in
 !! module m_orthosettings.

@@ -3,17 +3,10 @@
 set(waq_root_path ${CMAKE_CURRENT_SOURCE_DIR}/../..) # Trace back to the WAQ path
 set(waq_version_path ${waq_root_path}/version)
 
-set(ini_version_file ${waq_version_path}/version_number.ini)
-set(rc_version_file ${waq_version_path}/version_number_waq_plugin_wasteload_version.rc.svn)
+set(rc_version_file ${waq_version_path}/version_number_waq_plugin_wasteload.rc)
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
 
-# Generate version files
-generate_version_files(${rc_version_file}
-                       ${ini_version_file}
-                       ON)
 
-generate_version_files(${fortran_version_file}
-                       ${ini_version_file}
-                       ON)
 
 # Set directory which contains all source files
 set(src_path src)
@@ -23,13 +16,9 @@ get_fortran_source_files(${src_path} source_files)
 
 # Define library
 set(library_name waq_plugin_wasteload)
-add_library(${library_name} SHARED ${source_files})
+add_library(${library_name} SHARED ${source_files}
+                                   ${rc_version_file})
 
-# Define prebuild events
-prebuild_version_number(${library_name} ${rc_version_file}
-                                        ${checkout_src_root}
-                                        ${ini_version_file}
-                                        ON)
 # Define additional compilation flags
 set_source_files_properties(${fortran_version_file}
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
@@ -48,6 +37,8 @@ endif(UNIX)
 
 # Set additional compilation properties
 target_compile_options(${library_name} PRIVATE "${waq_default_flags}")
+
+target_include_directories(${library_name} PRIVATE ${version_include_dir})
 
 # Define how the files should be structured within Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files})

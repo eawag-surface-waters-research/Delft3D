@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 module unstruc_api
  use m_flowtimes
  use m_timer
@@ -214,6 +214,7 @@ end subroutine batch
   use unstruc_display
   use unstruc_messages
   use unstruc_display 
+  use unstruc_model 
     integer             :: jastop
     
     iresult = DFM_NOERR
@@ -230,10 +231,16 @@ end subroutine batch
     end if
 
     call writesomefinaloutput()
+
+    if (jagui > 0) then 
+       call plotnu(md_ident)
+    endif  
+
     
     if (jastop == 0 .and. jaGUI == 0) then
        call flowfinalize()
     endif   
+  
   end function flow
  
 

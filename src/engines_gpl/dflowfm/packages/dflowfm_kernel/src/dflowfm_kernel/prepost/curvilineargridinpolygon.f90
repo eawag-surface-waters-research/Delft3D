@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       !SUBROUTINE SPLINESFROMLANDBOUNDARY()
       !USE M_SPLINES

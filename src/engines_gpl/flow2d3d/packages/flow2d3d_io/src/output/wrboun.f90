@@ -27,8 +27,8 @@ subroutine wrboun(comfil    ,lundia    ,error     ,norow     ,nocol     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !

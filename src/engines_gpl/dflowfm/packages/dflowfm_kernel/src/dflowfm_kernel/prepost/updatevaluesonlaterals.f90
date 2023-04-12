@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Updates values on laterals for history output, starting from the starting time of history output
 !! ! Note: if it is a parallel simulation, qplat is already for all subdomains, so no need for mpi communication.

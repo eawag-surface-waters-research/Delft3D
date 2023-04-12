@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> update positions of particles within triangles
 subroutine update_particles_in_cells(numremaining, ierror)

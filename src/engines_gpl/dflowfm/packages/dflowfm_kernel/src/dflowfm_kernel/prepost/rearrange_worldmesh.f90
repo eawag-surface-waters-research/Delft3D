@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> rearrange netnodes for spherical, periodic coordinates
 !>    net nodes at the left are preferred

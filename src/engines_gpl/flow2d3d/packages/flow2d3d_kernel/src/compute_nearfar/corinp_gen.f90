@@ -25,8 +25,8 @@ subroutine corinp_gen(idensform, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads input needed for the coupling of Corjet/Cortime/Cormix

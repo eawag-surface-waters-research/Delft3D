@@ -29,8 +29,8 @@ subroutine z_hormom_iupw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !!--pseudo code and references--------------------------------------------------

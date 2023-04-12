@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    SUBROUTINE NDISPLAY(NWHAT,KEY)
    USE M_FLOW
@@ -420,12 +420,12 @@
       endif
 
       if (nshiptxy > 0) then
-         OPTION(49)= 'zspc                                 (m)'
+         OPTION(49)= 'zsp                                  (m)'
       endif
       if (janudge > 0) then
          OPTION(50)= 'Nudge time                           (s)'
       else if (nshiptxy > 0) then
-         OPTION(50)= 'v1ship                              (m3)'
+         OPTION(50)= 's1+zsp                               (m)'
       endif
       numopt=50
       numoptwav=-999

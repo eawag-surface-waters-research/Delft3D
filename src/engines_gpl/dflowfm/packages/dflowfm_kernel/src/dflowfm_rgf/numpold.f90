@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE NUMPold  (      X,     mmax, nmax, MP,  NUMPI)
 !     GEEF AANTAL PUNTEN VAN SPLINE MP

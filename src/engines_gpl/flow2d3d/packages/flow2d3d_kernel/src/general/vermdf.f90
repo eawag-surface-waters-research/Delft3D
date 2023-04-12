@@ -25,8 +25,8 @@ subroutine vermdf(mdfrec    ,nrver     ,lundia    ,error     ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads version nr. from the 1st record of MD-file

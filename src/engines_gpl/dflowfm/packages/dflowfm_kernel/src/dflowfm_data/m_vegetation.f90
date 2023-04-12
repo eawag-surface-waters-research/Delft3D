@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 module m_vegetation
  integer                           :: javeg     = 0           ! 0,1,2,3 , jabaptist is javeg

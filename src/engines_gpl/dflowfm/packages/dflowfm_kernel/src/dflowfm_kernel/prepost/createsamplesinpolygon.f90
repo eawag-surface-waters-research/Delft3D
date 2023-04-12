@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    SUBROUTINE CREATESAMPLESINPOLYGON()
    use m_flowparameters, only: autotrisam

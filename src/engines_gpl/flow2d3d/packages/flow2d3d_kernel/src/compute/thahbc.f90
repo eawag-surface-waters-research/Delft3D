@@ -29,8 +29,8 @@ subroutine thahbc(j         ,nmmaxj    ,icx       ,icy       ,kmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes boundary values at open boundaries,

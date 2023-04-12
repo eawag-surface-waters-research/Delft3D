@@ -30,8 +30,8 @@ subroutine zbrent(kmxdt     ,kmxt      ,omeg      ,angle     ,frfind    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Finds OMEG or ANGLE in interval [x1,x2] for eigen-

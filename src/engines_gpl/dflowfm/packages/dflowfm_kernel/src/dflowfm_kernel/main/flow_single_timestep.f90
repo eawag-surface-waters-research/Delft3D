@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> A complete single computational time step (init-perform-finalize).
  subroutine flow_single_timestep(key, iresult)                ! do only 1 flow timestep

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
             !   call nextcel(np,La,npb,k1b,k2b,Lb)
   subroutine nextcel(np,LL,npa,k1a,k2a,La) ! give face, link and nodes, opposite to plakrand LL of cel np

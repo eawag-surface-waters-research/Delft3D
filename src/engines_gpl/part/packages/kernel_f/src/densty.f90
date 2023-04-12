@@ -57,42 +57,19 @@
 !     b       real        1       local   temp.dependent coefficient
 !     c       real        1       local   temp.dependent coefficient
 !     dens0   real        1       local   density zero
-!     denssv  real        1       local   save-value density
-!     first   logical     1       local   switch
 !
       use precision_part     ! single/double precision
-      use timers
 !
       implicit none     ! force explicit typing
 !
 !     local scalars
 !
       real(sp) :: a     , b      , c
-      real(sp) :: dens0 , denssv , salin
-      real(sp) :: sqrt  , temp   , tmpold
-
-!
-!     save values between invocations
-!
-      save         denssv, first , tmpold
+      real(sp) :: dens0 , salin
+      real(sp) :: temp  , tmpold
 !
 !     declarations
 !
-      logical :: first = .true.
-      integer(4) ithndl              ! handle to time this subroutine
-      data       ithndl / 0 /
-      if ( timon ) call timstrt( "densty", ithndl )
-!
-      if (first) then
-        first = .false.
-      else
-!
-!       check whether the temperature is the same as before
-!
-        if (temp == tmpold) then
-          goto 100
-        endif
-      endif
 !
 !     calculate the temperature dependent coefficients
 !
@@ -120,16 +97,6 @@
 !
 !     calculate the density
 !
-      denssv = dens0 + a*salin + b*salin*sqrt(salin) + c*salin**2
-!
-!     assign value to function
-!
-  100 densty = denssv
-!
-!     end of function
-!
-      if ( timon ) call timstop ( ithndl )
-      return
-!
-      end function
+      densty = dens0 + a*salin + b*salin*sqrt(salin) + c*salin**2
 
+      end function

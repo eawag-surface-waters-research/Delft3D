@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !>    delete samples
 !>      jaconfirm=0: do not prompt for confirmation,       keep arrays,        make copy

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine reabnd2pol(mbnd,mbca)     ! convert d3d boundaryes stuf to model independent
  use m_grid

@@ -27,8 +27,8 @@ subroutine chkbnd(lundia    ,error     ,nmax      ,mmax      ,nrob      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Checks whether open boundaries lie on in- or

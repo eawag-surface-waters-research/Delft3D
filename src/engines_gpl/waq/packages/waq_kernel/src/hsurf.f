@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
       subroutine hsurf    ( noseg  , nopa   , paname , param  , nosfun ,
      &                      sfname , segfun , surface, lun)

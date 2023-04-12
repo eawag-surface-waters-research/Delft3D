@@ -340,7 +340,7 @@
          WRITE (*,*) 'ERROR in GMRES', IERR
          WRITE (LUrep,*) ' ERROR in GMRES 1', IERR
          WRITE (LUrep,*) ' Solver did not reach convergence'
-         WRITE (LUrep,*) ' maximum contribution in error at cell:', imax,' error: ', rmax/bnrm2
+         WRITE (LUrep,*) ' maximum contribution in error:', resid
          if ( .not. litrep ) WRITE (LUrep,*) ' Switch ITERATION REPORT to on to see details'
          WRITE (LUrep,*) ' Reduce the output time step to 1 time step close to point of failure'
          WRITE (lurep,*) ' Possible causes in decreasing frequency of likelyness:'

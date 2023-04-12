@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine setau()                                  ! get wet cross-sections at u points, after limiters, setau = vol12D with japerim == 1
  use m_flowgeom

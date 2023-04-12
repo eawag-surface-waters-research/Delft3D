@@ -1,3 +1,16 @@
+# Define include directory
+# Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
+set(waqmerge_root_path ${CMAKE_CURRENT_SOURCE_DIR}/../../) # Trace back to the maptonetcdf path
+set(waq_root_path ${waqmerge_root_path}/../../engines_gpl/waq) # Trace back to the WAQ path
+
+# Set version file variables
+set(waq_version_path ${waq_root_path}/version)
+
+set(fortran_version_file_delwaq ${waq_root_path}/packages/waq_utils_f/src/waq_utils/delwaq_version.F90)
+set(rc_version_file ${waq_version_path}/version_number_waqmerge.rc)
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
+
+
 # Set directory which contains all source files
 set(src_path src)
 
@@ -6,9 +19,12 @@ get_fortran_source_files(${src_path} source_files)
 
 # Define executable
 set(executable_name waqmerge)
-add_executable(${executable_name} ${source_files})
+add_executable(${executable_name} ${source_files}
+                                  ${rc_version_file}
+                                  ${fortran_version_file_delwaq})
 
 # Add dependencies
+target_include_directories(${executable_name} PRIVATE ${version_include_dir})
 if (UNIX)
     # the `pkg_check_modules` function is created with this call
     find_package(PkgConfig REQUIRED)
@@ -21,8 +37,7 @@ if (UNIX)
                          deltares_common_c
                          io_netcdf
                          io_hyd
-                         waq_utils_f
-                         waqmerge_version_number)
+                         waq_utils_f)
 
     oss_include_libraries(${executable_name} oss_dependencies)
 
@@ -39,8 +54,7 @@ if (WIN32)
                          io_hyd
                          netcdf4
                          netcdff
-                         waq_utils_f
-                         waqmerge_version_number)
+                         waq_utils_f)
 
     oss_include_libraries(${executable_name} oss_dependencies)
     target_link_libraries(${executable_name} ${oss_dependencies})

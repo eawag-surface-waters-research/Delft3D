@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> interpolation of sample data to network nodes, in curvilinear grid coordinates
 subroutine sam2net_curvi(numk, xk, yk, zk)

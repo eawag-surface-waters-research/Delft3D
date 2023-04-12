@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  ! delete curviliniar grid outside polygon(s)
  subroutine del_grid_outside_pol()

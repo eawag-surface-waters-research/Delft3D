@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine readprofilesdef(ja)    ! in afwachting van een module die profieldefinities leest
  USE UNSTRUC_MODEL

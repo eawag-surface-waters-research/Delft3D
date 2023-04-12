@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Read options and files from command line
 !>  autostart/autostartstop is not filled in directly, needs to be merged with MDU-file option
@@ -39,7 +39,7 @@ function read_commandline() result(istat)
    use unstruc_messages
    use string_module, only: str_lower, str_tolower
    use m_samples_refine
-   USE m_partitioninfo
+   use m_partitioninfo
    use unstruc_version_module
    use dfm_error
    use unstruc_api
@@ -108,6 +108,8 @@ function read_commandline() result(istat)
             iarg_usecaching = 0
          case ('findcells')
             md_findcells = 1
+        case ('usefetchproc')
+            use_fetch_proc = 1
          case ('partition')
             md_japartition = 1
             jaGUI = 0 ! batch-mode only, no GUI needed.

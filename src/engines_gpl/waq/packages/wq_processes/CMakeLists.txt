@@ -2,35 +2,25 @@
 set(src_path src)
 
 # Set version file variables
-set(svn_version_root "${CMAKE_CURRENT_SOURCE_DIR}/../") # Check the SVN revision of WAQ directory
-set(ini_version_file "${CMAKE_CURRENT_SOURCE_DIR}/../../version/version_number.ini")
-set(fortran_version_file "${CMAKE_CURRENT_SOURCE_DIR}/src/wq_processes_version.F90")
-set(rc_version_file "${CMAKE_CURRENT_SOURCE_DIR}/../../version/version_number.rc")
+set(svn_version_root ${CMAKE_CURRENT_SOURCE_DIR}/../) # Check the SVN revision of WAQ directory
+set(waq_root_path ${CMAKE_CURRENT_SOURCE_DIR}/../../) # Trace back to the WAQ path
 
-# Generate the F90 version files
-generate_version_files(${rc_version_file} 
-                       ${ini_version_file} 
-                       ON)
+# Set version file variables
+set(waq_version_path ${waq_root_path}/version)
+set(fortran_version_file_delwaq ${waq_root_path}/packages/waq_utils_f/src/waq_utils/delwaq_version.F90)
+set(rc_version_file ${CMAKE_CURRENT_SOURCE_DIR}/../../version/version_number.rc)
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
 
-generate_version_files(${fortran_version_file} 
-                       ${ini_version_file} 
-                       ON)
+
 
 # Gather source files
 get_fortran_source_files(${src_path} source)
 
 # Define library
 set(library_name wq_processes)
-add_library(${library_name} ${source})
+add_library(${library_name} ${source}
+                            ${rc_version_file})
 
-# Define prebuild events
-prebuild_version_number(${library_name} ${rc_version_file} 
-                                        ${checkout_src_root}
-                                        ${ini_version_file})
-
-prebuild_version_number(${library_name} ${fortran_version_file} 
-                                        ${checkout_src_root}
-                                        ${ini_version_file})
 
 # Define additional compilation flags
 set_source_files_properties(${fortran_version_file}
@@ -68,8 +58,7 @@ oss_include_libraries(${library_name} oss_dependencies)
 
 # Set additional compilation properties
 target_compile_options(${library_name} PRIVATE "${waq_default_flags}")
-
-target_include_directories(${library_name}  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../include")
+target_include_directories(${library_name}  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../include ${version_include_dir})
 
 # Define how the files should be structured in Visual studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES  ${source})

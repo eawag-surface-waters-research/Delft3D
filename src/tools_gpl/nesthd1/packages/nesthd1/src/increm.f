@@ -26,8 +26,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !-----------------------------------------------------------------------
 !             Module: SUBROUTINE INCREM
 !           Function: Computes increments (-1, 0 or 1) in the x- and y-

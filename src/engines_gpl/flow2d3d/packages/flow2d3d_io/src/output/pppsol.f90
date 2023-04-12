@@ -28,8 +28,8 @@ subroutine pppsol(mmax      ,nmax      ,kmax      ,lstsci    ,ltur      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: PPPSOL prints the computed solution

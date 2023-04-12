@@ -25,8 +25,8 @@ subroutine esm_alloc_int(lundia, error, zmodel, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Determines memory requirements for the INTEGER ARRAY.

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE REANET(filename, k0, L0, NUMKN, NUMLN, istat)
       use m_netw

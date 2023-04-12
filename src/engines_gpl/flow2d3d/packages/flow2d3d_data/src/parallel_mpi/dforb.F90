@@ -25,8 +25,8 @@ subroutine dforb ( ipown, npart, iwork, mmax, nmax, gdp )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Performs an Orthogonal Recursive Bisection partitioning

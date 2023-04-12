@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    subroutine plotnu(fnam)
    implicit none
@@ -38,9 +38,8 @@
    CHARACTER PLOTJE*255
    character (len=*) fnam
 
-   plotje = fnam
+   plotje = trim(fnam)
    key = 3 ; ndraw(10) = 1
    call drawnu(key)
-   plotje = ' '
 
    end subroutine plotnu

@@ -4,6 +4,7 @@ message(STATUS "swan omp:")
 
 # Set directory which contains all source files
 set(src_path ../src)
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
 
 # Gather source files
 set(headers ../include/swanout1_deltares.inc)
@@ -18,13 +19,6 @@ set(executable_files ${swan_sourcefiles})
 set(swan_path "${CMAKE_CURRENT_SOURCE_DIR}/..")
 set(res_path ${swan_path}/res)
 
-# Set version file variables
-set(ini_version_file ${res_path}/version_number.ini)
-set(rc_version_file ${res_path}/version_number-omp.rc)
-
-# Generate the version files
-generate_version_files(${rc_version_file} ${ini_version_file})
-
 # Define executable
 set(executable_name swan_omp)
 add_executable(${executable_name}   ${headers}
@@ -38,7 +32,8 @@ if (WIN32)
     oss_include_libraries(${executable_name} exe_dependencies)
     target_link_libraries(${executable_name} ${exe_dependencies})
 
-    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../include")
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../include"
+                        ${version_include_dir})
     # Set linker properties
     message(STATUS "Setting linker properties in windows")
     target_link_directories(${executable_name}
@@ -66,7 +61,8 @@ if(UNIX)
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN)
 
-    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../include")
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../include"
+                        ${version_include_dir})
 
     add_definitions(-DHAVE_CONFIG_H=1)
     set_target_properties(${executable_name} PROPERTIES COMPILE_FLAGS ${openmp_flag})
@@ -82,7 +78,7 @@ set_source_files_properties(${checkout_src_root}/third_party_open/swan/src/ocpid
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 
 # Set additional compilation properties, specific for Debug mode
-target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${executable_name} PRIVATE "$<$<CONFIG:Debug>:${check_nopointers_flag}>")
 
 # Define preprocessor definitions 
 if (WIN32)

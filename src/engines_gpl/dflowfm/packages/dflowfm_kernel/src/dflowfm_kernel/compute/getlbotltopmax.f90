@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine getLbotLtopmax(LL,Lb,Ltx)
 ! Variation on getLbotLtop. Always returns the maximum possible layer range in stead of the actual range, even for dry links.

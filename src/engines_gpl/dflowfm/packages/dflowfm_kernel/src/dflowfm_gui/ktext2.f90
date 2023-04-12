@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
       SUBROUTINE KTEXT2(TEX,NX,NY,NCOL,NCOL2)
       implicit none

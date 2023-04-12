@@ -25,43 +25,20 @@ module properties
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use precision
     use tree_structures
     use string_module, only : str_tolower, str_lower
     !
     implicit none
     !
-    integer                          , private, parameter :: max_length = 256
-    integer                          , private, parameter :: xml_buffer_length = 1000
-    character(len=1)                 , private, parameter :: space  = ' '
-    character(len=1)                 , private, parameter :: tab = achar(9)
-    character(len=1)                 , private, parameter :: indent = tab
-    character(len=10), dimension(2,3), private, parameter :: entities = &
-       reshape( (/ '&    ', '&amp;', &
-                  '>    ', '&gt; ',  &
-                  '<    ', '&lt; ' /), (/2,3/) )
-    !
-    ! Define the XML data type that holds the parser information
-    !
-    type :: xml_parse
-       integer                          :: lun                ! LU-number of the XML-file
-       integer                          :: level              ! Indentation level (output)
-       integer                          :: lineno             ! Line in file
-       logical                          :: ignore_whitespace  ! Ignore leading blanks etc.
-       logical                          :: no_data_truncation ! Do not allow data truncation
-       logical                          :: too_many_attribs   ! More attributes than could be stored?
-       logical                          :: too_many_data      ! More lines of data than could be stored?
-       logical                          :: eof                ! End of file?
-       logical                          :: error              ! Invalid XML file or other error?
-       character(len=xml_buffer_length) :: line               ! buffer
-    end type xml_parse
+    integer, private, parameter                   :: max_length = 256
+    integer, private, parameter                   :: dp = kind(1.0d00)
     !
     interface max_keylength
        module procedure max_keylength
@@ -83,14 +60,6 @@ module properties
        module procedure prop_get_logical
        module procedure prop_get_double
        module procedure prop_get_doubles
-       module procedure prop_get_subtree_string
-       module procedure prop_get_subtree_integer
-       module procedure prop_get_subtree_integers
-       module procedure prop_get_subtree_real
-       module procedure prop_get_subtree_reals
-       module procedure prop_get_subtree_logical
-       module procedure prop_get_subtree_double
-       module procedure prop_get_subtree_doubles
     end interface
 
     interface prop_set
@@ -106,10 +75,7 @@ module properties
        module procedure prop_get_version_number
     end interface
 
-contains
-!
-!
-! ====================================================================
+   contains
 
 !> Loads an .ini file into a tree structure.
 !! Some optional arguments may be used to obtain error status + message.
@@ -150,6 +116,8 @@ end subroutine readIniFile
 subroutine prop_file(filetype, filename , tree, error, errmsg)
     use tree_structures
     !
+    implicit none
+    !
     ! Parameters
     !
     character(*), intent(in)                :: filetype
@@ -178,8 +146,6 @@ subroutine prop_file(filetype, filename , tree, error, errmsg)
        call prop_inifile(filename, tree, error)
     case ('tekal')
        call prop_tekalfile(filename, tree, error)
-    case ('xml')
-       call prop_xmlfile(filename, tree, error)
     case default
        write(*,*)'file type ',filetype,' not supported'
        if ( present(errmsg) ) then
@@ -190,7 +156,6 @@ subroutine prop_file(filetype, filename , tree, error, errmsg)
 end subroutine prop_file
 !
 !
-! ====================================================================
 ! --------------------------------------------------------------------
 !   Subroutine: prop_file
 !   Author:     Arjen Markus
@@ -223,6 +188,8 @@ end subroutine prop_file
 subroutine prop_inifile(filename , tree, error, japreproc)
     use tree_structures
     !
+    implicit none
+    !
     ! Parameters
     !
     character(*),               intent(in)                    :: filename     !< File name
@@ -236,7 +203,6 @@ subroutine prop_inifile(filename , tree, error, japreproc)
 
     lu = 0
     if (present(japreproc)) then            ! If preprocessor was requested
-!      open existing file only
        if (japreproc) then
           lu = preprocINI(filename, error)  ! do preprocessing
        endif
@@ -254,12 +220,12 @@ subroutine prop_inifile(filename , tree, error, japreproc)
     error = 0
     return
 end subroutine prop_inifile
-!
-!
-! ====================================================================
+
 subroutine prop_inifile_pointer(lu, tree)
     use tree_structures
     use string_module
+    !
+    implicit none
     !
     ! Parameters
     !
@@ -445,7 +411,6 @@ subroutine prop_inifile_pointer(lu, tree)
 end subroutine prop_inifile_pointer
 !
 !
-! ====================================================================
 ! --------------------------------------------------------------------
 !   Subroutine: prop_tekal_file
 !   Author:     Adri Mourits
@@ -474,6 +439,8 @@ end subroutine prop_inifile_pointer
 subroutine prop_tekalfile(filename , tree, error)
     use tree_structures
     !
+    implicit none
+    !
     ! Parameters
     !
     character(*),               intent(in)      :: filename     !< File name
@@ -493,11 +460,11 @@ subroutine prop_tekalfile(filename , tree, error)
     close (lu)
     return
 end subroutine prop_tekalfile
-!
-!
-! ====================================================================
+
 subroutine prop_tekalfile_pointer(lu, tree)
     use tree_structures
+    !
+    implicit none
     !
     ! Parameters
     !
@@ -576,530 +543,8 @@ subroutine prop_tekalfile_pointer(lu, tree)
     ! End of file or procedure
     !
 end subroutine prop_tekalfile_pointer
-!
-!
-! ====================================================================
-subroutine prop_xmlfile(filename , tree, error)
-    use tree_structures
-    !
-    ! Parameters
-    !
-    character(*)            , intent(in)    :: filename  !< File name 
-    type(tree_data), pointer, intent(inout) :: tree      !< Tree object generated 
-    integer                 , intent(out)   :: error     !< Placeholder for file errors 
-    !
-    ! Local variables
-    !
-    integer               :: lu
-    integer               :: iostat
-    logical               :: opened
-    !
-    lu = -1
-    !
-    ! if lu has not been assigned a valid unit number 
-    !
-    if (lu < 0) then
-       !
-       !      open existing file only
-       !
-       open(newunit=lu,file=filename,iostat=error,status='old')
-       if (error/=0) then
-          return
-       endif
-    endif 
-    !
-    call prop_xmlfile_pointer(lu, tree, error)
-    close (lu)
-end subroutine prop_xmlfile
-!
-!
-! ====================================================================
-subroutine prop_xmlfile_pointer(lu, tree, error)
-    use tree_structures
-    use TREE_DATA_TYPES
-    !
-    ! Parameters
-    !
-    integer                 , intent(in)    :: lu    !< File unit 
-    type(tree_data), pointer, intent(inout) :: tree  !< Tree object generated 
-    integer                 , intent(out)   :: error !< Placeholder for file errors 
-    !
-    ! Local variables
-    !
-    integer                                                   :: i
-    integer                                                   :: k
-    integer                                                   :: kend
-    integer                                                   :: ierr
-    integer                                                   :: noattribs
-    integer                                                   :: nodata
-    logical                                                   :: filestatus
-    logical                                                   :: xmlendtag
-    character(10)                                             :: inttostring
-    character(80)                                             :: xmltag
-    character(80)               , dimension(:,:), allocatable :: xmlattribs
-    character(xml_buffer_length), dimension(:)  , allocatable :: xmldata
-    type(xml_parse)                                           :: xmlinfo
-    type(tree_data_ptr)         , dimension(:)  , allocatable :: xmllevel    ! Store a pointer to each xml element in the "path"
-    !
-    !! executable statements -------------------------------------------------------
-    !
-    ! 100 xml levels must be enough
-    !
-    allocate(xmlattribs(2,10), stat=ierr)
-    if (allocated(xmldata)) deallocate(xmldata, stat=ierr)
-    allocate(xmllevel(0:100) , stat=ierr)
-    xmllevel(0)%node_ptr       => tree
-    xmlinfo%lun                = lu
-    xmlinfo%level              = 0
-    xmlinfo%lineno             = 0
-    xmlinfo%ignore_whitespace  = .true.
-    xmlinfo%no_data_truncation = .true.
-    xmlinfo%too_many_attribs   = .false.
-    xmlinfo%too_many_data      = .false.
-    xmlinfo%eof                = .false.
-    xmlinfo%error              = .false.
-    xmlinfo%line               = ' '
-    !
-    ! Read first line separately
-    !
-    k = 1
-    do while ( k >= 1 )
-       read( xmlinfo%lun, '(a)', iostat = ierr ) xmlinfo%line
-       xmlinfo%lineno = xmlinfo%lineno + 1
-       if ( ierr == 0 ) then
-          xmlinfo%line = adjustl(  xmlinfo%line )
-          k            = index( xmlinfo%line, '<?' )
-          !
-          ! Assume (for now at least) that <?xml ... ?> appears on a single line!
-          !
-          if ( k >= 1 ) then
-             kend = index( xmlinfo%line, '?>' )
-             call tree_create_node(xmllevel(0)%node_ptr, trim(xmlinfo%line(2:kend)), xmllevel(1)%node_ptr)
-             if ( kend <= 0 ) then
-                write(*,'(a,i0)') 'ERROR: XML_OPEN: error reading file with LU-number: ', xmlinfo%lun
-                write(*,'(a)')    'ERROR: Line starting with "<?xml" should end with "?>"'
-                xmlinfo%error = .true.
-                exit
-             endif
-          endif
-       else
-          write(*,'(a,i0)') 'ERROR: XML_OPEN: error reading file with LU-number: ', xmlinfo%lun
-          write(*,'(a)')    'ERROR: Possibly no line starting with "<?xml"'
-          xmlinfo%error = .true.
-          exit
-       endif
-    enddo
-    if ( xmlinfo%error ) return
-    !
-    do
-       call xml_get(xmlinfo, xmltag, xmlendtag, xmlattribs, noattribs, xmldata, nodata )
-       if ( .not. xml_ok(xmlinfo) ) then
-          exit
-       endif
-       if ( xml_error(xmlinfo) ) then
-          error = .true.
-          exit
-       endif
-       if (xmlinfo%level >= ubound(xmllevel, DIM=1)) then
-          error = .true.
-          exit
-       endif
-       !
-       ! End tag: nothing to add to tree
-       !
-       if (xmlendtag) cycle
-       !
-       ! Skip comments
-       !
-       if (xmltag(1:3) == '!--') cycle
-       !
-       ! Create a node for the tag itself
-       !
-       xmltag = str_tolower(xmltag)
-       call tree_create_node(xmllevel(xmlinfo%level-1)%node_ptr, trim(xmltag), xmllevel(xmlinfo%level)%node_ptr)
-       do k=1,noattribs
-          !
-          ! Create a subnode for each attribute
-          ! The only difference between an attribute and a child tag is the type specification: "STRING:XMLATTRIBUTE" vs "STRING:XMLDATA"
-          ! The type specification must start with STRING (needed in tree_struct)
-          !
-          xmlattribs(1,k) = str_tolower(xmlattribs(1,k))
-          call tree_create_node(xmllevel(xmlinfo%level)%node_ptr, trim(xmlattribs(1,k)), xmllevel(xmlinfo%level+1)%node_ptr)
-          call tree_put_data(xmllevel(xmlinfo%level+1)%node_ptr, transfer(trim(xmlattribs(2,k)),node_value), "STRING:XMLATTRIBUTE")
-       enddo
-       if (nodata == 1) then
-          call tree_put_data(xmllevel(xmlinfo%level)%node_ptr, transfer(xmldata(1),node_value), "STRING:XMLDATA")
-       elseif (nodata > 1) then
-          write(inttostring,'(i0)') nodata
-          call tree_put_data(xmllevel(xmlinfo%level)%node_ptr, transfer(trim(inttostring),node_value), "STRING:XMLNUMDATALINES")
-          do i=1,nodata
-             write(inttostring,'(i0)') i
-             call tree_create_node(xmllevel(xmlinfo%level)%node_ptr, trim(inttostring), xmllevel(xmlinfo%level+1)%node_ptr)
-             call tree_put_data(xmllevel(xmlinfo%level+1)%node_ptr, transfer(trim(xmldata(i)),node_value), "STRING:XMLDATALINE")
-          enddo
-       else
-          nullify(xmllevel(xmlinfo%level)%node_ptr%node_data)
-       endif
-    enddo
-    !
-    ! End of file or procedure
-    !
-    deallocate(xmlattribs, stat=ierr)
-    deallocate(xmldata   , stat=ierr)
-    deallocate(xmllevel  , stat=ierr)
-end subroutine prop_xmlfile_pointer
-!
-!
-! ====================================================================
-! xml_get --
-!    Routine to get the next bit of information from an XML file
-! Arguments:
-!    info        Structure holding information on the XML-file
-!    tag         Tag that was encountered
-!    endtag      Whether the end of the element was encountered
-!    attribs     List of attribute-value pairs
-!    no_attribs  Number of pairs in the list
-!    data        Lines of character data found
-!    no_data     Number of lines of character data
-!
-subroutine xml_get( info, tag, endtag, attribs, no_attribs, data, no_data )
-   use m_alloc
-   !
-   type(xml_parse) , intent(inout)               :: info
-   character(len=*), intent(out)                 :: tag
-   logical         , intent(out)                 :: endtag
-   character(len=*), intent(out), dimension(:,:) :: attribs
-   integer         , intent(out)                 :: no_attribs
-   character(xml_buffer_length), intent(inout), dimension(:), allocatable   :: data
-   integer         , intent(out)                 :: no_data
-   !
-   integer                          :: kspace
-   integer                          :: kend
-   integer                          :: keq
-   integer                          :: kfirst, kfirst1, kfirst2
-   integer                          :: ksecond
-   integer                          :: idxat
-   integer                          :: idxdat
-   integer                          :: ierr
-   logical                          :: close_bracket
-   logical                          :: comment_tag
-   logical                          :: endtag_nodata
-   character(len=xml_buffer_length) :: nextline
-   character(len=1)                 :: closing_char
-   !
-   ! Initialise the output
-   !
-   endtag                = .false.
-   endtag_nodata         = .false.
-   no_attribs            = 0
-   no_data               = 0
-   info%too_many_attribs = .false.
-   info%too_many_data    = .false.
-   !
-   ! From the previous call or the call to xmlopen we have
-   ! the line that we need to parse already in memory:
-   ! <tag attrib1="..." attrib2="..." />
-   !
-   comment_tag   = .false.
-   close_bracket = .false.
-   kspace        = index( info%line, ' ' )
-   kend          = index( info%line, '>' )
-   do while ( kend <= 0 )
-      read( info%lun, '(a)', iostat = ierr ) nextline
-      info%lineno = info%lineno + 1
-      if ( ierr == 0 ) then
-         info%line = trim(info%line) // ' ' // adjustl(nextline)
-      else
-         info%error = .true.
-         write(*,'(a,i0)') 'ERROR: XML_GET - end of tag not found (buffer too small?). Line: ', info%lineno
-         return
-      endif
-      kend = index( info%line, '>' )
-   enddo
-   if ( kend > kspace ) then
-      kend = kspace
-   else
-      close_bracket = .true.
-   endif
-   !
-   ! Check for the end of an ordinary tag and of
-   ! a comment tag
-   !
-   if ( info%line(1:3) == '-->' ) then
-      endtag     = .true.
-      tag        = '<!--'
-      info%level = info%level - 1
-   else if ( info%line(1:2) == '</' ) then
-      endtag     = .true.
-      tag        = info%line(3:kend-1)
-      info%level = info%level - 1
-   else if (info%line(1:4) == '<!--') then
-      kend        = 4
-      tag         = info%line(2:4)
-      info%level  = info%level + 1
-      comment_tag = .true.
-   else if ( info%line(1:1) == '<' ) then
-      ! tag found
-      tag    = info%line(2:kend-1)
-      info%level = info%level + 1
-   else
-      kend   = 0 ! Beginning of data!
-   endif
-   if ( info%level < 0 ) then
-      write(*,'(a,i0,a)') 'ERROR: xml_get - level dropped below zero: ', info%lineno, trim(info%line)
-   endif
-   info%line = adjustl( info%line(kend+1:) )
-   idxat     = 0
-   idxdat    = 0
-   if (.not.allocated(data)) then
-      allocate(data(100), stat=ierr)
-   endif
-   data = ' '
-   do while ( info%line /= ' ' .and. .not. close_bracket .and. .not. comment_tag )
-      keq  = index( info%line, '=' )
-      kend = index( info%line, '>' )
-      if ( keq > kend ) keq = 0    ! Guard against multiple tags with attributes on one line
-      !
-      ! No attributes any more?
-      !
-      if ( keq < 1 ) then
-         kend = index( info%line, '/>' )
-         if ( kend >= 1 ) then
-            kend          = kend + 1 ! To go beyond the ">" character
-            endtag        = .true.
-            endtag_nodata = .true.
-         else
-            kend = index( info%line, '>' )
-            if ( kend < 1 ) then
-               write(*,'(a,i0,a)') 'ERROR: XML_GET - wrong ending of tag ', info%lineno, trim(info%line)
-               info%error = .true. ! Wrong ending of line!
-               return
-            else
-               close_bracket = .true.
-            endif
-         endif
-         if ( kend >= 1 ) then
-            info%line = adjustl( info%line(kend+1:) )
-         endif
-         exit
-      endif
-      idxat = idxat + 1
-      if ( idxat <= size(attribs,2) ) then
-         no_attribs = idxat
-         attribs(1,idxat) = adjustl(info%line(1:keq-1)) ! Use adjustl() to avoid multiple spaces, etc
-         info%line = adjustl( info%line(keq+1:) )
-         !
-         ! We have almost found the start of the attribute's value
-         !
-         kfirst1 = index( info%line, '''' )
-         kfirst2 = index( info%line, '"' )
-         kfirst = 0
-         if ( kfirst1 > 0 .and. (kfirst2 <= 0 .or. kfirst1 < kfirst2) ) then
-             closing_char = ''''
-             kfirst       = kfirst1
-         endif
-         if ( kfirst2 > 0 .and. (kfirst1 <= 0 .or. kfirst2 < kfirst1) ) then
-             closing_char = '"'
-             kfirst       = kfirst2
-         endif
-         if ( kfirst < 1 ) then
-            write(*,'(a,i0,a)') 'ERROR: XML_GET - malformed attribute-value pair: ', info%lineno, trim(info%line)
-            info%error = .true. ! Wrong form of attribute-value pair
-            return
-         endif
-         ksecond = index( info%line(kfirst+1:), closing_char ) + kfirst
-         if ( ksecond < 1 ) then
-            write(*,'(a,i0,a)') 'ERROR: XML_GET - malformed attribute-value pair: ', info%lineno, trim(info%line)
-            info%error = .true. ! Wrong form of attribute-value pair
-            return
-         endif
-         attribs(2,idxat) = info%line(kfirst+1:ksecond-1)
-         info%line = adjustl( info%line(ksecond+1:) )
-      endif
-      if ( idxat > size(attribs,2) ) then
-         write(*,'(a,i0,a)') 'ERROR: XML_GET - more attributes than could be stored: ', info%lineno, trim(info%line)
-         info%too_many_attribs = .true.
-         info%line             = ' '
-         exit
-      endif
-   enddo
-   !
-   ! Now read the data associated with the current tag
-   ! - all the way to the next "<" character
-   !
-   do
-      if ( comment_tag ) then
-         kend   = index( info%line, '-->' )
-      else
-         kend   = index( info%line, '<' )
-      endif
-      idxdat = idxdat + 1
-      if ( idxdat > size(data) ) then
-         call realloc(data,size(data)+100, lindex=1, stat=ierr, fill=' ', keepExisting=.true.)
-      endif
-      if ( .not. endtag ) no_data = idxdat    ! The endtag was set because of "/>"?
-      if ( kend >= 1 ) then
-         data(idxdat) = info%line(1:kend-1)
-         info%line    = info%line(kend:)
-      else
-         data(idxdat) = info%line
-      endif
-      no_data = idxdat
-      !
-      ! No more data? Otherwise, read on
-      !
-      if ( kend >= 1 ) then
-         exit
-      else
-         read( info%lun, '(a)', iostat = ierr ) info%line
-         info%lineno = info%lineno + 1
-         if ( ierr < 0 ) then
-            ! write(*,'(a,i0)') 'ERROR:XML_GET - end of file found - LU-number: ', info%lun
-            info%eof = .true.
-         elseif ( ierr > 0 ) then
-            write(*,'(a,2i0)') 'ERROR:XML_GET - error reading file with LU-number ', info%lun, info%lineno
-            info%error = .true.
-         endif
-         if ( ierr /= 0 ) then
-            exit
-         endif
-      endif
-   enddo
-   !
-   ! If we encountered the "/>" pattern, we still need to read the next line
-   ! from the file, but there is no actual data ...
-   !
-   if ( endtag_nodata ) then
-      no_data = 0
-   endif
-   !
-   ! Compress the data?
-   !
-   if ( info%ignore_whitespace ) then
-      call xml_compress_( data, no_data )
-   endif
-   !
-   ! Replace the entities, if any
-   !
-   call xml_replace_entities_( data, no_data )
-   !
-   !write(*,'(a,i0)') 'XML_GET - number of attributes: ', no_attribs
-   !write(*,'(a,i0)') 'XML_GET - number of data lines: ', no_data
-   !
-end subroutine xml_get
-!
-!
-! ====================================================================
-! xml_ok --
-!    Function that returns whether all was okay or not
-! Arguments:
-!    info                Structure holding information on the XML-file
-! Returns:
-!    .true. if there was no error, .false. otherwise
-!
-logical function xml_ok( info )
-   type(xml_parse),  intent(in) :: info
 
-   xml_ok = info%eof .or. info%error .or. &
-            ( info%no_data_truncation .and.    &
-                 ( info%too_many_attribs .or. info%too_many_data ) )
-   xml_ok = .not. xml_ok
-end function xml_ok
-!
-!
-! ====================================================================
-! xml_error --
-!    Function that returns whether there was an error
-! Arguments:
-!    info                Structure holding information on the XML-file
-! Returns:
-!    .true. if there was an error, .false. if there was none
-!
-logical function xml_error( info )
-   type(xml_parse),  intent(in) :: info
 
-   xml_error = info%error .or. &
-            ( info%no_data_truncation .and.    &
-                 ( info%too_many_attribs .or. info%too_many_data ) )
-end function xml_error
-!
-!
-! ====================================================================
-! --------------------------------------------------------------------
-!
-! xml_compress_ --
-!    Routine to remove empty lines from the character data and left-align
-!    all others. Left-align in this case, also includes removing tabs!
-! Arguments:
-!    data        Lines of character data found
-!    no_data     (Nett) number of lines of character data
-!
-subroutine xml_compress_( data, no_data )
-   character(len=*), intent(inout), dimension(:)    :: data
-   integer,          intent(inout)                  :: no_data
-
-   integer :: i
-   integer :: j
-   integer :: k
-   logical :: empty
-
-   j = 0
-   do i = 1,no_data
-      do k = 1,len(data(i))
-         if (data(i)(k:k) /= space .and. data(i)(k:k) /= tab) then
-            j = j + 1
-            data(j) = data(i)(k:)
-            exit
-         endif
-      enddo
-   enddo
-
-   no_data = j ! Make sure the empty lines do not count anymore
-
-end subroutine xml_compress_
-!
-!
-! ====================================================================
-! xml_replace_entities_ --
-!    Routine to replace entities such as &gt; by their
-!    proper character representation
-! Arguments:
-!    data        Lines of character data found
-!    no_data     (Nett) number of lines of character data
-!
-subroutine xml_replace_entities_( data, no_data )
-   character(len=*), intent(inout), dimension(:)    :: data
-   integer,          intent(inout)                  :: no_data
-
-   integer :: i
-   integer :: j
-   integer :: j2
-   integer :: k
-   integer :: pos
-   logical :: found
-
-   do i = 1,no_data
-      j = 1
-      do
-         do k = 1,size(entities,2)
-            found = .false.
-            pos   = index( data(i)(j:), trim(entities(2,k)) )
-            if ( pos > 0 ) then
-               found = .true.
-               j     = j + pos - 1
-               j2    = j + len_trim(entities(2,k))
-               data(i)(j:) = trim(entities(1,k)) // data(i)(j2:)
-               j     = j2
-            endif
-         enddo
-         if ( .not. found ) exit
-      enddo
-   enddo
-
-end subroutine xml_replace_entities_
-!
-!
-! ====================================================================
 ! --------------------------------------------------------------------
 !   Subroutine: expand
 !   Purpose:    Expand keys ${key} in subject, given a set of key-value pairs
@@ -1122,6 +567,8 @@ end subroutine xml_replace_entities_
 ! --------------------------------------------------------------------
 !
 subroutine expand(subject,defnames,defstrings,ndef)
+    !
+    implicit none
     !
     ! Parameters
     !
@@ -1178,9 +625,8 @@ subroutine expand(subject,defnames,defstrings,ndef)
     enddo
     subject=trim(outstring)
 end subroutine expand
-!
-!
-! ====================================================================
+
+
 ! --------------------------------------------------------------------
 !   Subroutine: preprocINI
 !   Purpose:    INI-file preprocessor, cpp-style
@@ -1227,6 +673,8 @@ end subroutine expand
 integer function preprocINI(infilename, error, outfilename) result (outfilenumber)
     use MessageHandling
     !
+    implicit none
+    !
     ! Parameters
     !
     character(*),     intent(in)                :: infilename           !< basic config file
@@ -1270,9 +718,7 @@ integer function preprocINI(infilename, error, outfilename) result (outfilenumbe
        rewind(outfilenumber)          ! rewind the file just written and return the number to caller
     endif
 end function preprocINI
-!
-!
-! ====================================================================
+
 ! --------------------------------------------------------------------
 !   Subroutine: parse_directives
 !   Purpose:    part of the INI-file preprocessor, handles preprocessor directives
@@ -1300,6 +746,8 @@ end function preprocINI
 !
 recursive integer function parse_directives (infilename, outfilenumber, defnames, defstrings, ndef, level) result (error)
     use MessageHandling
+    !
+    implicit none
     !
     ! Parameters
     !
@@ -1391,9 +839,8 @@ recursive integer function parse_directives (infilename, outfilenumber, defnames
  666  continue
     close(infilenumber)
 end function parse_directives
-!
-!
-! ====================================================================
+
+
 !> Writes a property tree to file in ini format.
 subroutine prop_write_inifile(mout, tree, error)
     integer,                  intent(in)  :: mout  !< File pointer where to write to.
@@ -1414,164 +861,7 @@ subroutine prop_write_inifile(mout, tree, error)
     call tree_traverse(tree, print_initree, transfer((/ mout, transfer(lenmaxdata, 123) /), node_value), dummylog)
 
 end subroutine prop_write_inifile
-!
-!
-! ====================================================================
-!> Writes a property tree to file in xml format.
-recursive subroutine prop_write_xmlfile(mout, tree, level, error)
-    integer,                  intent(in)  :: mout  !< File pointer where to write to.
-    type(TREE_DATA), pointer              :: tree  !< Tree to be written.
-    integer,                  intent(in)  :: level !< Indentation level.
-    integer,                  intent(out) :: error !< Return status.
-    !
-    ! local
-    integer                                :: i
-    integer                                :: numatt
-    integer                                :: numchild
-    character(len=1), dimension(:),pointer :: data_ptr
-    character(40)                          :: type_string
-    character(40)                          :: formatstring
-    character(80)                          :: tag
-    character(max_length)                  :: string
-    character(xml_buffer_length)           :: buffer
-    logical                                :: success
-    !
-    ! body
-    tag = tree_get_name(tree)
-    !
-    ! Number of children:
-    !
-    if (.not.associated(tree%child_nodes)) then
-       numchild = 0
-    else
-       numchild = size(tree%child_nodes)
-    endif
-    !
-    ! Count the number of children with type = attribure
-    !
-    numatt = 0
-    do i=1, numchild
-       call tree_get_data_ptr( tree%child_nodes(i)%node_ptr, data_ptr, type_string )
-       if (type_string == "STRING:XMLATTRIBUTE") then
-          numatt = numatt + 1
-       endif
-    enddo
-    call tree_get_data_ptr( tree, data_ptr, type_string )
-    if (numchild == numatt) then
-       !
-       ! Everything related to this tag fits on one line 
-       !
-       buffer = ' '
-       if (level > 0) then
-          if (tag(1:1) == '?') then
-             !
-             ! Special treatment for first line: <?xml version="1.0"?>
-             !
-             write(buffer,'(3a)') "<", trim(tag), ">"
-          elseif(tag(1:4) == '<!--') then
-             !
-             ! Comment line; write it as is
-             write(buffer,'(a)') trim(tag)
-          else
-             !
-             ! <tagname att1="val1" att2="val2">data</tagname>
-             !
-             write(buffer,'(2a)') "<", trim(tag)
-             do i=1, numchild
-                call tree_get_data_ptr(tree%child_nodes(i)%node_ptr, data_ptr, type_string )
-                if (type_string == "STRING:XMLATTRIBUTE") then
-                   string = ' '
-                   if (associated(data_ptr)) then
-                      call tree_get_data_string( tree%child_nodes(i)%node_ptr, string, success )
-                   endif
-                   write(buffer,'(6a)') trim(buffer), " ", trim(tree_get_name(tree%child_nodes(i)%node_ptr)), "=""", trim(string), """"
-                endif
-             enddo
-             string = ' '
-             call tree_get_data_ptr(tree, data_ptr, type_string )
-             if (associated(data_ptr)) then
-                call tree_get_data_string( tree, string, success )
-             endif
-             if (type_string == "STRING:XMLDATALINE") then
-                write(buffer,'(a)') trim(string)
-             else
-                write(buffer,'(6a)') trim(buffer), ">", trim(string), "</", trim(tag), ">"
-             endif
-          endif
-          !
-          ! Indentation
-          !
-          i = (level-1)*4
-          if (i == 0) then
-             write(formatstring,'(a)') '(a)'
-          else
-             write(formatstring,'(a,i0,a)') '(',i,'x,a)'
-          endif
-          write(mout, trim(formatstring)) trim(buffer)
-       endif
-    else
-       !
-       ! - Write start tag                  <tagname att1="val1" att2="val2">
-       ! - process child_nodes recursively     <children>
-       ! - Write end tag                    </tagname>
-       !
-       buffer = ' '
-       if (level > 0) then
-          write(buffer,'(2a)') "<", trim(tag)
-          do i=1, numchild
-             call tree_get_data_ptr(tree%child_nodes(i)%node_ptr, data_ptr, type_string )
-             if (type_string == "STRING:XMLATTRIBUTE") then
-                string = ' '
-                if (associated(data_ptr)) then
-                   call tree_get_data_string( tree%child_nodes(i)%node_ptr, string, success )
-                endif
-                write(buffer,'(6a)') trim(buffer), " ", trim(tree_get_name(tree%child_nodes(i)%node_ptr)), "=""", trim(string), """"
-             endif
-          enddo
-          write(buffer,'(6a)') trim(buffer), ">"
-          !
-          ! Indentation
-          !
-          i = (level-1)*4
-          if (i == 0) then
-             write(formatstring,'(a)') '(a)'
-          else
-             write(formatstring,'(a,i0,a)') '(',i,'x,a)'
-          endif
-          write(mout, trim(formatstring)) trim(buffer)
-       endif
-       !
-       ! process child_nodes recursively
-       ! skip children with type=attribute
-       !
-       do i = 1, numchild
-          call tree_get_data_ptr(tree%child_nodes(i)%node_ptr, data_ptr, type_string )
-          if (type_string /= "STRING:XMLATTRIBUTE") then
-             call prop_write_xmlfile(mout, tree%child_nodes(i)%node_ptr, level+1, error)
-          endif
-       enddo
-       !
-       ! Write end tag
-       !
-       buffer = ' '
-       if (level > 0) then
-          write(buffer,'(3a)') "</", trim(tag), ">"
-          !
-          ! Indentation
-          !
-          i = (level-1)*4
-          if (i == 0) then
-             write(formatstring,'(a)') '(a)'
-          else
-             write(formatstring,'(a,i0,a)') '(',i,'x,a)'
-          endif
-          write(mout, trim(formatstring)) trim(buffer)
-       endif
-    endif
-end subroutine prop_write_xmlfile
-!
-!
-! ====================================================================
+
 !> Selects the maximum keylength from childdata.
 !! to be used in call to tree_fold.
 subroutine max_keylength( tree, childdata, data, stop)
@@ -1590,9 +880,7 @@ subroutine max_keylength( tree, childdata, data, stop)
 
     data = transfer(lenmax, data)
 end subroutine max_keylength
-!
-!
-! ====================================================================
+
 !> Selects the keylength from a tree leave.
 !! to be used in call to tree_fold.
 subroutine leaf_keylength( tree, data, stop)
@@ -1614,9 +902,8 @@ subroutine leaf_keylength( tree, data, stop)
 
     data = transfer(keylen, data)
 end subroutine leaf_keylength
-!
-!
-! ====================================================================
+
+
 !> Prints the root of a tree (either as chapter or as key-value pair)
 !! to be used in call to tree_traverse
 subroutine print_initree( tree, data, stop )
@@ -1667,38 +954,18 @@ subroutine print_initree( tree, data, stop )
    end select
 end subroutine print_initree
 
-!
-!
-! ====================================================================
-! --------------------------------------------------------------------
-!   Subroutine: prop_get_string
-!   Author:     Arjen Markus
-!   Purpose:    Get the string value for a property
-!   Context:    Used by applications
-!   Summary:
-!               Go through the list of props to check the
-!               chapter. When the right chapter is found, check
-!               for the key.
-!               Only set the value if the key matches
-!   Arguments:
-!   chapter     Name of the chapter (case-insensitive) or "*" to get any key
-!   key         Name of the key (case-insensitive)
-!   value       Value of the key (not set if the key is not found,
-!               so you can set a default value)
-!   success     Whether successful or not (optional)
-!   Delimiters:
-!               If the value starts with the character "#", this character is removed.
-!               If a second character "#" is found , this character and everything behind
-!               this character is removed.
-!   Comments on this line:
-!               Use the delimiters "#". Example:
-!               StringIn = # AFileName # Comments are allowed behind the second "#"
-! --------------------------------------------------------------------
-!
+!> Get the string value for a property
+!!    Go through the list of props to check the
+!!    chapter. When the right chapter is found, check for the key.
+!!    Only set the value if the key matches
+!!  Delimiters:
+!!    If the value starts with the character "#", this character is removed.
+!!    If a second character "#" is found , this character and everything behind this character is removed.
+!!  Comments on this line:
+!!    Use the delimiters "#". Example:
+!!    StringIn = # AFileName # Comments are allowed behind the second "#"
 subroutine prop_get_string(tree, chapterin ,keyin, value, success)
-    !
-    ! Parameters
-    !
+    implicit none
     type(tree_data)  , pointer       :: tree        !< The property tree
     character(*)     , intent(in)    :: chapterin   !< Name of the chapter (case-insensitive) or "*" to get any key
     character(*)     , intent(in)    :: keyin       !< Name of the key (case-insensitive)
@@ -1853,10 +1120,9 @@ subroutine prop_get_alloc_string(tree, chapterin, keyin, value, success)
          success = success_
      end if
  end subroutine prop_get_alloc_string
-!
-!
-! ====================================================================
+
 subroutine visit_tree(tree,direction)
+   implicit none
    type(TREE_DATA), pointer                    :: tree
    character(len=1), dimension(0)              :: data
    logical                                     :: stop
@@ -1867,9 +1133,7 @@ subroutine visit_tree(tree,direction)
       call tree_traverse( tree, node_unvisit, data, stop )
    endif
 end subroutine visit_tree
-!
-!
-! ====================================================================
+
 subroutine node_visit( node, data, stop )
    use TREE_DATA_TYPES
    type(TREE_DATA), pointer                    :: node
@@ -1879,9 +1143,7 @@ subroutine node_visit( node, data, stop )
       node%node_visit = node%node_visit + 1  ! Update visit count
    endif
 end subroutine node_visit
-!
-!
-! ====================================================================
+
 subroutine node_unvisit( node, data, stop )
    use TREE_DATA_TYPES
    type(TREE_DATA), pointer                    :: node
@@ -1892,26 +1154,23 @@ subroutine node_unvisit( node, data, stop )
    endif
 end subroutine node_unvisit
 
-!
-!
-! ====================================================================
 !> Get the integer value for a property
 !!    Use prop_get_string to get the string value.
 !!    Convert it to integer.
 !!
 !!  Comments on this line:
+!!    Only after integer if valuesfirst = .true., otherwise:
 !!    Value is set with the first integer found behind the character "=".
 !!    The following example is allowed:
 !!    IntegerIn = Index 8, denoting the startpoint for searches
-subroutine prop_get_integer(tree, chapter, key, value, success)
-    !
-    ! Parameters
-    !
-    type(tree_data)  , pointer       :: tree    !< The property tree
-    integer          , intent(inout) :: value   !< Value of the key (not set if the key is not found, so you can set a default value)
-    character(*)     , intent(in)    :: chapter !< Name of the chapter (case-insensitive) or "*" to get any key
-    character(*)     , intent(in)    :: key     !< Name of the key (case-insensitive)
-    logical, optional, intent(out)   :: success !< Whether successful or not (optional)
+subroutine prop_get_integer(tree, chapter, key, value, success, valuesfirst)
+    implicit none
+    type(tree_data)  , pointer       :: tree        !< The property tree
+    integer          , intent(inout) :: value       !< Value of the key (not set if the key is not found, so you can set a default value)
+    character(*)     , intent(in)    :: chapter     !< Name of the chapter (case-insensitive) or "*" to get any key
+    character(*)     , intent(in)    :: key         !< Name of the key (case-insensitive)
+    logical, optional, intent(out)   :: success     !< Whether successful or not (optional)
+    logical, optional, intent(in)    :: valuesfirst !< Whether value should be specified before any comments (optional)
     !
     ! Local variables
     !
@@ -1920,12 +1179,10 @@ subroutine prop_get_integer(tree, chapter, key, value, success)
     !! executable statements -------------------------------------------------------
     !
     valuearray(1) = value
-    call prop_get_integers(tree   ,chapter   ,key       ,valuearray,1, success)
+    call prop_get_integers(tree   ,chapter   ,key       ,valuearray,1, success, valuesfirst)
     value = valuearray(1)
 end subroutine prop_get_integer
-!
-!
-! ====================================================================
+
 !> Get the array of integer values for a property
 !!    Use prop_get_string to get the string value.
 !!    Convert it to integers.
@@ -1935,19 +1192,19 @@ end subroutine prop_get_integer
 !!    only valuelength integers are set in value
 !!
 !!  Comments on this line:
+!!    Only after valuelength integers if valuesfirst = .true., otherwise:
 !!    Everywhere behind the character "=".
 !!    The following example is allowed:
 !!    IntegersIn = (n,m): 4,5
-subroutine prop_get_integers(tree, chapter, key, value, valuelength, success)
-    !
-    ! Parameters
-    !
+subroutine prop_get_integers(tree, chapter, key, value, valuelength, success, valuesfirst)
+    implicit none
     type(tree_data)      , pointer       :: tree         !< The property tree
     integer              , intent(in)    :: valuelength  !< Size of the array value
     integer, dimension(*), intent(inout) :: value        !< Values of the key (not set if the key is not found, so you can set a default value)
     character(*)         , intent(in)    :: chapter      !< Name of the chapter (case-insensitive) or "*" to get any key
     character(*)         , intent(in)    :: key          !< Name of the key (case-insensitive)
     logical, optional    , intent(out)   :: success      !< Whether successful or not (optional)
+    logical, optional    , intent(in)    :: valuesfirst  !< Whether values should be specified before any comments (optional)
     !
     ! Local variables
     !
@@ -1957,78 +1214,97 @@ subroutine prop_get_integers(tree, chapter, key, value, valuelength, success)
     integer :: valcount
     integer :: ierr
     character(12)  :: intchars = '0123456789-+'
+    character(2)   :: spacechars = ' '//achar(9)
     character(20)  :: fmt
     character(255) :: avalue
     character(len=:), allocatable :: prop_value
-
-    allocate(character(maxlen)::prop_value)
+    logical         :: valuesfirst_
 
     !
     !! executable statements -------------------------------------------------------
     !
-    prop_value(1:maxlen) = ' '
-    call prop_get_string(tree, chapter, key, prop_value, success)
+    call prop_get_alloc_string(tree, chapter, key, prop_value, success)
+    if (.not. allocated(prop_value)) prop_value = ' '
+    if (present(valuesfirst)) then
+        valuesfirst_ = valuesfirst
+    else
+        valuesfirst_ = .false.
+    endif
     !
     ! Extract the integer part
     ! Using read(prop_value,*,iostat=io) (value(i),i=1,valuelength)
     ! Has another behaviour as the following implementation:
     !
     do valcount = 1, valuelength
-       !
-       ! Remove everything before the first integer
-       !
-       k = 0
-       do i = 1, len_trim(prop_value)
-          k = index(intchars, prop_value(i:i))
-          if (k>0) exit
-       enddo
-       !
-       ! k=0: no integer found
-       !
-       if (k == 0) return
-       prop_value = prop_value(i:len(prop_value))
-       !
-       ! Move the first integer to avalue
-       !
-       do i = 1, len(prop_value)
-          k = index(intchars, prop_value(i:i))
-          if (k==0) exit
-       enddo
-       avalue = prop_value(1:i - 1)
-       prop_value = prop_value(i:len(prop_value))
-       length = len_trim(avalue)
-       if (length/=0) then
-          write (fmt, '(a,i5,a)') '(i', length, ')'
-          read (avalue, fmt, iostat=ierr) value(valcount)
-          if (ierr /= 0) then
-             if (present(success)) then
-                success = .false.
+       do
+          !
+          ! Remove everything before the first integer
+          !
+          k = 0
+          do i = 1, len_trim(prop_value)
+             k = index(intchars, prop_value(i:i))
+             if (k>0) exit
+             if (valuesfirst_ .and. index(spacechars, prop_value(i:i)) == 0) then
+                if (present(success)) then
+                   success = .false.
+                endif
+                return
              endif
-             return
+          enddo
+          !
+          ! k=0: no integer found
+          !
+          if (k == 0) return
+          prop_value = prop_value(i:len(prop_value))
+          !
+          ! Move the first integer to avalue
+          !
+          do i = 1, len(prop_value)
+             k = index(intchars, prop_value(i:i))
+             if (k==0) exit
+          enddo
+          avalue = prop_value(1:i - 1)
+          prop_value = prop_value(i:len(prop_value))
+          length = len_trim(avalue)
+          if (length/=0) then
+             write (fmt, '(a,i5,a)') '(i', length, ')'
+             read (avalue, fmt, iostat=ierr) value(valcount)
+             if (ierr /= 0) then
+                if (present(success)) then
+                   success = .false.
+                endif
+                return
+             endif
+             exit
+          else
+             if (valuesfirst_) then
+                if (present(success)) then
+                   success = .false.
+                endif
+                return
+             endif
           endif
-       endif
+       enddo
     enddo
 end subroutine prop_get_integers
-!
-!
-! ====================================================================
+
 !> Get the real value for a property
-!!              Use prop_get_string to get the string value.
-!!              Convert it to real.
+!!    Use prop_get_string to get the string value.
+!!    Convert it to real.
 !!
 !!  Comments on this line:
-!!              Value is set with the first real found behind the character "=".
-!!              The following example is allowed:
-!!              RealIn = Gravity 9.8, m/s*2
-subroutine prop_get_real(tree, chapter, key, value, success)
-    !
-    ! Parameters
-    !
-    type(tree_data)  , pointer       :: tree !< The property tree
-    real             , intent(inout) :: value !< Value of the key (not set if the key is not found, so you can set a default value)
-    character(*)     , intent(in)    :: chapter !< Name of the chapter (case-insensitive) or "*" to get any key
-    character(*)     , intent(in)    :: key !< Name of the key (case-insensitive)
-    logical, optional, intent(out)   :: success !< Whether successful or not (optional)
+!!    Only after real if valuesfirst = .true., otherwise:
+!!    Value is set with the first real found behind the character "=".
+!!    The following example is allowed:
+!!    RealIn = Gravity 9.8, m/s*2
+subroutine prop_get_real(tree, chapter, key, value, success, valuesfirst)
+    implicit none
+    type(tree_data)  , pointer       :: tree        !< The property tree
+    real             , intent(inout) :: value       !< Value of the key (not set if the key is not found, so you can set a default value)
+    character(*)     , intent(in)    :: chapter     !< Name of the chapter (case-insensitive) or "*" to get any key
+    character(*)     , intent(in)    :: key         !< Name of the key (case-insensitive)
+    logical, optional, intent(out)   :: success     !< Whether successful or not (optional)
+    logical, optional, intent(in)    :: valuesfirst !< Whether value should be specified before any comments (optional)
     !
     ! Local variables
     !
@@ -2037,34 +1313,32 @@ subroutine prop_get_real(tree, chapter, key, value, success)
     !! executable statements -------------------------------------------------------
     !
     valuearray(1) = value
-    call prop_get_reals(tree, chapter, key, valuearray, 1, success)
+    call prop_get_reals(tree, chapter, key, valuearray, 1, success, valuesfirst)
     value = valuearray(1)
 end subroutine prop_get_real
 
-!
-! ====================================================================
 !> Get the array of real values for a property
-!!     Use prop_get_string to get the string value.
-!!     Convert it to reals.
-!!     If the string contains less reals than valuelength,
-!!     only the reals found are set in value.
-!!     If the string contains more reals than valuelength,
-!!     only valuelength reals are set in value
+!!    Use prop_get_string to get the string value.
+!!    Convert it to reals.
+!!    If the string contains less reals than valuelength,
+!!    only the reals found are set in value.
+!!    If the string contains more reals than valuelength,
+!!    only valuelength reals are set in value
 !!
 !!  Comments on this line:
-!!     Everywhere behind the character "=".
-!!     The following example is allowed:
-!!     RealsIn = (x,y): 4.5,5.9 Start point
-subroutine prop_get_reals(tree, chapter, key, value, valuelength, success)
-    !
-    ! Parameters
-    !
+!!    Only after valuelength reals if valuesfirst = .true., otherwise:
+!!    Everywhere behind the character "=".
+!!    The following example is allowed:
+!!    RealsIn = (x,y): 4.5,5.9 Start point
+subroutine prop_get_reals(tree, chapter, key, value, valuelength, success, valuesfirst)
+    implicit none
     type(tree_data)   , pointer        :: tree         !< The property tree
     integer           , intent (in)    :: valuelength  !< Size of the array value
     real, dimension(*), intent (inout) :: value        !< Values of the key (not set if the key is not found, so you can set a default value)
     character(*)      , intent (in)    :: chapter      !< Name of the chapter (case-insensitive) or "*" to get any key
     character(*)      , intent (in)    :: key          !< Name of the key (case-insensitive)
     logical, optional , intent (out)   :: success      !< Whether successful or not (optional)
+    logical, optional , intent(in)     :: valuesfirst  !< Whether values should be specified before any comments (optional)
     !
     ! Local variables
     !
@@ -2074,17 +1348,22 @@ subroutine prop_get_reals(tree, chapter, key, value, valuelength, success)
     integer         :: valcount
     integer         :: ierr
     character(15)   :: realchars = '0123456789-+.eE'
+    character(2)    :: spacechars = ' '//achar(9)
     character(20)   :: fmt
     character(255)  :: avalue
     character(len=:), allocatable :: prop_value
     logical         :: digitfound
-
-    allocate(character(maxlen)::prop_value)
+    logical         :: valuesfirst_
     !
     !! executable statements -------------------------------------------------------
     !
-    prop_value(1:maxlen) = ' '
-    call prop_get_string(tree, chapter, key, prop_value, success)
+    call prop_get_alloc_string(tree, chapter, key, prop_value, success)
+    if (.not. allocated(prop_value)) prop_value = ' '
+    if (present(valuesfirst)) then
+        valuesfirst_ = valuesfirst
+    else
+        valuesfirst_ = .false.
+    endif
     !
     ! Extract the real part
     ! Using read(prop_value,*,iostat=io) (value(i),i=1,valuelength)
@@ -2102,6 +1381,12 @@ subroutine prop_get_reals(tree, chapter, key, value, valuelength, success)
           do i = 1, length
              k = index(realchars, prop_value(i:i))
              if (k>0) exit
+             if (valuesfirst_ .and. index(spacechars, prop_value(i:i)) == 0) then
+                if (present(success)) then
+                   success = .false.
+                endif
+                return
+             endif
           enddo
           !
           ! k=0: no real found
@@ -2133,30 +1418,35 @@ subroutine prop_get_reals(tree, chapter, key, value, valuelength, success)
                 return
              endif
              exit
+          else
+             if (valuesfirst_) then
+                if (present(success)) then
+                   success = .false.
+                endif
+                return
+             endif
           endif
        enddo
     enddo
 end subroutine prop_get_reals
 
-!
-! ====================================================================
 !> Get the double-precision real value for a property
 !!    Use prop_get_string to get the string value.
 !!    Convert it to a double precision real.
 !!
 !!  Comments on this line:
+!!    Only after the double if valuesfirst = .true., otherwise:
 !!    Value is set with the first real found behind the character "=".
 !!    The following example is allowed:
 !!    RealIn = Gravity 9.8, m/s*2
-subroutine prop_get_double(tree, chapter, key, value, success)
-    !
-    ! Parameters
-    !
-    type(tree_data)  , pointer       :: tree    !< The property tree
-    real(kind=dp)    , intent(inout) :: value   !< Value of the key (not set if the key is not found, so you can set a default value)
-    character(*)     , intent(in)    :: chapter !< Name of the chapter (case-insensitive) or "*" to get any key
-    character(*)     , intent(in)    :: key     !< Name of the key (case-insensitive)
-    logical, optional, intent(out)   :: success !< Whether successful or not (optional)
+subroutine prop_get_double(tree, chapter, key, value, success, valuesfirst)
+    implicit none
+    type(tree_data)  , pointer       :: tree        !< The property tree
+    real(kind=dp)    , intent(inout) :: value       !< Value of the key (not set if the key is not found, so you can set a default value)
+    character(*)     , intent(in)    :: chapter     !< Name of the chapter (case-insensitive) or "*" to get any key
+    character(*)     , intent(in)    :: key         !< Name of the key (case-insensitive)
+    logical, optional, intent(out)   :: success     !< Whether successful or not (optional)
+    logical, optional, intent(in)    :: valuesfirst !< Whether value should be specified before any comments (optional)
     !
     ! Local variables
     !
@@ -2165,34 +1455,32 @@ subroutine prop_get_double(tree, chapter, key, value, success)
     !! executable statements -------------------------------------------------------
     !
     valuearray(1) = value
-    call prop_get_doubles(tree, chapter, key, valuearray, 1, success)
+    call prop_get_doubles(tree, chapter, key, valuearray, 1, success, valuesfirst)
     value = valuearray(1)
 end subroutine prop_get_double
-!
-!
-! ====================================================================
+
 !> Get the array of double precision real values for a property
 !!    Use prop_get_string to get the string value.
 !!    Convert it to double precision reals.
 !!    If the string contains less reals than valuelength,
 !!    only the reals found are set in value.
 !!    If the string contains more reals than valuelength,
-!!    only valuelength reals are set in value
+!!    only valuelength reals are set in value.
 !!
-!! Comments on this line:
+!!  Comments on this line:
+!!    Only after valuelength doubles if valuesfirst = .true., otherwise:
 !!    Everywhere behind the character "=".
 !!    The following example is allowed:
 !!    RealsIn = (x,y): 4.5,5.9 Start point
-subroutine prop_get_doubles(tree, chapter, key, value, valuelength, success)
-    !
-    ! Parameters
-    !
+subroutine prop_get_doubles(tree, chapter, key, value, valuelength, success, valuesfirst)
+    implicit none
     type(tree_data)            , pointer       :: tree        !< The property tree
     integer                    , intent(in)    :: valuelength !< Size of the array value
-    real(kind=hp), dimension(*), intent(inout) :: value       !< Values of the key (not set if the key is not found, so you can set a default value)
+    real(kind=dp), dimension(*), intent(inout) :: value       !< Values of the key (not set if the key is not found, so you can set a default value)
     character(*)               , intent(in)    :: chapter     !< Name of the chapter (case-insensitive) or "*" to get any key
     character(*)               , intent(in)    :: key         !< Name of the key (case-insensitive)
     logical, optional          , intent(out)   :: success     !< Whether successful or not (optional)
+    logical, optional          , intent(in)    :: valuesfirst !< Whether values should be specified before any comments (optional)
     !
     ! Local variables
     !
@@ -2202,16 +1490,23 @@ subroutine prop_get_doubles(tree, chapter, key, value, valuelength, success)
     integer         :: valcount
     integer         :: ierr
     character(17)   :: realchars = '0123456789-+.eEdD'
+    character(2)    :: spacechars = ' '//achar(9)
     character(20)   :: fmt
     character(255)  :: avalue
     character(len=:), allocatable :: prop_value
     logical         :: digitfound
+    logical         :: valuesfirst_
 
     !
     !! executable statements -------------------------------------------------------
     !
     call prop_get_alloc_string(tree, chapter, key, prop_value, success)
     if (.not. allocated(prop_value)) prop_value = ' '
+    if (present(valuesfirst)) then
+        valuesfirst_ = valuesfirst
+    else
+        valuesfirst_ = .false.
+    endif
     !
     ! Extract the real part
     ! Using read(prop_value,*,iostat=io) (value(i),i=1,valuelength)
@@ -2229,6 +1524,12 @@ subroutine prop_get_doubles(tree, chapter, key, value, valuelength, success)
           do i = 1, length
              k = index(realchars, prop_value(i:i))
              if (k>0) exit
+             if (valuesfirst_ .and. index(spacechars, prop_value(i:i)) == 0) then
+                if (present(success)) then
+                   success = .false.
+                endif
+                return
+             endif
           enddo
           !
           ! k=0: no real found
@@ -2260,13 +1561,18 @@ subroutine prop_get_doubles(tree, chapter, key, value, valuelength, success)
                 return
              endif
              exit
+          else
+             if (valuesfirst_) then
+                if (present(success)) then
+                   success = .false.
+                endif
+                return
+             endif
           endif
        enddo
     enddo
 end subroutine prop_get_doubles
-!
-!
-! ====================================================================
+
 !> Get the logical value for a property
 !!    Use prop_get_string to get the string value.
 !!    Convert it to logical.
@@ -2278,9 +1584,7 @@ end subroutine prop_get_doubles
 !!  Comments on this line:
 !!    Not allowed
 subroutine prop_get_logical(tree, chapter, key, value, success)
-    !
-    ! Parameters
-    !
+    implicit none
     type(tree_data)  , pointer       :: tree    !< The property tree
     character(*)     , intent(in)    :: chapter !< Name of the chapter (case-insensitive) or "*" to get any key
     character(*)     , intent(in)    :: key     !< Name of the key (case-insensitive)
@@ -2297,8 +1601,6 @@ subroutine prop_get_logical(tree, chapter, key, value, success)
     character(100) :: falsity
     character(100) :: truth
     character(len=:), allocatable :: prop_value
-
-    allocate(character(maxlen)::prop_value)
     !
     data truth/    &
      & '|1|Y|y|YES|yes|Yes|T|t|TRUE|true|True|J|j|JA|Ja|ja|W|w|WAAR|Waar|waar|'/
@@ -2307,9 +1609,8 @@ subroutine prop_get_logical(tree, chapter, key, value, success)
     !
     !! executable statements -------------------------------------------------------
     !
-    prop_value(1:maxlen) = ' '
-    call prop_get_string(tree, chapter, key, prop_value, success)
-    prop_value = adjustl(prop_value)
+    call prop_get_alloc_string(tree, chapter, key, prop_value, success)
+    if (.not. allocated(prop_value)) prop_value = ' '
     if (prop_value(1:1) == '.') prop_value = prop_value(2:)
     vallength = len_trim(prop_value)
     !
@@ -2339,344 +1640,8 @@ subroutine prop_get_logical(tree, chapter, key, value, success)
        endif
     endif
 end subroutine prop_get_logical
-!
-!
-! ====================================================================
-! subtree: String containing multiple tree nodes, correctly ordered,
-!          separated by a forward slash (/)
-! method: Recursively call this subroutine for each level in subtree,
-!         until there is only one level left. Then call the corresponding
-!         subroutine without parameter subtree, with chapter="*" and key=subtree
-recursive subroutine prop_get_subtree_string(tree, subtree, value)
-    !
-    ! Parameters
-    !
-    type(tree_data), pointer                  :: tree
-    character(*)             , intent (inout) :: value
-    character(*)             , intent (in)    :: subtree
-    !
-    ! With the optional parameter success, prop_get_subtree_string, can not be distinguished from
-    ! prop_get_logical anymore.
-    ! Clean solution: make parameter success not optional in all prop_get subroutines
-    !logical        , optional, intent (out)   :: success
-    !
-    ! Local variables
-    !
-    integer                  :: separator
-    type(tree_data), pointer :: node_ptr
-    logical                  :: success_
-    !
-    !! executable statements -------------------------------------------------------
-    !
-    success_ = .false.
-    separator = index(subtree, '/')
-    if (separator == 0) then
-       !
-       ! No multiple level key (anymore)
-       ! Handle it normally
-       !
-       call prop_get_string(tree, "*", subtree, value, success_)
-    else
-       call tree_get_node_by_name(tree, subtree(:separator-1), node_ptr)
-       if (associated(node_ptr)) then
-          call prop_get_subtree_string(node_ptr, subtree(separator+1:), value)
-       endif
-    endif
-    ! if (present(success)) success = success_
-end subroutine prop_get_subtree_string
-!
-!
-! ====================================================================
-! subtree: String containing multiple tree nodes, correctly ordered,
-!          separated by a forward slash (/)
-! method: Recursively call this subroutine for each level in subtree,
-!         until there is only one level left. Then call the corresponding
-!         subroutine without parameter subtree, with chapter="*" and key=subtree
-recursive subroutine prop_get_subtree_integer(tree, subtree, value, success)
-    !
-    ! Parameters
-    !
-    type(tree_data), pointer                  :: tree
-    integer                  , intent (inout) :: value
-    character(*)             , intent (in)    :: subtree
-    logical        , optional, intent (out)   :: success
-    !
-    ! Local variables
-    !
-    integer                  :: separator
-    type(tree_data), pointer :: node_ptr
-    logical                  :: success_
-    !
-    !! executable statements -------------------------------------------------------
-    !
-    success_ = .false.
-    separator = index(subtree, '/')
-    if (separator == 0) then
-       !
-       ! No multiple level key (anymore)
-       ! Handle it normally
-       !
-       call prop_get_integer(tree, "*", subtree, value, success_)
-    else
-       call tree_get_node_by_name(tree, subtree(:separator-1), node_ptr)
-       if (associated(node_ptr)) then
-          call prop_get_subtree_integer(node_ptr, subtree(separator+1:), value, success_)
-       endif
-    endif
-    if (present(success)) success = success_
-end subroutine prop_get_subtree_integer
-!
-!
-! ====================================================================
-! subtree: String containing multiple tree nodes, correctly ordered,
-!          separated by a forward slash (/)
-! method: Recursively call this subroutine for each level in subtree,
-!         until there is only one level left. Then call the corresponding
-!         subroutine without parameter subtree, with chapter="*" and key=subtree
-recursive subroutine prop_get_subtree_integers(tree, subtree, value, valuelength, success)
-    !
-    ! Parameters
-    !
-    type(tree_data), pointer                  :: tree
-    integer, dimension(*)    , intent (inout) :: value
-    integer                  , intent (in)    :: valuelength
-    character(*)             , intent (in)    :: subtree
-    logical        , optional, intent (out)   :: success
-    !
-    ! Local variables
-    !
-    integer                  :: separator
-    type(tree_data), pointer :: node_ptr
-    logical                  :: success_
-    !
-    !! executable statements -------------------------------------------------------
-    !
-    success_ = .false.
-    separator = index(subtree, '/')
-    if (separator == 0) then
-       !
-       ! No multiple level key (anymore)
-       ! Handle it normally
-       !
-       call prop_get_integers(tree, "*", subtree, value, valuelength, success_)
-    else
-       call tree_get_node_by_name(tree, subtree(:separator-1), node_ptr)
-       if (associated(node_ptr)) then
-          call prop_get_subtree_integers(node_ptr, subtree(separator+1:), value, valuelength, success_)
-       endif
-    endif
-    if (present(success)) success = success_
-end subroutine prop_get_subtree_integers
-!
-!
-! ====================================================================
-! subtree: String containing multiple tree nodes, correctly ordered,
-!          separated by a forward slash (/)
-! method: Recursively call this subroutine for each level in subtree,
-!         until there is only one level left. Then call the corresponding
-!         subroutine without parameter subtree, with chapter="*" and key=subtree
-recursive subroutine prop_get_subtree_real(tree, subtree, value, success)
-    !
-    ! Parameters
-    !
-    type(tree_data), pointer                  :: tree
-    real(sp)                 , intent (inout) :: value
-    character(*)             , intent (in)    :: subtree
-    logical        , optional, intent (out)   :: success
-    !
-    ! Local variables
-    !
-    integer                  :: separator
-    type(tree_data), pointer :: node_ptr
-    logical                  :: success_
-    !
-    !! executable statements -------------------------------------------------------
-    !
-    success_ = .false.
-    separator = index(subtree, '/')
-    if (separator == 0) then
-       !
-       ! No multiple level key (anymore)
-       ! Handle it normally
-       !
-       call prop_get_real(tree, "*", subtree, value, success_)
-    else
-       call tree_get_node_by_name(tree, subtree(:separator-1), node_ptr)
-       if (associated(node_ptr)) then
-          call prop_get_subtree_real(node_ptr, subtree(separator+1:), value, success_)
-       endif
-    endif
-    if (present(success)) success = success_
-end subroutine prop_get_subtree_real
-!
-!
-! ====================================================================
-! subtree: String containing multiple tree nodes, correctly ordered,
-!          separated by a forward slash (/)
-! method: Recursively call this subroutine for each level in subtree,
-!         until there is only one level left. Then call the corresponding
-!         subroutine without parameter subtree, with chapter="*" and key=subtree
-recursive subroutine prop_get_subtree_reals(tree, subtree, value, valuelength, success)
-    !
-    ! Parameters
-    !
-    type(tree_data), pointer                  :: tree
-    real(sp), dimension(*)   , intent (inout) :: value
-    integer                  , intent (in)    :: valuelength
-    character(*)             , intent (in)    :: subtree
-    logical        , optional, intent (out)   :: success
-    !
-    ! Local variables
-    !
-    integer                  :: separator
-    type(tree_data), pointer :: node_ptr
-    logical                  :: success_
-    !
-    !! executable statements -------------------------------------------------------
-    !
-    success_ = .false.
-    separator = index(subtree, '/')
-    if (separator == 0) then
-       !
-       ! No multiple level key (anymore)
-       ! Handle it normally
-       !
-       call prop_get_reals(tree, "*", subtree, value, valuelength, success_)
-    else
-       call tree_get_node_by_name(tree, subtree(:separator-1), node_ptr)
-       if (associated(node_ptr)) then
-          call prop_get_subtree_reals(node_ptr, subtree(separator+1:), value, valuelength, success_)
-       endif
-    endif
-    if (present(success)) success = success_
-end subroutine prop_get_subtree_reals
-!
-!
-! ====================================================================
-! subtree: String containing multiple tree nodes, correctly ordered,
-!          separated by a forward slash (/)
-! method: Recursively call this subroutine for each level in subtree,
-!         until there is only one level left. Then call the corresponding
-!         subroutine without parameter subtree, with chapter="*" and key=subtree
-recursive subroutine prop_get_subtree_double(tree, subtree, value, success)
-    !
-    ! Parameters
-    !
-    type(tree_data), pointer                  :: tree
-    real(hp)                 , intent (inout) :: value
-    character(*)             , intent (in)    :: subtree
-    logical        , optional, intent (out)   :: success
-    !
-    ! Local variables
-    !
-    integer                  :: separator
-    type(tree_data), pointer :: node_ptr
-    logical                  :: success_
-    !
-    !! executable statements -------------------------------------------------------
-    !
-    success_ = .false.
-    separator = index(subtree, '/')
-    if (separator == 0) then
-       !
-       ! No multiple level key (anymore)
-       ! Handle it normally
-       !
-       call prop_get_double(tree, "*", subtree, value, success_)
-    else
-       call tree_get_node_by_name(tree, subtree(:separator-1), node_ptr)
-       if (associated(node_ptr)) then
-          call prop_get_subtree_double(node_ptr, subtree(separator+1:), value, success_)
-       endif
-    endif
-    if (present(success)) success = success_
-end subroutine prop_get_subtree_double
-!
-!
-! ====================================================================
-! subtree: String containing multiple tree nodes, correctly ordered,
-!          separated by a forward slash (/)
-! method: Recursively call this subroutine for each level in subtree,
-!         until there is only one level left. Then call the corresponding
-!         subroutine without parameter subtree, with chapter="*" and key=subtree
-recursive subroutine prop_get_subtree_doubles(tree, subtree, value, valuelength, success)
-    !
-    ! Parameters
-    !
-    type(tree_data), pointer                  :: tree
-    real(hp), dimension(*)   , intent (inout) :: value
-    integer                  , intent (in)    :: valuelength
-    character(*)             , intent (in)    :: subtree
-    logical        , optional, intent (out)   :: success
-    !
-    ! Local variables
-    !
-    integer                  :: separator
-    type(tree_data), pointer :: node_ptr
-    logical                  :: success_
-    !
-    !! executable statements -------------------------------------------------------
-    !
-    success_ = .false.
-    separator = index(subtree, '/')
-    if (separator == 0) then
-       !
-       ! No multiple level key (anymore)
-       ! Handle it normally
-       !
-       call prop_get_doubles(tree, "*", subtree, value, valuelength, success_)
-    else
-       call tree_get_node_by_name(tree, subtree(:separator-1), node_ptr)
-       if (associated(node_ptr)) then
-          call prop_get_subtree_doubles(node_ptr, subtree(separator+1:), value, valuelength, success_)
-       endif
-    endif
-    if (present(success)) success = success_
-end subroutine prop_get_subtree_doubles
-!
-!
-! ====================================================================
-! subtree: String containing multiple tree nodes, correctly ordered,
-!          separated by a forward slash (/)
-! method: Recursively call this subroutine for each level in subtree,
-!         until there is only one level left. Then call the corresponding
-!         subroutine without parameter subtree, with chapter="*" and key=subtree
-recursive subroutine prop_get_subtree_logical(tree, subtree, value, success)
-    !
-    ! Parameters
-    !
-    type(tree_data), pointer                  :: tree
-    logical                  , intent (inout) :: value
-    character(*)             , intent (in)    :: subtree
-    logical        , optional, intent (out)   :: success
-    !
-    ! Local variables
-    !
-    integer                  :: separator
-    type(tree_data), pointer :: node_ptr
-    logical                  :: success_
-    !
-    !! executable statements -------------------------------------------------------
-    !
-    success_ = .false.
-    separator = index(subtree, '/')
-    if (separator == 0) then
-       !
-       ! No multiple level key (anymore)
-       ! Handle it normally
-       !
-       call prop_get_logical(tree, "*", subtree, value, success_)
-    else
-       call tree_get_node_by_name(tree, subtree(:separator-1), node_ptr)
-       if (associated(node_ptr)) then
-          call prop_get_subtree_logical(node_ptr, subtree(separator+1:), value, success_)
-       endif
-    endif
-    if (present(success)) success = success_
-end subroutine prop_get_subtree_logical
-!
-!
-! ====================================================================
+
+
 !> The generic routine for setting key-value data in the tree.
 !! The value (of any type) should be transferred into the type of node_value.
 subroutine prop_set_data(tree, chapter, key, value, type_string, anno, success)
@@ -2750,9 +1715,8 @@ subroutine prop_set_data(tree, chapter, key, value, type_string, anno, success)
         success = success_
     end if
 end subroutine prop_set_data
-!
-!
-! ====================================================================
+
+
 !> Sets a string property in the tree.
 !! Take care of proper quoting (e.g., by "" or ##) at the call site.
 subroutine prop_set_string(tree, chapter, key, value, anno, success)
@@ -2774,16 +1738,15 @@ subroutine prop_set_string(tree, chapter, key, value, anno, success)
         success = success_
     end if
 end subroutine prop_set_string
-!
-!
-! ====================================================================
+
+
 !> Sets a double precision array property in the tree.
 !! The property value is stored as a string representation.
 subroutine prop_set_doubles(tree, chapter, key, value, anno, success)
     type(tree_data),            pointer      :: tree      !< The property tree
     character(*),               intent (in)  :: chapter   !< Name of the chapter under which to store the property ('' or '*' for global)
     character(*),               intent (in)  :: key       !< Name of the property
-    real(kind=hp),              intent (in)  :: value(:)  !< Value of the property
+    real(kind=dp),              intent (in)  :: value(:)  !< Value of the property
     character(len=*), optional, intent (in)  :: anno      !< Optional annotation/comment
     logical, optional,          intent (out) :: success   !< Returns whether the operation was successful
 
@@ -2817,9 +1780,8 @@ subroutine prop_set_doubles(tree, chapter, key, value, anno, success)
     end if
 
 end subroutine prop_set_doubles
-!
-!
-! ====================================================================
+
+
 !> Sets a double precision property in the tree.
 !! The property value is stored as a string representation.
 subroutine prop_set_double(tree, chapter, key, value, anno, success)
@@ -2831,7 +1793,7 @@ subroutine prop_set_double(tree, chapter, key, value, anno, success)
     logical, optional, intent (out)         :: success  !< Returns whether the operation was successful
 
     logical :: success_
-    real(kind=hp) :: valuearray(1)
+    real(kind=dp) :: valuearray(1)
 
     valuearray(1) = value
 
@@ -2846,9 +1808,8 @@ subroutine prop_set_double(tree, chapter, key, value, anno, success)
     end if
 
 end subroutine prop_set_double
-!
-!
-! ====================================================================
+
+
 !> Sets an integer array property in the tree.
 !! The property value is stored as a string representation.
 subroutine prop_set_integers(tree, chapter, key, value, anno, success)
@@ -2892,9 +1853,8 @@ subroutine prop_set_integers(tree, chapter, key, value, anno, success)
     end if
 
 end subroutine prop_set_integers
-!
-!
-! ====================================================================
+
+
 !> Sets an integer property in the tree.
 !! The property value is stored as a string representation.
 subroutine prop_set_integer(tree, chapter, key, value, anno, success)
@@ -2921,14 +1881,13 @@ subroutine prop_set_integer(tree, chapter, key, value, anno, success)
     end if
 
 end subroutine prop_set_integer
-!
-!
-! ====================================================================
+
+
 !> Prettyprints a double precision real to a character string
 !! Trailing zeros and leading blanks are removed.
 subroutine pp_double(value, strvalue)
 ! A bit ad-hoc prettyprinting, intended for easy readable output in settings files.
-    real(kind=hp),    intent(in)  :: value
+    real(kind=dp),    intent(in)  :: value
     character(len=*), intent(out) :: strvalue
 
     ! adjustl not working in gfortran, so writing to a temp array
@@ -2985,10 +1944,9 @@ subroutine pp_double(value, strvalue)
 
     strvalue = adjustl(trim(strtmp))
 end subroutine pp_double
-!
-!
-! ====================================================================
+
 subroutine count_occurrences(input_ptr, group, keyword, npars)
+    implicit none
     !
     ! Global variables
     !

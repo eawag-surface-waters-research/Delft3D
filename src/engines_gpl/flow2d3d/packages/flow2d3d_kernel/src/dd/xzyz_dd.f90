@@ -26,8 +26,8 @@ subroutine xzyz_dd(xz        ,yz        ,kcs       ,nmax      ,mmax      ,&
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Computes coordinates of the couple (water level) points

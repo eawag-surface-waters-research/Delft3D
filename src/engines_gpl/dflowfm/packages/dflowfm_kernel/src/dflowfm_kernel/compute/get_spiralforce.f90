@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 subroutine get_spiralforce    ! Effect of secondary flow on momentum equations
                               ! This subroutine calculates the forces fx and fy for momentum equations
