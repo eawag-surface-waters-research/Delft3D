@@ -153,7 +153,7 @@ subroutine desa(nlb     ,nub     ,mlb     ,mub        ,kmax       , &
     integer                              :: m_tmp
     integer                              :: k_tmp
     real(fp)                             :: conc
-    real(fp)                             :: conc_intake
+    real(fp)                             :: conc_add
     real(fp)                             :: dis_dil
     real(fp)                             :: dis_tot
     real(fp)                             :: dis_per_intake
@@ -172,6 +172,7 @@ subroutine desa(nlb     ,nub     ,mlb     ,mub        ,kmax       , &
     real(fp)                             :: yend
     real(fp)                             :: momu_tmp
     real(fp)                             :: momv_tmp
+    real(fp),dimension(:), allocatable   :: conc_intake
     real(fp),dimension(:), allocatable   :: weight
     integer, dimension(:), allocatable   :: n_dis
     integer, dimension(:), allocatable   :: m_dis
@@ -215,6 +216,69 @@ subroutine desa(nlb     ,nub     ,mlb     ,mub        ,kmax       , &
     sournf      (nlb:nub,mlb:mub, 1:kmax, 1:lstsci,idis) = 0.0_fp
     nf_src_momu (nlb:nub,mlb:mub, 1:kmax, idis)          = 0.0_fp
     nf_src_momv (nlb:nub,mlb:mub, 1:kmax, idis)          = 0.0_fp
+    allocate (conc_intake (lstsc), stat=ierror)
+    !
+    ! Handle intakes
+    ! This must be done first: conc_intake might be used when handling sources
+    !
+    intake_cnt = size(nf_intake,1)
+    if (intake_cnt > 0) then
+       allocate (n_dis (intake_cnt), stat=ierror)
+       allocate (m_dis (intake_cnt), stat=ierror)
+       allocate (k_dis (intake_cnt), stat=ierror)
+       n_dis      = 0
+       m_dis      = 0
+       k_dis      = 0
+       wght_tot   = 0.0_fp
+       ndis_track = 0
+       conc_intake = 0.0_fp
+       !
+       ! Count points inside (vertical) domain
+       !
+       do irow = 1, intake_cnt
+          call findnmk(nlb                ,nub               ,mlb               ,mub   ,xz    ,yz    , &
+                     & dps                ,s0                ,kcs               ,thick ,kmax  ,  &
+                      & nf_intake(irow,IX),nf_intake(irow,IY),nf_intake(irow,IZ),n_irow,m_irow,k_irow, &
+                     & kfsmn0             ,kfsmx0            ,dzs0              ,zmodel,inside,gdp   )
+          if (inside) then
+             ndis_track        = ndis_track + 1
+             n_dis(ndis_track) = n_irow
+             m_dis(ndis_track) = m_irow
+             k_dis(ndis_track) = k_irow
+             wght_tot          = wght_tot + 1.0_fp
+             do lcon = 1, lstsc
+                call coupled(nlb              ,nub              ,mlb              ,mub   ,conc_add   , &
+                           & r0               ,kmax             ,lstsci           ,lcon  ,thick      , &
+                           & m_dis(ndis_track),n_dis(ndis_track),k_dis(ndis_track),s0    ,dps        , &
+                           & dzs0             ,kfsmn0           ,kfsmx0           ,zmodel,gdp        )
+                conc_intake(lcon) = conc_intake(lcon) + conc_add
+             enddo
+          endif
+       enddo
+       do lcon = 1, lstsc
+          conc_intake(lcon) = conc_intake(lcon) / wght_tot
+       enddo
+       !
+       ! Remove intake from disnf, distributed over inside-points
+       !
+       dis_per_intake = nf_q_intake / wght_tot
+       do irow = 1, ndis_track
+          n_irow = n_dis(irow)
+          m_irow = m_dis(irow)
+          k_irow = k_dis(irow)
+          disnf_intake(n_irow,m_irow,k_irow,idis) = disnf_intake(n_irow,m_irow,k_irow,idis) - dis_per_intake
+       enddo
+       deallocate (n_dis, stat=ierror)
+       deallocate (m_dis, stat=ierror)
+       deallocate (k_dis, stat=ierror)
+    else
+       do lcon = 1, lstsc
+          call coupled(nlb           ,nub           ,mlb           ,mub   ,conc_intake(lcon), &
+                     & r0            ,kmax          ,lstsci        ,lcon  ,thick      , &
+                     & m_intake(idis),n_intake(idis),k_intake(idis),s0    ,dps        , &
+                     & dzs0          ,kfsmn0        ,kfsmx0        ,zmodel,gdp        )
+       enddo
+    endif
     !
     ! Handle sinks and sources
     !
@@ -508,12 +572,8 @@ subroutine desa(nlb     ,nub     ,mlb     ,mub        ,kmax       , &
                             ! nf_const_operator = NFLCONSTOPERATOR_EXC:
                             ! Add it to the concentration at the intake location
                             !
-                            call coupled(nlb           ,nub           ,mlb           ,mub   ,conc_intake, &
-                                       & r0            ,kmax          ,lstsci        ,lcon  ,thick      , &
-                                       & m_intake(idis),n_intake(idis),k_intake(idis),s0    ,dps        , &
-                                       & dzs0          ,kfsmn0        ,kfsmx0        ,zmodel,gdp        )
                             ! Excess model
-                            conc = nf_const(lcon) + conc_intake
+                            conc = nf_const(lcon) + conc_intake(lcon)
                          endif
                          sournf(n,m,k,lcon,idis) = nf_q_source * conc &
                                                  & / (thick_tot/(wght*thick(k)))
@@ -621,11 +681,7 @@ subroutine desa(nlb     ,nub     ,mlb     ,mub        ,kmax       , &
                             ! nf_const_operator = NFLCONSTOPERATOR_EXC:
                             ! Add it to the concentration at the intake location
                             !
-                            call coupled(nlb           ,nub           ,mlb           ,mub   ,conc_intake, &
-                                       & r0            ,kmax          ,lstsci        ,lcon  ,thick      , &
-                                       & m_intake(idis),n_intake(idis),k_intake(idis),s0    ,dps        , &
-                                       & dzs0          ,kfsmn0        ,kfsmx0        ,zmodel,gdp        )
-                            conc = nf_const(lcon) + conc_intake
+                            conc = nf_const(lcon) + conc_intake(lcon)
                          endif
                          sournf(n,m,k,lcon,idis) = nf_q_source * conc &
                                                  & / (thick_tot/(wght*dzs0(n,m,k)*hhi))
@@ -676,47 +732,5 @@ subroutine desa(nlb     ,nub     ,mlb     ,mub        ,kmax       , &
        if (allocated(k_dis)) deallocate(k_dis, stat=ierror)
        deallocate(weight, stat=ierror)
     endif
-    !
-    ! Handle intakes
-    !
-    intake_cnt = size(nf_intake,1)
-    if (intake_cnt > 0) then
-       allocate (n_dis (intake_cnt), stat=ierror)
-       allocate (m_dis (intake_cnt), stat=ierror)
-       allocate (k_dis (intake_cnt), stat=ierror)
-       n_dis      = 0
-       m_dis      = 0
-       k_dis      = 0
-       wght_tot   = 0.0_fp
-       ndis_track = 0
-       !
-       ! Count points inside (vertical) domain
-       !
-       do irow = 1, intake_cnt
-          call findnmk(nlb                ,nub               ,mlb               ,mub   ,xz    ,yz    , &
-                     & dps                ,s0                ,kcs               ,thick ,kmax  ,  &
-                      & nf_intake(irow,IX),nf_intake(irow,IY),nf_intake(irow,IZ),n_irow,m_irow,k_irow, &
-                     & kfsmn0             ,kfsmx0            ,dzs0              ,zmodel,inside,gdp   )
-          if (inside) then
-             ndis_track        = ndis_track + 1
-             n_dis(ndis_track) = n_irow
-             m_dis(ndis_track) = m_irow
-             k_dis(ndis_track) = k_irow
-             wght_tot          = wght_tot + 1.0_fp
-          endif
-       enddo
-       !
-       ! Remove intake from disnf, distributed over inside-points
-       !
-       dis_per_intake = nf_q_intake / wght_tot
-       do irow = 1, ndis_track
-          n_irow = n_dis(irow)
-          m_irow = m_dis(irow)
-          k_irow = k_dis(irow)
-          disnf_intake(n_irow,m_irow,k_irow,idis) = disnf_intake(n_irow,m_irow,k_irow,idis) - dis_per_intake
-       enddo
-       deallocate (n_dis, stat=ierror)
-       deallocate (m_dis, stat=ierror)
-       deallocate (k_dis, stat=ierror)
-    endif
+    deallocate (conc_intake, stat=ierror)
 end subroutine desa
