@@ -173,7 +173,7 @@ end subroutine reconst_vel_coeffs_fmx
 !! u0x, u0y, u0z - cartesian components of the velocity in the cell, output
 !! alphafm - coefficient for linear gradient
 !!
-subroutine reconst_vel(q, h0, h1, ierror)
+subroutine reconst_vel(q, h0, h1)
    use partmem, only: hyd
    use m_flowgeom, only: Ndx, Lnx, bl
    use m_flowparameters, only: epshs
@@ -189,8 +189,6 @@ subroutine reconst_vel(q, h0, h1, ierror)
    double precision, dimension(Ndx), intent(in)  :: h0   !< flownode-based water level (m) at begin of interval
    double precision, dimension(Ndx), intent(in)  :: h1   !< flownode-based water level (m) at end of interval
 
-   integer,                          intent(out) :: ierror !< error code, not used
-
    integer,                          parameter   :: N = 4
 
    integer                                       :: icell, icell3d, j, k, L, lay, L3d
@@ -202,8 +200,6 @@ subroutine reconst_vel(q, h0, h1, ierror)
    integer(4) ithndl              ! handle to time this subroutine
    data ithndl / 0 /
    if ( timon ) call timstrt( "reconst_vel", ithndl )
-
-   ierror = 1
 
    ! get fluxes at all edges, including internal
    call set_fluxes(Lnx, q, qe)
@@ -274,7 +270,6 @@ subroutine reconst_vel(q, h0, h1, ierror)
       end do
    end do
 
-   ierror = 0
    if ( timon ) call timstop ( ithndl )
 end subroutine reconst_vel
 
