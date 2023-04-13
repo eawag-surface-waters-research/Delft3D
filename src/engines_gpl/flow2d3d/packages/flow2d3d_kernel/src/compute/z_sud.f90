@@ -657,7 +657,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
           ! Single domain case without domain decomposition
           ! The next piece of code in this IF-statement works for both serial and parallel runs
           ! In case of parallel runs twisted factorization technique is employed which is
-          ! perfectly parallizable for two processors only. In case of more than 2 processors,
+          ! perfectly parallellizable for two processors only. In case of more than 2 processors,
           ! this technique is combined with the block Jacobi approach at coupling points between
           ! pairs of "twisted" processors. Improvement in convergence is achieved by means of
           ! alternating the pairs of twisted processors at each iteration.

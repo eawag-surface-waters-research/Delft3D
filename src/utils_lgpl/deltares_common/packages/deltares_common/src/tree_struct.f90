@@ -775,12 +775,10 @@ subroutine tree_get_data_string( tree, string, success )
       success = .true.
       length  = size(data_ptr)
       string  = ' '
-      if (length <= len(string)) then
-         length = min(length,len(string))
-         do i=1, length
-            string(i:i) = data_ptr(i)
-         end do
-      endif
+      length = min(length,len(string))
+      do i=1, length
+         string(i:i) = data_ptr(i)
+      end do
    endif
 
 end subroutine tree_get_data_string

@@ -249,7 +249,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer(pntrsize)                    , pointer :: disch
     integer(pntrsize)                    , pointer :: disinp
     integer(pntrsize)                    , pointer :: discum
-    integer(pntrsize)                    , pointer :: disnf
     integer(pntrsize)                    , pointer :: dldeta
     integer(pntrsize)                    , pointer :: dldksi
     integer(pntrsize)                    , pointer :: dp
@@ -370,7 +369,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer(pntrsize)                    , pointer :: sinkw
     integer(pntrsize)                    , pointer :: soumud
     integer(pntrsize)                    , pointer :: sour
-    integer(pntrsize)                    , pointer :: sournf
     integer(pntrsize)                    , pointer :: sourr
     integer(pntrsize)                    , pointer :: sourw
     integer(pntrsize)                    , pointer :: stbf
@@ -798,7 +796,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     disch               => gdp%gdr_i_ch%disch
     disinp              => gdp%gdr_i_ch%disinp
     discum              => gdp%gdr_i_ch%discum
-    disnf               => gdp%gdr_i_ch%disnf
     dldeta              => gdp%gdr_i_ch%dldeta
     dldksi              => gdp%gdr_i_ch%dldksi
     dp                  => gdp%gdr_i_ch%dp
@@ -919,7 +916,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     sinkw               => gdp%gdr_i_ch%sinkw
     soumud              => gdp%gdr_i_ch%soumud
     sour                => gdp%gdr_i_ch%sour
-    sournf              => gdp%gdr_i_ch%sournf
     sourr               => gdp%gdr_i_ch%sourr
     sourw               => gdp%gdr_i_ch%sourw
     stbf                => gdp%gdr_i_ch%stbf
@@ -1684,7 +1680,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
               & r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  ,r(wrkb5)  , &
               & r(wrkb6)  ,r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) , &
               & r(wrkb11) ,r(wrkb12) ,r(wrkb13) ,r(wrkb14) ,r(wrkb15) , &
-              & r(wrkb16) ,sbkol     ,r(disnf)  ,r(precip) ,gdp       )
+              & r(wrkb16) ,sbkol     ,r(precip) ,gdp       )
        call timer_stop(timer_1stadi, gdp)
        if (roller) then
           !
@@ -2022,7 +2018,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & r(wenf)   ,r(wenl)   ,r(dis)    ,r(grmsur) ,r(grmsvr) , &
                  & r(areau)  ,r(areav)  ,r(volum0) ,r(volum1) ,r(xz)     , &
                  & r(yz)     ,r(rlabda) ,r(wrka4)  ,r(wrkb18) ,r(bruvai) , &
-                 & r(hrms)   ,r(dzs1)   ,i(kfsmin) ,i(kfsmax) ,r(sournf) , &
+                 & r(hrms)   ,r(dzs1)   ,i(kfsmin) ,i(kfsmax) ,            &
                  & gdp       )
           call timer_stop(timer_tritra, gdp)
           call timer_stop(timer_difu, gdp)
@@ -2706,7 +2702,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
               & r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  ,r(wrkb5)  , &
               & r(wrkb6)  ,r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) , &
               & r(wrkb11) ,r(wrkb12) ,r(wrkb13) ,r(wrkb14) ,r(wrkb15) , &
-              & r(wrkb16) ,sbkol     ,r(disnf)  ,r(precip) ,gdp       )
+              & r(wrkb16) ,sbkol     ,r(precip) ,gdp       )
        call timer_stop(timer_2ndadi, gdp)
        if (roller) then
           !
@@ -3093,7 +3089,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & r(wenf)   ,r(wenl)   ,r(dis)    ,r(grmsur) ,r(grmsvr) , &
                  & r(areau)  ,r(areav)  ,r(volum0) ,r(volum1) ,r(xz)     , &
                  & r(yz)     ,r(rlabda) ,r(wrka4)  ,r(wrkb18) ,r(bruvai) , &
-                 & r(hrms)   ,r(dzs1)   ,i(kfsmin) ,i(kfsmax) ,r(sournf) , &
+                 & r(hrms)   ,r(dzs1)   ,i(kfsmin) ,i(kfsmax) ,            &
                  & gdp       )
           call timer_stop(timer_tritra, gdp)
           call timer_stop(timer_difu, gdp)

@@ -241,6 +241,10 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,lsts      , &
        lsecfl = lstsci
     endif
     !
+    ! Determine background temperature constituents
+    !
+    call dimbacktemp(lundia    ,lconst    ,lstsci    ,gdp       )
+    !
     ! Determine whether the fluidmud process is to be activated and set the process and dio I/O flags
     !
     call dimmud(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )

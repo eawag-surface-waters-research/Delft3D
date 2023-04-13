@@ -841,6 +841,15 @@ subroutine tricom_init(olv_handle, gdp)
        endif
     endif
     !
+    ! Initialises arrays for nearfield/farfield coupling
+    !
+    if (nfl) then
+       call init_nfl(kmax,lstsci, gdp)
+    else
+       coupleact = .true.
+       gdp%gdnfl%nf_src_mom = .false.
+    endif
+    !
     ! Define time differences for writing output files
     ! for MAP print the times should be defined ( >= 0)
     !
