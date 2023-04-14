@@ -720,6 +720,10 @@ rem ==========================
 
         echo "Debug postbuild"
         set dest_bin="%install_dir%\x64\Debug"
+        set dest_default="!install_dir!\x64\Debug"
+        set dest_scripts="!install_dir!\x64\Debug"
+        set dest_plugins="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
 
         call :makeDir !dest_bin!
         call :copyDflowfmDependentRuntimeLibraries
@@ -735,7 +739,7 @@ rem ==========================
         set dest_csvFiles="!install_dir!\x64\Release\dflowfm\default\csvFiles"
         set dest_subFiles="!install_dir!\x64\Release\dflowfm\default\subFiles"
         set dest_default_backup="!install_dir!\x64\Release\dflowfm\installation_default"
-        set dest_csvFiles_backup="!install_dir!\x64\Release\dflowfm\installation_default\csvFiles
+        set dest_csvFiles_backup="!install_dir!\x64\Release\dflowfm\installation_default\csvFiles"
         set dest_scripts="!install_dir!\x64\Release\dflowfm\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
