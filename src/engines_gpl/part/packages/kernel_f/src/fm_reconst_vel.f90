@@ -274,7 +274,7 @@ subroutine set_fluxes(Lnx,q,qe)
          do j=jflux2link(L),jflux2link(L+1)-1
             Lf = iflux2link(j) + (lay-1) * lnx
             if ( Lf.gt.0 ) then
-               qe(L3d) = qe(L) + Aflux2link(j)*q(Lf)
+               qe(L3d) = qe(L3d) + Aflux2link(j)*q(Lf)
             end if
          end do
       end do
