@@ -98,7 +98,7 @@ function BuildCMake () {
     echo "Building (make) based on CMake preparations for $1 ..."
     cd    $root/build_$1$2
     echo "make VERBOSE=1 install &>build_$1$2/make_$1.log"
-          make VERBOSE=1 install &>make_$1.log
+          make -j VERBOSE=1 install
     if [ $? -ne 0 ]; then
         echo "CMake build resulted in an error. Check log files."
         exit 1
