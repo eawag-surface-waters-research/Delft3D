@@ -110,7 +110,6 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: discom
     integer(pntrsize), pointer :: discum
     integer(pntrsize), pointer :: disinp
-    integer(pntrsize), pointer :: disnf
     integer(pntrsize), pointer :: dldeta
     integer(pntrsize), pointer :: dldksi
     integer(pntrsize), pointer :: dp
@@ -247,7 +246,6 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: sinkw
     integer(pntrsize), pointer :: soumud
     integer(pntrsize), pointer :: sour
-    integer(pntrsize), pointer :: sournf
     integer(pntrsize), pointer :: sourr
     integer(pntrsize), pointer :: sourw
     integer(pntrsize), pointer :: sstr
@@ -593,7 +591,6 @@ subroutine gtptrs(gdp)
     df         => gdp%gdr_i_ch%df
     disch      => gdp%gdr_i_ch%disch
     disinp     => gdp%gdr_i_ch%disinp
-    disnf      => gdp%gdr_i_ch%disnf
     discom     => gdp%gdr_i_ch%discom
     discum     => gdp%gdr_i_ch%discum
     dldeta     => gdp%gdr_i_ch%dldeta
@@ -732,7 +729,6 @@ subroutine gtptrs(gdp)
     sinkw      => gdp%gdr_i_ch%sinkw
     soumud     => gdp%gdr_i_ch%soumud
     sour       => gdp%gdr_i_ch%sour
-    sournf     => gdp%gdr_i_ch%sournf
     sourr      => gdp%gdr_i_ch%sourr
     sourw      => gdp%gdr_i_ch%sourw
     sstr       => gdp%gdr_i_ch%sstr
@@ -1136,7 +1132,6 @@ subroutine gtptrs(gdp)
     discom     = gtrpnt('discom', gdp)
     discum     = gtrpnt('discum', gdp)
     disinp     = gtrpnt('disinp', gdp)
-    disnf      = gtrpnt('disnf' , gdp)
     dldeta     = gtrpnt('dldeta', gdp)
     dldksi     = gtrpnt('dldksi', gdp)
     dp         = gtrpnt('dp'    , gdp)
@@ -1291,7 +1286,6 @@ subroutine gtptrs(gdp)
     sinkw      = gtrpnt('sinkw' , gdp)
     soumud     = gtrpnt('soumud', gdp)
     sour       = gtrpnt('sour'  , gdp)
-    sournf     = gtrpnt('sournf', gdp)
     sourr      = gtrpnt('sourr' , gdp)
     sourw      = gtrpnt('sourw' , gdp)
     sstr       = gtrpnt('sstr'  , gdp)
