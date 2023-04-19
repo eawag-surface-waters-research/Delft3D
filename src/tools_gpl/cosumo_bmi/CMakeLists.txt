@@ -13,8 +13,15 @@ target_compile_options(${library_name} PRIVATE "${extend_source132_flag}")
 
 # Set dependencies on windows
 if (WIN32)
-    set(library_dependencies    deltares_common
-                                ec_module
+    set(library_dependencies    ec_module
+                                deltares_common
+                                deltares_common_c
+                                gridgeom
+                                kdtree_wrapper
+                                kdtree2
+                                io_netcdf
+                                netcdf4
+                                netcdff
                                 ) 
 
     oss_include_libraries(${library_name} library_dependencies)
@@ -27,8 +34,13 @@ endif(WIN32)
 
 # Set dependencies on linux
 if(UNIX)
-    set(library_dependencies    deltares_common
-                                ec_module
+    set(library_dependencies    ec_module
+                                deltares_common
+                                deltares_common_c
+                                gridgeom
+                                kdtree_wrapper
+                                kdtree2
+                                io_netcdf
                                 )
                                 
     oss_include_libraries(${library_name} library_dependencies)
