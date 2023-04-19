@@ -182,6 +182,7 @@ subroutine tricom_init(olv_handle, gdp)
     logical                             , pointer :: flmd2l
     logical                             , pointer :: mudlay
     logical                             , pointer :: mudwave
+    logical                             , pointer :: nfl
     logical                             , pointer :: coupleact
     logical                             , pointer :: couplemod
     logical                             , pointer :: zmodel
@@ -562,6 +563,7 @@ subroutine tricom_init(olv_handle, gdp)
     flmd2l              => gdp%gdprocs%flmd2l
     mudlay              => gdp%gdprocs%mudlay
     mudwave             => gdp%gdprocs%mudwave
+    nfl                 => gdp%gdprocs%nfl
     coupleact           => gdp%gdprocs%coupleact
     couplemod           => gdp%gdprocs%couplemod
     zmodel              => gdp%gdprocs%zmodel
