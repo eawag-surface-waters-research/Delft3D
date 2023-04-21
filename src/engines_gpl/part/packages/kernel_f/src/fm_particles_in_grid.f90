@@ -42,7 +42,7 @@ subroutine add_particles(Nadd, xadd, yadd)
    double precision, dimension(Nadd), intent(in)  :: xadd       !< x-coordinates of particles to be added
    double precision, dimension(Nadd), intent(in)  :: yadd       !< y-coordinates of particles to be added
 
-   call calculate_position_in_grid( nadd, xadd, yadd, nopart, xpart, ypart, zpart, mpart, laypart, hpart )
+   call calculate_position_in_grid( nadd, xadd, yadd, nopart, xpart, ypart, zpart, mpart)
 end subroutine add_particles
 
 
