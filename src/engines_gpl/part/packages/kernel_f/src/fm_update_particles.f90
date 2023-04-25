@@ -171,7 +171,7 @@ subroutine update_particles_in_cells(numremaining, ierror)
       if ( dtremaining(ipart).eq.0d0 .or. mpart(ipart).lt.1 ) cycle
       ! get cell (flownode) particle in in
       k = mpart(ipart)
-      kl = k + (laypart(ipart) - 1) * lnx
+      kl = k + (laypart(ipart) - 1) * numcells
 
       ! compute exit time <= dtremaining
       tex = dtremaining(ipart)
