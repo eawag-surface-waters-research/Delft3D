@@ -457,7 +457,20 @@ double precision, external :: setrhofixedp
             else if (jadrhodz == 5) then
 
                drhodz  = max( drhodz1, drhodz2 )  ! least stratified, increases viscosity 
-           
+
+            else if (jadrhodz == 6) then          ! first average then d/dz
+
+               if (dzc1 > 0 .and. dzc2 > 0) then
+
+                  if (idensform < 10) then                     
+                     drhodz  = ( rho(k1u) + rho(k2u) - rho(k1) - rho(k2) ) / (dzc1 + dzc2)
+                  else
+                     prsappr = ag*rhomean*( zws(ktop(ln(1,LL))) - zws(k1) )   
+                     drhodz  = ( setrhofixedp(k1u,prsappr) + setrhofixedp(k2u,prsappr) - setrhofixedp(k1,prsappr) - setrhofixedp(k1,prsappr)) / ( dzc1 + dzc2)
+                  endif
+ 
+               endif
+               
             endif
  !
             bruva (k)  = coefn2*drhodz                  ! N.B., bruva = N**2 / sigrho
