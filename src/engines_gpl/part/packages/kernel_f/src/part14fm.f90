@@ -398,7 +398,7 @@ module part14fm_mod
                else
                   hpart(i) =  zwaste(ie)/pblay
                endif
-            elseif ( modtyp .eq. model_oil .and. laywaste(ie) .eq. 1 ) then   !   for one layer models (2dh),
+            elseif ( modtyp .eq. model_oil .and. laypart(i) .eq. 1 ) then   !   for one layer models (2dh),
                   hpart(i) = zwaste(ie)           !      the release will be in the user-defined location
             elseif ( nolay .eq. 1 ) then
                hpart(i) = zwaste(ie)/100.0

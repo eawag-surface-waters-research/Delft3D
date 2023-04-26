@@ -263,7 +263,7 @@ contains
             endif
 
 !    for one layer models (2dh), the release will be in the user-defined location
-            if ( modtyp .eq. model_oil .and. laywaste(id) .eq. 1 ) then
+            if ( modtyp .eq. model_oil .and. laypart(i) .eq. 1 ) then
                hpart(i) = zwasth
             elseif ( nolay .eq. 1 ) then
                hpart(i) = zwasth/100.0
@@ -277,7 +277,7 @@ contains
             endif
 
             do isub = 1, nosubs
-               wpart( isub, nopart+i ) = aconc( id, isub )
+               wpart( isub, i ) = aconc( id, isub )
                if (modtyp .eq. model_prob_dens_settling) then
                   rhopart(isub, i) = pldensity(isub)
                endif
