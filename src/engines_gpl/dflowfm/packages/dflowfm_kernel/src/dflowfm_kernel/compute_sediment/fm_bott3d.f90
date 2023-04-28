@@ -92,7 +92,7 @@
    !!
    !! Local variables
    !!
-   logical                                     :: bedload, error, jamerge
+   logical                                     :: bedload, error, jamerge, aval
    integer                                     :: ierror
    integer                                     :: l, nm, ii, ll, Lx, Lf, lstart, j, bedchangemesscount, k, k1, k2, knb, kb, kk, itrac
    integer                                     :: Lb, Lt, ka, kf1, kf2, kt, nto, iL, ac1, ac2
@@ -124,7 +124,7 @@
    integer, dimension(:), allocatable :: branInIDLn       !< ID of Incoming Branch (If there is only one) (nnod)
 
    integer                                     :: icond
-   integer  :: istat
+   integer                                     :: istat
    integer                                     :: jb
    integer                                     :: ib
    integer                                     :: li
@@ -417,7 +417,8 @@
    !                                               v
    !
    if (bed > 0.0_fp) then
-      call fm_adjust_bedload(e_sbcn, e_sbct, .true.)
+      aval=.true.
+      call fm_adjust_bedload(e_sbcn, e_sbct, aval)
    endif
    !
    ! Determine incoming discharge and transport at nodes
@@ -585,18 +586,20 @@
    ! wave-related bed load transport
    !
    if (bedw>0.0_fp .and. jawave > 0) then
-      call fm_adjust_bedload(e_sbwn, e_sbwt,.false.)
+      aval=.false.
+      call fm_adjust_bedload(e_sbwn, e_sbwt,aval)
    endif
    !
    ! Sediment availability effects for
    ! wave-related suspended load transport
    !
    if (susw>0.0_fp .and. jawave > 0) then
-      call fm_adjust_bedload(e_sswn, e_sswt, .false.)
+      aval=.false.
+      call fm_adjust_bedload(e_sswn, e_sswt, aval)
    endif
    !!
    if (duneavalan) then
-      call duneaval(error)         ! only on current related bed transport
+      call duneaval(error)
       if (error) then
          write(errmsg,'(a)') 'fm_bott3d::duneavalan returned an error. Check your inputs.'
          call write_error(errmsg, unit=mdia)
@@ -1017,8 +1020,6 @@
 
       if ( jampi.gt.0 ) then
          call update_ghosts(ITYPE_Sall, lsedtot, Ndx, dbodsd, ierror)
-         !call update_ghosts(ITYPE_U, lsedtot, lnx, e_sbn, ierror)
-         !call update_ghosts(ITYPE_U, lsedtot, lnx, e_ssn, ierror)
       end if
       !
       ! Modifications for running parallel conditions (mormerge)
@@ -1253,10 +1254,6 @@
       enddo
    endif       ! time1<tmor
    !
-   !if (jampi>0) then
-   !   call update_ghosts(ITYPE_SALL, 1, Ndx, blchg, ierror)
-   !endif
-   !
    ! Update bottom elevations
    !
    if (bedupd) then
@@ -1269,14 +1266,6 @@
       !
       call fm_update_crosssections(blchg) ! blchg gets updated for 1d cross-sectional profiles in this routine
       !
-      !if (jampi==1) then    ! restrict ifs in do loops
-      !   do nm = 1, Ndx
-      !      !
-      !      if (.not. (idomain(nm)==my_rank)) cycle
-      !      bl(nm) = bl(nm) + blchg(nm)
-      !      !
-      !   enddo
-      !else
       do nm = 1, Ndx
          !
          bl(nm) = bl(nm) + blchg(nm)
@@ -1420,14 +1409,6 @@
          enddo
       endif
    endif
-   !
-   !if (duneavalan) then
-   !   call duneaval(error)         ! only on current related bed transport
-   !   if (error) then
-   !      write(errmsg,'(a)') 'fm_bott3d::duneavalan returned an error. Check your inputs.'
-   !      call write_error(errmsg, unit=mdia)
-   !   end if
-   !end if
    !
    if (istat == 0) deallocate(qb_out, stat = istat)
    if (istat == 0) deallocate(width_out, stat = istat)

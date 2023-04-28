@@ -243,7 +243,7 @@ else if (nodval == 27) then
     if ( allocated(FrcInternalTides2D) ) then
        znod = FrcInternalTides2D(kk)
     else
-    znod =  turkinepsws(1,k)
+    znod = turkinepsws(1,k)
     endif
  else if (nodval == 47 .and. (jagrw > 0 .or. jadhyd > 0)) then
     select case (grwhydopt)

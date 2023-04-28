@@ -472,12 +472,12 @@ type t_unc_mapids
    integer :: id_noiter_cum(MAX_ID_VAR)   = -1 !< Variable ID for cumulative number of times no iteration is generated in a node
    integer :: id_limtstep(MAX_ID_VAR)     = -1 !< Variable ID for number of times a node was limiting for the computational time step
    integer :: id_limtstep_cum(MAX_ID_VAR) = -1 !< Variable ID for cumulative number of times a node was limiting for the computational time step
-   integer :: id_courant(MAX_ID_VAR)      = -1 !< Variable ID for the Courant number in a node      
+   integer :: id_courant(MAX_ID_VAR)      = -1 !< Variable ID for the Courant number in a node
    !
    ! for debug purposes JRE
-   integer :: id_dbg1d(MAX_ID_VAR)        = -1
-   integer :: id_dbg2d(MAX_ID_VAR)        = -1
-   integer :: id_dbg3d(MAX_ID_VAR)        = -1
+   integer :: id_dbg1d(MAX_ID_VAR)        = -1   !< Variable ID for the 1D debug output array
+   integer :: id_dbg2d(MAX_ID_VAR)        = -1   !< Variable ID for the 2D debug output array
+   integer :: id_dbg3d(MAX_ID_VAR)        = -1   !<  Variable ID for the 3D debug output array
    !
    ! Other
    !
@@ -13524,7 +13524,7 @@ subroutine unc_read_map_or_rst(filename, ierr)
              else
                 write (msgbuf, '(a,i0,a,i0,a)') 'Number of 1D links: in the restart file ', numl1d, ',  in model: ', lnx1d, '.'
                 call warn_flush()
-                call qnerror('Number of 1D links read from the restart file unequal to number of 1d links in model.')
+                call qnerror('Number of 1D links read from the restart file unequal to number of 1d links in model.',' ',' ')
              end if
           else
              write (msgbuf, '(a)') 'unc_read_map_or_rst: cannot read the number of 1D links.'

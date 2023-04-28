@@ -268,7 +268,7 @@ subroutine flow_sedmorinit()
 
     ! ad hoc allocation of dummy variables
     allocate(mtd%dzbdt(ndx))
-    allocate(mtd%uau(lnkx))
+    allocate(mtd%uau(lnx))
     allocate(mtd%seddif(stmpar%lsedsus,ndkx))
     allocate(mtd%sed(stmpar%lsedsus,ndkx))
     allocate(mtd%ws(ndkx,stmpar%lsedsus))

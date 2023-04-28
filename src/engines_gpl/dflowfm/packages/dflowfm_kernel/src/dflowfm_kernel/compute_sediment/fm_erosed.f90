@@ -57,14 +57,14 @@
    use bedcomposition_module
    use morphology_data_module
    use sediment_basics_module
-   use m_physcoef, only: ag, vonkar, sag, ee, backgroundsalinity, backgroundwatertemperature, vismol, rhomean, vicouv
+   use m_physcoef, only: ag, vonkar, sag, ee, backgroundsalinity, backgroundwatertemperature, vismol
    use m_sediment, only: stmpar, sedtra, stm_included, mtd, jatranspvel, sbcx_raw,sbcy_raw,sswx_raw,sswy_raw,sbwx_raw,sbwy_raw
-   use m_flowgeom, only: bl, lnxi, lnx, ln, dxi, ndx, csu, snu, wcx1, wcx2, wcy1, wcy2, acl, nd, csu, snu, wcl, wu_mor
+   use m_flowgeom, only: bl, lnxi, lnx, ln, dxi, ndx, csu, snu, wcx1, wcx2, wcy1, wcy2, acl, nd, csu, snu, wcl
    use m_flow, only: s0, s1, u1, kmx, zws, hs, &
-      iturbulencemodel, z0urou, ifrcutp, hu, spirint, spiratx, spiraty, u_to_umain, qa, frcu_mor, javeg,jabaptist,cfuhi, epshu, taubxu, epsz0
+      iturbulencemodel, z0urou, ifrcutp, hu, spirint, spiratx, spiraty, u_to_umain, frcu_mor, javeg,jabaptist,cfuhi, epshs, taubxu, epsz0
    use m_flowtimes, only: julrefdat, dts, time1
    use unstruc_files, only: mdia
-   use unstruc_channel_flow, only: network, t_branch, t_node, nt_LinkNode
+   use unstruc_channel_flow, only: t_branch, t_node, nt_LinkNode
    use message_module, only: write_error
    use MessageHandling, only: LEVEL_INFO, LEVEL_FATAL, mess, setmessage
    use m_transport, only: ised1, constituents, isalt, itemp
@@ -73,7 +73,7 @@
    use m_missing
    use m_physcoef, only: frcuni, ifrctypuni
    use m_turbulence, only: vicwws, turkinepsws, rhowat
-   use m_flowparameters, only: jasal, jatem, jawave, epshs, jasecflow, jasourcesink, v2dwbl, flowWithoutWaves, eps10, epshu
+   use m_flowparameters, only: jasal, jatem, jawave, jasecflow, jasourcesink, v2dwbl, flowWithoutWaves, epshu
    use m_fm_erosed
    use m_bedform
    use m_xbeach_data
@@ -107,10 +107,7 @@
    ! Local variables
    !
    integer                       :: i
-   integer                       :: iFrac
-   integer                       :: inod
    integer                       :: istat
-   integer                       :: ised
    integer                       :: j
    integer                       :: k
    integer                       :: k2d
@@ -123,8 +120,7 @@
    logical                       :: error
    integer                       :: klc
    integer                       :: kmaxlc
-   integer                       :: k1, k2, k3, k4
-   integer                       :: lsd
+   integer                       :: k1, k2
    logical                       :: suspfrac  ! suspended component sedtyp(l)/=SEDTYP_NONCOHESIVE_TOTALLOAD
    logical                       :: javegczu
    real(fp)                      :: afluff
@@ -199,12 +195,10 @@
    double precision                    :: zcc, maxdepfrac
    double precision                    :: ubot
    integer                             :: ierr, kk, Lf, kmxvel, kb, kt
-   integer                             :: Ldir
    double precision, allocatable       :: dzdx(:), dzdy(:), u1_tmp(:), ucxq_tmp(:), ucyq_tmp(:)
    double precision, allocatable       :: z0rouk(:), z0curk(:), deltas(:), ua(:), va(:)
    double precision                    :: dzdn, dzds
    double precision                    :: z0u, czu
-   double precision                    :: facCheck
    !
    real(fp), dimension(:), allocatable :: localpar        !< local array for sediment transport parameters
    !! executable statements -------------------------------------------------------
@@ -402,7 +396,7 @@
       z0curk(k)=max(epsz0,z0curk(k))
    enddo
    !
-   taub = 0d0; dzdx=0d0; dzdy=0d0
+   taub = 0d0
    do L=1,lnx
       k1=ln(1,L); k2=ln(2,L)
       z0rouk(k1) = z0rouk(k1)+wcl(1,L)*z0urou(L)   
@@ -602,10 +596,10 @@
       ! do not calculate sediment sources, sinks, and bed load
       ! transport in areas with very shallow water.
       !
-      if ((s1(nm)-bl(nm))<=epshs) cycle     ! dry
+      if ((s1(nm)-bl(nm))<=epshu) cycle     ! dry
       !
       call getkbotktop(nm, kb, kt)
-      if (kfsed(nm) == 0) then              ! shallow but not dry, ie ]epshs sedthresh]
+      if (kfsed(nm) == 0) then              ! shallow but not dry, ie ]epshu sedthresh]
          !
          ! Very shallow water:
          ! set sediment diffusion coefficient
@@ -833,9 +827,7 @@
       dll_reals(RP_BLCHG) = real(dzbdt(nm) ,hp)   ! for dilatancy
       dll_reals(RP_DZDX)  = real(dzdx(nm)  ,hp)   ! for dilatancy
       dll_reals(RP_DZDY)  = real(dzdy(nm)  ,hp)   ! for dilatancy
-      dll_reals(RP_DZDY)  = real(dzdy(nm)  ,hp)   ! for dilatancy
       !
-
       if (max_integers < MAX_IP) then
          write(errmsg,'(a)') 'fm_erosed::Insufficient space to pass integer values to transport routine.'
          call mess(LEVEL_FATAL, errmsg)

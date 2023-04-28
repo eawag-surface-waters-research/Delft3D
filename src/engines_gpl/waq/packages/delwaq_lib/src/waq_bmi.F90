@@ -193,16 +193,16 @@ subroutine get_attribute(c_att_name, c_att_value) bind(C, name="get_attribute")
     ! Store the name
     att_name = char_array_to_string(c_att_name)
 
-    !select case (att_name)
-    !case ('model_name')
-    !   att_value = component_name
-    !case ('version')
-    !   att_value = version_suffix
-    !case ('author_name')
-    !   att_value = company
-    !case default
-    !   att_value = 'unknown attribute'
-    !end select
+    select case (att_name)
+    case ('model_name')
+       att_value = component_name
+    case ('version')
+       att_value = version_suffix
+    case ('author_name')
+       att_value = company
+    case default
+       att_value = 'unknown attribute'
+    end select
 
     c_att_value = string_to_char_array(trim(att_value))
 end subroutine get_attribute

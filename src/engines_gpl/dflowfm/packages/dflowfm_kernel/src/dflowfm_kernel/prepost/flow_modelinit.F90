@@ -97,7 +97,7 @@
     call makedir(getoutputdir('waq'))  ! No problem if it exists already.
  end if
 
-  call timstrt('Basic init', handle_extra(1)) ! Basic steps
+ call timstrt('Basic init', handle_extra(1)) ! Basic steps
 
  md_snapshotdir =  trim(getoutputdir())                  ! plot output to outputdir
  ! Make sure output dir for plot files exists

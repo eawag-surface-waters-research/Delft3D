@@ -117,7 +117,7 @@ module m_transport
    integer :: jalimitdtdiff
 
    double precision :: dsum
-   double precision :: maserrsed
+   double precision :: maserrsed !< cumulative sediment mass error because of volume truncation in shallow areas
 
 
    double precision, dimension(:),   allocatable :: u1sed

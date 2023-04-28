@@ -1,3 +1,33 @@
+!----- AGPL --------------------------------------------------------------------
+!                                                                               
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
+!                                                                               
+!  This file is part of Delft3D (D-Flow Flexible Mesh component).               
+!                                                                               
+!  Delft3D is free software: you can redistribute it and/or modify              
+!  it under the terms of the GNU Affero General Public License as               
+!  published by the Free Software Foundation version 3.                         
+!                                                                               
+!  Delft3D  is distributed in the hope that it will be useful,                  
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
+!  GNU Affero General Public License for more details.                          
+!                                                                               
+!  You should have received a copy of the GNU Affero General Public License     
+!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.             
+!                                                                               
+!  contact: delft3d.support@deltares.nl                                         
+!  Stichting Deltares                                                           
+!  P.O. Box 177                                                                 
+!  2600 MH Delft, The Netherlands                                               
+!                                                                               
+!  All indications and logos of, and references to, "Delft3D",                  
+!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting 
+!  Deltares, and remain the property of Stichting Deltares. All rights reserved.
+!                                                                               
+!-------------------------------------------------------------------------------
+
+
 subroutine bermslopenudging(error)
    use m_sediment
    use m_fm_erosed
@@ -16,21 +46,22 @@ subroutine bermslopenudging(error)
    double precision     :: hwavu, slope,flx,frc,fixf,trmag_u,slpfac,trm
 
    error = .true.
-
+   !
    ! Determine points where berm slope adjustment is used
    bermslopeindex=.false.
+   bermslopeindexbed = .false.
+   bermslopeindexsus = .false.
+   !
    if (jawave>0) then
       do L=1,lnx
          if (hu(L)<epshu) cycle
          k1 = ln(1,L); k2=ln(2,L)
          hwavu = max(hwav(k1),hwav(k2))
-         if (hwavu/hu(L)>bermslopegamma) then
+         if (hwavu>bermslopegamma*hu(L)) then
             bermslopeindex(L) = .true.
-         else
-            bermslopeindex(L) = .false.
-         endif
-      enddo
-   endif
+         end if
+      end do
+   end if
    ! Criteria cannot be combined as hwav not allocated for jawave==0
    do L=1,lnx
       if (hu(L)<epshu) cycle
@@ -38,33 +69,33 @@ subroutine bermslopenudging(error)
          bermslopeindex(L) = .true.
       else
          bermslopeindex(L) = .false. .or. bermslopeindex(L)
-      endif
-   enddo
+      end if
+   end do
    !
    if (bermslopebed) then
       bermslopeindexbed = bermslopeindex
-   endif
+   end if
    if (bermslopesus) then
       bermslopeindexsus = bermslopeindex
-   endif
+   end if
    !
-   do lsd = 1,lsedtot
-      if (stmpar%sedpar%sedtyp(lsd) == SEDTYP_COHESIVE) cycle
-      do L=1,lnx
-         if (hu(L)<epshu) cycle
-         if (wu_mor(L)==0) cycle
-         if (.not. bermslopeindexbed(L) .and. .not. bermslopeindexsus(L)) cycle
-         !
-         k1=ln(1,L); k2=ln(2,L)
-         !
-         ! Transports positive outgoing
-         !
-         slope  =  hypot(e_dzdn(L),e_dzdt(L))
-         slpfac = bermslopefac*(-e_dzdn(L) + bermslope*e_dzdn(L)/slope) / max(morfac,1d0)
+   do L=1,lnx
+      if (hu(L)<=epshu) cycle
+      if (wu_mor(L)==0) cycle
+      if (.not. bermslopeindexbed(L) .and. .not. bermslopeindexsus(L)) cycle
+      !
+      k1=ln(1,L); k2=ln(2,L)
+      !
+      ! Transports positive outgoing
+      !
+      slope  = hypot(e_dzdn(L),e_dzdt(L))
+      slpfac = bermslopefac*(-e_dzdn(L) + bermslope*e_dzdn(L)/slope) / max(morfac,1d0)
+      do lsd = 1,lsedtot
          !
          ! slope magnitude smaller than bermslope leads to transport away from the cell, ie outward
          ! minus sign because e_dzdn is defined as bl1-bl2 in fm_erosed
          if (bermslopeindexbed(L) .and. bed/=0.0) then
+            if (stmpar%sedpar%sedtyp(lsd) == SEDTYP_COHESIVE) cycle
             trmag_u = hypot(e_sbcn(L,lsd),e_sbct(L,lsd))
             flx = trmag_u*slpfac
             e_sbcn(L,lsd) = e_sbcn(L,lsd) - flx
@@ -76,10 +107,10 @@ subroutine bermslopenudging(error)
             e_sbwn(L,lsd) = e_sbwn(L,lsd) - flx
             call getfracfixfac(L,k1, k2, lsd,e_sbwn(L,lsd),frc,fixf)
             e_sbwn(L,lsd) = e_sbwn(L,lsd)*frc*fixf
-         endif
+         end if
          !
          if (bermslopeindexsus(L) .and. sus/=0.0 .and. lsd<=lsed) then
-            trmag_u = hypot(e_ssn(L,lsd),e_sst(L,lsd))
+            trmag_u = abs(e_ssn(L,lsd))
             flx = trmag_u*slpfac
             e_ssn(L,lsd) = e_ssn(L,lsd) - flx
             call getfracfixfac(L,k1, k2, lsd,e_ssn(L,lsd),frc,fixf)
@@ -90,11 +121,10 @@ subroutine bermslopenudging(error)
             e_sswn(L,lsd) = e_sswn(L,lsd) - flx
             call getfracfixfac(L,k1, k2, lsd,e_sswn(L,lsd),frc,fixf)
             e_sswn(L,lsd) = e_sswn(L,lsd)*frc*fixf
-         endif
-      enddo
-   enddo
-
-1234 continue
+         end if
+      end do
+   end do
+   !
    error = .false.
    return
 
@@ -111,12 +141,12 @@ subroutine getfracfixfac(L,k1, k2, lsd, transp,frc,fixf)
    double precision, intent(in) :: transp
    double precision, intent(out):: frc, fixf
 
-   if (L > lnxi .and. hu(L) > epshu) then          
+   if (L > lnxi .and. hu(L) > epshu) then
       fixf = fixfac(k2, lsd)
       frc  = frac(k2, lsd)
-   else                                             
+   else
       if (transp >= 0) then
-         fixf = fixfac(k1, lsd)               
+         fixf = fixfac(k1, lsd)
          frc  = frac(k1, lsd)
       else
          fixf = fixfac(k2, lsd)

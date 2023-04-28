@@ -74,18 +74,12 @@ subroutine setdt()
    dim_real = 1.0d0
 
    !  globally reduce time step
-   if ( jampi.eq.1 .and. jareduced.eq.0 ) then
-!     globally reduce dts (dtsc may now be larger)
+   if ( jampi.eq.1 ) then
+      !     globally reduce dts (dtsc may now be larger)
       if ( jatimer.eq.1 ) call starttimer(IMPIREDUCE)
       call reduce_double_min(dts)
       if ( jatimer.eq.1 ) call stoptimer(IMPIREDUCE)
    end if
-   !if ( jampi.eq.1 ) then
-   !   !     globally reduce dts (dtsc may now be larger)
-   !   if ( jatimer.eq.1 ) call starttimer(IMPIREDUCE)
-   !   call reduce_double_min(dts)
-   !   if ( jatimer.eq.1 ) call stoptimer(IMPIREDUCE)
-   !end if
 
    dtsc = dts
 

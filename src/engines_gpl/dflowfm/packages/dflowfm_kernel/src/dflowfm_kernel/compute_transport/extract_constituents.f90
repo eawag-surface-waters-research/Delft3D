@@ -67,6 +67,7 @@ subroutine extract_constituents()
                constituents(iconst,k) = 0d0
             endif
             !
+            ! keep track of mass error because of concentration limitation
             if (constituents(iconst,k)>upperlimitssc) then
                limmax = limmax + 1
                maserrsed = maserrsed + vol1(k)*(constituents(iconst,k)-upperlimitssc)
@@ -149,7 +150,9 @@ subroutine extract_constituents()
   if (jasal > 0 .and. maxitverticalforestersal > 0 .or. jatem > 0 .and. maxitverticalforestertem > 0) then
      call doforester()
   endif
-
+  !
+  ! When a cell become dries, keep track of the mass in the water column in sscum array. This will be accounted
+  ! for in the bottom update when the cell becomes wet again. This prevents large concentration gradients and exploding bed levels.
   if (ISED1>0) then
     do ll=1,mxgr
        ii = ISED1-ll+1 

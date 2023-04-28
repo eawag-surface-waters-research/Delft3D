@@ -1097,7 +1097,7 @@
       OPTION(4) = 'Wave  rel. susp. transport      (kg/s/m)'
       OPTION(5) = 'Total transport                 (kg/s/m)'
       OPTION(6) = 'Bermslope correction            (kg/s/m)'
-      OPTION(7) = 'Bermslope index                    (1/0)'
+      OPTION(7) = 'Bermslope index                      (-)'
 
       MAXOPT    = 7
       NWHAT2    = NDRAW(29)
