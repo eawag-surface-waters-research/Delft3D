@@ -45,8 +45,8 @@ subroutine extract_constituents()
 
    implicit none
 
-   integer :: i, iconst, k, kk, limmin, limmax,  ll, kb, kt, ii
-   double precision :: dmin
+   integer :: i, iconst, k, kk, limmin, limmax,  ll, kb, k1, kt, ii
+   double precision :: dmin, tempmi
 
    integer(4) ithndl /0/
    if (timon) call timstrt ( "extract_constituents", ithndl )
@@ -101,17 +101,30 @@ subroutine extract_constituents()
             write(msgbuf , *) 'Max. temperature limited, number of cells Limmax = ' , limmax  ; call msg_flush()
          endif
       endif
-      if (tempmin .ne. dmiss) then ! tem is now positive
          limmin = 0
-         do k = 1, Ndkx
+     
+      if (tempmin .ne. dmiss) then 
+         k1 = 1 ; if (kmx > 0) k1 = Ndx + 1
+         do k = k1, Ndkx
             if (constituents(itemp,k) < tempmin) then
                 constituents(itemp,k) = tempmin
                 limmin   = limmin + 1
             endif
          enddo
+      else if (isalt > 0) then ! only at surface limit to freezing point
+         !a = -0.0575d0 ; b =  1.710523d-3 ; c = -2.154996d-4 ; d = -7.53d-3 ; P = 0 ; 
+         !fp = (a + b.*sqrt(S) + c.*S) .* S + d*P;
+         do k = 1, Ndx
+            kt = ktop(k)
+            tempmi = ( -0.0575d0 - 2.154996d-4*constituents(isalt,kt) ) * constituents(isalt,kt)  
+            if (constituents(itemp,kt) < tempmi) then
+                constituents(itemp,kt) = tempmi
+                limmin   = limmin + 1
+            endif
+         enddo
+      endif
          if (limmin .ne. 0) then
             write(msgbuf , *) 'Min. temperature limited, number of cells Limmin = ' , limmin  ; call msg_flush()
-         endif
       endif
 
    endif

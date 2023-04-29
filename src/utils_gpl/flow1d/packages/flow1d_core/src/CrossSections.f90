@@ -972,7 +972,7 @@ subroutine useBranchOrdersCrs(crs, brs)
    integer, allocatable, dimension(:)           :: crsIndices
    type(t_CrossSection)                         :: cross
    type(t_CrossSectionSet)                      :: tempset
-   integer                                      :: maxBranchOrder
+   integer                                      :: maxBranchId, maxBranchOrder
    double precision                             :: maxChainage
    double precision                             :: F1, F2 !< sorting multiplication factors
 
@@ -980,12 +980,13 @@ subroutine useBranchOrdersCrs(crs, brs)
    tempset%size = crsCount
    tempset%count = crsCount
    
+   maxBranchId    = max(1,maxval(crs%cross(:)%branchId))
    maxBranchOrder = max(1,maxval(brs%branch(:)%ordernumber))
    maxChainage    = maxval(crs%cross(:)%chainage)
    
    ! Multiplication factors for sorting 
    F2 = maxChainage+1
-   F1 = (maxBranchOrder+1)*F2
+   F1 = (maxBranchId+1)*F2
    
    allocate(crsData(crsCount),crs%crossSectionIndex(crscount),crsIndices(crsCount),tempset%cross(crsCount),orderNumber(maxBranchOrder+2,2))
    ! We want to sort the array on branchid, followed by order number and finally by chainage.
@@ -997,9 +998,9 @@ subroutine useBranchOrdersCrs(crs, brs)
       if (ibr <= 0) then ! crs without branch first
          crsData(ics) = crs%cross(ics)%chainage
       else if (getOrderNumber(brs, ibr) <= 0) then
-         crsData(ics) = crs%cross(ics)%branchid*F1 + crs%cross(ics)%chainage
+         crsData(ics) = crs%cross(ics)%branchid*F2 + crs%cross(ics)%chainage
       else   
-         crsData(ics) = crs%cross(ics)%branchid*F1 + getOrderNumber(brs, ibr)*F2 + crs%cross(ics)%chainage
+         crsData(ics) = getOrderNumber(brs, ibr)*F1 + crs%cross(ics)%branchid*F2 + crs%cross(ics)%chainage
       endif
    enddo
    
