@@ -4274,7 +4274,7 @@ subroutine xbeach_solve_wave_stationary(callType,ierr)
    use m_xbeach_data, m_xbeach_data_hminlw=>hminlw
    use m_flowgeom
    use m_flowtimes, only: dnt
-   use m_flow, only: s1, epshs, kmx, flowwithoutwaves
+   use m_flow, only: s1, epshu, kmx, flowwithoutwaves
    use network_data, only: xk, yk, numk
    use m_sferic, only: pi, dg2rd, rd2dg
    use m_physcoef, only: ag, rhomean
