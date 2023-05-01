@@ -298,7 +298,6 @@ rem ===============
     call :ddcouple
     call :agrhyd
     call :maptonetcdf
-    call :waq_run_processes
     call :duprol2delwaq
     call :delpar
     call :wave
@@ -1155,31 +1154,13 @@ goto :endproc
 
 
 
-rem ==========================
-rem === POST_BUILD_waq_run_processes
-rem ==========================
-:waq_run_processes
-
-    echo "postbuild waq_run_processes . . ."
-
-    call :setWaqFolders
-
-    call :makeAllDirs
-    call :copyDwaqDependentRuntimeLibraries                                                         !dest_share!
-
-    rem copy binaries and dll
-    call :copyFile "!build_dir!\waq_run_processes\!configuration!\waq_run_processes.*"              !dest_bin!
-
-goto :endproc
-
-
 
 rem ==========================
 rem === POST_BUILD_duprol2delwaq
 rem ==========================
 :duprol2delwaq
 
-    echo "postbuild waq_run_processes . . ."
+    echo "postbuild duprol2delwaq . . ."
 
     call :setWaqFolders
 
