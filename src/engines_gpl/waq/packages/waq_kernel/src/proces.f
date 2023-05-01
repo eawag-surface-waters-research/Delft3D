@@ -37,7 +37,7 @@
      &                    vartda , vardag , vartag , varagg , arrpoi ,
      &                    arrknd , arrdm1 , arrdm2 , vgrset , grdnos ,
      &                    grdseg , novar  , a      , nogrid , ndmps  ,
-     &                    pronam , intsrt ,  
+     &                    pronam , intsrt ,
      &                    prvpnt , done   , nrref  , proref , nodef  ,
      &                    surfac , lunrep )
 
@@ -70,6 +70,7 @@
       use timers
       use iso_c_binding
       use process_registration
+      use m_dhaggr
 
       implicit none
 
@@ -686,7 +687,7 @@
      &                       iknmrk  , noq1         , noq2    , noq3    , noq4    ,
      &                       nproc   , notot        , deriv   , stochi  , volume  ,
      &                       prondt  , ibflag       , isdmp   , flxdmp  , novar   ,
-     &                       vartag  , iiknmr       , pronam  , 
+     &                       vartag  , iiknmr       , pronam  ,
      &                       dspndt  , velndt       , dll_opb )
 
                done(iproc) = 1                           ! this process has resolved its output
@@ -707,7 +708,7 @@
       call twopro ( nproc  , nogrid , noflux , novar  , noseg  ,
      &              notot  , progrd , grdnos , iflux  , vgrset ,
      &              grdseg , volume , deriv  , stochi , flux   ,
-     &              prondt , ibflag , isdmp  , flxdmp , 
+     &              prondt , ibflag , isdmp  , flxdmp ,
      &              ipbloo , ipchar , istep  )
 
 !     Store fluxes and elaborate mass balances set fractional step
@@ -793,12 +794,13 @@
      +                    IKNMRK, NOQ1  , NOQ2  , NOQ3  , NOQ4  ,
      +                    NPROC , NOTOT , DERIV , STOCHI, VOLUME,
      +                    PRONDT, IBFLAG, ISDMP , FLXDMP, NOVAR ,
-     +                    VARTAG, IIKNMR, PRONAM, 
+     +                    VARTAG, IIKNMR, PRONAM,
      +                    DSPNDT, VELNDT, dll_opb)
 !
       use timers
       use iso_c_binding
       use process_registration
+      use m_dhaggr
 !
       INTEGER             IPROC , K     , IDT   , ITFACT, NOGRID,
      +                    NOSEG , NOFLUX, NOQ1  , NOQ2  , NOQ3  ,
@@ -816,7 +818,7 @@
      +                    IFLUX (*)      , PROMNR(*)      ,
      +                    IEXPNT(*)      , IKNMRK(*)      ,
      +                    PRONDT(*)      , ISDMP (*)      ,
-     +                    VARTAG(*)      , 
+     +                    VARTAG(*)      ,
      +                    DSPNDT(*)      , VELNDT(*)
       REAL                A(*)           , FLUX(*)        ,
      +                    DERIV(*)       , STOCHI(*)      ,
@@ -1143,7 +1145,7 @@
       subroutine twopro ( nproc  , nogrid , noflux , novar  , noseg  ,
      &                    notot  , progrd , grdnos , iflux  , vgrset ,
      &                    grdseg , volume , deriv  , stochi , flux   ,
-     &                    prondt , ibflag , isdmp  , flxdmp , 
+     &                    prondt , ibflag , isdmp  , flxdmp ,
      &                    ipbloo , ipchar , istep  )
 
 !     Deltares - Delft Software Department
@@ -1166,6 +1168,8 @@
 !                           profld - fills the dump array for fluxes used in a mass balance
 
       use timers
+      use m_dhaggr
+
       implicit none
 
 !     Arguments           :
