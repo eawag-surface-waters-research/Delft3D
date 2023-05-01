@@ -77,6 +77,7 @@
       use dlwq0t_data
       use timers       !   performance timers
       use m_sysi          ! Timer characteristics
+      use m_cnvtim
 
 
       implicit none
@@ -260,7 +261,7 @@
      &                    1        , .false.  )
             call report_date_time  ( lunitp(2))
             call rdlgri ( nfilesp  , lunitp   , fnamep   )
-            call rdccol ( nmaxp    , mmaxp    , lunitp(5), fnamep(5), 
+            call rdccol ( nmaxp    , mmaxp    , lunitp(5), fnamep(5),
      &                    lgrid2   , xb       , yb       , lunitp(2))
             call part01 ( lgrid    , lgrid2   , xb       , yb       , dx      ,
      &                    dy       , area     , angle    , nmaxp    , mmaxp   )
