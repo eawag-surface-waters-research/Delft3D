@@ -49,6 +49,7 @@
       use timers       !   performance timers
       use rd_token
       use m_cnvtim
+      use m_dhfext
 
       implicit none
 

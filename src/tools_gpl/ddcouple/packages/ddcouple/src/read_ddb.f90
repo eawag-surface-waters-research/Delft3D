@@ -29,6 +29,8 @@
 
       use hydmod
       use m_dherrs
+      use m_dhfext
+
 
       implicit none
 

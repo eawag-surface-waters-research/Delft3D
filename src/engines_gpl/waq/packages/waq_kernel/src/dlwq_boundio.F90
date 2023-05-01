@@ -28,6 +28,7 @@ subroutine dlwq_boundio( lunrep, notot , nosys , noseg , nobnd ,&
     use M_WQParComm
     use M_WQHBComm
     use timers
+    use m_dhfext
 
   ! implicit none
 

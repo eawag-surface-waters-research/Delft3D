@@ -55,6 +55,8 @@
 !     OPTION  CHAR*256   1        IN/OUT  For future use
 !
 !
+      use m_dhfext
+
       CHARACTER*256 FNAME (3) , OPTION
       DIMENSION     LOC(*)    , DATA(*)
       REAL*8        TIM(3)    , OTIME  , ATIME    , SECOND  , JULIAN
@@ -156,6 +158,8 @@
 !     FUNCTION           : ODS GETMAT routine for DELWAQ HIS-files
 !
 !     SUBROUTINES CALLED :
+
+      use m_dhfext
 !
 !     LOGICAL UNITS      :
 !

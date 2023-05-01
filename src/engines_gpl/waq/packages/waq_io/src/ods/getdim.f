@@ -58,6 +58,8 @@
 !            NDIM(3) = nr of time steps in the file
 !
 !
+      use m_dhfext
+
       CHARACTER*256 FNAME(3) , OPTION
       CHARACTER*3   DIM
       DIMENSION     NDIM(5)

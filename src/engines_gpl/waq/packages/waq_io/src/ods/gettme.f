@@ -56,6 +56,8 @@
 !     OPTION  CHAR*256   1        IN/OUT  For future use
 !
 !
+      use m_dhfext
+
       CHARACTER*256    FNAME (3) , OPTION
       INTEGER          ITMTYP(*)
       DOUBLE PRECISION TIMLST(*) , TIMDEF(2,*) , ATIME , OTIME, SECOND,
