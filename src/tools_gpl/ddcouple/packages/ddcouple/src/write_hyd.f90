@@ -30,6 +30,8 @@
       use hydmod
       use :: m_hyd_keys, only: key, nokey     ! keywords in hydfile
       use delwaq_version_module
+      use m_dattim
+
       implicit none
 
       ! declaration of the arguments
@@ -52,7 +54,7 @@
       integer                   :: n_dd_bound             ! number of dd-boundaries
       integer                   :: i_dd_bound             ! index in collection
       type(t_dd_bound),pointer  :: dd_bound               ! one dd_bound description
-      
+
       character(Len=80) :: version_string_full
       character(20)  rundat            !! Current date and time containing a combination of DATE and TIME
       character(21)  datetime          !! Date/time to be filled in the header

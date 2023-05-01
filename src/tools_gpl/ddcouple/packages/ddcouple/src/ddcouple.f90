@@ -22,9 +22,12 @@
 !!  rights reserved.
 
 program ddcouple
+
       use hydmod
       use merge_step_mod
       use delwaq_version_module
+      use m_dattim
+
       implicit none
 
       type(t_hyd)              :: hyd             ! description of the overall hydrodynamics

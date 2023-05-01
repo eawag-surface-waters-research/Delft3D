@@ -29,6 +29,8 @@
       ! Declaration of arguments
 
       use timers
+      use m_dattim
+
       implicit none
 
       integer      , intent(in   ) :: lunrep   !< Unit number report file

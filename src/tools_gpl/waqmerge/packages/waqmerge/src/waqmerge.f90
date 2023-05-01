@@ -28,6 +28,7 @@ program waqmerge
       use hyd_waqgeom_old
       use m_alloc
       use delwaq_version_module
+      use m_dattim
 
       implicit none
 
