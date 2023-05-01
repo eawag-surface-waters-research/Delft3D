@@ -1,31 +1,31 @@
 !----- GPL ---------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2023.                                
-!                                                                               
-!  This program is free software: you can redistribute it and/or modify         
-!  it under the terms of the GNU General Public License as published by         
-!  the Free Software Foundation version 3.                                      
-!                                                                               
-!  This program is distributed in the hope that it will be useful,              
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU General Public License for more details.                                 
-!                                                                               
-!  You should have received a copy of the GNU General Public License            
-!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
-!  are registered trademarks of Stichting Deltares, and remain the property of  
-!  Stichting Deltares. All rights reserved.                                     
-!                                                                               
+!
+!  Copyright (C)  Stichting Deltares, 2011-2023.
+!
+!  This program is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU General Public License as published by
+!  the Free Software Foundation version 3.
+!
+!  This program is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU General Public License for more details.
+!
+!  You should have received a copy of the GNU General Public License
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"
+!  are registered trademarks of Stichting Deltares, and remain the property of
+!  Stichting Deltares. All rights reserved.
+!
 !-------------------------------------------------------------------------------
-!  
-!  
+!
+!
 
       subroutine read_hyd(hyd)
 
@@ -34,6 +34,7 @@
       ! global declarations
 
       use hydmod
+      use m_dherrs
       use rd_token       ! tokenized reading
 
       implicit none
@@ -83,7 +84,7 @@
       integer             :: itime                  ! time
       real*8              :: julian                 ! julian function
       logical, parameter  :: untileol = .true.      ! read until the end of the line
-      
+
       key(1)  = 'task'
       key(2)  = 'geometry'
       key(3)  = 'horizontal-aggregation'
@@ -240,7 +241,7 @@
          if (itype .ne. 1) then
              goto 900
          end if
-         
+
          call zoek ( ctoken, nokey , key , 30 , ikey )
          if ( ikey .eq. 1 ) then
 
@@ -279,7 +280,7 @@
                   hyd%layer_type = HYD_LAYERS_Z
                else
                   if ( puttoken( ctoken ) .ne. 0 ) goto 900
-               end if         
+               end if
             else
                if ( puttoken( ctoken ) .ne. 0 ) goto 900
             end if
@@ -647,9 +648,9 @@
             ! file-created-by string.
             if (gettoken(line, untileol, ierr) .ne. 0 ) goto 900
             hyd%created_by = line(1:80)
-             
+
          elseif ( ikey .eq. 79) then
-            ! file-creation-date 
+            ! file-creation-date
             if (gettoken(line, untileol, ierr) .ne. 0 ) goto 900
             hyd%creation_date = line(1:40)
 
@@ -657,7 +658,7 @@
             ! sink-sources
             do
                if ( gettoken(ctoken, idummy, rdummy, itype, ierr) .ne. 0 ) goto 900
-                  if(itype==1) then 
+                  if(itype==1) then
                      ! look for end-domains keyword
                      call zoek ( ctoken, nokey , key , 30 , ikey2 )
                      if ( ikey2 .eq. 81 ) exit
@@ -672,7 +673,7 @@
 !               i_domain = domain_coll_add(hyd%domain_coll, domain)
             enddo
 
-         else    
+         else
             ! unknown keyword, ignore until the end of the line
             if (gettoken(line, untileol, ierr) .ne. 0 ) goto 900
 
@@ -694,5 +695,5 @@
       endif
 
       return
- 900  call dherrs('error reading hyd file ('//trim(key(ikey))//')')
+ 900  call dherrs('error reading hyd file ('//trim(key(ikey))//')', 0)
       end subroutine read_hyd

@@ -28,6 +28,8 @@
       ! global declarations
 
       use hydmod
+      use m_dherrs
+
       implicit none
 
       ! declaration of the arguments

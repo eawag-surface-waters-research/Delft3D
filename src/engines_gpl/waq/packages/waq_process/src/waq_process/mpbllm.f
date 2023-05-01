@@ -52,6 +52,8 @@ C     110399  J. vGils        Error in time integration removed
 C     111103  Jan van Beek    2003 implementation
 C***********************************************************************
 
+      use m_dherrs
+
       IMPLICIT NONE
 
 C     arguments
