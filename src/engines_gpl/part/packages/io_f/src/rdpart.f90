@@ -1875,7 +1875,7 @@
 
 !     close input file
 
-      close ( ilun(i) )
+      close ( ilun(1) )
 
 !     check on the total number of particles:
 
