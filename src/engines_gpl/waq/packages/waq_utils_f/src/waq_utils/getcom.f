@@ -54,6 +54,8 @@
 !     Declaration of arguments
 !
       USE Timers
+      use m_dhcarg
+
       INTEGER        ARGMOD, INTARG, IERR
       REAL           REAARG
       LOGICAL        FOUND
@@ -61,7 +63,7 @@
 !
 !     Local
 !
-      INTEGER        DHCARG
+
       CHARACTER*256  ARGV , ARG , COM
       integer(4) ithndl /0/
       if ( timon ) call timstrt( "getcom", ithndl )
