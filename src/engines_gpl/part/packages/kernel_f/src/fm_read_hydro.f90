@@ -68,23 +68,26 @@ subroutine part_readhydstep(hyd,itime,istat)
          h1(iseg) = vol1(iseg)/ba(iseg)
       end do
       offset = hyd%nolay*lnx
-      do K = 1, hyd%nolay  
+      do K = 1, hyd%nolay
           do L = 1, lnx  ! horizontal
              iql = lne2ln(L)  !loop at boundary cells
              iq  = lne2ln(L) + (K-1)*lnx  !
-             if (iql > 0) then
-                if (hyd%edge_type(iql) == 2 .or. hyd%edge_type(iql) == 22) then  ! upstream boundary?
-                   q1(iq) = real(hyd%flow(iq),8)
-                else
-                   q1(iq) = real(-hyd%flow(iq),8)
-                endif
+             if (iql <= 0) cycle
+
+             if (hyd%edge_type(iql) == 2 .or. hyd%edge_type(iql) == 22) then  ! upstream boundary?
+                  q1(iq) = hyd%flow(iq)
+             else
+                  q1(iq) = -hyd%flow(iq)
              endif
+  
           end do
       end do
       do K = 1,hyd%nolay-1
-          do L = 1, ndx  ! vertical
+          do L = 1, hyd%nosegl  ! vertical
              iq  = offset + L + (K-1) * hyd%nosegl  !
-             q1(iq) = real(hyd%flow(iq),8)
+             !write(*,*) "qq",ndx,hyd%nosegl,offset, iq
+             q1(iq) = hyd%flow(iq)
+                   ! write(*,*) K,L,iq,q1(iq)
           end do
       end do
    end if
