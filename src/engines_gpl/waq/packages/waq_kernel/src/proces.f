@@ -71,6 +71,7 @@
       use iso_c_binding
       use process_registration
       use m_dhaggr
+      use m_dhagkm
 
       implicit none
 

@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dhagkm
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DHAGKM ( NOSEG , NODIM2, NOGRID, IKNMRK, GRDNOS,
      +                    GRDSEG)
@@ -114,3 +120,4 @@
 !
       RETURN
       END
+      end module m_dhagkm
