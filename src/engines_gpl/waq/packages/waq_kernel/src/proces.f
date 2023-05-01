@@ -72,6 +72,7 @@
       use process_registration
       use m_dhaggr
       use m_dhagkm
+      use m_dhdag2
 
       implicit none
 
@@ -802,6 +803,7 @@
       use iso_c_binding
       use process_registration
       use m_dhaggr
+      use m_dhdag2
 !
       INTEGER             IPROC , K     , IDT   , ITFACT, NOGRID,
      +                    NOSEG , NOFLUX, NOQ1  , NOQ2  , NOQ3  ,
@@ -1170,6 +1172,7 @@
 
       use timers
       use m_dhaggr
+      use m_dhdag2
 
       implicit none
 
