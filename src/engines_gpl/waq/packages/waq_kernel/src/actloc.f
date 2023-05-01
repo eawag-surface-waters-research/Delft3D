@@ -70,6 +70,7 @@
 !     Declaration of arguments
 !
       use timers
+      use m_dhdagg
 
       INTEGER    NRVAR , NOCONS, NOPA  , NOFUN , NOSFUN,
      +           NOTOT , NOSEG , NOLOC , NOGRID, NOVAR

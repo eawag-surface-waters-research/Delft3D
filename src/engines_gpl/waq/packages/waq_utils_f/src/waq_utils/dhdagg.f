@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dhdagg
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DHDAGG ( NOSEG1, NOSEG2, NOTOTI, NOTOTW, NOTOTH,
      +                    NOTOTO, ISYSI , ISYSW , ISYSH , ISYSO ,
@@ -55,7 +61,8 @@
 !
 !     Declaration of arguments
 !
-      INTEGER        NOSEG1, NOSEG2, IDATYP, ISWCUM
+      INTEGER        NOSEG1, NOSEG2, NOTOTI, NOTOTW, NOTOTH, NOTOTO
+      INTEGER        IDATYP, ISWCUM, ISYSI , ISYSW , ISYSH , ISYSO
       INTEGER        IPGRID(NOSEG1)
       REAL           ARRINP(NOTOTI,NOSEG2) , WEIGHT(NOTOTW,NOSEG1) ,
      +               ARRHLP(NOTOTH,NOSEG2) , ARROUT(NOTOTO,NOSEG1)
@@ -170,3 +177,4 @@
       RETURN
  2000 FORMAT ( ' ERROR: undefined dis-aggregation type in DHDAGG :',I8 )
       END
+      end module m_dhdagg
