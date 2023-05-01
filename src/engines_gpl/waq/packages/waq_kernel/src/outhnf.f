@@ -44,6 +44,8 @@
 !
 
       use timers
+      use m_dhdelf
+
       implicit none
 
 !     declaration of arguments
