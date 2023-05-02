@@ -100,7 +100,7 @@ integer,          dimension(:)  , pointer       :: kcu2, shapearray
 integer,                          pointer       :: ndx2d
 double precision, dimension(:),   pointer       :: bndvalues
 double precision, dimension(:,:), pointer       :: inslevtube
-double precision, dimension(:,:), pointer       :: gridvolume, gridsurface
+double precision, dimension(:,:), pointer       :: gridvolume, gridsurface, griddeadstorage, gridstorage
 double precision, dimension(:),   allocatable   :: wl_deadstorage, bedlevels, topheights
 integer, parameter                              :: maxdims = 6
 ! externals
@@ -313,15 +313,17 @@ if (ierr==0) then
    if (computeOnGridpoints) then !Gridpoints are written separately
       !compute maximum volume table length
       
-      allocate(gridsurface(numpoints,numlevels),gridvolume(numpoints,numlevels),bedlevels(numpoints),topheights(numpoints),tablecount(numpoints))
+      allocate(gridsurface(numlevels,numpoints),griddeadstorage(numlevels,numpoints),gridvolume(numlevels,numpoints),gridstorage(numlevels,numpoints),bedlevels(numpoints),topheights(numpoints),tablecount(numpoints))
    
       do i = 1, numpoints   
          bedlevels(i)   = volumetable(i)%bedlevel
          topheights(i)  = volumetable(i)%topheight
          tablecount(i)  = volumetable(i)%count
+         call AddVolumeAndSurface(volume(:,1), surface(:,1), griddeadstorage(:,i), wl_deadstorage(i), volumetable(i), volumetable(i)%bedlevel, increment, numlevels)
          do j = 1,volumetable(i)%count
-            gridsurface(i,j) = volumetable(i)%sur(j)
-            gridvolume(i,j) = volumetable(i)%vol(j)
+            gridsurface(j,i) = volumetable(i)%sur(j)
+            gridvolume (j,i) = volumetable(i)%vol(j)
+            gridstorage(j,i) = gridvolume(j,i) - griddeadstorage(j,i)
          enddo
       enddo
       
@@ -329,7 +331,8 @@ if (ierr==0) then
       ! Write the output to the netcdf file
       call write_1d_flowgeom_ugrid(dfm, ncid)
       
-      call write_volume_table_gridpoint_data(ncid,bedlevels,topheights,gridvolume,gridsurface,tablecount,numpoints,increment)
+      call write_volume_table_gridpoint_data(ncid,bedlevels,topheights,gridvolume,gridsurface, &
+           gridstorage,griddeadstorage,wl_deadstorage,tablecount,numpoints,increment)
    endif
             
    deallocate(surface,volume, levels, ids, mask)
