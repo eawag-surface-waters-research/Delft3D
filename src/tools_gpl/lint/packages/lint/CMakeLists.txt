@@ -27,7 +27,6 @@ set(oss_dependencies    deltares_common
                         deltares_common_c
                         deltares_common_mpi
                         lint_f
-                        lint_version_number
                         nefis)
 oss_include_libraries(${executable_name} oss_dependencies)
 
