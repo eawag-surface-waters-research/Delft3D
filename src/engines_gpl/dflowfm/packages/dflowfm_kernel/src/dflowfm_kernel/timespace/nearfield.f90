@@ -101,17 +101,18 @@ module m_nearfield
     !
     ! NearField arrays on FM domain, allocated in FM
     !
-    integer , dimension(:,:)    , allocatable :: nf_sink_n        !<    Flow cell index of sink   points of all diffusers
-    integer , dimension(:,:)    , allocatable :: nf_sour_n        !<    Flow cell index of source points of all diffusers
-    integer , dimension(:,:)    , allocatable :: nf_intake_n      !<    Flow cell index of intake points of all diffusers
-    integer , dimension(:,:)    , allocatable :: nf_intake_nk     !< 3D index of nf_intake_n
-    integer , dimension(:)      , allocatable :: nf_entr_start    !< Start index in src arrays of entrainment points (coupled sink source)        of all diffusers
-    integer , dimension(:)      , allocatable :: nf_entr_end      !< End   index in src arrays of entrainment points (coupled sink source)        of all diffusers
-    integer , dimension(:,:)    , allocatable :: nf_sinkid        !< 3D index of nf_sink_n for each src point (from nf_entr_start to nf_entr_end) of all diffusers
-    real(fp), dimension(:,:)    , allocatable :: nf_sour_wght     !< Fraction * 1000.0       of each source point of all diffusers
-    real(fp), dimension(:)      , allocatable :: nf_sour_wght_sum !< Sum of all source weights for each diffuser
-    real(fp), dimension(:,:)    , allocatable :: nf_intake_wght   !< Fraction * nf_numintake of each intake point of all diffusers
-    real(fp), dimension(:,:)    , allocatable :: nf_intake_z      !< Z coordinate            of each intake point of all diffusers
+    integer , dimension(:,:)    , allocatable :: nf_sink_n         !<    Flow cell index of sink   points of all diffusers
+    integer , dimension(:,:)    , allocatable :: nf_sour_n         !<    Flow cell index of source points of all diffusers
+    integer , dimension(:,:)    , allocatable :: nf_intake_n       !<    Flow cell index of intake points of all diffusers
+    integer , dimension(:,:)    , allocatable :: nf_intake_nk      !< 3D index of nf_intake_n
+    integer , dimension(:)      , allocatable :: nf_numintake_idif !< nf_numintake per diffuser
+    integer , dimension(:)      , allocatable :: nf_entr_start     !< Start index in src arrays of entrainment points (coupled sink source)        of all diffusers
+    integer , dimension(:)      , allocatable :: nf_entr_end       !< End   index in src arrays of entrainment points (coupled sink source)        of all diffusers
+    integer , dimension(:,:)    , allocatable :: nf_sinkid         !< 3D index of nf_sink_n for each src point (from nf_entr_start to nf_entr_end) of all diffusers
+    real(fp), dimension(:,:)    , allocatable :: nf_sour_wght      !< Fraction * 1000.0       of each source point of all diffusers
+    real(fp), dimension(:)      , allocatable :: nf_sour_wght_sum  !< Sum of all source weights for each diffuser
+    real(fp), dimension(:,:)    , allocatable :: nf_intake_wght    !< Fraction * nf_numintake of each intake point of all diffusers
+    real(fp), dimension(:,:)    , allocatable :: nf_intake_z       !< Z coordinate            of each intake point of all diffusers
 
     contains
 !
@@ -173,17 +174,18 @@ subroutine dealloc_nfarrays()
     integer :: istat
     !
     ! Body
-    if (allocated(nf_sink_n)       ) deallocate(nf_sink_n       , stat=istat)
-    if (allocated(nf_sour_n)       ) deallocate(nf_sour_n       , stat=istat)
-    if (allocated(nf_intake_n)     ) deallocate(nf_intake_n     , stat=istat)
-    if (allocated(nf_intake_nk)    ) deallocate(nf_intake_nk    , stat=istat)
-    if (allocated(nf_sinkid)       ) deallocate(nf_entr_start   , stat=istat)
-    if (allocated(nf_sinkid)       ) deallocate(nf_entr_end     , stat=istat)
-    if (allocated(nf_sinkid)       ) deallocate(nf_sinkid       , stat=istat)
-    if (allocated(nf_sour_wght)    ) deallocate(nf_sour_wght    , stat=istat)
-    if (allocated(nf_sour_wght_sum)) deallocate(nf_sour_wght_sum, stat=istat)
-    if (allocated(nf_intake_wght)  ) deallocate(nf_intake_wght  , stat=istat)
-    if (allocated(nf_intake_z)     ) deallocate(nf_intake_z     , stat=istat)
+    if (allocated(nf_sink_n)        ) deallocate(nf_sink_n        , stat=istat)
+    if (allocated(nf_sour_n)        ) deallocate(nf_sour_n        , stat=istat)
+    if (allocated(nf_intake_n)      ) deallocate(nf_intake_n      , stat=istat)
+    if (allocated(nf_intake_nk)     ) deallocate(nf_intake_nk     , stat=istat)
+    if (allocated(nf_numintake_idif)) deallocate(nf_numintake_idif, stat=istat)
+    if (allocated(nf_sinkid)        ) deallocate(nf_entr_start    , stat=istat)
+    if (allocated(nf_sinkid)        ) deallocate(nf_entr_end      , stat=istat)
+    if (allocated(nf_sinkid)        ) deallocate(nf_sinkid        , stat=istat)
+    if (allocated(nf_sour_wght)     ) deallocate(nf_sour_wght     , stat=istat)
+    if (allocated(nf_sour_wght_sum) ) deallocate(nf_sour_wght_sum , stat=istat)
+    if (allocated(nf_intake_wght)   ) deallocate(nf_intake_wght   , stat=istat)
+    if (allocated(nf_intake_z)      ) deallocate(nf_intake_z      , stat=istat)
 end subroutine dealloc_nfarrays
 !
 !
@@ -226,7 +228,8 @@ subroutine desa()
     nf_sour_wght      = 0.0d0
     nf_sour_wght_sum  = 0.0d0
     !
-    ! Intake: May vary per diffuser. Start with 0 or 1 
+    ! Intake: May vary per diffuser. Start with 0 or 1
+    call realloc(nf_numintake_idif, nf_num_dif, keepExisting=.false., fill = nf_numintake)
     if (nf_numintake == 0) then
         nf_intake_cnt_max = 0
     else
@@ -400,20 +403,23 @@ subroutine getIntakeLocations(idif, jakdtree, jaoutside, iLocTp)
     call realloc(find_x, nf_numintake, keepExisting=.false., fill = 0.0_hp)
     call realloc(find_y, nf_numintake, keepExisting=.false., fill = 0.0_hp)
     call realloc(find_n, nf_numintake, keepExisting=.false., fill = 0)
+    !call realloc(nf_numintake_idif, nf_num_dif, keepExisting=.false., fill = 0)
     if (allocated(find_name)) deallocate(find_name, stat=istat)
     allocate(character(IdLen)::find_name(nf_numintake), stat=istat)
     find_name = ' '
     do i = 1, nf_numintake
+        if (comparereal(nf_intake(idif,i,NF_IX),0.0_hp)==0 .and. &
+            comparereal(nf_intake(idif,i,NF_IY),0.0_hp)==0) then
+            nf_numintake_idif(idif) = i-1
+            exit
+        endif
         find_x(i) = nf_intake(idif,i,NF_IX)
         find_y(i) = nf_intake(idif,i,NF_IY)
         write(find_name(i),'(i0.4,a,i0.4)') idif, "intake", i
     enddo
-    call find_flownode(nf_numintake, find_x, find_y, find_name, find_n, jakdtree, jaoutside, iLocTp)
+    call find_flownode(nf_numintake_idif(idif), find_x, find_y, find_name, find_n, jakdtree, jaoutside, iLocTp)
     !
-    if (nf_numintake /= 0 .and. &
-        (comparereal(nf_intake(idif,1,NF_IX),0.0_hp)/=0 .or. &
-         comparereal(nf_intake(idif,1,NF_IY),0.0_hp)/=0 .or. &
-         comparereal(nf_intake(idif,1,NF_IZ),0.0_hp)/=0)      ) then
+    if (nf_numintake_idif(idif) /= 0) then
         !
         ! First handle the first intake point of this diffuser: it will always result in an additional intake point
         ! Copy nf_intake(:,:,NF_IZ) to nf_intake_z: administration index has changed
@@ -437,7 +443,7 @@ subroutine getIntakeLocations(idif, jakdtree, jaoutside, iLocTp)
         nf_intake_wght(idif,1) = nf_intake_wght(idif,1) + 1.0_fp
         !
         ! Now handle the rest of the intake points of this diffuser
-        do i = 2, nf_numintake
+        do i = 2, nf_numintake_idif(idif)
             if (comparereal(nf_intake(idif,i,NF_IX),0.0_hp)==0 .and. &
                 comparereal(nf_intake(idif,i,NF_IY),0.0_hp)==0 .and. &
                 comparereal(nf_intake(idif,i,NF_IZ),0.0_hp)==0) then
