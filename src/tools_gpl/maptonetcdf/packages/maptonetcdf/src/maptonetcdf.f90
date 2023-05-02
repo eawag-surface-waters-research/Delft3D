@@ -82,18 +82,18 @@ program maptonetcdf
             write(*,'(a)' ) 'No arguments or too few arguments given and file "maptonetcdf.inp" does not exist'
             call print_usage
             stop
-        else
-            write(*,'(a)') 'No arguments or too few arguments given, using file "maptonetcdf.inp"'
-                             read( 10, '(a)', iostat = ierr ) mapfile
-            if ( ierr == 0 ) read( 10, '(a)', iostat = ierr ) ugridfile
-            if ( ierr == 0 ) read( 10, *, iostat = ierr )     nolayers
-            close( 10 )
+        end if
+        
+        write(*,'(a)') 'No arguments or too few arguments given, using file "maptonetcdf.inp"'
+                         read( 10, '(a)', iostat = ierr ) mapfile
+        if ( ierr == 0 ) read( 10, '(a)', iostat = ierr ) ugridfile
+        if ( ierr == 0 ) read( 10, *, iostat = ierr )     nolayers
+        close( 10 )
 
-            if ( ierr /= 0 ) then
-                write(*,'(a)' ) 'Error reading "maptonetcdf.inp"'
-                call print_usage
-                stop
-            endif
+        if ( ierr /= 0 ) then
+            write(*,'(a)' ) 'Error reading "maptonetcdf.inp"'
+            call print_usage
+            stop
         endif
     endif
 
@@ -207,7 +207,7 @@ subroutine print_usage
     write(*,'(a)') 'Provide an input file "maptonetcdf.inp" containing, in this order:'
     write(*,'(a)') '- Name of the map file to be converted'
     write(*,'(a)') '- Name of the UGRID file (waqgeom) that contains the grid information'
-    write(*,'(a)') '- Number of layers (this information is not contained in the UGRID file'
-    write(*,'(a)') '  and serves a simple check as well'
+    write(*,'(a)') '- Number of layers (this information is not contained in the UGRID file)'
+    write(*,'(a)') '  and is also used to check the UGRID file'
 end subroutine print_usage
 end program
