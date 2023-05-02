@@ -67,6 +67,7 @@
 
 !     Files               : Monitoring file if needed for messages
 
+      use m_dhgpoi
       use timers
       use iso_c_binding
       use process_registration
@@ -805,6 +806,7 @@
       use m_dhaggr
       use m_dhdag2
       use m_dhdagg
+      use m_dhgpoi
 !
       INTEGER             IPROC , K     , IDT   , ITFACT, NOGRID,
      +                    NOSEG , NOFLUX, NOQ1  , NOQ2  , NOQ3  ,

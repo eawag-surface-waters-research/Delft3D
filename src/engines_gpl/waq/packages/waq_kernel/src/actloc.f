@@ -69,6 +69,7 @@
 !
 !     Declaration of arguments
 !
+      use m_dhgpoi
       use timers
       use m_dhdagg
 
