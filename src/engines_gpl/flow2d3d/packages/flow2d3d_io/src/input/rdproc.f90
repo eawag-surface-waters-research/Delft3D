@@ -7,7 +7,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
                 & nmaxus   ,sedim     ,idensform ,solrad_read2, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -31,8 +31,8 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Reads physical coefficients for temperature

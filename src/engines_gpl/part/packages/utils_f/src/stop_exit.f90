@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -21,9 +21,6 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      module exception_part
-      logical :: useexception_part = .false.
-      end module exception_part
 
       subroutine stop_exit( iexit )
 !
@@ -38,7 +35,7 @@
 !     iexit   integer    1         input   return value
 !     ---------------------------------------------------------
 !
-      use exception_part
+
 
       implicit none
 
@@ -55,7 +52,7 @@
       write ( lunfil , * ) iexit
       close ( lunfil )
 
-      if (useexception_part) call throwexception()
+
 
       select case ( iexit )
          case ( :0 )

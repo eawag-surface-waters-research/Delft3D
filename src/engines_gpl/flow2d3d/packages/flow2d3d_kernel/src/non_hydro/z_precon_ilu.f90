@@ -4,7 +4,7 @@ subroutine z_precon_ilu(aak       ,bbk       ,cck       ,aak2      ,cck2      , 
                       & kfsmin    ,kfsmx0    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -28,8 +28,8 @@ subroutine z_precon_ilu(aak       ,bbk       ,cck       ,aak2      ,cck2      , 
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes the preconditioning

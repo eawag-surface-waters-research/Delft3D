@@ -25,7 +25,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
              & precip    ,ustokes   ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -49,8 +49,8 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: SUD evaluates/solves the implicitly coupled

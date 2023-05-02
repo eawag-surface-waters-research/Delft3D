@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine setextforcechkadvec()
  use m_flow
@@ -171,7 +171,11 @@ if (jawind > 0) then
           endif
 
           if (jatidep > 0 .or. jaselfal > 0) then
-             tidp  = ( tidep(1,k2) - tidep(1,k1) )*dxi(L)
+             if (jatidep == 1) then 
+                tidp = ( tidep(1,k2) - tidep(1,k1) )*dxi(L)
+             else
+                tidp = tidef(L)
+             endif
              if ( hu(L) < trshcorio) then
                 tidp = tidp*hu(L)*trshcorioi
              endif
@@ -183,13 +187,14 @@ if (jawind > 0) then
                 enddo
              endif
 
-!            add to tidal forces
-             tidef(L) = tidp
+             if (jatidep == 1) then  ! todo: check if you now get desired outputting if jatidep==2
+                tidef(L) = tidp      ! add to tidal forces
+             endif
           endif
        endif
     enddo
 
-    if ( jatidep.gt.0 .or. jaselfal.gt.0 .and. kmx.eq.0 ) then
+    if ( jatidep>0 .or. jaselfal>0 .and. kmx.eq.0 ) then
        call comp_GravInput()
     end if
 

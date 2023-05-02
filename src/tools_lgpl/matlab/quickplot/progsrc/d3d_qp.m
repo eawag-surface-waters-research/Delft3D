@@ -1,4 +1,4 @@
-function outdata=d3d_qp(cmd,varargin)
+function outdata = d3d_qp(cmd,varargin)
 %D3D_QP QuickPlot user interface: plotting interface for Delft3D output data.
 %   To start the interface type: d3d_qp
 %
@@ -6,7 +6,7 @@ function outdata=d3d_qp(cmd,varargin)
 
 %----- LGPL --------------------------------------------------------------------
 %
-%   Copyright (C) 2011-2022 Stichting Deltares.
+%   Copyright (C) 2011-2023 Stichting Deltares.
 %
 %   This library is free software; you can redistribute it and/or
 %   modify it under the terms of the GNU Lesser General Public
@@ -47,8 +47,10 @@ catch Ex
 end
 
 function outdata=d3d_qp_core(cmd,varargin)
-%VERSION = 2.65
+%VERSION = 2.70
 qpversionbase = 'v<VERSION>';
+gitrepo = '<GITREPO>';
+githash = '<GITHASH>';
 qpcreationdate = '<CREATIONDATE>';
 %
 persistent qpversion logfile logtype
@@ -262,7 +264,7 @@ switch cmd
             mfig=mfig(1);
         elseif isempty(mfig)
             if isstandalone && matlabversionnumber>7.10
-                if ~qp_checkversion(qpversionbase,qpcreationdate)
+                if ~qp_checkversion(qpversionbase,gitrepo,githash,qpcreationdate)
                     return
                 end
             end
@@ -1219,11 +1221,16 @@ switch cmd
         d3d_qp updatedatafields
         
     case 'selectdomain'
-        domains=findobj(mfig,'tag','selectdomain');
-        Domains=get(domains,'string');
+        domains = findobj(mfig,'tag','selectdomain');
+        Domains = get(domains,'string');
         if ~isempty(cmdargs)
-            i=ustrcmpi(cmdargs{1},Domains);
-            if i<0
+            if ischar(cmdargs{1})
+                i = ustrcmpi(cmdargs{1},Domains);
+            elseif isnumeric(cmdargs{1})
+                i = cmdargs{1};
+                cmdargs{1} = sprintf('%g',i); % only for error handling
+            end
+            if i < 0 || i > length(Domains)
                 error('Cannot select field: %s',cmdargs{1})
             else
                 set(domains,'value',i);
@@ -2842,8 +2849,13 @@ switch cmd
         
     case {'comline','hidecomline'}
         currentstatus=get(UD.ComLine.Fig,'visible');
-        if strcmp(cmd,'hidecomline'),
+        if strcmp(cmd,'hidecomline')
             currentstatus='on';
+        elseif matlabversionnumber >= 9.04 % 2018a
+            winstate = get(UD.ComLine.Fig,'WindowState');
+            if ~strcmp(winstate,'normal')
+                set(UD.ComLine.Fig,'WindowState','normal')
+            end
         else
             try
                 jFrame = get(handle(UD.ComLine.Fig),'JavaFrame');
@@ -3964,6 +3976,15 @@ switch cmd
             auto = strcmp(lbl,'<automatic>');
         end
         %
+        set(XLblAuto,'value',auto)
+        if auto
+            if isappdata(ax,xlbl)
+                rmappdata(ax,xlbl)
+            end
+        else
+            setappdata(ax,xlbl,lbl)
+        end
+        %
         if auto
             lbl = '<automatic>';
             if isappdata(ax,[xlbl 'auto'])
@@ -3989,21 +4010,13 @@ switch cmd
         %
         switch x
             case 'title'
-                title(ax,expanded_lbl)
+                qp_title('update',ax)
             case 'x'
                 xlabel(ax,expanded_lbl)
             case 'y'
                 ylabel(ax,expanded_lbl)
             case 'z'
                 zlabel(ax,expanded_lbl)
-        end
-        set(XLblAuto,'value',auto)
-        if auto
-            if isappdata(ax,xlbl)
-                rmappdata(ax,xlbl)
-            end
-        else
-            setappdata(ax,xlbl,lbl)
         end
         if strcmp(cmd,'title')
             d3d_qp refreshaxes
@@ -5142,7 +5155,7 @@ switch str
         clr=str2vec(str,'%f');
 end
 
-function OK = qp_checkversion(qpversionbase,qpcreationdate)
+function OK = qp_checkversion(qpversionbase,gitrepo,githash,qpcreationdate)
 % Until MATLAB 7.10 (R2010a) it was possible to mix
 % c/c++ files in with the MATLAB executable. This was
 % used to include the @(#) identification string in the
@@ -5160,6 +5173,8 @@ else
     qpversion = qpversionbase;
 end
 Str = ['@(#)Deltares, Delft3D-QUICKPLOT, Version ' qpversion ', ' qpcreationdate ];
+RepoLine = ['Repository : ', gitrepo];
+HashLine = ['Source hash: ', githash];
 fid = fopen(whatfile,'r','n','UTF-8');
 if fid>0
     % file exists, read its contents
@@ -5180,7 +5195,7 @@ if fid<0
     if fid>0
         % file can be opened for writing, write string
         try
-            fprintf(fid,'%s\n',Str);
+            fprintf(fid,'%s\n',Str,RepoLine,HashLine);
             fclose(fid);
             % reopen the file to check whether string was written correctly
             fid = fopen(whatfile,'r','n','UTF-8');

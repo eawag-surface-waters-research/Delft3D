@@ -12,6 +12,7 @@ set(oss_dependencies_general deltares_common
                              part_data_f
                              part_utils_f
                              part_io_f
+                             waq_utils_f
                              gridgeom
                              kdtree_wrapper
                              kdtree2
@@ -54,4 +55,3 @@ set_target_properties (${library_name} PROPERTIES FOLDER engines_gpl/part)
 target_compile_options(${library_name} PRIVATE "${openmp_flag}")
 target_compile_options(${library_name} PRIVATE "${qauto_threaded_flags}")
 target_compile_options(${library_name} PRIVATE "${waq_default_flags}")
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${waq_debug_flags}>")

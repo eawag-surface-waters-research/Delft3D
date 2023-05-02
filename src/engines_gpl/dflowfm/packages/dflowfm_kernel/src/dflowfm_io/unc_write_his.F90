@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Write history data in NetCDF format.
 subroutine unc_write_his(tim)            ! wrihis
@@ -1343,7 +1343,7 @@ subroutine unc_write_his(tim)            ! wrihis
                     ierr = nf90_put_att(ihisfile, id_voltot(num), 'units', 'TJ')
                  end if
               else if ( num.eq.IDX_GravInput ) then
-                 if ( jatidep.eq.1 ) then
+                 if ( jatidep > 0 ) then
                     ierr = nf90_def_var(ihisfile, trim(voltotname(num)), nf90_double, (/ id_timedim /), id_voltot(num))
                     ierr = nf90_put_att(ihisfile, id_voltot(num), 'units', 'TJ')
                  end if
@@ -3816,7 +3816,7 @@ subroutine unc_write_his(tim)            ! wrihis
              ierr = nf90_put_var(ihisfile, id_voltot(num), 1d-12*voltot(num),  start=(/ it_his /))
           end if
        else if ( num.eq.IDX_GravInput ) then
-          if ( jatidep.eq.1 .or. jaselfal.gt.0 ) then
+          if ( jatidep > 0 .or. jaselfal > 0 ) then
              ierr = nf90_put_var(ihisfile, id_voltot(num), 1d-12*voltot(num),  start=(/ it_his /))
           end if
        else if ( num.eq.IDX_SALInput .or. num.eq.IDX_SALInput2 ) then

@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 ! fill observation stations array
 subroutine fill_valobs()
@@ -96,8 +96,8 @@ subroutine fill_valobs()
                call getkbotktop(k,kb,kt)
                ux = ueux(kb); uy = ueuy(kb)
                um = max(hypot(ux,uy),1d-4)
-               workx(k) = taus(k)*ux/max(ucmag(k),1d-4)   
-               worky(k) = taus(k)*uy/max(ucmag(k),1d-4)   
+               workx(k) = taus(k)*ux/um  
+               worky(k) = taus(k)*uy/um 
             enddo
          endif
       else
@@ -358,7 +358,7 @@ subroutine fill_valobs()
                   valobs(IPNT_RHO+klay-1,i) = rho(kk)
                endif
                if (kmx > 0) then 
-                   if (zws(kt) - zws(kb-1) > epshu .and. k < kt ) then
+                   if (zws(kt) - zws(kb-1) > epshu .and. kk < kt ) then
                       if (idensform > 10 ) then           
                          prsappr = ag*rhomean*( zws(kt) - zws(kk) )  
                          drhodz  = ( setrhofixedp(kk+1,prsappr) - setrhofixedp(kk,prsappr) ) / max(0.5d0*(zws(kk+1) - zws(kk-1)),epshs)    ! FIXME!!!!

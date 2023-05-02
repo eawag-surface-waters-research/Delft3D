@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -74,7 +74,6 @@
       COMMON / CZOEK / ICASEM
       SAVE   / CZOEK /
       integer(4) ithndl /0/
-      if ( timon ) call timstrt( "zoek", ithndl )
 !
 !     Search with case sensitivity depending on ICASEM
 !
@@ -87,7 +86,6 @@
          CALL ERRSYS ( 'ERROR IN ZOEK : ONBEKENDE MODE ' , 1 )
       ENDIF
 !
-      if ( timon ) call timstop( ithndl )
       RETURN
       END
 !

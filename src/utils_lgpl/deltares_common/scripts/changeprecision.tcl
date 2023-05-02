@@ -32,13 +32,15 @@ if { $scriptpos >= 0 } {
 puts "rootdir:$rootdir"
 
 set files {}
-lappend files [file join $rootdir "packages" "deltares_common" "src" "precision.F90"]
+lappend files [file join $rootdir "packages" "deltares_common" "src" "precision.f90"]
 lappend files [file join $rootdir "packages" "deltares_common" "include" "tri-dyn.igd"]
 lappend files [file join $rootdir "packages" "deltares_common_c" "include" "precision.h"]
 lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d" "flow2d3d.vcxproj"]
 # parse flow2d3d/Makefile.am twice for two strings to be replaced
 lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d" "src" "Makefile.am"]
 lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d" "src" "Makefile.am"]
+lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d" "CMakeLists.txt"]
+lappend files [file join $rootdir ".." ".." "cmake" "install_flow2d3d" "install_and_bundle.cmake"]
 
 # file types:
 # f: fortran
@@ -53,6 +55,11 @@ lappend filetypes "o"
 # flow2d3d/Makefile.am:
 lappend filetypes "o"
 lappend filetypes "o"
+# CMakeLists.txt:
+lappend filetypes "o"
+# install_and_bundle.cmake:
+lappend filetypes "o"
+
 
 set hplines {}
 lappend hplines "integer, parameter :: fp=hp"
@@ -63,6 +70,12 @@ lappend hplines "flow2d3d.dll"
 # flow2d3d/Makefile.am:
 lappend hplines "libflow2d3d.la"
 lappend hplines "libflow2d3d_la"
+# CMakeLists.txt:
+lappend hplines "library_name flow2d3d "
+# install_and_bundle.cmake:
+lappend hplines "libflow2d3d.so"
+
+
 
 set splines {}
 lappend splines "integer, parameter :: fp=sp"
@@ -73,6 +86,12 @@ lappend splines "flow2d3d_sp.dll"
 # flow2d3d/Makefile.am:
 lappend splines "libflow2d3d_sp.la"
 lappend splines "libflow2d3d_sp_la"
+# CMakeLists.txt (WARNING: the space at the end is crucial):
+lappend splines "library_name flow2d3d_sp "
+# install_and_bundle.cmake:
+lappend splines "libflow2d3d_sp.so"
+
+
 
 puts "The following files are going to be changed:"
 foreach f $files {
@@ -180,7 +199,7 @@ for {set i 0} {$i<[llength $files]} {incr i} {
          if {[lindex $filetypes $i] == "o"} {
             if { $mode == "double" } {
                puts "   sp word deactivated."
-               regsub -all [lindex $splines $i] $line [lindex $hplines $i] line 
+               regsub -all [lindex $splines $i] $line [lindex $hplines $i] line
                lappend newfile $line
             } else {
                puts "   sp word already activated; not changed."

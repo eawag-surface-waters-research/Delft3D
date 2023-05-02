@@ -2,7 +2,7 @@ subroutine iniid(error     ,prgnm     ,runid     ,filmd     ,filmrs    , &
                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -26,8 +26,8 @@ subroutine iniid(error     ,prgnm     ,runid     ,filmd     ,filmrs    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Reads RUN IDentification code from file 'runid'
@@ -47,6 +47,7 @@ subroutine iniid(error     ,prgnm     ,runid     ,filmd     ,filmrs    , &
     use globaldata
     use string_module
     use system_utils, only: exifil
+    use MessageHandling, only: SetMessageHandling
     !
     implicit none
     !
@@ -465,6 +466,7 @@ subroutine iniid(error     ,prgnm     ,runid     ,filmd     ,filmrs    , &
                & status = 'replace')
        endif
     endif
+    call SetMessageHandling(write2screen = .true., useLog = .false., lunMessages = lundia)
     !
  9999 continue
 end subroutine iniid

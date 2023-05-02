@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -27,7 +27,7 @@
      &                    aleng  , ipoint , iknmrk , idpnt  , ivpnt  ,
      &                    conc   , conc2  , bound  , iopt   , ilflag ,
      &                    idt    , iaflag , amass2 , ndmpq  , iqdmp  ,
-     &                    dmpq   , owners , mypart )
+     &                    dmpq   )
 
 !     Deltares Software Centre
 
@@ -56,14 +56,6 @@
 !>       Furthermore the fluxes in and out of monitoring areas for detail balances are accumulated on
 !>       the fly. Which flux needs to be accumulated in what balance is given in the IQDMP(noq) array.
 
-!     Created             : March     1988 by Leo Postma
-!     Modified            : Unknown        by Jan van Beek
-!                                          balances
-!                         : September 2007 by Vortech
-!                                          parallelism
-!                         : September 2010 by Leo Postma
-!                                          addition of feature array for drying and flooding
-!                                          FORTRAN-90 look and feel
 
 !     Files               : none
 
@@ -110,8 +102,6 @@
       integer  ( 4), intent(in   ) :: ndmpq                !< number of dumped exchanges for mass balances
       integer  ( 4), intent(in   ) :: iqdmp (noq)          !< pointer from echange to dump location
       real     ( 4), intent(inout) :: dmpq  (nosys,ndmpq,2)!< array with mass balance information
-      integer  ( 4), intent(in   ) :: owners(noseg)        !< array of owners per volume for paralellism
-      integer  ( 4), intent(in   ) :: mypart               !< which processor am I ?
 
 !     Local variables     :
 
@@ -152,13 +142,7 @@
          ito_1   = ipoint(4,iq)
          if ( ifrom   .eq. 0 .or. ito   .eq. 0 ) cycle
          if ( ifrom .le. 0 .and. ito .le. 0 ) cycle
-         if   ( ifrom .lt. 0) then
-            if ( owners(ito)   .ne. mypart ) cycle
-         elseif ( ito .lt. 0) then
-            if ( owners(ifrom) .ne. mypart ) cycle
-         else
-            if ( owners(ifrom) .ne. mypart .and. owners(ito) .ne. mypart ) cycle
-         endif
+
          if ( ifrom .gt. 0 ) then
             if ( .not. btest(iknmrk(ifrom),0) ) cycle   ! identified dry at start and end of timestep
          endif

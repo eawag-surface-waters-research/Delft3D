@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -60,7 +60,6 @@
       use waqmem
       use delwaq2_data
       use timers
-      use m_couplib
       use workspace
       use string_module  ! string manipulation tools
       use m_sysn          ! System characteristics
@@ -98,8 +97,6 @@
       CHARACTER*4   cext                          ! inital conditions file extention
 
       INTEGER       IERRIO
-
-      logical, save :: init_ixset = .true.
 
 !     Common to define external communications in SOBEK
 !     OLCFWQ             Flag indicating ONLINE running of CF and WQ
@@ -212,7 +209,7 @@
          CALL DLWQIO ( LUN(25) , LCHAR(25), LUN(19) , NOUTP   , NRVART  ,
      +                 NBUFMX  , J(IIOUT) , J(IIOPO), C(IONAM), C(IOSNM),
      +                 C(IOUNI), C(IODSC) , NOTOT   , C(ISSNM), C(ISUNI),
-     +                 C(ISDSC), LUN      , LCHAR   , MYPART  , IERR    )
+     +                 C(ISDSC), LUN      , LCHAR   , IERR    )
          CLOSE ( LUN(25) )
       ENDIF
 !
@@ -266,23 +263,10 @@
          enddo
       ENDIF
       CLOSE ( LUN( 8) )
-!
-!     determine mesh/grid partitioning for parallel computing
-!
-      CALL PARTIT ( LUN(19) , NOSSS   , NOLAY   , NOQTT   , J(IXPNT),
-     +              MYPART  , NPARTp  , J(IOWNS), J(IOWNQ), INTSRT  )
+
 
       IBFLAG = 0
       IF ( MOD(INTOPT,16) .GE. 8 ) IBFLAG = 1
-
-      if ( init_ixset ) then
-          init_ixset = .false.
-          CALL IXSETS ( LUN(19) , MYPART  , NOTOT   , NOSYS   ,
-     +                  NOSSS   , NOQ     , J(IXPNT), J(IOWNS),
-     +                  J(IOWNQ), NDMPAR  , NDMPS   , NTDMPQ  ,
-     +                  NDMPQ   , IBFLAG  , J(ISDMP), J(IPDMP),
-     +                  J(IQDMP) )
-      endif
 
 !
 !     locally/per processor adapt the feature array:
@@ -292,7 +276,7 @@
 !        feature 4 == segment belongs to own processor
 !
 
-      CALL CHKNMR ( LUN(19) , MYPART , nosss  , J(IOWNS) , J(IKNMR) )
+      CALL CHKNMR ( LUN(19) , nosss  , J(IKNMR) )
 
       ! determine top of the vertcical columns
 
@@ -392,7 +376,6 @@
       call delpar00 ( lchar(45), noseg    , noq      , a(ivol)  , a(iflow) ,
      &                nosfun   , c(isfna) , a(isfun) )
 
-      if (mypart .eq.1) then
 !
 !     New bottomlayer processing
 !
@@ -404,7 +387,6 @@
      *                      C(ISFNA), J(IXPNT), A(IVOL ), A(IAREA), A(IFLOW),
      *                      A(ILENG))
 !
-      end if
 
       IF ( INTSRT .EQ. 6 .OR. INTSRT .EQ. 7 ) THEN
          NOSUBz = NOTOT

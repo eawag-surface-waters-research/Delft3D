@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2018-2022.
+!  Copyright (C)  Stichting Deltares, 2018-2023.
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
 !  Delft3D is free software: you can redistribute it and/or modify
@@ -26,8 +26,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    subroutine mba_init()
 
@@ -304,7 +304,7 @@
    use m_flowparameters, only: jatem, jambawritecsv, jambalumpmba, jambalumpbnd, jambalumpsrc, jambalumpproc
    use m_flowtimes, only: refdate_mjd
    use m_transport, only: numconst, isalt, itemp
-   use time_module
+   use time_module, only: mjd2date
 
    implicit none
 
@@ -318,11 +318,15 @@
 
    timembaend = time
 
-   call gregor(refdate_mjd + offset_modified_jd + timembastart/86400.0, iyear, imonth, iday, ihour, imin, isec, sec)
-   write(datembastart, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, isec
-   call gregor(refdate_mjd + offset_modified_jd + timembaend/86400.0, iyear, imonth, iday, ihour, imin, isec, sec)
-   write(datembaend, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, isec
-
+   datembastart = ""
+   if (mjd2date(refdate_mjd + timembastart/86400.0, iyear, imonth, iday, ihour, imin, sec) /= 0) then
+      write(datembastart, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, int(sec)      
+   endif
+   datembaend = ""
+   if (mjd2date(refdate_mjd + timembaend/86400.0, iyear, imonth, iday, ihour, imin, sec) /= 0) then
+      write(datembaend, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, int(sec)
+   endif
+   
 !  New total volumes and masses
    call mba_sum(nombs, nomba, mbadefdomain, mbavolumeend, mbamassend)
 
@@ -467,7 +471,7 @@
    use m_wind, only: jarain, jaevap
    use m_flowparameters, only: jatem, jambalumpmba, jambalumpbnd, jambalumpsrc, jambalumpproc
    use m_flowtimes, only: refdate_mjd
-   use time_module
+   use time_module, only: mjd2date
 
    implicit none
 
@@ -481,10 +485,14 @@
 
    timembaend = time
 
-   call gregor(refdate_mjd + offset_modified_jd + timembastarttot/86400.0, iyear, imonth, iday, ihour, imin, isec, sec)
-   write(datembastart, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, isec
-   call gregor(refdate_mjd + offset_modified_jd + timembaend/86400.0, iyear, imonth, iday, ihour, imin, isec, sec)
-   write(datembaend, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, isec
+   datembastart = ""
+   if (mjd2date(refdate_mjd + timembastarttot/86400.0, iyear, imonth, iday, ihour, imin, sec) /= 0) then
+      write(datembastart, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, int(sec)
+   endif
+   datembaend = ""
+   if (mjd2date(refdate_mjd + timembaend/86400.0, iyear, imonth, iday, ihour, imin, sec) /= 0) then
+      write(datembaend, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, int(sec)
+   endif
 
    writebalance = .true.
    if ( jampi.eq.1 ) then

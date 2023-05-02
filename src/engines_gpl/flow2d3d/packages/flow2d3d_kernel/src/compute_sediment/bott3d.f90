@@ -12,7 +12,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                 & nto       ,volum0    ,volum1    ,dt        ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -36,8 +36,8 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes suspended sediment transport correction
@@ -79,6 +79,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     real(hp)                             , pointer :: morft
     real(fp)                             , pointer :: morfac
     real(fp)                             , pointer :: sus
+    real(fp)                             , pointer :: suscorfac
     real(fp)                             , pointer :: bed
     real(fp)              , dimension(:) , pointer :: thetsd
     real(fp)                             , pointer :: sedthr
@@ -102,6 +103,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     logical                              , pointer :: scour
     logical                              , pointer :: snelli
     logical                              , pointer :: l_suscor
+    logical, dimension(:)                , pointer :: cmpupdfrac
     real(fp), dimension(:)               , pointer :: factor
     real(fp)                             , pointer :: slope
     real(fp), dimension(:)               , pointer :: bc_mor_array
@@ -259,6 +261,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     morft               => gdp%gdmorpar%morft
     morfac              => gdp%gdmorpar%morfac
     sus                 => gdp%gdmorpar%sus
+    suscorfac           => gdp%gdmorpar%suscorfac
     bed                 => gdp%gdmorpar%bed
     thetsd              => gdp%gdmorpar%thetsd
     sedthr              => gdp%gdmorpar%sedthr
@@ -306,6 +309,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     sinkse              => gdp%gderosed%sinkse
     sourse              => gdp%gderosed%sourse
     nmudfrac            => gdp%gdsedpar%nmudfrac
+    cmpupdfrac          => gdp%gdsedpar%cmpupdfrac
     rhosol              => gdp%gdsedpar%rhosol
     cdryb               => gdp%gdsedpar%cdryb
     sedtyp              => gdp%gdsedpar%sedtyp
@@ -434,7 +438,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                             cumflux = cumflux - u1(nm,k)*(cavg-r1avg)*dz
                          endif
                       endif
-                      sucor(nm,l) = -cumflux
+                      sucor(nm,l) = -suscorfac * cumflux
                       !
                       ! bedload will be reduced in case of sediment transport
                       ! over a non-erodible layer (no sediment in bed) in such
@@ -516,7 +520,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                             cumflux = cumflux - v1(nm,k)*(cavg-r1avg)*dz
                          endif
                       endif
-                      svcor(nm, l) = -cumflux
+                      svcor(nm, l) = -suscorfac * cumflux
                       !
                       ! bedload will be reduced in case of sediment transport
                       ! over a non-erodible layer (no sediment in bed) in such
@@ -993,6 +997,14 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
        ! Apply erosion and sedimentation to bookkeeping system
        !
        if (cmpupd) then
+          !
+          ! exclude specific fractions if cmpupdfrac has been set
+          !
+          do l = 1, lsedtot
+             if (.not. cmpupdfrac(l)) then
+                dbodsd(l, :) = 0.0_fp 
+             endif
+          enddo
           !
           ! Determine new thickness of transport layer
           !

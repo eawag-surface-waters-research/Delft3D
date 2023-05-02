@@ -3,7 +3,7 @@ subroutine c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,kcs       ,kfu    
                 & vortic    ,enstro    ,wrkarr    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -27,8 +27,8 @@ subroutine c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,kcs       ,kfu    
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes vorticity and enstrophy from given

@@ -9,7 +9,7 @@ function make_all
 
 %----- LGPL --------------------------------------------------------------------
 %
-%   Copyright (C) 2011-2022 Stichting Deltares.
+%   Copyright (C) 2011-2023 Stichting Deltares.
 %
 %   This library is free software; you can redistribute it and/or
 %   modify it under the terms of the GNU Lesser General Public
@@ -41,13 +41,15 @@ if ~license('checkout','compiler')
     error('Compiler license currently not available.')
 end
 curdir = pwd;
-sourcedir=[curdir,filesep,'progsrc'];
-qpversion=read_identification(sourcedir,'d3d_qp.m');
-T=now;
-make_quickplot(curdir,qpversion,T)
+sourcedir = [curdir,filesep,'progsrc'];
+
+[qpversion,hash,repo_url] = read_identification(sourcedir,'d3d_qp.m');
+T = now;
+
+make_quickplot(curdir,qpversion,repo_url,hash,T)
 make_ecoplot(curdir,qpversion,T)
-c=computer;
-if c(end-1:end)=='64'
+c = computer;
+if c(end-1:end) == '64'
    make_d3dmatlab(curdir,qpversion,T)
 end
 make_delwaq2raster(curdir,qpversion,T)

@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2021-2022.
+!!  Copyright (C)  Stichting Deltares, 2021-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -24,6 +24,7 @@
 program ddcouple
       use hydmod
       use merge_step_mod
+      use delwaq_version_module
       implicit none
 
       type(t_hyd)              :: hyd             ! description of the overall hydrodynamics
@@ -155,7 +156,7 @@ program ddcouple
 !
       interactive = .false.
       cident = ' '
-      call getfullversionstring_ddcouple(cident)
+      call getfullversionstring_delwaq(cident)
       length = len_trim(cident)
       write(*,*)
       write(*,'(a)') ' ', cident(5:length)

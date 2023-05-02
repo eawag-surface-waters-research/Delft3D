@@ -7,7 +7,7 @@ subroutine z_dwnvel(nmmax     ,kmax      ,icx     ,kcs       ,kfu       , &
                   & vonkar    ,gdp     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -31,8 +31,8 @@ subroutine z_dwnvel(nmmax     ,kmax      ,icx     ,kcs       ,kfu       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Calculate velocity components and magnitude at the
 ! zeta points based on velocity in the bottom

@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Reading + initializing of initial and parameter fields.
 !! The IniFieldFile from the MDU is the successor of the old
@@ -854,6 +854,7 @@ subroutine spaceInit1dField(sBranchId, sChainages, sValues, ipos, res)
    double precision, intent(  out) :: res(:)        !< result
    
    integer                 :: nbrstart, nbrend, ibr, k, j, i, ierr, ipre, ns, ncount
+   integer                 :: is, ip1, ip2, ipe
    type(t_branch), pointer :: pbr
    double precision        :: chai, sChaiPrev, sChai, sValPrev, sVal, minsChai, maxsChai
    character(len=256)      :: brId
@@ -873,20 +874,24 @@ subroutine spaceInit1dField(sBranchId, sChainages, sValues, ipos, res)
       do ibr = nbrstart, nbrend
          pbr => network%brs%branch(ibr)
          brId = pbr%id
-         if (ipos == 1) then
-            ncount = pbr%uPointsCount
-         else if (ipos == 2) then
-            ncount = pbr%gridPointsCount
-         end if
-         
-         do j = 1, ncount
+         do is=1,pbr%gridpointsseqcount
+            ip1 = pbr%k1gridpointsseq(is)
+            ip2 = pbr%k2gridpointsseq(is)
             if (ipos == 1) then
-               k = pbr%lin(j)
+               ipe = ip2 - 1 ! upoints loop
             else if (ipos == 2) then
-               k = pbr%grd(j)
+               ipe = ip2 ! grid points loopt
             end if
+
+            do i=ip1,ipe
+               if (ipos == 1) then
+                  k = pbr%lin(i)
+               else if (ipos == 2) then
+                  k = pbr%grd(i)
+               end if
          
-            res(k) = sValues(1)
+               res(k) = sValues(1)
+            end do
          end do
       end do
             

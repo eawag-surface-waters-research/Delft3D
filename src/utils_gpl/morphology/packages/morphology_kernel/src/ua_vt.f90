@@ -3,7 +3,7 @@ subroutine ua_vt(facas,      facsk,        sws,      h,   &
                & ua)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -27,8 +27,8 @@ subroutine ua_vt(facas,      facsk,        sws,      h,   &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! computes velocity asymmetry due to waves according to
 ! PhD van Thiel 2009
@@ -93,11 +93,11 @@ subroutine ua_vt(facas,      facsk,        sws,      h,   &
    f2=q*(1-p)
    f3=p*q
    !
-   ! Skewness and assymetry
+   ! Skewness and asymmetry
    sk = f0*RF(1,ih0,it0)+f1*RF(1,ih1,it0)+ f2*RF(1,ih0,it1)+f3*RF(1,ih1,it1)
    as = f0*RF(2,ih0,it0)+f1*RF(2,ih1,it0)+ f2*RF(2,ih0,it1)+f3*RF(2,ih1,it1)
    !
-   ! Sediment advection velocity from Skewness and Assymetry
+   ! Sediment advection velocity from Skewness and Asymmetry
    ua = sws*(facsk*sk-facas*as)*uorb
    
 end subroutine ua_vt

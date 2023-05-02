@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 module m_xbeach_data
    use m_xbeach_typesandkinds
@@ -128,39 +128,40 @@ module m_xbeach_data
    double precision, dimension(:,:), allocatable  :: wmask                  ! not integer, has weights
    !
    !> statsolver netnode oriented quantities
-   integer                                                  :: noseapts     ! number of offshore wave boundary net nodes
-   integer         , dimension(:)     , allocatable         :: seapts       ! netnodes on wave boundary
-   double precision, dimension(:,:,:) , allocatable         :: w            ! weights of upwind grid points, 2 per grid point and per wave direction
-   double precision, dimension(:,:)   , allocatable         :: ds           ! distance to interpolated upwind point, per grid point and direction
-   logical         , dimension(:)     , allocatable         :: inner        ! mask of inner grid points (not on boundary)
-   integer         , dimension(:,:,:) , allocatable         :: prev         ! two upwind grid points per grid point and wave direction
-   double precision, dimension(:)     , allocatable         :: hhstat       ! water depth
-   double precision, dimension(:)     , allocatable         :: kwavstat     ! wave number
-   double precision, dimension(:)     , allocatable         :: cgstat       ! group velocity
-   double precision, dimension(:)     , allocatable         :: cstat        ! phase velocity
-   double precision, dimension(:,:)   , allocatable         :: cthetastat   ! refraction speed
-   double precision, dimension(:,:)   , allocatable         :: eestat       ! wave energy distribution
-   double precision, dimension(:)     , allocatable         :: Erstat       ! bulk roller energy stationary model
-   double precision, dimension(:)     , allocatable         :: fwstat       ! wave friction factor
-   double precision, dimension(:)     , allocatable         :: Hstat        ! wave height
-   double precision, dimension(:)     , allocatable         :: Dwstat       ! wave breaking dissipation
-   double precision, dimension(:)     , allocatable         :: Dfstat       ! wave friction dissipation
-   double precision, dimension(:)     , allocatable         :: Drstat       ! roller dissipation
-   double precision, dimension(:)     , allocatable         :: thetam       ! mean wave direction
-   double precision, dimension(:)     , allocatable         :: uorbstat     ! orbital velocity
-   double precision, dimension(:)     , allocatable         :: dhdxstat     ! depth gradient, x
-   double precision, dimension(:)     , allocatable         :: dhdystat     ! depth gradient, y
-   double precision, dimension(:,:,:) , allocatable         :: wmean        ! weights stationary roller model
-   integer         , dimension(:,:,:) , allocatable         :: prevmean     ! two upwind grid points per grid point roller model
-   double precision, dimension(:,:)   , allocatable         :: dsmean       ! distance to interpolated upwind point, per grid point roller model
-   integer         , dimension(:,:)   , allocatable         :: kp           ! computational kernel around all numk net nodes
+   integer                                                  :: noseapts     !< number of offshore wave boundary net nodes
+   integer         , dimension(:)     , allocatable         :: seapts       !< netnodes on wave boundary
+   double precision, dimension(:,:,:) , allocatable         :: w            !< weights of upwind grid points, 2 per grid point and per wave direction
+   double precision, dimension(:,:)   , allocatable         :: ds           !< distance to interpolated upwind point, per grid point and direction
+   logical         , dimension(:)     , allocatable         :: inner        !< mask of inner grid points (not on boundary)
+   integer         , dimension(:,:,:) , allocatable         :: prev         !< two upwind grid points per grid point and wave direction
+   double precision, dimension(:)     , allocatable         :: hhstat       !< water depth
+   double precision, dimension(:)     , allocatable         :: kwavstat     !< wave number
+   double precision, dimension(:)     , allocatable         :: cgstat       !< group velocity
+   double precision, dimension(:)     , allocatable         :: cstat        !< phase velocity
+   double precision, dimension(:,:)   , allocatable         :: cthetastat   !< refraction speed
+   double precision, dimension(:,:)   , allocatable         :: eestat       !< wave energy distribution
+   double precision, dimension(:)     , allocatable         :: Erstat       !< bulk roller energy stationary model
+   double precision, dimension(:)     , allocatable         :: fwstat       !< wave friction factor
+   double precision, dimension(:)     , allocatable         :: Hstat        !< wave height
+   double precision, dimension(:)     , allocatable         :: Dwstat       !< wave breaking dissipation
+   double precision, dimension(:)     , allocatable         :: Dfstat       !< wave friction dissipation
+   double precision, dimension(:)     , allocatable         :: Drstat       !< roller dissipation
+   double precision, dimension(:)     , allocatable         :: thetam       !< mean wave direction
+   double precision, dimension(:)     , allocatable         :: uorbstat     !< orbital velocity
+   double precision, dimension(:)     , allocatable         :: dhdxstat     !< depth gradient, x
+   double precision, dimension(:)     , allocatable         :: dhdystat     !< depth gradient, y
+   double precision, dimension(:,:,:) , allocatable         :: wmean        !< weights stationary roller model
+   integer         , dimension(:,:,:) , allocatable         :: prevmean     !< two upwind grid points per grid point roller model
+   double precision, dimension(:,:)   , allocatable         :: dsmean       !< distance to interpolated upwind point, per grid point roller model
+   double precision, dimension(:)     , allocatable         :: Hmaxstat     !< Maximum expected wave height in corner point
+   integer         , dimension(:,:)   , allocatable         :: kp           !< computational kernel around all numk net nodes
 
    !< Relaxated depth and velocities
-   double precision, dimension(:)     , allocatable         :: hhw          ! mode dependent water depth
-   double precision, dimension(:)     , allocatable         :: hhws         ! depth with relaxation, singledir
-   double precision, dimension(:)     , allocatable         :: ucxws        ! ucx with relaxation, singledir
-   double precision, dimension(:)     , allocatable         :: ucyws        ! ucy with relaxation, singledir
-   double precision, dimension(:)     , allocatable         :: hhwwci       ! depth with relaxation, wci
+   double precision, dimension(:)     , allocatable         :: hhw          !< mode dependent water depth
+   double precision, dimension(:)     , allocatable         :: hhws         !< depth with relaxation, singledir
+   double precision, dimension(:)     , allocatable         :: ucxws        !< ucx with relaxation, singledir
+   double precision, dimension(:)     , allocatable         :: ucyws        !< ucy with relaxation, singledir
+   double precision, dimension(:)     , allocatable         :: hhwwci       !< depth with relaxation, wci
    double precision, dimension(:)     , allocatable         :: km           !< wave number k with wci
    double precision, dimension(:)     , allocatable         :: umwci        !< ucx with relaxation,  wci
    double precision, dimension(:)     , allocatable         :: vmwci        !< ucx with relaxation,  wci

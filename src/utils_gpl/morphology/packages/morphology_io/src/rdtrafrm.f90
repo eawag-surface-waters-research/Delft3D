@@ -1,7 +1,7 @@
 module m_rdtrafrm
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -25,8 +25,8 @@ module m_rdtrafrm
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !-------------------------------------------------------------------------------
 use m_depfil_stm
 
@@ -574,7 +574,7 @@ subroutine rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
              write (lundia, '(a,i3)') '    Transport formula used =', iform(l)
           endif
        else
-          write (lundia, '(a)') '    File in traditional MOR-format.'
+          write (lundia, '(a)') '*** WARNING Transport file "'//flname(1:lfile)//'" uses old MOR-format. Please update to keyword-based file.'
           !
           open (newunit = inp, file = flname(1:lfile),status = 'old', iostat = iost)
           if (iost/=0) then

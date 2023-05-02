@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,12 +27,12 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
    !----- AGPL --------------------------------------------------------------------
    !
-   !  Copyright (C)  Stichting Deltares, 2017-2022.
+   !  Copyright (C)  Stichting Deltares, 2017-2023.
    !
    !  This file is part of Delft3D (D-Flow Flexible Mesh component).
    !
@@ -58,8 +58,8 @@
    !  Deltares, and remain the property of Stichting Deltares. All rights reserved.
    !
    !-------------------------------------------------------------------------------
-   !  $Id$
-   !  $HeadURL$
+   !  
+   !  
    !>  pointer data
    module m_fm_erosed
    use precision
@@ -94,6 +94,7 @@
 
    !     sedpar
    integer                              , pointer :: nmudfrac
+   logical          , dimension(:)      , pointer :: cmpupdfrac
    real(fp)         , dimension(:)      , pointer :: rhosol
    real(fp)         , dimension(:)      , pointer :: cdryb
    real(fp)         , dimension(:,:,:)  , pointer :: logseddia
@@ -119,6 +120,7 @@
    ! morpar
    real(fp)                             , pointer :: thresh
    real(fp)                             , pointer :: sus
+   real(fp)                             , pointer :: suscorfac
    real(fp)                             , pointer :: bed
    real(fp)                             , pointer :: susw
    real(fp)                             , pointer :: sedthr

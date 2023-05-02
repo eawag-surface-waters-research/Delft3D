@@ -19,7 +19,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -43,8 +43,8 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Updates the monitoring station informations at
@@ -65,12 +65,30 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer                              , pointer :: ktemp
+    logical                              , pointer :: free_convec
     integer , dimension(:,:)             , pointer :: mnstat
     type (flwoutputtype)                 , pointer :: flwoutput
     real(fp), dimension(:,:)             , pointer :: rca
     real(fp), dimension(:,:)             , pointer :: rsedeq
     real(fp), dimension(:,:)             , pointer :: ssuu
     real(fp), dimension(:,:)             , pointer :: ssvv
+    real(fp), dimension(:)               , pointer :: qeva_out
+    real(fp), dimension(:)               , pointer :: qco_out
+    real(fp), dimension(:)               , pointer :: qbl_out
+    real(fp), dimension(:)               , pointer :: qin_out
+    real(fp), dimension(:)               , pointer :: qnet_out
+    real(fp), dimension(:)               , pointer :: hlc_out
+    real(fp), dimension(:)               , pointer :: hfree_out
+    real(fp), dimension(:)               , pointer :: efree_out
+    real(fp), dimension(:)               , pointer :: zqeva_out
+    real(fp), dimension(:)               , pointer :: zqco_out
+    real(fp), dimension(:)               , pointer :: zqbl_out
+    real(fp), dimension(:)               , pointer :: zqin_out
+    real(fp), dimension(:)               , pointer :: zqnet_out
+    real(fp), dimension(:)               , pointer :: zhlc_out
+    real(fp), dimension(:)               , pointer :: zhfree_out
+    real(fp), dimension(:)               , pointer :: zefree_out
 !
 ! Global variables
 !
@@ -189,10 +207,28 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     !
     mnstat              => gdp%gdstations%mnstat
     flwoutput           => gdp%gdflwpar%flwoutput
+    ktemp               => gdp%gdtricom%ktemp
+    free_convec         => gdp%gdheat%free_convec
     rca                 => gdp%gderosed%rca
     rsedeq              => gdp%gderosed%rsedeq
     ssuu                => gdp%gderosed%e_ssn
     ssvv                => gdp%gderosed%e_sst
+    qeva_out            => gdp%gdheat%qeva_out
+    qco_out             => gdp%gdheat%qco_out
+    qbl_out             => gdp%gdheat%qbl_out
+    qin_out             => gdp%gdheat%qin_out!
+    qnet_out            => gdp%gdheat%qnet_out
+    hlc_out             => gdp%gdheat%hlc_out!
+    hfree_out           => gdp%gdheat%hfree_out
+    efree_out           => gdp%gdheat%efree_out
+    zqeva_out           => gdp%gdheat%zqeva_out
+    zqco_out            => gdp%gdheat%zqco_out
+    zqbl_out            => gdp%gdheat%zqbl_out
+    zqin_out            => gdp%gdheat%zqin_out!
+    zqnet_out           => gdp%gdheat%zqnet_out
+    zhlc_out            => gdp%gdheat%zhlc_out
+    zhfree_out          => gdp%gdheat%zhfree_out
+    zefree_out          => gdp%gdheat%zefree_out
     !
     ! Store water-levels and concentrations in defined stations
     ! and calculated discharges to zeta points
@@ -657,5 +693,51 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
              zuorb(ii)  = uorb(n, m)
           endif
        enddo
+    endif
+    !
+    ! Store heat fluxes QEVA, QCON, QBL,QIN en QNET in defined stations
+    !
+    if (ktemp > 0 .and. flwoutput%temperature) then
+       zqeva_out = -999.0_fp
+       zqco_out  = -999.0_fp
+       zqbl_out  = -999.0_fp
+       zqin_out  = -999.0_fp
+       zqnet_out = -999.0_fp
+       do ii = 1, nostat
+          m = mnstat(1, ii)
+          if (m<0) cycle
+          n = mnstat(2, ii)
+          if (n<0) cycle
+          !
+          call n_and_m_to_nm(n , m , nm , gdp)
+          !
+          ! Heat fluxes in W/m2 are stored in stations
+          !
+          zqeva_out(ii) = qeva_out(nm)
+          zqco_out (ii) = qco_out (nm)
+          zqbl_out (ii) = qbl_out (nm)
+          zqin_out (ii) = qin_out (nm)
+          zqnet_out(ii) = qnet_out(nm)
+       enddo
+       !
+       ! Store fluxes efree, hfree for free convection in defined stations
+       !
+       if (free_convec) then
+          zefree_out = -999.0_fp
+          zhfree_out = -999.0_fp
+          do ii = 1, nostat
+             m = mnstat(1, ii)
+             if (m<0) cycle
+             n = mnstat(2, ii)
+             if (n<0) cycle
+             !
+             call n_and_m_to_nm(n , m , nm , gdp)
+             !
+             ! Heat fluxes in W/m2 are stored in stations
+             !
+             zefree_out(ii) = efree_out(nm)
+             zhfree_out(ii) = hfree_out(nm)
+          enddo
+       endif
     endif
 end subroutine tstat

@@ -1,6 +1,6 @@
 !----- LGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2011-2022.
+!  Copyright (C)  Stichting Deltares, 2011-2023.
 !
 !  This library is free software; you can redistribute it and/or
 !  modify it under the terms of the GNU Lesser General Public
@@ -25,8 +25,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> Utility module for additional manipulation/inquiry of NetCDF files, on top of the basic nf90* primitives.
 module netcdf_utils

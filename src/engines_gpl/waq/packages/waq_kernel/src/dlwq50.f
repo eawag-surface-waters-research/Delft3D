@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -24,7 +24,7 @@
       subroutine dlwq50 ( nosys   , notot   , noseg   , noq     , novelo  ,
      &                    velo    , area    , flow    , ipoint  , ivpnt   ,
      &                    conc    , bound   , idt     , deriv   , iaflag  ,
-     &                    amass2  , owners  , mypart  )
+     &                    amass2   )
 
 !     Deltares Software Centre
 
@@ -39,14 +39,6 @@
 !>        step if a positive diffusion remains, then no correction takes place, if a
 !>        negative diffusion remains, it is applied to the degree possible.
 
-!     Created             : March     1988 by Leo Postma
-!     Modified            : Unknown        by Jan van Beek
-!                                          balances
-!                         : September 2007 by Vortech
-!                                          parallelism
-!                         : September 2010 by Leo Postma
-!                                          addition of feature array for drying and flooding
-!                                          FORTRAN-90 look and feel
 
 !     Files               : none
 
@@ -75,9 +67,7 @@
       real     ( 4), intent(inout) :: deriv (notot,noseg)  !< derivatives of the concentraions
       integer  ( 4), intent(in   ) :: iaflag               !< if 1 then accumulate mass in report array
       real     ( 4), intent(inout) :: amass2(notot, 5   )  !< report array for monitoring file
-      integer  ( 4), intent(in   ) :: owners(noseg)        !< array of owners per volume for paralellism
-      integer  ( 4), intent(in   ) :: mypart               !< which processor am I ?
-
+      
 !     Local variables     :
 
       integer  ( 4) iq              ! loop counter exchanges
@@ -101,13 +91,6 @@
          ito     = ipoint(2,iq)
          if ( ifrom .eq. 0 .or.  ito .eq. 0 ) cycle
          if ( ifrom .le. 0 .and. ito .le. 0 ) cycle
-         if   ( ifrom .lt. 0) then
-            if ( owners(ito)   .ne. mypart ) cycle
-         elseif ( ito .lt. 0) then
-            if ( owners(ifrom) .ne. mypart ) cycle
-         else
-            if ( owners(ifrom) .ne. mypart .and. owners(ito) .ne. mypart ) cycle
-         endif
 
          a = area(iq)
          q = flow(iq)

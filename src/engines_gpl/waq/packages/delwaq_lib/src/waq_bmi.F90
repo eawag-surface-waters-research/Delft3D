@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -82,20 +82,20 @@ contains
           allocate (argv_tmp(argc))
           do iarg = 1, argc
              argv_tmp(iarg) = argv(iarg)
-          end do   
+          end do
           deallocate( argv )
-       else       
+       else
           argc = 0
        end if
        allocate( argv(argc+argnew) )
        do iarg = 1, argc
           argv(iarg) = argv_tmp(iarg)
-       end do   
+       end do
        argv(argc+1) = key_given
        if(argnew.eq.2) then
           argv(argc+2) = value_given
        endif
-    endif  
+    endif
     set_var = 0
   end function set_var
 
@@ -111,8 +111,6 @@ contains
     use iso_c_utils
     use delwaq2_global_data
     use dhcommand
-    use exception_waq
-    use exception_part
     use m_actions
 
     implicit none
@@ -122,9 +120,6 @@ contains
     integer                          :: iarg
     integer                          :: errorcode
 
-    ! do not use stop, but exception when used trough bmi
-    useexception_waq = .true.
-    useexception_part = .true.
 
     ! Store the name
     runid_given = char_array_to_string(c_config_file)
@@ -136,9 +131,9 @@ contains
        allocate (argv_tmp(argc))
        do iarg = 1, argc
           argv_tmp(iarg) = argv(iarg)
-       end do   
+       end do
        deallocate( argv )
-    else       
+    else
        argc = 0
     end if
     allocate( argv(argc+2) )
@@ -146,7 +141,7 @@ contains
     argv(2) = runid_given
     do iarg = 1, argc
        argv(iarg+2) = argv_tmp(iarg)
-    end do  
+    end do
     argc = argc + 2
 
     call delwaq1(argc, argv, errorcode)
@@ -159,7 +154,7 @@ contains
        initialize = 1
     endif
   end function initialize
-  
+
   subroutine get_version_string(c_version_string) bind(C, name="get_version_string")
     !DEC$ ATTRIBUTES DLLEXPORT :: get_version_string
     use iso_c_binding, only: c_char
@@ -194,17 +189,17 @@ subroutine get_attribute(c_att_name, c_att_value) bind(C, name="get_attribute")
 
     character(len=strlen(c_att_name)) :: att_name
     character(len=MAXSTRLEN)          :: att_value
- 
+
     ! Store the name
     att_name = char_array_to_string(c_att_name)
 
     select case (att_name)
     case ('model_name')
-       att_value = delwaq_program
+       att_value = component_name
     case ('version')
-       att_value = delwaq_version
+       att_value = version_suffix
     case ('author_name')
-       att_value = delwaq_company
+       att_value = company
     case default
        att_value = 'unknown attribute'
     end select
@@ -241,7 +236,7 @@ end subroutine get_attribute
     !DEC$ ATTRIBUTES DLLEXPORT :: finalize
     use delwaq2_global_data
     use m_actions
-    
+
     implicit none
     character(len=20), dimension(0) :: argv_dummy
     integer :: ierr
@@ -254,7 +249,7 @@ end subroutine get_attribute
     finalize = 0
   end function finalize
 
-  
+
   subroutine get_start_time(t) bind(C, name="get_start_time")
     !DEC$ ATTRIBUTES DLLEXPORT :: get_start_time
     use delwaq2_global_data
@@ -266,7 +261,7 @@ end subroutine get_attribute
     t = real(dlwqd%otime,8) + real(itstrt,8) / real(dlwqd%tscale,8)
   end subroutine get_start_time
 
-  
+
   subroutine get_end_time(t) bind(C, name="get_end_time")
     !DEC$ ATTRIBUTES DLLEXPORT :: get_end_time
     use delwaq2_global_data
@@ -278,7 +273,7 @@ end subroutine get_attribute
     t = real(dlwqd%otime,8) + real(itstop,8) / real(dlwqd%tscale,8)
   end subroutine get_end_time
 
-  
+
   subroutine get_time_step(dt) bind(C, name="get_time_step")
     !DEC$ ATTRIBUTES DLLEXPORT :: get_time_step
     use delwaq2_global_data
@@ -290,7 +285,7 @@ end subroutine get_attribute
     dt = real(idt,8) / real(dlwqd%tscale,8)
   end subroutine get_time_step
 
-  
+
   subroutine get_current_time(t) bind(C, name="get_current_time")
     !DEC$ ATTRIBUTES DLLEXPORT :: get_current_time
     use delwaq2_global_data

@@ -3,7 +3,7 @@ subroutine jet3d2flow(thick  ,kmax   ,dps    ,s1     ,disch_nf ,sour_nf , &
                     & kcs    ,flwang ,sign   ,gdp    )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -27,8 +27,8 @@ subroutine jet3d2flow(thick  ,kmax   ,dps    ,s1     ,disch_nf ,sour_nf , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Converts Jet3D output to delft3d sources following the DESA

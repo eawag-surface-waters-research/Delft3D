@@ -7,7 +7,7 @@ subroutine bediwe(kmax      ,kmxdt     ,kmxt      ,h0        ,scale     , &
                 & dzdz      ,luniwe    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -31,8 +31,8 @@ subroutine bediwe(kmax      ,kmxdt     ,kmxt      ,h0        ,scale     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !      Function: Power transfer of lee waves to TKE. The latter

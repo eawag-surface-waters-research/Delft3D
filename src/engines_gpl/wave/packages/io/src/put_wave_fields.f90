@@ -35,7 +35,7 @@ subroutine crewav(filnam   ,itide    ,hrms     ,tp       ,dir      , &
                 & mmax     ,nmax     ,swflux   ,wavetime )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -59,8 +59,8 @@ subroutine crewav(filnam   ,itide    ,hrms     ,tp       ,dir      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--pseudo code and references--------------------------------------------------
@@ -455,7 +455,7 @@ subroutine crewav_netcdf(fg       ,itide    ,hrms     ,tp       ,dir      , &
                        & mmax     ,nmax     ,swflux   ,wavedata ,netcdf_sp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -479,8 +479,8 @@ subroutine crewav_netcdf(fg       ,itide    ,hrms     ,tp       ,dir      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--pseudo code and references--------------------------------------------------

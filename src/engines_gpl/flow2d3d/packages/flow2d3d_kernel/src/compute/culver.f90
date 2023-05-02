@@ -4,7 +4,7 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
                 & sumrho    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -28,8 +28,8 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Computes the discharge relation through a culvert.
 !
@@ -522,7 +522,7 @@ integer function intlay    (lundia     ,zmodel    ,kfsmin    ,kfsmax    , &
                           & kmax       ,thick     ,isrc      ,intake    )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -546,8 +546,8 @@ integer function intlay    (lundia     ,zmodel    ,kfsmin    ,kfsmax    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Computes the discharge relation through a culvert.
 !

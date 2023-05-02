@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !> DFMOUTPUT - A postprocessing tool for output files from D-Flow Flexible Mesh.
 !! Combines several commands/operations into a single program.
@@ -39,7 +39,7 @@
 !! * extract  - (not implemented) Extract time series on certain locations from _his.nc files.
 !! * convert  - (not implemented) Convert old format map files into UGRID compliant map files.
 !!
-!! $Id$
+!! 
 program dfmoutput
 use IR_Precision                                                        ! Integers and reals precision definition.
 use Data_Type_Command_Line_Interface, only: Type_Command_Line_Interface ! Definition of Type_Command_Line_Interface.

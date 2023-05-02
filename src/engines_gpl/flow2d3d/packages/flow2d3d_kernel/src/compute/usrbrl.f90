@@ -3,7 +3,7 @@ subroutine usrbrl(icx       ,icy       ,nmmax     ,kmax      ,kfu       , &
                 & ubrlsu    ,diapl     ,rnpl      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -27,8 +27,8 @@ subroutine usrbrl(icx       ,icy       ,nmmax     ,kmax      ,kfu       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! The routine adds additional energy losses due to 3D hydraulic structures.

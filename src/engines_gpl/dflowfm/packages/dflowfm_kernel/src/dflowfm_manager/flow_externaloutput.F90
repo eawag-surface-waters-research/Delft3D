@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> Write solution data to output files (map/his/restart/waq).
  !! Each output type has its own interval (see m_flowtimes),
@@ -135,7 +135,7 @@
            endif
         endif
          if (comparereal(time_map, ti_mape, eps10) == 0) then
-            time_map = tstop_user + 1
+            time_map = tstop_user  + 1
          else
             tem_dif = (tim - ti_maps)/ti_map
             time_map = max(ti_maps + (floor(tem_dif + 0.001d0) +1)*ti_map,ti_maps)
@@ -149,6 +149,7 @@
             ! next time_map would be beyond end of map-window, write one last map exactly at that end.
                 time_map = ti_mape
             endif
+
          endif
      endif
    endif

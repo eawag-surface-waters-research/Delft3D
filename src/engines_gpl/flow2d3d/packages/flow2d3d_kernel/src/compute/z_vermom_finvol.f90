@@ -7,7 +7,7 @@ subroutine z_vermom_finvol(nmmax     ,kmax      ,icx       ,icy       ,u0       
                          & dzv0      ,w1        ,p0        ,zk        ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -31,8 +31,8 @@ subroutine z_vermom_finvol(nmmax     ,kmax      ,icx       ,icy       ,u0       
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Vertical momentum equation. Integration for

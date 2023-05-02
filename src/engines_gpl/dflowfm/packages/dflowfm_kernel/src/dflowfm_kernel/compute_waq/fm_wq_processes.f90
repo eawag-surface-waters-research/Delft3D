@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2018-2022.
+!  Copyright (C)  Stichting Deltares, 2018-2023.
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
 !  Delft3D is free software: you can redistribute it and/or modify
@@ -26,8 +26,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
    subroutine fm_wq_processes_ini_sub()
       use m_fm_wq_processes
       use m_alloc

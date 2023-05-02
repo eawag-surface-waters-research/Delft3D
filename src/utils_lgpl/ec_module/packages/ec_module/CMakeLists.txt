@@ -36,7 +36,8 @@ if(UNIX)
 endif(UNIX)
 
 # Set additional compilation properties, specific for Debug mode
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointers_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exception_flag}>")
 
 set_source_files_properties(${src_path}/ec_parameters.F90
                             PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
@@ -49,7 +50,10 @@ set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/ec_module)
 # EC_MODULE_DLL
 ###############
 string(TOUPPER ${CONFIGURATION_TYPE} configuration_type)
-if ( ${configuration_type} STREQUAL "DFLOWFM" OR ${configuration_type} STREQUAL "ALL" )
+if ( ${configuration_type} STREQUAL "DFLOWFM" OR 
+     ${configuration_type} STREQUAL "DELFT3D4" OR 
+     ${configuration_type} STREQUAL "ALL" OR 
+     ${configuration_type} STREQUAL "TOOLS" )
 
     set(library_name ec_module_dll)
     set(library_renamed libec_module.so)
@@ -62,7 +66,8 @@ if ( ${configuration_type} STREQUAL "DFLOWFM" OR ${configuration_type} STREQUAL 
 	target_link_libraries(${library_name} ${oss_dependencies})
 
     # Set additional compilation properties, specific for Debug mode
-    target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+    target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointers_flag}>")
+    target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exception_flag}>")
 
     # Create the folder structure in vfproj
     source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${src_path}/ec_module_api.f90)

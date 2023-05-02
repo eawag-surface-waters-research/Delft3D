@@ -6,7 +6,7 @@ subroutine zbrent(kmxdt     ,kmxt      ,omeg      ,angle     ,frfind    , &
                 & xkh       ,luniwe    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -30,8 +30,8 @@ subroutine zbrent(kmxdt     ,kmxt      ,omeg      ,angle     ,frfind    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Finds OMEG or ANGLE in interval [x1,x2] for eigen-

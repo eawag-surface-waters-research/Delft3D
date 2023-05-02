@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  !> this module contains the real flow times, only to be managed by setting times in module m_usertimes
  module m_flowtimes
@@ -173,6 +173,7 @@
  integer                           :: handle_iniext   !< timer handle for init externalforcings
  integer                           :: handle_ext      !< timer handle for externalforcings
  integer                           :: handle_extbnd   !< timer handle for externalforcingsonbnd
+ integer                           :: handle_fetch    !< timer handle for externalforcings fetch model																									  
  integer                           :: handle_extra(90)!< timer handles for extra timers
 
  double precision                  :: dsetb       !< number of setbacks ()
@@ -359,6 +360,7 @@ subroutine reset_timers()
    handle_iniext  = 0
    handle_ext     = 0
    handle_extbnd  = 0
+   handle_fetch   = 0					 
    handle_extra   = 0
 
    call timstrt('All', handle_all)

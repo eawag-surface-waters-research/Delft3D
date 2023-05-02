@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -23,7 +23,7 @@
 
       subroutine write_version(lun)
 
-      use part_version_module
+      use delpar_version_module
       use timers
 !
       implicit none    ! force explicit typing
@@ -59,7 +59,7 @@
 !     Get version string from file version_number.h.svn
 !     (see also version_number project)
 !
-      call getfullversionstring_PART(version_string)
+      call getfullversionstring_delpar(version_string)
 !
       if (lun==0) then
 !        scherm uitvoer

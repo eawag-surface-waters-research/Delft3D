@@ -1,4 +1,4 @@
-!!!  Copyright (C)  Stichting Deltares, 2022.
+!!!  Copyright (C)  Stichting Deltares, 2022-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -21,8 +21,8 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!  $Id$
-!  $HeadURL$
+!  
+!  
 
 ! maptonetcdf.f90 --
 !      Program to convert a traditional binary map file into a NetCDF map file

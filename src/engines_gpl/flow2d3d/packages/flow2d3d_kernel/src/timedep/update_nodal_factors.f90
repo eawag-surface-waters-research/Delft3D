@@ -1,7 +1,7 @@
 subroutine update_nodal_factors(timnow, kc, ntof, nto, kcd, hydrbc, omega, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -25,8 +25,8 @@ subroutine update_nodal_factors(timnow, kc, ntof, nto, kcd, hydrbc, omega, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Update the nodel factors with current date/time i_date_time
 ! i_date_time is set in setcurrentdatetime

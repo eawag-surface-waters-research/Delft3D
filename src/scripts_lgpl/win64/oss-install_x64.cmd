@@ -253,7 +253,7 @@ rem ====================
     call :copyFile "third_party_open\expat\x64\x64\Release\libexpat.dll"        !dest_share!
     call :copyFile "third_party_open\pthreads\bin\x64\*.dll"                    !dest_share!
     call :copyNetcdf                                                            !dest_share!
-    echo This directory is automatically created by script https://svn.oss.deltares.nl/repos/delft3d/trunk/src/scripts_lgpl/win64/oss-install_x64.cmd >!dest_share!\readme.txt
+    echo This directory is automatically created by script https://git.deltares.nl/oss/delft3d/-/tree/main/src/scripts_lgpl/win64/oss-install_x64.cmd >!dest_share!\readme.txt
     echo This script is executed via a post-build event >>!dest_share!\readme.txt
     echo Further modifications can be done via a Python script executed via "DIMR_collector" projects in TeamCity >>!dest_share!\readme.txt
 goto :endproc
@@ -267,13 +267,10 @@ rem ===================
     echo "installing d_hydro . . ."
 
     set dest_bin="!dest_main!\x64\dflow2d3d\bin"
-    set dest_menu="!dest_main!\x64\menu\bin"
 
     call :makeDir !dest_bin!
-    call :makeDir !dest_menu!
 
     call :copyFile engines_gpl\d_hydro\bin\x64\Release\d_hydro.exe      !dest_bin!
-    call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl    !dest_menu!
 goto :endproc
 
 

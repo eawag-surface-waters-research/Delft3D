@@ -25,8 +25,8 @@ module swan_input
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! WAVE-GUI version number dependencies:
@@ -343,6 +343,7 @@ module swan_input
        character(256)                           :: flowgridfile ! netcdf file containing flow grid
        character(256)                           :: scriptname
        character(256)                           :: specfile
+       character(256)                           :: inputtemplatefile
        character(1024)                          :: comfile
        character(15)                            :: usehottime    = '00000000.000000'       ! Time in the name of the hotfile that has to be used by SWAN
        character(15)                            :: writehottime  = '00000000.000000'       ! Time in the name of the hotfile that has to be written by SWAN
@@ -367,6 +368,7 @@ module swan_input
     private :: get_pointname
 
     contains
+!
 !
 !==============================================================================
 subroutine dealloc_swan(sr)
@@ -478,7 +480,7 @@ end subroutine read_swan
 subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     use properties
     use read_grids
-    use time_module
+    use time_module, only: ymd2jul
     use string_module
     use netcdf_utils, only: ncu_format_to_cmode
     use system_utils, only: SCRIPT_EXTENSION
@@ -526,6 +528,9 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     integer                     :: par
     integer                     :: slash_er
     integer                     :: slash_ok
+    integer                     :: old_input
+    integer                     :: loc_tag
+    integer                     :: ierr
     integer, dimension(4)       :: def_ts_hs
     integer, dimension(4)       :: def_ts_tp
     integer, dimension(4)       :: def_ts_wd
@@ -545,6 +550,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     character(37)               :: tseriesfilename
     character(37)               :: polylinefile
     character(80)               :: parname
+    character(256)              :: rec
     character(256)              :: errorstring
     character(80),dimension(:), allocatable :: tmp_add_out_names
     character(80),dimension(:), allocatable :: tmp_extforce_names
@@ -573,12 +579,24 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     !
     versionstring = ''
     call prop_get_string(mdw_ptr, 'WaveFileInformation', 'FileVersion', versionstring)
-    if (trim(versionstring) /= '02.00') return
+    if (trim(versionstring) < '02.00') return
     keywbased = .true.
     !
-    ! gen_ptr is used later on
     !
     call tree_get_node_by_name( mdw_ptr, 'General', gen_ptr )
+    ! Read the Template INPUT keyword before everything else
+    sr%inputtemplatefile = ''
+    call prop_get_string (mdw_ptr, 'General', 'INPUTTemplateFile', sr%inputtemplatefile)
+    if(sr%inputtemplatefile/='') then
+        inquire (file = trim(sr%inputtemplatefile), exist = ex)
+        if (.not. ex) then
+            write(*,*) 'SWAN_INPUT: specified INPUTTemplateFile "',trim(sr%inputtemplatefile),'" does not exist.'
+            call wavestop(1, '*** ERROR File: '//trim(sr%inputtemplatefile)//' not found')
+        endif
+    endif
+    
+    ! gen_ptr is used later on
+    !
     !
     ! From here on we know that we read the input data from a keyword based
     ! mdw file.
@@ -602,7 +620,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
         sr%exemode = SWAN_MODE_LIB
         if (engine_comm_world == MPI_COMM_NULL) then
             write(*,*) 'SWAN_INPUT: SwanMode = lib only allowed when D-Waves is run using MPI.'
-            goto 999
+            call handle_errors_mdw(sr)
         endif
         call prop_get_string (mdw_ptr, 'General', 'ScriptName' , sr%scriptname)
         if (sr%scriptname /= ' ') then
@@ -610,18 +628,51 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
             inquire (file = trim(sr%scriptname), exist = ex)
             if (.not. ex) then
                 write(*,*) 'SWAN_INPUT: specified ScriptName "',trim(sr%scriptname),'" does not exist.'
-                goto 999
+                call handle_errors_mdw(sr)
             endif
         endif
     case default
        write(*,*) 'SWAN_INPUT: invalid SWAN execution mode. Expected SwanMode = "exe" or "lib"'
-       goto 999
+       call handle_errors_mdw(sr)
     end select
     !
     sr%deltc            = -999.0
     sr%nonstat_interval = -999.0
     parname  = ''
-    call prop_get_string (mdw_ptr, 'General', 'SimMode', parname)
+       
+    if(swan_run%inputtemplatefile /= '') then
+    ! Read ModSim from SWAN INPUT file when using a template
+        open (newunit=old_input, file = swan_run%inputtemplatefile, form = 'formatted', status = 'old',iostat=ierr)
+        if(ierr /= 0) then
+            write(*,'(2a)') '*** ERROR: Unable to find file ',trim(swan_run%inputtemplatefile)
+            close(old_input)
+            call wavestop(1, 'Unable to find file '//trim(swan_run%inputtemplatefile))
+        endif
+        
+        read(old_input,'(a)',iostat=ierr) rec
+        if (ierr /= 0) then
+            write(*,'(2a)') '*** ERROR: Unable to read file ',trim(swan_run%inputtemplatefile)
+            close(old_input)
+            call wavestop(1, 'Unable to read file '//trim(swan_run%inputtemplatefile))
+        endif
+        do while (ierr == 0) 
+            loc_tag = index(rec, 'MODE ')
+            if (loc_tag /= 0) then
+                if (index(rec, ' STAT') /= 0 ) then
+                    ! (quasi-)stationary mode: NB we cannot distinguish quasi-stat from stat
+                    parname = 'stationary'
+                elseif(index(rec, 'NONST')/= 0 ) then
+                    ! non-stationary mode
+                    parname = 'non-stationary'
+                endif
+                exit
+            endif
+            read(old_input,'(a)',iostat=ierr) rec
+        enddo
+    else
+        call prop_get_string (mdw_ptr, 'General', 'SimMode', parname)
+    endif
+       
     select case (parname)
     case ('stationary')
        !
@@ -635,16 +686,16 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        call prop_get_real(mdw_ptr, 'General', 'TimeStep', sr%deltc)
        if (sr%deltc < 0.0) then
           write(*,*) '*** ERROR: Unable to read non-stationary parameter "TimeStep"'
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        call prop_get_real(mdw_ptr, 'General', 'TimeInterval', sr%nonstat_interval)
        if (sr%nonstat_interval < 0.0) then
           write(*,*) '*** ERROR: Unable to read non-stationary parameter "TimeInterval"'
-          goto 999
+          call handle_errors_mdw(sr)
        endif
     case default
        write(*,*) 'SWAN_INPUT: missing or invalid simulation mode'
-       goto 999
+       call handle_errors_mdw(sr)
     end select
     !
     parname = ''
@@ -678,7 +729,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
       sr%nautconv = .false.
     case default
        write(*,*) 'SWAN_INPUT: missing or invalid direction convention'
-       goto 999
+       call handle_errors_mdw(sr)
     end select
     obstfil = ''
     call prop_get_string (mdw_ptr, 'General', 'ObstacleFile', obstfil)
@@ -694,7 +745,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     read(parname,*,iostat=istat) refdate
     if (istat /= 0) then
        write(*,*) 'SWAN_INPUT: missing or invalid reference date'
-       goto 999
+       call handle_errors_mdw(sr)
     endif
     call setrefdate(wavedata%time,refdate)
     sr%refjulday = ymd2jul(refdate)
@@ -713,7 +764,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        call readtable(sr%tseriesfile, tseriesfilename, sr%refjulday, errorstring)
        if (errorstring /= ' ') then
           write(*,'(A)') trim(errorstring)
-          goto 999
+          call handle_errors_mdw(sr)
        endif
     endif
     sr%flowLinkConnectivity = .false.
@@ -736,7 +787,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        ntimes = gettablentimes(sr%tseriesfile, timetable, errorstring)
        if (errorstring /= ' ') then
           write(*,'(A)') trim(errorstring)
-          goto 999
+          call handle_errors_mdw(sr)
        endif
     else
        !
@@ -763,7 +814,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     !
     if (istat/=0) then
        write(*,*) 'SWAN_INPUT: memory alloc error (ntimes)'
-       goto 999
+       call handle_errors_mdw(sr)
     endif
     !
     sr%timwav = -999.0
@@ -840,35 +891,35 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
                    & 0     , errorstring)
        if (sr%ts_wl(3) > 1) then
           write(*,*) 'SWAN_INPUT: too many WaterLevel entries in TSeriesFile'
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        !
        call gettable(sr%tseriesfile, 'General', 'XVeloc', sr%ts_xv, &
                    & 0     , errorstring)
        if (sr%ts_xv(3) > 1) then
           write(*,*) 'SWAN_INPUT: too many XVeloc entries in TSeriesFile'
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        !
        call gettable(sr%tseriesfile, 'General', 'YVeloc', sr%ts_yv, &
                    & 0     , errorstring)
        if (sr%ts_yv(3) > 1) then
           write(*,*) 'SWAN_INPUT: too many YVeloc entries in TSeriesFile'
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        !
        call gettable(sr%tseriesfile, 'General', 'WindSpeed', sr%ts_ws, &
                    & 0     , errorstring)
        if (sr%ts_ws(3) > 1) then
           write(*,*) 'SWAN_INPUT: too many WindSpeed entries in TSeriesFile'
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        !
        call gettable(sr%tseriesfile, 'General', 'WindDir', sr%ts_wd, &
                    & 0     , errorstring)
        if (sr%ts_wd(3) > 1) then
           write(*,*) 'SWAN_INPUT: too many WindDir entries in TSeriesFile'
-          goto 999
+          call handle_errors_mdw(sr)
        endif
     endif
     !
@@ -886,7 +937,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     case default
        if (parname /= '') then
           write(*,*) 'SWAN_INPUT: unknown General/DirSpace: ', parname
-          goto 999
+          call handle_errors_mdw(sr)
        endif
     end select
     def_ndir     = -999
@@ -1017,7 +1068,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     call prop_get_integer(mdw_ptr, 'Processes', 'GenModePhys', sr%genmode)
     if (sr%genmode < 0 .or. sr%genmode > 3) then
        write(*,*) 'SWAN_INPUT: missing or invalid generation mode'
-       goto 999
+       call handle_errors_mdw(sr)
     endif
     !
     call prop_get_logical(mdw_ptr, 'Processes', 'WaveSetup' , sr%setup)
@@ -1050,7 +1101,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
       sr%frcof    = 0.05
     case default
        write(*,*) 'SWAN_INPUT: invalid bed friction type'
-       goto 999
+       call handle_errors_mdw(sr)
     end select
     if (sr%frictype > 0) then
        call prop_get_real   (mdw_ptr, 'Processes', 'BedFricCoef', sr%frcof)
@@ -1074,7 +1125,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     call prop_get_real   (mdw_ptr, 'Processes', 'AlfaWind'    , sr%alfawind)
     if (sr%alfawind<1d-6 .and. sr%alfawind>-1d-6) then
        write (*,'(a)') 'SWAN_INPUT: AlfaWind is not allowed to be equal to 0.0.'
-       goto 999
+       call handle_errors_mdw(sr)
     endif
     parname = ''
     call prop_get_string (mdw_ptr, 'Processes', 'WhiteCapping', parname)
@@ -1089,11 +1140,11 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
       if (sr%genmode /= 3) then
         write (*,'(2a,i0)') 'SWAN_INPUT: WhiteCapping=Westhuysen can not be', &
              & ' combined with formulations of generation ',sr%genmode
-        goto 999
+        call handle_errors_mdw(sr)
       endif
     case default
        write(*,*) 'SWAN_INPUT: [Processes] WhiteCapping: invalid input:',trim(parname)
-       goto 999
+       call handle_errors_mdw(sr)
     end select
     call prop_get_logical(mdw_ptr, 'Processes', 'Quadruplets', sr%quadruplets)
     call prop_get_logical(mdw_ptr, 'Processes', 'Refraction' , sr%refraction)
@@ -1115,7 +1166,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
       sr%swdis = 3
     case default
        write(*,*) 'SWAN_INPUT: invalid method to compute wave forces'
-       goto 999
+       call handle_errors_mdw(sr)
     end select
     !
     parname = ''
@@ -1138,7 +1189,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
       call prop_get_real (mdw_ptr, 'Processes', 'IceWind', sr%icewind)
     case default
        write(*,*) 'SWAN_INPUT: invalid method for wave damping due to ice'
-       goto 999
+       call handle_errors_mdw(sr)
     end select
     !
     ! Numerics
@@ -1195,7 +1246,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     call prop_get_string (mdw_ptr, 'Output', 'FlowGridForCom'  , sr%flowgridfile)
     if (sr%flowgridfile /= ' ') then
        write(*,'(a)') "ERROR: No longer supported: stand alone WAVE computation using FLOW data in a com-file via keyword 'FlowGridForCom'"
-       goto 999
+       call handle_errors_mdw(sr)
     endif
     call prop_get_string (mdw_ptr, 'Output', 'COMFile'                , sr%flowgridfile)
     call prop_get_logical(mdw_ptr, 'Output', 'AppendCOM'              , sr%append_com)
@@ -1218,7 +1269,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        i = len_trim(sr%flowgridfile)
        if (sr%flowgridfile(i-5:i) /= "com.nc") then
           write(*,'(3a)') "ERROR: The name of the COMFile (", trim(sr%flowgridfile), ") must end on 'com.nc'"
-          goto 999
+          call handle_errors_mdw(sr)
        endif
     endif
     !
@@ -1240,7 +1291,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        allocate (sr%pntfilnamtab(nlocc), stat = istat)
        if (istat/=0) then
           write(*,*) 'SWAN_INPUT: memory alloc error (pntfilnam)'
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        sr%pntfilnam    = ' '
        sr%pntfilnamtab = ' '
@@ -1352,7 +1403,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     enddo
     if (ndomains == 0) then
        write(*,*) 'SWAN_INPUT: no domains found!'
-       goto 999
+       call handle_errors_mdw(sr)
     endif
     sr%nnest = ndomains
     !
@@ -1361,7 +1412,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     !
     if (istat /= 0) then
        write(*,*) 'SWAN_INPUT: memory alloc error (ndomains)'
-       goto 999
+       call handle_errors_mdw(sr)
     endif
     !
     sr%dom(1)%qextnd           = 0
@@ -1374,7 +1425,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        call prop_get_integer(mdw_ptr, 'General', 'FlowVegetation', sr%dom(1)%qextnd(q_veg) )
        if (sr%dom(1)%qextnd(q_veg) == 2) then
           write(*,*) 'SWAN_INPUT: FlowVegetation=2 is found while extrapolation to the outside of domain is not supported yet.'
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        call prop_get_integer(mdw_ptr, 'General', 'FlowWaterLevel', sr%dom(1)%qextnd(q_wl)  )
        call prop_get_integer(mdw_ptr, 'General', 'FlowVelocity'  , sr%dom(1)%qextnd(q_cur) )
@@ -1395,7 +1446,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           !
        case default
           write(*,*) 'SWAN_INPUT: invalid option for [General], FlowVelocityType'
-          goto 999
+          call handle_errors_mdw(sr)
        end select
     endif
     do i = 1, ndomains
@@ -1446,7 +1497,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        call readgriddims(dom%curlif, dom%mxc, dom%myc)
        if (dom%curlif == '') then
           write(*,*) 'SWAN_INPUT: grid not found for domain', domainnr
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        !
        ! poles? No, fences!
@@ -1475,7 +1526,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        call prop_get_string(tmp_ptr, '*', 'BedLevel', dom%botfil)
        if (dom%botfil == '') then
           write(*,*) 'SWAN_INPUT: bathymetry not found for domain', domainnr
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        !
        flag           = .false.
@@ -1502,7 +1553,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           call prop_get_string(tmp_ptr, '*', 'VegetationMap', dom%vegfil)
           if (dom%vegfil == '') then
              write(*,*) 'SWAN_INPUT: vegetation map not found for domain ', domainnr
-             goto 999
+             call handle_errors_mdw(sr)
           endif
        endif       
        !
@@ -1511,7 +1562,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        call prop_get_integer(tmp_ptr, '*', 'NDir', dom%ndir)
        if (dom%ndir < 1) then
           write(*,*) 'SWAN_INPUT: invalid number of directions: ', dom%ndir
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        parname = ''
        call prop_get_string(tmp_ptr, '*', 'DirSpace', parname)
@@ -1524,7 +1575,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        case default
           if (parname /= '' .or. dom%dirspace < 0) then
              write(*,*) 'SWAN_INPUT: unknown DirSpace: ', parname
-             goto 999
+             call handle_errors_mdw(sr)
           endif
        end select
        !
@@ -1545,7 +1596,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        if (domainnr > 1 .and. &
           & (dom%nestnr<1 .or. dom%nestnr>=domainnr)) then
           write(*,*) 'SWAN_INPUT: domain', domainnr, ' not nested in a valid domain'
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        dom%nesfil(1:4) = 'NEST'
        write(dom%nesfil(5:7),'(I3.3)') domainnr
@@ -1582,7 +1633,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
              !
           case default
              write(*,'(a,i0,a)') 'SWAN_INPUT: invalid option for [Domain ', domainnr, '], FlowVelocityType'
-             goto 999
+             call handle_errors_mdw(sr)
           end select
           !
           ! echo to screen
@@ -1736,7 +1787,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     allocate (sr%bnd(nbound  ), stat = istat)
     if (istat /= 0) then
        write(*,*) 'SWAN_INPUT: memory alloc error (nbound)'
-       goto 999
+       call handle_errors_mdw(sr)
     endif
     !
     sr%specfile    = ' '
@@ -1771,28 +1822,28 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
                    & 0     , errorstring)
        if (def_ts_hs(3) > 1) then
           write(*,*) 'SWAN_INPUT: too many WaveHeight entries in TSeriesFile'
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        !
        call gettable(sr%tseriesfile, 'General', 'Period', def_ts_tp, &
                    & 0     , errorstring)
        if (def_ts_tp(3) > 1) then
           write(*,*) 'SWAN_INPUT: too many Period entries in TSeriesFile'
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        !
        call gettable(sr%tseriesfile, 'General', 'Direction', def_ts_wd, &
                    & 0     , errorstring)
        if (def_ts_wd(3) > 1) then
           write(*,*) 'SWAN_INPUT: too many Direction entries in TSeriesFile'
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        !
        call gettable(sr%tseriesfile, 'General', 'DirSpreading', def_ts_ds, &
                    & 0     , errorstring)
        if (def_ts_ds(3) > 1) then
           write(*,*) 'SWAN_INPUT: too many DirSpreading entries in TSeriesFile'
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        !
     endif
@@ -1836,7 +1887,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
              bnd%orient = 8
           case default
              write(*,*) 'SWAN_INPUT: missing or invalid boundary orientation'
-             goto 999
+             call handle_errors_mdw(sr)
           end select
           bnd%turn = 1
           !
@@ -1850,7 +1901,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
              bnd%turn = 1
           case default
              write(*,*) 'SWAN_INPUT: invalid distance measurement direction'
-             goto 999
+             call handle_errors_mdw(sr)
           end select
           !
        case ('grid','grid-coordinates')
@@ -1885,7 +1936,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           !
        case default
           write(*,*) 'SWAN_INPUT: missing or invalid boundary orientation definition type'
-          goto 999
+          call handle_errors_mdw(sr)
        end select
        !
        parname = ''
@@ -1915,7 +1966,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
             bnd%sshape = 4
           case default
              write(*,*) 'SWAN_INPUT: missing or invalid boundary spectrum shape type'
-             goto 999
+             call handle_errors_mdw(sr)
           end select
           !
           parname = ''
@@ -1928,7 +1979,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
             bnd%periodtype = 2
           case default
              write(*,*) 'SWAN_INPUT: missing or invalid boundary spectrum period type'
-             goto 999
+             call handle_errors_mdw(sr)
           end select
           !
           parname = ''
@@ -1941,12 +1992,12 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
             bnd%dsprtype = 2
           case default
              write(*,*) 'SWAN_INPUT: missing or invalid boundary spectrum directional spreading type'
-             goto 999
+             call handle_errors_mdw(sr)
           end select
           !
        case default
           write(*,*) 'SWAN_INPUT: missing or invalid boundary spectrum specification type'
-          goto 999
+          call handle_errors_mdw(sr)
        end select
        !
        select case (bnd%sshape)
@@ -1987,7 +2038,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        if (istat==0) allocate (bnd%spectrum  (nsect ), stat = istat)
        if (istat/=0) then
           write(*,*) 'SWAN_INPUT: memory alloc error (nsect)'
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        bnd%distance  = -999.0
        bnd%waveheight= -999.0
@@ -2013,31 +2064,31 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           case ('waveheight')
              if (sectnr==0) then
                 write(*,*) 'SWAN_INPUT: premature wave height specification at ',trim(bnd%name)
-                goto 999
+                call handle_errors_mdw(sr)
              endif
              call prop_get_real(tmp_ptr, '*', 'WaveHeight', bnd%waveheight(sectnr))
           case ('period')
              if (sectnr==0) then
                 write(*,*) 'SWAN_INPUT: premature period specification at ',trim(bnd%name)
-                goto 999
+                call handle_errors_mdw(sr)
              endif
              call prop_get_real(tmp_ptr, '*', 'Period', bnd%period(sectnr))
           case ('direction')
              if (sectnr==0) then
                 write(*,*) 'SWAN_INPUT: premature direction specification at ',trim(bnd%name)
-                goto 999
+                call handle_errors_mdw(sr)
              endif
              call prop_get_real(tmp_ptr, '*', 'Direction', bnd%direction(sectnr))
           case ('dirspreading')
              if (sectnr==0) then
                 write(*,*) 'SWAN_INPUT: premature direction spreading specification at ',trim(bnd%name)
-                goto 999
+                call handle_errors_mdw(sr)
              endif
              call prop_get_real(tmp_ptr, '*', 'DirSpreading', bnd%dirspread(sectnr))
           case ('spectrum')
              if (sectnr==0) then
                 write(*,*) 'SWAN_INPUT: premature spectrum file specification at ',trim(bnd%name)
-                goto 999
+                call handle_errors_mdw(sr)
              endif
              call prop_get_string(tmp_ptr, '*', 'Spectrum', bnd%spectrum(sectnr))
           end select
@@ -2051,7 +2102,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           if (bnd%ts_hs(1)<0) bnd%ts_hs = def_ts_hs
           if (bnd%ts_hs(3)>1 .and. bnd%ts_hs(3)/=bnd%nsect) then
              write(*,*) 'SWAN_INPUT: invalid number of WaveHeight entries in TSeriesFile'
-             goto 999
+             call handle_errors_mdw(sr)
           endif
           !
           call gettable(sr%tseriesfile, bnd%name, 'Period', bnd%ts_tp, &
@@ -2059,7 +2110,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           if (bnd%ts_tp(1)<0) bnd%ts_tp = def_ts_tp
           if (bnd%ts_tp(3)>1 .and. bnd%ts_tp(3)/=bnd%nsect) then
              write(*,*) 'SWAN_INPUT: invalid number of Period entries in TSeriesFile'
-             goto 999
+             call handle_errors_mdw(sr)
           endif
           !
           call gettable(sr%tseriesfile, bnd%name, 'Direction', bnd%ts_wd, &
@@ -2067,7 +2118,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           if (bnd%ts_wd(1)<0) bnd%ts_wd = def_ts_wd
           if (bnd%ts_wd(3)>1 .and. bnd%ts_wd(3)/=bnd%nsect) then
              write(*,*) 'SWAN_INPUT: invalid number of Direction entries in TSeriesFile'
-             goto 999
+             call handle_errors_mdw(sr)
           endif
           !
           call gettable(sr%tseriesfile, bnd%name, 'DirSpreading', bnd%ts_ds, &
@@ -2075,7 +2126,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           if (bnd%ts_ds(1)<0) bnd%ts_ds = def_ts_ds
           if (bnd%ts_ds(3)>1 .and. bnd%ts_ds(3)/=bnd%nsect) then
              write(*,*) 'SWAN_INPUT: invalid number of DirSpreading entries in TSeriesFile'
-             goto 999
+             call handle_errors_mdw(sr)
           endif
           !
        endif
@@ -2090,20 +2141,20 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        call prop_file('ini',trim(obstfil),obst_ptr,istat)
        if (istat /= 0) then
           write(*,*) 'SWAN_INPUT: error reading obstacle file ''', trim(obstfil), ''''
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        !
        call tree_get_node_by_name( obst_ptr, 'ObstacleFileInformation', tmp_ptr )
        call tree_get_node_by_name( tmp_ptr, 'PolylineFile', pol_ptr )
        if (.not.associated (pol_ptr)) then
           write(*,*) 'SWAN_INPUT: missing PolylineFile keyword in obstacle file'
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        call tree_get_data_string(pol_ptr,polylinefile,flag)
        call prop_file('tekal',polylinefile,pol_ptr,istat)
        if (istat /= 0) then
           write(*,*) 'SWAN_INPUT: error reading obstacle polygon file ''', trim(polylinefile), ''''
-          goto 999
+          call handle_errors_mdw(sr)
        endif
        !
        nobst    = 0
@@ -2119,7 +2170,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           call tree_get_node_by_name(pol_ptr, parname, tmp_ptr )
           if ( .not. associated(tmp_ptr) ) then
              write(*,*) 'SWAN_INPUT: obstacle polygon ''', trim(parname), ''' not found'
-             goto 999
+             call handle_errors_mdw(sr)
           endif
           !
           call tree_get_data_ptr( tmp_ptr, data_ptr, parname)
@@ -2147,7 +2198,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     !
     if (istat/=0) then
        write(*,*) 'SWAN_INPUT: memory alloc error (nobst)'
-       goto 999
+       call handle_errors_mdw(sr)
     endif
     !
     if (nobst > 0) then
@@ -2196,7 +2247,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           call tree_get_node_by_name(pol_ptr, parname, tmp_ptr )
           if ( .not. associated(tmp_ptr) ) then
              write(*,*) 'SWAN_INPUT: obstacle polygon not found'
-             goto 999
+             call handle_errors_mdw(sr)
           endif
           !
           ! get x,y coordinates ...
@@ -2231,8 +2282,23 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     !
     return
 999 continue
-    call wavestop(1, "ERROR while reading keyword based mdw file")
 end subroutine read_keyw_mdw
+!
+!
+!==============================================================================
+subroutine handle_errors_mdw(sr)
+    implicit none
+    type(swan_type)             :: sr
+    
+    ! 
+    if(sr%inputtemplatefile /= '') then
+        ! use existing INPUT, mdw keywords not needed
+        continue
+    else
+        ! not using existing INPUT, mdw keywords required
+        call wavestop(1, "ERROR while reading keyword based mdw file") 
+    endif
+end subroutine handle_errors_mdw
 !
 !
 !==============================================================================
@@ -2255,7 +2321,10 @@ subroutine write_swan_input (sr, itide, calccount, inest, xymiss, wavedata)
     wvel   = sr%wvel(itide)
     wdir   = sr%wdir(itide)
     !
-    call write_swan_inp (wavedata, calccount, &
+    if(sr%inputtemplatefile /= '') then
+       call update_swan_inp(sr%inputtemplatefile,itide,sr%nttide,calccount,inest,sr,wavedata)
+     else 
+       call write_swan_inp (wavedata, calccount, &
                     & itide        ,sr%nttide ,inest      ,sr%nnest  ,sr%swuvt  , &
                     & sr%swuvi     ,sr%prname ,sr%prnumb  ,sr%title1 ,sr%title2 , &
                     & sr%title3    ,sr%itest  ,sr%itrace  , &
@@ -2268,7 +2337,103 @@ subroutine write_swan_input (sr, itide, calccount, inest, xymiss, wavedata)
                     & sr%varwin    ,sr%varfri ,sr%ncurv   ,sr%ncrv   ,sr%nclin  , &
                     & sr%xpcu      ,sr%ypcu   ,xymiss     ,curlif    ,sr%casl   , &
                     & sr%cdd       ,sr%css    ,sr%sferic  ,sr     )
+     endif
+    !
+    
 end subroutine write_swan_input
+!
+!
+!==============================================================================
+! open existing INPUT file
+! open new INPUT file
+! read line by line the existing INPUT file
+! write that line to the new input file
+subroutine update_swan_inp(filnam,itide,nttide,calccount,inest,sr,wavedata)
+    use precision_basics
+    use wave_data
+    implicit none
+
+! Global variables    
+    integer                        , intent(in)  :: calccount
+    integer                        , intent(in)  :: itide
+    integer                        , intent(in)  :: nttide
+    character(*)                   , intent(in)  :: filnam
+    type(swan_type)                              :: sr
+    type(wave_data_type)                         :: wavedata
+    integer                        , intent(in)  :: inest
+!
+! Local variables
+!
+    integer                     :: old_input
+    integer                     :: new_input
+    integer                     :: loc_tag
+    integer                     :: ierr
+    character(256)              :: rec
+    character(256)              :: line
+    character(15)               :: tbegc
+    character(15)               :: tendc
+    character(15), external     :: datetime_to_string
+    character(256)              :: fname
+!
+!! executable statements -------------------------------------------------------
+!
+    write(*,'(2a)') 'Updating pre-existing INPUT file: ',trim(filnam)
+    !
+    open (newunit=old_input, file = filnam, form = 'formatted', status = 'old',iostat=ierr)
+    if(ierr /= 0) then
+        write(*,'(2a)') '*** ERROR: Unable to find file ',trim(filnam)
+        close(old_input)
+        call wavestop(1, 'Unable to find file '//trim(filnam))
+    endif
+    !
+    open (newunit=new_input, file = 'INPUT', form = 'formatted', status = 'replace')
+    
+    read(old_input,'(a)',iostat=ierr) rec
+    if (ierr /= 0) then
+        write(*,'(2a)') '*** ERROR: Unable to read file ',trim(filnam)
+        close(old_input)
+        close(new_input)
+        call wavestop(1, 'Unable to read file '//trim(filnam))
+    endif
+    do while (ierr == 0) 
+        !=============================================================================
+        !           look for tags: $TSTART$, $TSTOP$, $HOTSTART$, $HOTSAVE$
+        !=============================================================================
+        ! 
+        !
+        line = rec
+        loc_tag   = index(rec,'$TSTART$'  )
+        if(loc_tag /= 0) then
+            tbegc = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)
+            line(loc_tag+16:) = rec(loc_tag+8:)
+            write(line(loc_tag:loc_tag+15),'(a)') tbegc
+            rec = line
+        endif
+        loc_tag   = index(rec,'$TSTOP$'  )
+        if(loc_tag /= 0) then
+            tendc = datetime_to_string(wavedata%time%refdate, wavedata%time%calctimtscale* real(wavedata%time%tscale,hp))
+            write(line(loc_tag:loc_tag+15),'(a)') tendc
+        endif
+        loc_tag   = index(rec,'$HOTSTART$'  )
+        if(loc_tag /= 0) then
+            ! check for existence of hotfile
+            call create_hotstart_line(inest,fname,line,sr)
+        endif
+        loc_tag   = index(rec,'$HOTSAVE$'  )
+        if(loc_tag /= 0) then
+            ! SPEC for netcdf hotfiles, with format hot_inest_date_time.nc
+            call create_hotfile_line(fname,inest,line,sr,wavedata)
+        endif
+        write(new_input,'(a)') line
+        line       = ' '
+        line(1:2) = ' $ '
+        !
+        read(old_input,'(a)',iostat=ierr) rec
+    end do
+    close(old_input)
+    close(new_input)
+    
+end subroutine update_swan_inp
 !
 !
 !==============================================================================
@@ -2412,7 +2577,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     character(37)               :: aicefil
     character(60)               :: lijn
     character(60)               :: outfirst
-    character(85)               :: line
+    character(256)               :: line
     character(79)               :: pointname
     character(256)              :: fname
     character(4)                :: copy
@@ -2434,7 +2599,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     ! The following output string is optionally used on several locations
     !
     tbegc = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)
-    write(outfirst,'(3a,f8.2,a)') "OUT ",tbegc, " ", sr%deltc, " MIN"
+    write(outfirst,'(3a,f8.2,a)') "OUT ",tbegc, " ", sr%nonstat_interval, " MIN"
 
     dom => sr%dom(inest)
     !
@@ -3122,34 +3287,9 @@ subroutine write_swan_inp (wavedata, calccount, &
     ! hotfile= true: use hotfile
     !
     if (sr%hotfile) then
-       !
-       ! define the name of the hotfile to be used
-       !
-       write (fname,'(a,i0,2a)') 'hot_', inest, '_', trim(sr%usehottime)
-       !
-       ! use it when it exists
-       !
-       inquire (file = trim(fname), exist = exists)
-       if (exists) then
-          line  = 'INIT HOTS ''' // trim(fname) // ''''
-          write (luninp, '(1X,A)') line
-          write(*,'(2a)') '  Using SWAN hotstart file: ',trim(fname)
-       else ! check if there exists at least 1 partioned hotfile
-          write (fname,'(a,i0,3a,i3.3)') 'hot_', inest, '_', trim(swan_run%usehottime), '-', 1
-          inquire (file = trim(fname), exist = exists)
-          if (exists) then
-             write (fname,'(a,i0,2a)') 'hot_', inest, '_', trim(sr%usehottime) ! swan input needs filename without partition no
-             line  = 'INIT HOTS ''' // trim(fname) // ''''
-             write (luninp, '(1X,A)') line
-             write(*,'(2a)') '  Using SWAN hotstart file: ',trim(fname)
-          else   
-             ! No hotfile, set usehottime to 0.0 to flag that it isn't used
-             sr%usehottime    = '00000000.000000'
-          endif
-       endif
+       call create_hotstart_line(inest,fname,line,sr)
+       write (luninp, '(1X,A)') line
     endif
-    !
-    !     Physics activated in SWAN (default options)
     !
 !-----------------------------------------------------------------------
     line       = ' '
@@ -3771,10 +3911,13 @@ subroutine write_swan_inp (wavedata, calccount, &
        write (luninp, '(1X,A)') line
        line       = ' '
     endif
-    line       = ' '
-    line(1:2) = '$ '
+    !
+    if(sr%hotfile) then 
+        call create_hotfile_line(fname,inest,line,sr,wavedata)
+    endif
     write (luninp, '(1X,A)') line
-!-----------------------------------------------------------------------
+  
+    !-----------------------------------------------------------------------
     !
     !     Compute and test parameters
     !
@@ -3786,12 +3929,6 @@ subroutine write_swan_inp (wavedata, calccount, &
     write (luninp, '(1X,A)') line
     line       = ' '
     !
-    ! Default: put current time in writehottime
-    ! writehottime will be overwritten by tendc when quasi-/non-stationary
-    !
-    sr%writehottime = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)
-    !
-    ! 
     if (.not.sr%compmode) then
        line(1:1) = '$'
        line(2:)   = ' '
@@ -3809,7 +3946,6 @@ subroutine write_swan_inp (wavedata, calccount, &
        elseif (sr%modsim == 2) then
           tendc = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)
           write (line,'(A,1X,A)') 'COMPUTE STAT  ',tendc
-          sr%writehottime = tendc
        elseif (sr%modsim == 3) then
           !
           ! non-stationary
@@ -3843,25 +3979,10 @@ subroutine write_swan_inp (wavedata, calccount, &
           write (line(33:40), '(f8.2)') sr%deltc
           line(41:44) = ' MIN'
           write (line(46:61), '(a)')    tendc
-          sr%writehottime = tendc
        else
        endif
     endif
     write (luninp, '(1X,A)') line
-    !
-    ! hotstart:
-    ! hotfile= true: use hotfile
-    ! modsim = 2   : quasi-stationary
-    ! modsim = 3   : non-stationary
-    !
-    if (sr%hotfile) then
-       !
-       ! line to ensure that SWAN is going to produce a hotfile
-       !
-       write (fname,'(a,i0,2a)') 'hot_', inest, '_', trim(sr%writehottime)
-       line  = 'HOTF ''' // trim(fname) // ''''
-       write (luninp, '(1X,A)') line
-    endif
     !
     line        = ' '
     line(1:4)   = 'STOP'
@@ -3973,7 +4094,101 @@ end subroutine outputCurvesFromFile
 end subroutine write_swan_inp
 !
 !
-!===============================================================================
+!==============================================================================
+subroutine create_hotfile_line(fname,inest,line,sr,wavedata)
+    use precision_basics
+    use wave_data
+    !
+    implicit none
+    !
+    ! Global variables
+    integer       , intent(in)  :: inest
+    character(*)                :: fname
+    character(256)            :: line
+    
+    type(swan_type)             :: sr
+    type(wave_data_type)        :: wavedata
+    
+    ! Local variables
+    character(15), external     :: datetime_to_string
+    
+    ! Default: put current time in writehottime
+    ! writehottime will be overwritten by tendc when quasi-/non-stationary
+    !
+    sr%writehottime = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)
+    !
+    ! hotstart:
+    ! hotfile= true: use hotfile
+    ! modsim = 2   : quasi-stationary
+    ! modsim = 3   : non-stationary
+    ! 
+    if (sr%modsim == 2) then 
+        ! quasi-stationary
+        sr%writehottime = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)
+    elseif (sr%modsim == 3) then
+        ! non-stationary 
+        sr%writehottime = datetime_to_string(wavedata%time%refdate, wavedata%time%calctimtscale* real(wavedata%time%tscale,hp))
+    else
+    endif
+    !
+    ! line to ensure that SWAN is going to produce a hotfile
+    !
+    write (fname,'(a,i0,5a)') 'hot_', inest, '_', trim(sr%writehottime(1:8)), '_', trim(sr%writehottime(10:15)), '.nc'
+    line = "SPEC 'COMPGRID' RELATIVE '" // trim(fname) // "' MDGRID"
+    
+    
+    
+    
+    
+end subroutine create_hotfile_line
+!
+!
+!==============================================================================
+subroutine create_hotstart_line(inest,fname,line,sr)
+    implicit none
+    
+      ! Global variables
+    integer       , intent(in)  :: inest
+    character(256)              :: line
+    character(*)                :: fname
+    
+    type(swan_type)             :: sr
+ 
+    ! Local variables
+    character(15), external     :: datetime_to_string
+    logical                     :: exists
+
+    line       = ' '
+    !
+  
+       ! define the name of the hotfile to be used
+       !
+       write (fname,'(a,i0,5a)') 'hot_', inest, '_', trim(sr%usehottime(1:8)), '_', trim(sr%usehottime(10:15)), '.nc'
+       !
+       ! use it when it exists
+       !
+       inquire (file = trim(fname), exist = exists)
+       if (exists) then
+           line  = "INITIAL HOTSTART '"  // trim(fname) //  "' NETCDF"
+          write(*,'(2a)') '  Using SWAN hotstart file: ',trim(fname)
+       else ! check if there exists at least 1 partioned hotfile
+          write (fname,'(a,i0,5a,i3.3,a)') 'hot_', inest, '_', trim(sr%usehottime(1:8)), '_', trim(sr%usehottime(10:15)), '-', 1, '.nc'
+          inquire (file = trim(fname), exist = exists)
+          if (exists) then
+             write (fname,'(a,i0,5a)') 'hot_', inest, '_', trim(sr%usehottime(1:8)), '_', trim(sr%usehottime(10:15)), '.nc' ! swan input needs filename without partition no
+             line  = 'INITIAL HOTSTART ''' // trim(fname) // ''''' NETCDF'
+             write(*,'(2a)') '  Using SWAN hotstart file: ',trim(fname)
+          else   
+             ! No hotfile, set usehottime to 0.0 to flag that it isn't used
+             sr%usehottime    = '00000000.000000'
+             line = ' $ '
+          endif
+       endif
+
+end subroutine create_hotstart_line
+!
+!
+!==============================================================================
 subroutine adjustinput(sr)
     use properties
     implicit none
@@ -4033,7 +4248,9 @@ subroutine adjustinput(sr)
     enddo
     !
 end subroutine adjustinput
-
+!
+!
+!==============================================================================
 !> pointname is pntfilnam without path, spaces and extension
 function get_pointname(pntfilnam) result (pointname)
    character(len=*), intent(in) :: pntfilnam  !< input filename

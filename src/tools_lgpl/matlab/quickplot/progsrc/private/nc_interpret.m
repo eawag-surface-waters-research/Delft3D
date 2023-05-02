@@ -8,7 +8,7 @@ function nc = nc_interpret(nc,NumPartitions,PartNr_StrOffset,nDigits,Part1)
 
 %----- LGPL --------------------------------------------------------------------
 %                                                                               
-%   Copyright (C) 2011-2022 Stichting Deltares.                                     
+%   Copyright (C) 2011-2023 Stichting Deltares.                                     
 %                                                                               
 %   This library is free software; you can redistribute it and/or                
 %   modify it under the terms of the GNU Lesser General Public                   
@@ -161,7 +161,11 @@ nvars = length(nc.Dataset);
 % variables listed by the coordinates attributes. At the same time, mark
 % all coordinate (dimension) variables.
 %
-dimNames = {nc.Dimension.Name};
+if isempty(nc.Dimension)
+    dimNames = {};
+else
+    dimNames = {nc.Dimension.Name};
+end
 varNames = {nc.Dataset.Name};
 %AuxCoordVars = {};
 for ivar = 1:nvars
@@ -1060,6 +1064,8 @@ for ivar = 1:nvars
                         yName = strrep(strrep(xName,'x','y'),'X','Y');
                     end
                 end
+            else
+                yName = '';
             end
             yName = strcmp(yName,Names);
             if sum(yName)==1

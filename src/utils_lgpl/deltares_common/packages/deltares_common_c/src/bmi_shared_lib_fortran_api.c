@@ -1,6 +1,6 @@
 //---- LGPL --------------------------------------------------------------------
 //
-// Copyright (C)  Stichting Deltares, 2011-2022.
+// Copyright (C)  Stichting Deltares, 2011-2023.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -59,6 +59,7 @@
 #  define BMI_GET_VAR_SHAPE     BMI_GET_VAR_SHAPE
 #  define BMI_SET_VAR           BMI_SET_VAR
 #  define BMI_GET_VAR           BMI_GET_VAR
+#  define BMI_GET_VAR_POINTER   BMI_GET_VAR_POINTER
 #  define STDCALL
 #elif defined(linux)
 #  include "config.h"
@@ -74,6 +75,7 @@
 #  define BMI_GET_VAR_SHAPE     FC_FUNC(bmi_get_var_shape,BMI_GET_VAR_SHAPE)
 #  define BMI_SET_VAR           FC_FUNC(bmi_set_var,BMI_SET_VAR)
 #  define BMI_GET_VAR           FC_FUNC(bmi_get_var,BMI_GET_VAR)
+#  define BMI_GET_VAR_POINTER   FC_FUNC(bmi_get_var_pointer,BMI_GET_VAR_POINTER)
 #  define STDCALL
 #endif
 
@@ -200,6 +202,18 @@ void STDCALL BMI_GET_VAR(int64_t * sharedDLLHandle,
    }
 
    free(c_var_name); c_var_name = NULL;
+}
+
+void STDCALL BMI_GET_VAR_POINTER(int64_t* sharedDLLHandle, char* var_name, void* xptr)
+{
+	typedef void* (STDCALL* MyProc)(char*, void*);
+	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "get_var");
+
+
+	if (proc != NULL)
+	{
+		(void*)(*proc)(var_name, xptr);
+	}
 }
 
 void STDCALL BMI_GET_VAR_SHAPE(int64_t * sharedDLLHandle,

@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
  subroutine flow_geominit(iphase)                          ! initialise flow geometry
  use m_netw
@@ -113,7 +113,7 @@
 
  double precision        :: xh, yh
 
- integer                 :: jaidomain, jaiglobal_s
+ integer                 :: jaidomain, jaiglobal_s, ierror
 
  double precision, external    :: cosphiu
  integer :: ndraw
@@ -812,6 +812,8 @@
     call load1D2DLinkFile(md_1d2dlinkfile)
  end if
 
+ call set_1d_indices_in_network()
+
  IF (ALLOCATED (prof1D) ) deallocate( prof1D)
  allocate  ( prof1D(3,lnx1D) , stat= ierr)
  call aerr ('prof1D(3,lnx1D)', ierr, 2*lnx1D)
@@ -880,6 +882,7 @@
        endif
        hdx = 0.5d0*dx(L)
        if (kcu(L) .ne. 3) then
+          ! TODO: UNST-6592: consider excluding ghost links here and do an mpi_allreduce sum later
           if (k1 > ndx2d) ba(k1) = ba(k1) + hdx*wu(L)     ! todo, on 1d2d nodes, choose appropriate wu1DUNI = min ( wu1DUNI, intersected 2D face)
           if (k2 > ndx2d) ba(k2) = ba(k2) + hdx*wu(L)
        endif
@@ -887,6 +890,11 @@
        wu(L)  = dbdistance ( xk(k3), yk(k3), xk(k4), yk(k4), jsferic, jasfer3D, dmiss)  ! set 2D link width
     endif
  enddo
+
+ if (jampi>0) then
+    ! WU of orphan 1D2D links must come from neighbouring partition.
+    call update_ghosts(ITYPE_U, 1, lnx, wu, ierror, ignore_orientation=.true.)
+ end if
 
  do L = lnxi+1,Lnx
     k1 = ln(1,L) ; k2 = ln(2,L)
@@ -992,7 +1000,9 @@
  enddo
 
  do n = 1,ndx
-    bai(n) = 1d0/ba(n)                               ! initially, ba based on 'max wet envelopes', take bai used in linktocentreweights
+    if (ba(n) > 0d0) then
+       bai(n) = 1d0/ba(n)                               ! initially, ba based on 'max wet envelopes', take bai used in linktocentreweights
+    end if
  enddo
 
  ! call message ('cutcell call 4',' ',' ')
@@ -1058,8 +1068,6 @@
  else
     jaupdbobbl1d = 0
  endif
-
- call set_1d_indices_in_network()
 
  if (jampi > 0) then
     ! MPI communication of nonLin, nonLin1D and nonLin2D

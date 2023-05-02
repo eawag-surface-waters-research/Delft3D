@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -139,7 +139,6 @@
       push    = .false.
       npos    = 200
       iposr   =   0
-      close ( lun1 )
       open  ( newunit=ilun(i), file=lch(i), iostat=ios) ! File might already be open
       if (ios.ne.0 .and. ios.ne.5004) then
          write ( lun2, * ) ' Error opening PART input file'
@@ -1876,7 +1875,7 @@
 
 !     close input file
 
-      close ( lun1 )
+      close ( ilun(i) )
 
 !     check on the total number of particles:
 

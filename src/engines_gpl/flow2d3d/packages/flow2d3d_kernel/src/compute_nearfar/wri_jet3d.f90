@@ -2,7 +2,7 @@ subroutine wri_jet3d(u1    ,v1    ,rho    ,thick ,kmax      ,dps   ,&
                    & s1    ,alfas ,flwang ,sign  ,idensform ,gdp   )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -26,8 +26,8 @@ subroutine wri_jet3d(u1    ,v1    ,rho    ,thick ,kmax      ,dps   ,&
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes input for jet3d

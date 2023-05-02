@@ -51,10 +51,8 @@
 		<File RelativePath=".\src\read_roughness.f90"/>
 		<File RelativePath=".\src\read_table.f90"/>
 		<File RelativePath=".\src\readCrossSections.f90"/>
-		<File RelativePath=".\src\readModelParameters.f90"/>
 		<File RelativePath=".\src\readObservationPoints.f90"/>
 		<File RelativePath=".\src\readObservCrossSections.f90"/>
-		<File RelativePath=".\src\readSalinityParameters.f90"/>
 		<File RelativePath=".\src\readspatialdata.f90"/>
 		<File RelativePath=".\src\readStorageNodes.f90"/>
 		<File RelativePath=".\src\Readstructures.f90"/></Filter></Files>

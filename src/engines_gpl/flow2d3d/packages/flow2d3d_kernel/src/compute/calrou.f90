@@ -3,7 +3,7 @@ subroutine calrou(kn_sum    ,fracto    ,fracbu      ,depth     ,ch_lin_ser, &
                 & ch_sum_ser,ch_pnt_ser,alf_area_ser)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -27,8 +27,8 @@ subroutine calrou(kn_sum    ,fracto    ,fracbu      ,depth     ,ch_lin_ser, &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Finalize rougness calculation.

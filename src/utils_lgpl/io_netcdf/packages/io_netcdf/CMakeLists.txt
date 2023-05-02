@@ -1,7 +1,7 @@
 # Set version file variables
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
-set(ini_version_file ${CMAKE_CURRENT_SOURCE_DIR}/include/version_number.ini)
 set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/io_netcdf_version.F90)
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
 
 if(UNIX)
     # the `pkg_check_modules` function is created with this call
@@ -13,8 +13,6 @@ if(UNIX)
 
 endif(UNIX)
 
-# Generate the F90 version file
-generate_version_files(${fortran_version_file} ${ini_version_file})
             
 set(src_path src)
 get_fortran_source_files(${src_path} sources)
@@ -29,6 +27,7 @@ add_library(${library_name} ${sources} ${fortran_version_file})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources} ${fortran_version_file})
 set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/io_netcdf)
 
+target_include_directories(${library_name}  PRIVATE ${version_include_dir})
 
 if(UNIX)
     # Add dependency
@@ -62,12 +61,9 @@ if (WIN32)
 endif(WIN32)
 
 # Set additional compilation properties, specific for Debug mode
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointers_flag}>")
+target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exception_flag}>")
 
-# Prebuild events
-prebuild_version_number(${library_name} ${fortran_version_file} 
-                                        ${checkout_src_root} 
-                                        ${ini_version_file})
 
 # Set additional compilation properties
 set_source_files_properties(${fortran_version_file}
@@ -81,6 +77,7 @@ set_source_files_properties(${fortran_version_file}
 ###############
 string(TOUPPER ${CONFIGURATION_TYPE} configuration_type)
 if ( ${configuration_type} STREQUAL "DFLOWFM" OR 
+     ${configuration_type} STREQUAL "DELFT3D4" OR 
      ${configuration_type} STREQUAL "ALL" OR 
      ${configuration_type} STREQUAL "TOOLS" )
     set(library_name io_netcdf_dll)
@@ -93,7 +90,8 @@ if ( ${configuration_type} STREQUAL "DFLOWFM" OR
     target_link_libraries(${library_name} ${oss_dependencies})
 
     # Set additional compilation properties, specific for Debug mode
-    target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_bounds_flag}>")
+    target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${check_pointers_flag}>")
+    target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${floating_point_exception_flag}>")
 
     # Create the folder structure in vfproj
     source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${src_path}/io_netcdf_api.F90)

@@ -18,7 +18,7 @@ function outfile = sim2ugrid(filename,ntimesReq)
 
 %----- LGPL --------------------------------------------------------------------
 %
-%   Copyright (C) 2011-2022 Stichting Deltares.
+%   Copyright (C) 2011-2023 Stichting Deltares.
 %
 %   This library is free software; you can redistribute it and/or
 %   modify it under the terms of the GNU Lesser General Public
@@ -50,6 +50,8 @@ if isstandalone
     fprintf(1, '--------------------------------------------------------------------------------\n');
     fprintf(1, 'SIM2UGRID conversion tool.\n');
     fprintf(1, 'Version <VERSION> (<CREATIONDATE>)\n');
+    fprintf(1, 'Repository <GITREPO>\n');
+    fprintf(1, 'Source hash <GITHASH>\n');
     fprintf(1, '--------------------------------------------------------------------------------\n');
 end
 

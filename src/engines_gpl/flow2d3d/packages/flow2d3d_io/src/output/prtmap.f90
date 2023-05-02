@@ -8,7 +8,7 @@ subroutine prtmap(lundia    ,error     ,prsmap    ,lunprt    ,nuprpg    , &
                 & rbuff0    ,rbuff1    ,velt      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -32,8 +32,8 @@ subroutine prtmap(lundia    ,error     ,prsmap    ,lunprt    ,nuprpg    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Print the time varying map data

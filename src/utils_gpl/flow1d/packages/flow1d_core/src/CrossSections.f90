@@ -2,7 +2,7 @@
 module m_CrossSections
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify              
 !  it under the terms of the GNU Affero General Public License as               
@@ -26,8 +26,8 @@ module m_CrossSections
 !  Stichting Deltares. All rights reserved.
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !-------------------------------------------------------------------------------
 
    use MessageHandling
@@ -106,7 +106,6 @@ module m_CrossSections
    !> Realloc memory cross-section definition or cross-sections
    interface realloc
       module procedure reallocCSDefinitions
-      module procedure reallocCSDefinitionsSize
       module procedure reallocCrossSections
    end interface
 
@@ -352,22 +351,6 @@ subroutine deallocCSDefinitions(CSdef)
    endif
    call dealloc(CSDef%hashlist)
 end subroutine deallocCSDefinitions
-
-
-
-!> Increase the memory used by a cross-section definition
-subroutine reallocCSDefinitionsSize(CSDef,growsBy)
-   implicit none
-   type(t_CSDefinitionSet), intent(inout)    :: CSdef    !< Current cross-section definition
-   integer                , intent(in)       :: growsBy  !< Increment for extending array size
-   integer                   :: old_growsBy
-   old_growsBy = CSdef%growsBy
-   CSdef%growsBy = growsBy
-   call reallocCSDefinitions(CSDef)
-   CSdef%growsBy = old_growsBy
-   return
-end subroutine 
-
 
 !> Increase the memory used by a cross-section definition
 subroutine reallocCSDefinitions(CSDef)
@@ -877,47 +860,6 @@ subroutine SetParsCross(CrossDef, cross)
       
    endif                        
 end subroutine SetParsCross
-   
-!> Set the groundlayer data
-subroutine setGroundLayerData(crossDef, thickness)
-
-   type(t_CStype), pointer, intent(inout) :: crossDef
-   double precision       , intent(in   ) :: thickness
-      
-   double precision                    :: area 
-   double precision                    :: perimeter
-   double precision                    :: width
-   double precision                    :: maxwidth
-   double precision                    :: af_sub(3), perim_sub(3)
-   
-   if (Thickness <= 0.0d0) then
-      crossDef%groundlayer%used      = .false.
-      crossDef%groundlayer%thickness = 0.0d0
-      crossDef%groundlayer%area      = 0.0d0
-      crossDef%groundlayer%perimeter = 0.0d0
-      crossDef%groundlayer%width     = 0.0d0
-      return
-   endif
-   
-   select case(crossDef%crossType)
-      case (CS_TABULATED)
-         call GetTabSizesFromTables(thickness, crossDef, .true., area, width, perimeter, af_sub, perim_sub, CS_TYPE_NORMAL)
-      case (CS_CIRCLE)
-         call CircleProfile(thickness, crossDef%diameter, area, width, maxwidth, perimeter, CS_TYPE_NORMAL)
-      case (CS_EGG)
-         call EggProfile(thickness, crossDef%diameter, area, width, perimeter, CS_TYPE_NORMAL)
-      case default
-         call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
-   end select
-      
-   crossDef%groundlayer%used      = .true.
-   crossDef%groundlayer%thickness = thickness
-   crossDef%groundlayer%area      = area
-   crossDef%groundlayer%perimeter = perimeter
-   crossDef%groundlayer%width     = width
-
-end subroutine setGroundLayerData
-   
 
 !> Add a cross-section on a reach, using a cross section defined on another reach
 integer function AddCrossSectionByCross(crs, cross, branchid, chainage)
@@ -1015,88 +957,84 @@ end subroutine interpolateWidths
 subroutine useBranchOrdersCrs(crs, brs)
    ! modules
    use messageHandling
-
+   use sorting_algorithms, only: dpquicksort
    implicit none
    ! variables
    type(t_CrossSectionSet), intent(inout)          :: crs       !< Current cross-section set
    type(t_branchSet)      , intent(in   )          :: brs       !< Set of reaches
 
    ! local variables
-   integer  ibr, orderNumberCount
-   integer  i
-   integer  iorder
-   integer  ics
+   integer  ibr, i
+   integer  ics, iorder, minOrderNumber, OrderNumberCount, currentOrder
    integer  crsCount
-   integer  minindex
-   integer  minOrdernumber
-   integer  minBranchindex
-   double precision  minoffset
-   integer, allocatable, dimension(:,:)   :: orderNumber       !< first index contains orderNumber, second contains start position for this ordernumber
-   type(t_CrossSection)                   :: cross
+   integer, allocatable, dimension(:,:)         :: orderNumber       !< first index contains orderNumber, second contains start position for this ordernumber
+   double precision, allocatable, dimension(:)  :: crsData
+   integer, allocatable, dimension(:)           :: crsIndices
+   type(t_CrossSection)                         :: cross
+   type(t_CrossSectionSet)                      :: tempset
+   integer                                      :: maxBranchId, maxBranchOrder
+   double precision                             :: maxChainage
+   double precision                             :: F1, F2 !< sorting multiplication factors
 
-   !program code
-   allocate(crs%crossSectionIndex(crs%count), orderNumber(crs%Count+2,2))
-
-   ! order cross sections, first on order number, then on branch index, last on offset
-   orderNumberCount = 1
+   crsCount = crs%count
+   tempset%size = crsCount
+   tempset%count = crsCount
+   
+   maxBranchId    = max(1,maxval(crs%cross(:)%branchId))
+   maxBranchOrder = max(1,maxval(brs%branch(:)%ordernumber))
+   maxChainage    = maxval(crs%cross(:)%chainage)
+   
+   ! Multiplication factors for sorting 
+   F2 = maxChainage+1
+   F1 = (maxBranchId+1)*F2
+   
+   allocate(crsData(crsCount),crs%crossSectionIndex(crscount),crsIndices(crsCount),tempset%cross(crsCount),orderNumber(maxBranchOrder+2,2))
+   ! We want to sort the array on branchid, followed by order number and finally by chainage.
+   ! To this end we multiply branch id by F1 and branch order by F2 to be able to sort them all at once.
+   ! see: UNST-3680
+   do ics = 1, crsCount
+      crsIndices(ics) = ics
+      ibr = crs%cross(ics)%branchid
+      if (ibr <= 0) then ! crs without branch first
+         crsData(ics) = crs%cross(ics)%chainage
+      else if (getOrderNumber(brs, ibr) <= 0) then
+         crsData(ics) = crs%cross(ics)%branchid*F2 + crs%cross(ics)%chainage
+      else   
+         crsData(ics) = getOrderNumber(brs, ibr)*F1 + crs%cross(ics)%branchid*F2 + crs%cross(ics)%chainage
+      endif
+   enddo
+   
+   call dpquicksort(crsData,crsIndices)
+   
+   do ics = 1, crsCount !copy data to temp array
+      tempset%cross(ics) = crs%cross(crsIndices(ics))
+      crs%crossSectionIndex(crsIndices(ics)) = ics 
+   enddo
+   crs%cross(:) = tempset%cross(:) !copy temp array to real array
+   
+   !check for multiple crossSections on a branch and fill OrderNumber array
+   minordernumber = -1
+   ordernumbercount = 1
    orderNumber(1,1) = -1
    orderNumber(1,2) = 1
-   crsCount = crs%count
-   crs%crossSectionIndex = -1
    do ics = 1, crsCount
-      minindex = ics
-      if (crs%cross(ics)%branchid <= 0 ) then
-         crs%crossSectionIndex(ics) = ics
-      else
-         ibr = crs%cross(ics)%branchid
-         minordernumber = getOrderNumber(brs, ibr)
-         minBranchindex = ibr
-         minoffset = crs%cross(ics)%chainage
-         do i = ics, crsCount
-            if (crs%cross(i)%branchid <= 0) then
-               minindex = i
-               crs%crossSectionIndex(i) = ics
-               minOrderNumber = -1
-               exit
-            else
-               ibr = crs%cross(i)%branchid
-               if (minOrderNumber > getOrdernumber(brs, ibr)) then
-                  minOrderNumber =  getOrdernumber(brs, ibr)
-                  minBranchindex = ibr
-                  minOffset = crs%cross(i)%chainage
-                  minIndex = i
-               elseif (minOrderNumber == getOrdernumber(brs, ibr))then
-                  if (minBranchIndex > ibr) then
-                     minBranchindex = ibr
-                     minOffset = crs%cross(i)%chainage
-                     minIndex = i
-                  elseif (minBranchIndex == ibr) then
-                     if (minoffset > crs%cross(i)%chainage) then
-                        minOffset = crs%cross(i)%chainage
-                        minIndex = i
-                     endif
-                  endif
-               endif
-            endif
-         enddo
-      endif
       cross = crs%cross(ics)
-      crs%cross(ics) = crs%cross(minindex)
-      crs%cross(minindex) = cross
-      ! Check for multiple cross sections at one location.
       if (ics > 1) then
          if ( crs%cross(ics)%branchid > 0 .and. (crs%cross(ics-1)%branchid == crs%cross(ics)%branchid) .and. (crs%cross(ics-1)%chainage == crs%cross(ics)%chainage) ) then
             msgbuf = 'Cross section ''' // trim(crs%cross(ics-1)%csid) // ''' and ''' // trim(crs%cross(ics)%csid) // ''' are exactly at the same location.'
             call err_flush()
          endif
       endif
-      
+      if (crs%cross(ics)%branchid > 0) then
+      minOrderNumber = max(minOrderNumber,getOrderNumber(brs, crs%cross(ics)%branchid))
+      endif
       if (orderNumber(orderNumberCount,1) /= minOrderNumber) then
          orderNumberCount = orderNumberCount + 1
          orderNumber(orderNumberCount, 1) = minOrderNumber
          orderNumber(orderNumberCount, 2) = ics
       endif
    enddo
+
    orderNumber(orderNumberCount+1,1) = -999
    orderNumber(orderNumberCount+1,2) = crsCount+1
    ! Now check all cross sections on branches of the same order (-1 orders can be skipped)
@@ -1128,8 +1066,7 @@ subroutine useBranchOrdersCrs(crs, brs)
          ics = ics +1
       enddo
    enddo
-
-   deallocate(orderNumber)
+   deallocate(orderNumber, crsData, crsIndices)
 
 end subroutine useBranchOrdersCrs
 
@@ -1267,7 +1204,6 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimet
 
    double precision                      :: af_sub_local1(3), af_sub_local2(3)      
    double precision                      :: perim_sub_local1(3), perim_sub_local2(3)
-   integer, save                         :: ihandle = 0
 
    if (line2cross%c1 <= 0) then
       ! no cross section defined on branch, use default definition
@@ -1374,7 +1310,6 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
    double precision                  :: af_sub_local(3)      
    double precision                  :: perim_sub_local(3)      
    logical                           :: hysteresis =.true.   ! hysteresis is a dummy variable at this location, since this variable is only used for total areas
-   integer, save                     :: ihandle = 0
    perim_sub_local = 0d0
    if (dpt < 0.0d0) then
       flowArea     = 0.0
@@ -1437,9 +1372,6 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
       maxFlowWidth = maxFlowWidth1
    endif
 
-   !call system_clock(countstop)
-   !wccount(1)   = wccount(1) + countstop-countstart ! GetCSParsFlowCross
-   !callcount(1) = callcount(1) + 1
 end subroutine GetCSParsFlowCross
 
 !> Get total area and total width for given location and water depth
@@ -1468,7 +1400,6 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
    type (t_CrossSection), save           :: crossi         !< intermediate virtual crosssection     
    type (t_CrossSection), pointer        :: cross1         !< cross section
    type (t_CrossSection), pointer        :: cross2         !< cross section
-   integer, save                         :: ihandle   = 0
 
    if (line2cross%c1 <= 0) then
       ! no cross section defined on branch, use default definition
@@ -1546,7 +1477,6 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
    double precision                  :: wlev            !< water level at cross section
    logical                           :: getSummerDikes
    double precision                  :: af_sub(3), perim_sub(3)
-   integer, save                     :: ihandle = 0
 
    if (dpt < 0.0d0) then
       totalArea = 0.0d0
@@ -1592,9 +1522,6 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
          call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
    end select
  
-   !call system_clock(countstop)
-   !wccount(2)   = wccount(2) + countstop-countstart ! GetCSParsTotalCross
-   !callcount(2) = callcount(2) + 1
 end subroutine GetCSParsTotalCross
 
 !> Get area, width and perimeter for a tabulated profile
@@ -2673,7 +2600,7 @@ else if (i012 == 0) then                                ! look at u points, mom.
          endif
          !
          if (convtab%conveyType==CS_LUMPED) then
-            cz = getchezy(frictionType, frictionValue, area/perimeter, dpt, 0d0)
+            cz = getchezy(frictionType, frictionValue, area/perimeter, dpt, 1d0)
             conv = (cz)*area*sqrt(area/perimeter)
          elseif (convtab%conveyType==CS_VERT_SEGM) then
             conv  = a1*c1 + a2*c2
@@ -3531,6 +3458,8 @@ subroutine createTablesForTabulatedProfile(crossDef)
 
     !> retrieve the interpolated summerdike  data
     subroutine getSummerDikeData(line2cross, cross, crestLevel, baseLevel)
+       use m_missing
+       
        type(t_chainage2cross),intent(in)         :: line2cross     !< cross section indirection
        type(t_CrossSection), target, intent(in)  :: cross(:)       !< array containing cross section information
        double precision,      intent(  out)      :: crestLevel     !< Crest level of the summerdike at the given location
@@ -3554,9 +3483,10 @@ subroutine createTablesForTabulatedProfile(crossDef)
          crestLevel = cross2%tabDef%summerdike%crestLevel + cross2%shift
          baseLevel  = cross2%tabDef%summerdike%baseLevel  + cross2%shift
        else
-         crestLevel = missingvalue
-         baseLevel  = missingvalue
+         crestLevel = dmiss
+         baseLevel  = dmiss
        endif
 
-    end subroutine getSummerDikeData
+   end subroutine getSummerDikeData
+   
 end module m_CrossSections

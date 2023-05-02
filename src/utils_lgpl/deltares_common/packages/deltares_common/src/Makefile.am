@@ -22,14 +22,14 @@ noinst_LTLIBRARIES = libDeltaresCommon.la
 #-------------------------------------------------------------------------------
 #Sources
 libDeltaresCommon_la_SOURCES = \
-	iso_c_utils.F90 \
-	precision_basics.F90 \
-	precision.F90 \
-	precision_sp.F90 \
+	iso_c_utils.f90 \
+	precision_basics.f90 \
+	precision.f90 \
+	precision_sp.f90 \
 	mathconsts.f90 \
 	physicalconsts.f90 \
 	cwd.f90 \
-	MessageHandling.f90 \
+	MessageHandling.F90 \
 	malloc.f90 \
 	geometry_module.f90 \
 	grid_dimens_module.f90 \

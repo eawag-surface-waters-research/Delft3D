@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2022.
+!  Copyright (C)  Stichting Deltares, 2017-2023.
 !
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
@@ -27,8 +27,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 module wrwaq
 
 !include preprocessing flags from autotools
@@ -437,7 +437,7 @@ subroutine waq_wri_hyd()
    use m_flowexternalforcings
    use m_flowgeom
    use unstruc_model
-   use time_module
+   use time_module, only: ymd2jul
 
    implicit none
    !

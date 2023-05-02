@@ -32,7 +32,6 @@ FMODULES += \
 #Sources
 libKernelGeneral_la_SOURCES = \
          angle.f90 \
-         area4.f90 \
          chckit.f90 \
          checkmeteoresult.f90 \
          copykcuv.f90 \

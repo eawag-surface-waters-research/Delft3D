@@ -1,5 +1,3 @@
-project(dwaq)
-
 #
 # WAQ
 #=============
@@ -51,6 +49,10 @@ if(NOT TARGET waq_delftio)
     add_subdirectory(${checkout_src_root}/${waq_delftio_module} waq_delftio)
 endif()
 
+if(NOT TARGET wq_processes)
+    add_subdirectory(${checkout_src_root}/${wq_processes_module} wq_processes)
+endif()
+
 #
 # WAQ Tools
 #=============
@@ -64,14 +66,8 @@ endif()
 if(NOT TARGET waqpb_lib)
     add_subdirectory(${checkout_src_root}/${waqpb_lib_module} waqpb_lib)
 endif()
-if(NOT TARGET waqmerge_version_number)
-    add_subdirectory(${checkout_src_root}/${waqmerge_version_number_module} waqmerge_version_number)
-endif()
 if(NOT TARGET waqmerge)
     add_subdirectory(${checkout_src_root}/${waqmerge_module} waqmerge)
-endif()
-if(NOT TARGET ddcouple_version_number)
-    add_subdirectory(${checkout_src_root}/${ddcouple_version_number_module} ddcouple_version_number)
 endif()
 if(NOT TARGET ddcouple)
     add_subdirectory(${checkout_src_root}/${ddcouple_module} ddcouple)
@@ -194,3 +190,6 @@ endif()
 if(UNIX)
     add_subdirectory(${checkout_src_root}/${install_waq_module} install_waq)
 endif()
+
+# Project name must be at the end of the configuration: it might get a name when including other configurations and needs to overwrite that
+project(dwaq)

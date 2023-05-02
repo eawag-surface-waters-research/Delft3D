@@ -6,7 +6,7 @@ subroutine inivol(j         ,nmmaxj    ,nmmax     ,kmax      ,zmodel    , &
                 & volum1    ,porosu    ,porosv    ,areau     ,areav     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -30,8 +30,8 @@ subroutine inivol(j         ,nmmaxj    ,nmmax     ,kmax      ,zmodel    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes volumes and areas from depth values at water level

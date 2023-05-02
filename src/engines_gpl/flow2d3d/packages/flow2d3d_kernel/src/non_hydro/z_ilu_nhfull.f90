@@ -4,7 +4,7 @@ subroutine z_ilu_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      , 
                       & dinv      ,kfs       ,gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -28,8 +28,8 @@ subroutine z_ilu_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      , 
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Computes ILU decomposition and stores it in dinv

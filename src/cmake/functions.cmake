@@ -163,7 +163,7 @@ endfunction()
 # build_project       : The name of the project
 function(post_build_target target_name install_dir build_dir checkout_src_root build_project)
 
-   if (WIN32)
+   if (CMAKE_GENERATOR MATCHES "Visual Studio")
    
     # compiler_redist_dir : Compiler dlls (Windows only)
     # mkl_redist_dir      : mkl dlls (Windows only)
@@ -191,22 +191,7 @@ function(post_build_target target_name install_dir build_dir checkout_src_root b
                          ${compiler_redist_dir}
                          ${mkl_redist_dir}
                          ${mpi_redist_dir}) 
-   endif(WIN32)
-
-   if(UNIX)
-   
-#    set(build_config ${CMAKE_BUILD_TYPE}) 
-
-#    add_custom_command(TARGET ${target_name}
-#                       POST_BUILD
-#                       COMMAND /bin/bash "${checkout_src_root}/scripts_lgpl/linux/oss-post_build.sh"  
-#                       ${install_dir} 
-#                       ${build_dir} 
-#                       ${checkout_src_root} 
-#                       ${build_config}
-#                       ${build_project} )
-
-   endif(UNIX)
+   endif(CMAKE_GENERATOR MATCHES "Visual Studio")
    
 endfunction()
 

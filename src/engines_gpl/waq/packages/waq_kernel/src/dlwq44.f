@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -22,7 +22,7 @@
 !!  rights reserved.
 
       subroutine dlwq44 ( nosys  , notot  , noseg  , volume , amass  ,
-     &                    conc   , deriv  , owners , mypart )
+     &                    conc   , deriv   )
 
 !     Deltares Software Centre
 
@@ -52,8 +52,6 @@
       real      (4), intent(inout) :: amass (notot ,noseg)    !< masses per substance per volume
       real      (4), intent(inout) :: conc  (notot ,noseg)    !< concentrations per substance per volume
       real      (4), intent(inout) :: deriv (notot ,noseg)    !< derivatives per substance per volume
-      integer   (4), intent(in   ) :: owners(noseg )          !< ownership array for segments
-      integer   (4), intent(in   ) :: mypart                  !< number of the current subdomain
 
 !     local variables
 
@@ -67,7 +65,6 @@
 !         loop accross the number of computational elements
 
       do iseg = 1, noseg
-         if ( owners(iseg) .eq. mypart ) then
             vol = 1.0
             if ( abs(volume(iseg)) .gt. 1.0e-25 ) vol = volume(iseg)
             do isys = 1, nosys
@@ -75,7 +72,6 @@
                amass(isys,iseg) = conc(isys,iseg)*vol
                deriv(isys,iseg) = 0.0
             enddo
-         endif
       enddo
 
       if ( timon ) call timstop ( ithandl )

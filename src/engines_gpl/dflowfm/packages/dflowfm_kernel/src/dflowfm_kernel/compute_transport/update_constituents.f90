@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,12 +27,12 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2022.
+!  Copyright (C)  Stichting Deltares, 2017-2023.
 !
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
@@ -58,8 +58,8 @@
 !  Deltares, and remain the property of Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-! $Id$
-! $HeadURL$
+! 
+! 
 !> This subroutine transports an array of scalars.
 !> In light of future vectorization, the aim is to:
 !>   -use as few module variables as possible,
@@ -142,9 +142,12 @@ subroutine update_constituents(jarhoonly)
 
    fluxhor    = 0d0  ! not necessary
    sumhorflux = 0d0
-   fluxhortot = 0d0
-   sinksetot  = 0d0
-   sinkftot   = 0d0
+  
+   if (stm_included) then
+      fluxhortot = 0d0
+      sinksetot  = 0d0
+      sinkftot   = 0d0
+   endif
 
    do istep=0,nsubsteps-1
       if ( kmx.gt.0 ) then
@@ -203,9 +206,6 @@ subroutine update_constituents(jarhoonly)
 
       if ( kmx.lt.1 ) then   ! 2D, call to 3D as well for now
          call solve_2D(NUMCONST, Ndkx, Lnkx, vol1, kbot, ktop, Lbot, Ltop, sumhorflux, fluxver, const_sour, const_sink, nsubsteps, jaupdate, ndeltasteps, constituents, rhs)
-         if (jalimitdiff == 3) then
-            call diffusionimplicit2D()
-         endif
       else
          call comp_fluxver( NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, ktop, constituents, nsubsteps, jaupdate, ndeltasteps, fluxver, wsf)
 
@@ -232,6 +232,9 @@ subroutine update_constituents(jarhoonly)
       call comp_sinktot()
 
    end do
+   if (jalimitdiff == 3 .and. kmx == 0) then
+      call diffusionimplicit2D()
+   endif
 
    if( jased == 4 .and. stmpar%lsedsus > 0 ) then
       do j = ISED1,ISEDN

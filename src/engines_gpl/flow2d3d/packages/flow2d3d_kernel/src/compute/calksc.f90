@@ -5,7 +5,7 @@ subroutine calksc(nmmax     ,dps       ,s1        ,lsedtot   , &
                 & deltau    ,deltav    ,icx       ,icy       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -29,8 +29,8 @@ subroutine calksc(nmmax     ,dps       ,s1        ,lsedtot   , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Calculate ripple height, mega ripple height and dune height Van Rijn (2004)
@@ -127,6 +127,7 @@ subroutine calksc(nmmax     ,dps       ,s1        ,lsedtot   , &
     real(fp) :: fch2
     real(fp) :: fcoarse
     real(fp) :: hs
+    real(fp) :: llabda  ! local limited rlabda value
     real(fp) :: par1    ! scale factor ripples
     real(fp) :: par2    ! scale factor mega-ripples
     real(fp) :: par3    ! scale factor dunes
@@ -261,8 +262,9 @@ subroutine calksc(nmmax     ,dps       ,s1        ,lsedtot   , &
                      & / log(1.0_fp + (1.0_fp + sig(kmaxx))*depth/z0rou)
              endif
              if (wave) then
+                llabda = max(rlabda(nm), 0.1_fp)
                 hs     = hrms(nm) * sqrt(2.0_fp)
-                arg = 2.0_fp * pi * depth / max(rlabda(nm),1.0e-12_fp)
+                arg = 2.0_fp * pi * depth / llabda
                 if (arg > 50.0_fp) then
                    uw = 0.0_fp
                 else
@@ -274,7 +276,7 @@ subroutine calksc(nmmax     ,dps       ,s1        ,lsedtot   , &
                 u1    = umax / (ag*depth)**0.5_fp
                 a11   = -0.0049_fp*t1**2 - 0.069_fp*t1 + 0.2911_fp
                 raih  = max(0.5_fp  , -5.25_fp - 6.1_fp*tanh(a11*u1-1.76_fp))
-                rmax  = max(0.62_fp , min(0.75_fp , -2.5_fp*depth/rlabda(nm)+0.85_fp))
+                rmax  = max(0.62_fp , min(-2.5_fp*depth/llabda+0.85_fp, 0.75_fp))
                 uon   = umax * (0.5_fp+(rmax-0.5_fp)*tanh((raih-0.5_fp)/(rmax-0.5_fp)))
                 uoff  = umax - uon
                 uon   = max(1.0e-5_fp , uon)

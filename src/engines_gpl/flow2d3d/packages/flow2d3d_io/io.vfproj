@@ -75,6 +75,7 @@
 		<File RelativePath="src\input\grdfil.f90"/>
 		<File RelativePath="src\input\hybfil.f90"/>
 		<File RelativePath="src\input\icfil.f90"/>
+		<File RelativePath="src\input\area4.f90"/>
 		<File RelativePath="src\input\inicut.f90"/>
 		<File RelativePath="src\input\inimet.f90"/>
 		<File RelativePath="src\input\inimorlyr.f90"/>

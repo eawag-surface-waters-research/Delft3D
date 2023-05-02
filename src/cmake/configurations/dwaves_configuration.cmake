@@ -1,5 +1,3 @@
-project(dwaves)
-
 # Wave modules
 # ============
 add_subdirectory(${checkout_src_root}/${wave_data_module} wave_data)
@@ -67,6 +65,11 @@ endif()
 # Third party
 # ===========
 
+# fortrangis
+if(NOT TARGET fortrangis)
+    add_subdirectory(${checkout_src_root}/${fortrangis_module} fortrangis)
+endif()
+
 # triangle
 if(NOT TARGET triangle_c)
     add_subdirectory(${checkout_src_root}/${triangle_c_module} triangle_c)
@@ -88,6 +91,10 @@ if(NOT TARGET kdtree_wrapper)
     add_subdirectory(${checkout_src_root}/${kdtree_wrapper_module} kdtree_wrapper)
 endif()
 
+if(NOT TARGET shp)
+    add_subdirectory(${checkout_src_root}/${shp_module} shp)
+endif()
+
 # Swan
 if(NOT TARGET swan)
     add_subdirectory(${checkout_src_root}/${swan_mpi_lib_module} swan_mpi_lib)
@@ -101,3 +108,6 @@ if(UNIX)
     # install
     add_subdirectory(${checkout_src_root}/${install_wave_module} install_wave)
 endif()
+
+# Project name must be at the end of the configuration: it might get a name when including other configurations and needs to overwrite that
+project(dwaves)

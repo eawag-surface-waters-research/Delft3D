@@ -8,10 +8,10 @@
      &                      ilaggr , nd     , nlb    , nub    , mlb    , &
      &                      mub    , kfsmin , ksrwaq , noseg  , noq1   , &
      &                      noq2   , noq3   , xz     , yz     , zbot   , &
-     &                      ztop )
+     &                      ztop, gdp)
 !----- GPL ---------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2011-2022.
+!  Copyright (C)  Stichting Deltares, 2011-2023.
 !
 !  This program is free software: you can redistribute it and/or modify
 !  it under the terms of the GNU General Public License as published by
@@ -35,8 +35,8 @@
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--pseudo code and references--------------------------------------------------
@@ -44,7 +44,12 @@
 !!--declarations----------------------------------------------------------------
       use precision
       use time_module
+      use flow2d3d_version_module
+      use globaldata
+            
       implicit none
+!      
+      type(globdat),target :: gdp
 !
 !           Global variables
 !
@@ -100,13 +105,15 @@
       integer       n, m, nl           !! grid indices
       real     ( 4) anl                !! for waq layers
       integer  ( 4) kfmin, kfmax       !! help variables z-model
-      character(256) version_full      !! Delft3D FLOW version information
+      character(256) full_version      !! Delft3D FLOW version information
       character(20)  rundat            !! Current date and time containing a combination of DATE and TIME
       character(21)  datetime          !! Date/time to be filled in the header
       character(256) filstring, file1, file2
       character(6) sf                  !! character variable for s(ediment)f(iles)
       integer(4)    lunout1 !! write hyd file for structured grid needed for delpar
       integer(4)    lunout2 !! write hyd-file for DeltaShell (unstructured format)
+      integer(4)    nm_sink !! NM lcoation of the sink (sink-sources)
+      integer(4)    nm_source !! NM lcoation of the sourc (sin-sources)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -115,10 +122,10 @@
       file2 = trim(filnam)//'_unstructured.hyd'
       open  ( newunit = lunout2 , file=trim(file2) )
 
-      version_full  = ' '
-      call getfullversionstring_flow2d3d(version_full)
-      write(lunout1,'(a,a)') 'file-created-by  '//trim(version_full)
-      write(lunout2,'(a,a)') 'file-created-by  '//trim(version_full)
+      full_version  = ' '
+      call getfullversionstring_flow2d3d(full_version)
+      write(lunout1,'(a,a)') 'file-created-by  '//trim(full_version)
+      write(lunout2,'(a,a)') 'file-created-by  '//trim(full_version)
 
       call dattim(rundat)
       datetime = rundat(1:4)//'-'//rundat(6:7)//'-'//rundat(9:10)//','//rundat(11:19)
@@ -375,7 +382,7 @@
       write ( lunout1 , '(a      )' ) 'end-water-quality-layers'
       write ( lunout2 , '(a      )' ) 'end-water-quality-layers'
       write ( lunout1 , '(a      )' ) 'discharges'
-      write ( lunout2 , '(a      )' ) 'discharges'
+      write ( lunout2 , '(a      )' ) 'sink-sources'
       nowalk = 0
       il     = 1
       do i = 1,nsrc
@@ -405,27 +412,34 @@
             filstring = trim(filstring)//' '//trim(namsrc(i))//''''//' culvert-inlet'
             il = il + 1
          endif
+         call n_and_m_to_nm(mnksrc(2,i), mnksrc(1,i), nm_sink, gdp)
+         call n_and_m_to_nm(mnksrc(5,i), mnksrc(4,i), nm_source, gdp)
          if ( zmodel ) then
             kfmin     = kfsmin(n,m)
             ksrwaq(i) = ilaggr(kmax-kfmin+1)     ! store value with source index
             if ( mnksrc(3,i) .eq. 0 ) then ! uniform source over depth
                do ilay = 1, ksrwaq(i)
                   write ( lunout1 , '(3(i0,3x),a)' ) n, m, ilay, trim(filstring)
-                  write ( lunout2 , '(2es15.7,1x,i0,1x,a)' ) xz(n,m), yz(n,m), ilay, trim(filstring)
+                  write ( lunout2 , '(3(i0,3x),4es15.7,1x,i0,1x,a)' ) i, nm_sink, nm_source, &
+                          xz(mnksrc(2,i), mnksrc(1,i)), yz(mnksrc(2,1), mnksrc(1,i)), &
+                          xz(mnksrc(5,i), mnksrc(4,i)), yz(mnksrc(5,i), mnksrc(4,i)), ilay, trim(namsrc(i))
                enddo
             else
                nl = ilaggr(kmax-max(kfmin,mnksrc(3,i))+1)
                write ( lunout1 , '(3(i0,3x),a)' ) n, m, nl, trim(filstring)
-               write ( lunout2 , '(2es15.7,1x,i0,1x,a)' ) xz(n,m), yz(n,m), nl, trim(filstring)
+               write ( lunout2 , '(3(i0,3x),4es15.7,1x,i0,1x,a)' ) i, nm_sink, nm_source, &
+                       xz(mnksrc(2,i), mnksrc(1,i)), yz(mnksrc(2,1), mnksrc(1,i)), &
+                       xz(mnksrc(5,i), mnksrc(4,i)), yz(mnksrc(5,i), mnksrc(4,i)), nl, trim(namsrc(i))
             endif
          else
             if ( mnksrc(3,i) .eq. 0 ) then
                write ( lunout1 , '(3(i0,3x),a)' ) n, m, 0, trim(filstring)
-               write ( lunout2 , '(2es15.7,1x,i0,1x,a)' ) xz(n,m), yz(n,m), 0, trim(filstring)
             else
                write ( lunout1 , '(3(i0,3x),a)' ) n, m, ilaggr(mnksrc(3,i)), trim(filstring)
-               write ( lunout2 , '(2es15.7,1x,i0,1x,a)' ) xz(n,m), yz(n,m), ilaggr(mnksrc(3,i)), trim(filstring)
             endif
+            write ( lunout2 , '(3(i0,3x),4es15.7,1x,a)' ) i, nm_sink, nm_source, &
+                    xz(mnksrc(2,i), mnksrc(1,i)), yz(mnksrc(2,1), mnksrc(1,i)), &
+                    xz(mnksrc(5,i), mnksrc(4,i)), yz(mnksrc(5,i), mnksrc(4,i)), trim(namsrc(i))
          endif
       enddo
       il = 1
@@ -451,31 +465,38 @@
             filstring = trim(filstring)//' '//trim(namsrc(i))//''''//' culvert-outlet'
             il = il + 1
          endif
+         call n_and_m_to_nm(mnksrc(2,i), mnksrc(1,i), nm_sink, gdp)
+         call n_and_m_to_nm(mnksrc(5,i), mnksrc(4,i), nm_source, gdp)
          if ( zmodel ) then
             kfmin     = kfsmin(n,m)
             ksrwaq(nsrc+i) = ilaggr(kmax-kfmin+1)     ! store value with source index
             if ( mnksrc(6,i) .eq. 0 ) then ! uniform source over depth
                do ilay = 1, ksrwaq(nsrc+i)
                   write ( lunout1 , '(3(i0,3x),a)' ) n, m, ilay, trim(filstring)
-                  write ( lunout2 , '(2es15.7,1x,i0,1x,a)' ) xz(n,m), yz(n,m), ilay, trim(filstring)
+                  write ( lunout2 , '(3(i0,3x),4es15.7,1x,i0,2x,a)' ) i, nm_sink, nm_source, &
+                          xz(mnksrc(2,i), mnksrc(1,i)), yz(mnksrc(2,1), mnksrc(1,i)), &
+                          xz(mnksrc(5,i), mnksrc(4,i)), yz(mnksrc(5,i), mnksrc(4,i)), ilay, trim(namsrc(i))
                enddo
             else
                nl = ilaggr(kmax-max(kfmin,mnksrc(6,i))+1)
                write ( lunout1 , '(3(i0,3x),a)' ) n, m, nl, trim(filstring)
-               write ( lunout2 , '(2es15.7,1x,i0,1x,a)' ) xz(n,m), yz(n,m), nl, trim(filstring)
+               write ( lunout2 , '(3(i0,3x),4es15.7,1x,i0,2x,a)' ) i, nm_sink, nm_source, &
+                       xz(mnksrc(2,i), mnksrc(1,i)), yz(mnksrc(2,1), mnksrc(1,i)), &
+                       xz(mnksrc(5,i), mnksrc(4,i)), yz(mnksrc(5,i), mnksrc(4,i)), nl, trim(namsrc(i))
             endif
          else 
             if ( mnksrc(6,i) .eq. 0 ) then
                write ( lunout1 , '(3(i0,3x),a)' ) n, m, 0, trim(filstring)
-               write ( lunout2 , '(2es15.7,1x,i0,1x,a)' ) xz(n,m), yz(n,m), 0, trim(filstring)
             else
                write ( lunout1 , '(3(i0,3x),a)' ) n, m, ilaggr(mnksrc(6,i)), trim(filstring)
-               write ( lunout2 , '(2es15.7,1x,i0,1x,a)' ) xz(n,m), yz(n,m), ilaggr(mnksrc(6,i)), trim(filstring)
             endif
+            write ( lunout2 , '(3(i0,3x),4es15.7,1x,a)' ) i, nm_sink, nm_source, & 
+                    xz(mnksrc(2,i), mnksrc(1,i)), yz(mnksrc(2,1), mnksrc(1,i)), &
+                    xz(mnksrc(5,i), mnksrc(4,i)), yz(mnksrc(5,i), mnksrc(4,i)), trim(namsrc(i))
          endif
       enddo
       write ( lunout1 , '(a      )' ) 'end-discharges'
-      write ( lunout2 , '(a      )' ) 'end-discharges'
+      write ( lunout2 , '(a      )' ) 'end-sink-sources'
       close ( lunout1 )
       close ( lunout2 )
       end subroutine wrwaqhyd

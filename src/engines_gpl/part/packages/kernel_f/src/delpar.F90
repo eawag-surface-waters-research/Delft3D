@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -373,6 +373,7 @@
       call rdfnam ( lun     , ifnam   , fname   , nfiles  , 2       ,    &
                     1       , alone   )
       lunpr = lun(2)
+      call setmlu( lunpr )
 
       hyd%file_hyd%name = fname(18)
       call read_hyd(hyd)

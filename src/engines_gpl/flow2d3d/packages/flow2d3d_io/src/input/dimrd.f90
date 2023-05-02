@@ -8,7 +8,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
                & nfl       ,nflmod    ,lfsdu     ,lfsdus1   ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -32,8 +32,8 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Initialises the grid and process

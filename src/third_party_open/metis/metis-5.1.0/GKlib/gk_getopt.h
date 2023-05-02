@@ -51,6 +51,7 @@ struct gk_option {
 #define optional_argument	2
 
 
+/* MDK 09-12-2022 Statement below put in comment because of double variable declaration */
 /* Function prototypes
 extern int gk_getopt(int __argc, char **__argv, char *__shortopts);
 extern int gk_getopt_long(int __argc, char **__argv, char *__shortopts,

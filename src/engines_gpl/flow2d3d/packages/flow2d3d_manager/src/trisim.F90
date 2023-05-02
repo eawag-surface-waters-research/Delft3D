@@ -36,7 +36,7 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, runid, &
                  & initonly, gdpC)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -60,8 +60,8 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, runid, &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Main routine for the 2d / 3d program

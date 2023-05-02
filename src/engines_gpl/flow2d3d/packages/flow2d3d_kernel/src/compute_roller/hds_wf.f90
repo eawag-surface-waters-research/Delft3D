@@ -3,7 +3,7 @@ subroutine hds_wf(kfs       ,dps       ,s1        ,xcor      ,ycor      ,&
                 & hbd       ,f_lam     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -27,8 +27,8 @@ subroutine hds_wf(kfs       ,dps       ,s1        ,xcor      ,ycor      ,&
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 ! Adapted from Reniers' Code for Breaker Delay

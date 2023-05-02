@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 !> Opens an existing file for reading.
 !!
 !! When file does not exist or is already open, program stops with
@@ -605,9 +605,9 @@ subroutine unstruc_errorhandler(level)
     use unstruc_messages
     use unstruc_files
     use dfm_error
-    use m_partitioninfo, only: DFM_COMM_DFMWORLD, jampi
 #ifdef HAVE_MPI
     use mpi
+    use m_partitioninfo, only: DFM_COMM_ALLWORLD, jampi
 #endif
     implicit none
     integer, intent(in) :: level
@@ -621,7 +621,7 @@ subroutine unstruc_errorhandler(level)
         mdia = 0
 #ifdef HAVE_MPI
         if (jampi == 1) then 
-            call MPI_Abort(DFM_COMM_DFMWORLD, DFM_GENERICERROR, ierr)
+            call MPI_Abort(DFM_COMM_ALLWORLD, DFM_GENERICERROR, ierr)
         endif
 #endif
         stop

@@ -10,7 +10,7 @@
      &                      zmodel , ztop   , zbot   , gdp    )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -34,8 +34,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 ! Routine is called every time step to allow a direct writing of WAQ files
 ! Routine is now written in fixed format compatible form, 2nd author is not very
@@ -49,6 +49,7 @@
       use dfparall
       use io_ugrid, only: t_ug_meta
       use m_write_waqgeom_curvilinear
+      use flow2d3d_version_module
 !
       use globaldata
       !
@@ -383,7 +384,7 @@
                         ilaggr , nd     , nlb    , nub    , mlb    ,    &
                         mub    , kfsmin , ksrwaq , noseg  , noq1   ,    &
                         noq2   , noq3   , xz     , yz     , zbot   ,    &
-                        ztop )
+                        ztop   , gdp)
          if (parll) then
             write(filnam,'(3a,i3.3,a)') 'com-', trim(runid), '-', inode, '.'
          else

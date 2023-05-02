@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 
 module m_oned_functions
    use m_missing, only: dmiss
@@ -183,32 +183,48 @@ module m_oned_functions
          pbr => network%brs%branch(ibr)
 
          ! Set flow node numbers via all flow link numbers on current branch.
-         ! When uPointsCount == 0, any "orphan" flow node numbers will be set via another branch on which they *do* lie.
+         ! Grid points sequences with singleton grid points find the flow node using original input grid point index.
+         if (pbr%gridPointsCount > 0) then
+            call realloc(pbr%grd, pbr%gridPointsCount)
+         else 
+            cycle
+         end if
          if (pbr%uPointsCount > 0) then
             call realloc(pbr%lin, pbr%uPointsCount)
-            call realloc(pbr%grd, pbr%gridPointsCount)
-            lin => pbr%lin
-            grd => pbr%grd
-            L = lin(1)
-            k1  =  abs(ln(1,L))
-            if (pbr%FromNode%gridNumber == -1 .and. comparereal(pbr%gridPointsChainages(1), 0d0, flow1d_eps10) == 0) then
-               pbr%FromNode%gridNumber = k1 ! Only when exactly at the branch start (need not be so in parallel models).
-            end if
-            do is=1,pbr%gridpointsseqcount
-               ip1 = pbr%k1gridpointsseq(is)
-               ip2 = pbr%k2gridpointsseq(is)
-               do i=ip1,ip2-1 ! upoints loop
-                  L = lin(i-(is-1)) ! is-1 corrects for any "holes" in between the previous is-1 gridpointssequences.
-                  k1 = abs(ln(1,L))
-                  grd(i) = k1
-               enddo
+         end if
+         lin => pbr%lin
+         grd => pbr%grd
+         do is=1,pbr%gridpointsseqcount
+            ip1 = pbr%k1gridpointsseq(is)
+            ip2 = pbr%k2gridpointsseq(is)
+            do i=ip1,ip2-1 ! upoints loop
+               L = lin(i-(is-1)) ! is-1 corrects for any "holes" in between the previous is-1 gridpointssequences.
+               k1 = abs(ln(1,L))
+               grd(i) = k1
+            enddo
+            if (ip2 > ip1) then
+               ! For gridpointsequence with 2 or more gridpoints, make sure to add the last one.
                L = ip2-1-(is-1)
                k2 = ln(2,iabs(lin(L)))
                grd(ip2) = k2
-            end do
-            if (pbr%toNode%gridnumber == -1 .and. comparereal(pbr%gridPointsChainages(pbr%gridPointsCount), pbr%length, flow1d_eps10) == 0)  then
-               pbr%toNode%gridnumber = k2 ! Only when exactly at the branch end (need not be so in parallel models).
+            else ! ip1 == ip2: singleton/orphan grid point
+               k2 = ndx2d + pbr%grd_input(ip2)
+               if (nd(k2)%nod(1) /= pbr%grd_input(ip2)) then
+                  write(msgbuf, '(a,i0,a,i0,a,i0,a)') 'set_link_numbers_in_branches(): 1D grd_input(',ip2,')=', pbr%grd_input(ip2), &
+                     ' does not match flow nd(',k2, ')%nod(1)=', nd(k2)%nod(1)
+                  call err_flush()
+               else
+                  grd(ip2) = k2
+               end if
             end if
+         end do
+         k1  =  grd(1)
+         if (pbr%FromNode%gridNumber == -1 .and. comparereal(pbr%gridPointsChainages(1), 0d0, flow1d_eps10) == 0) then
+            pbr%FromNode%gridNumber = k1 ! Only when exactly at the branch start (need not be so in parallel models).
+         end if
+         k2  =  grd(pbr%gridPointsCount)
+         if (pbr%toNode%gridnumber == -1 .and. comparereal(pbr%gridPointsChainages(pbr%gridPointsCount), pbr%length, flow1d_eps10) == 0)  then
+            pbr%toNode%gridnumber = k2 ! Only when exactly at the branch end (need not be so in parallel models).
          end if
       enddo
    end subroutine set_linknumbers_in_branches
@@ -613,6 +629,11 @@ module m_oned_functions
       integer              :: k2
       integer              :: dir
       
+      if (struct%numlinks == 0) then
+         ! Possibly outside of this partition
+         return
+      end if
+
       ! First compute average waterlevels on suction side and delivery side of the pump
       s1k1 = 0d0
       s1k2 = 0d0

@@ -3,7 +3,7 @@ subroutine fouana(mmax      ,nmaxus    ,nofou     ,ifou      ,kcs      , &
                 & umean     ,vmean     ,dps       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -27,8 +27,8 @@ subroutine fouana(mmax      ,nmaxus    ,nofou     ,ifou      ,kcs      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - performs fourier analysis i.e. computes suma

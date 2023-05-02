@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2021-2022.
+!!  Copyright (C)  Stichting Deltares, 2021-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -25,7 +25,7 @@
       use hydmod
       use io_ugrid
       use system_utils
-      use agrhyd_version_module
+      use delwaq_version_module
       implicit none
 
       type(t_hyd)          :: input_hyd     ! description of the input hydrodynamics
@@ -88,13 +88,12 @@
       type(t_dlwqfile)     :: new_grd               ! new grd file
       logical              :: singapore_rename_discharges ! special option rename discharges for singapore
       character(len=256)   :: singapore_discharge_names   ! special option filename for singapore
-      character(len=80)    :: version_full          ! version information
 
       ! sing_z variables
       integer :: iseg1, iseg2, iseg, ik1, ik2, isegb, lenname
 
       write(*,*)
-      write(*,'(a,a)') ' (c) ',agrhyd_version_full
+      write(*,'(a,a)') ' (c) ',delwaq_version_full
       write(*,*)
 
       ! get input file from commandline
@@ -109,7 +108,7 @@
       if ( input_file .eq. ' ' ) then
          open(lunrep,file='agrhyd.rep',recl=132)
          call dattim(rundat)
-         write(lunrep,'(a,a)') ' (c) ',agrhyd_version_full
+         write(lunrep,'(a,a)') ' (c) ',delwaq_version_full
          write(lunrep,'(a,a)') ' execution start: ',rundat
          write(lunrep,'(a)') ' error: no command line argument or interactive input with name of ini-filename'
          write(*,'(a)') ' error: no command line argument or interactive input with name of ini-filename'
@@ -121,7 +120,7 @@
       if ( .not. exist_ini ) then
          open(lunrep,file='agrhyd.rep',recl=132)
          call dattim(rundat)
-         write(lunrep,'(a,a)') ' (c) ',agrhyd_version_full
+         write(lunrep,'(a,a)') ' (c) ',delwaq_version_full
          write(lunrep,'(a,a)') ' execution start: ',rundat
          write(lunrep,'(a,a)') ' error: ini-file not found: ', trim(input_file)
          write(*,'(a,a)') ' error: ini-file not found: ', trim(input_file)
@@ -154,7 +153,7 @@
       open(lunrep,file=trim(name)//'-agrhyd.rep',recl=132)
       call setmlu(lunrep)
       call SetMessageHandling(lunMessages=lunrep)
-      write(lunrep,'(a,a)') ' (c) ',agrhyd_version_full
+      write(lunrep,'(a,a)') ' (c) ',delwaq_version_full
       call dattim(rundat)
       write(lunrep,'(2a)') ' execution start: ',rundat
       write(lunrep,*)
@@ -539,7 +538,6 @@
       endif
 
       ! write hyd file
-      version_full = trim(agrhyd_version_full)
       call write_hyd(output_hyd, version_full)
 
       ! write time independent data

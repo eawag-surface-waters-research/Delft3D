@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2022.
+!  Copyright (C)  Stichting Deltares, 2017-2023.
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
 !  Delft3D is free software: you can redistribute it and/or modify
@@ -26,8 +26,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id$
-! $HeadURL$
+! 
+! 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -59,6 +59,7 @@ module bmi
   use m_heatfluxes, only: Qsunmap
   use m_longculverts
   use m_nearfield
+  use m_VolumeTables, only: vltb, vltbonlinks, ndx1d
 
   implicit none
 
@@ -775,6 +776,12 @@ subroutine get_var_type(c_var_name, c_type)  bind(C, name="get_var_type")
       type_name = "double"
    case("TcrEro", "TcrSed", "tem1Surf")
       type_name = "double"
+   case('vltb')
+      type_name = "type(t_voltable)"
+   case('vltbOnLinks')
+      type_name = "type(t_voltable)"
+   case('network')
+      type_name = "type(t_network)"
    end select
 
    if (numconst > 0) then
@@ -929,7 +936,7 @@ subroutine get_var_shape(c_var_name, shape) bind(C, name="get_var_shape")
       return
    case("orifices")
       shape(1) = network%sts%numOrifices
-      shape(2) = 1
+      shape(2) = 2
       return
    case("gates")
       shape(1) = ngategen
@@ -957,8 +964,15 @@ subroutine get_var_shape(c_var_name, shape) bind(C, name="get_var_shape")
 	   shape(1) = numlatsg
 	   shape(2) = 1
        return
+   case('vltb')
+      shape(1) = ndx1d
+   case('vltbOnLinks')
+      shape(1) = 2
+      shape(2) = ndx1d
+   case('network')
+      shape(1) = 1 
 
-! Array pointers:
+   ! Array pointers:
    case("geometry/xcc", "geometry/ycc", "field/water_depth", "geometry/kbot", "geometry/ktop")
       shape(1) = ndx
       return
@@ -1058,6 +1072,7 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
    use string_module
    use m_cell_geometry ! TODO: UNST-1705: temp, replace by m_flowgeom
    use unstruc_model
+   use unstruc_channel_flow, only: network
 
    character(kind=c_char), intent(in) :: c_var_name(*) !< Variable name. May be slash separated string "name/item/field": then get_compound_field is called.
    type(c_ptr), intent(inout) :: x
@@ -1252,7 +1267,12 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
          endif
       enddo
       x = c_loc(TcrSed)
-
+   case('vltb')
+      x = c_loc(vltb)
+   case('vltbOnLinks')
+      x = c_loc(vltbOnLinks)
+   case('network')
+      x = c_loc(Network)
    end select
 
    ! Try to parse variable name as slash-separated id (e.g., 'weirs/Lith/crest_level')
@@ -1267,14 +1287,12 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
          ! A valid item name, now parse the field name...
          call str_token(tmp_var_name, field_name, DELIMS='/')
 
-         !if (len_trim(field_name) > 0) then
-            ! Finally, a field_name was found, call the compound getter and return directly.
-            call get_compound_field(string_to_char_array(varset_name), &
-                                    string_to_char_array(item_name), &
-                                    string_to_char_array(field_name), &
-                                    x)
-            return
-         !end if
+         ! field_name is allowed to be empty, call the compound getter and return directly.
+         call get_compound_field(string_to_char_array(varset_name), &
+                                 string_to_char_array(item_name), &
+                                 string_to_char_array(field_name), &
+                                 x)
+         return
       end if
    case ("controllabledam")
       call str_token(tmp_var_name, field_name, DELIMS='/')
@@ -1323,21 +1341,20 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
    integer, external :: init_openmp
 
    character(kind=c_char), dimension(:), pointer :: x_0d_char_ptr => null()
-   real(c_double), pointer :: x_0d_double_ptr
-
-   real(c_double), pointer :: x_1d_double_ptr(:)
-   real(c_double), pointer :: x_2d_double_ptr(:,:)
-   real(c_double), pointer :: x_3d_double_ptr(:,:,:)
-   integer(c_int), pointer :: x_0d_int_ptr
-   integer(c_int), pointer :: x_1d_int_ptr(:)
-   integer(c_int), pointer :: x_2d_int_ptr(:,:)
-   integer(c_int), pointer :: x_3d_int_ptr(:,:,:)
-   real(c_float), pointer  :: x_0d_float_ptr
-   real(c_float), pointer  :: x_1d_float_ptr(:)
-   real(c_float), pointer  :: x_2d_float_ptr(:,:)
-   real(c_float), pointer  :: x_3d_float_ptr(:,:,:)
+   real(c_double)        , pointer :: x_0d_double_ptr
+   real(c_double)        , pointer :: x_1d_double_ptr(:)
+   real(c_double)        , pointer :: x_2d_double_ptr(:,:)
+   real(c_double)        , pointer :: x_3d_double_ptr(:,:,:)
+   integer(c_int)        , pointer :: x_0d_int_ptr
+   integer(c_int)        , pointer :: x_1d_int_ptr(:)
+   integer(c_int)        , pointer :: x_2d_int_ptr(:,:)
+   integer(c_int)        , pointer :: x_3d_int_ptr(:,:,:)
+   real(c_float)         , pointer :: x_0d_float_ptr
+   real(c_float)         , pointer :: x_1d_float_ptr(:)
+   real(c_float)         , pointer :: x_2d_float_ptr(:,:)
+   real(c_float)         , pointer :: x_3d_float_ptr(:,:,:)
    character(kind=c_char), pointer :: x_1d_char_ptr(:)
-   logical(kind=c_bool)  , pointer :: x_1d_logical_ptr(:)
+   logical  (kind=c_bool), pointer :: x_1d_logical_ptr(:)
    ! The fortran name of the attribute name
    character(len=strlen(c_var_name))            :: var_name
    character(kind=c_char),dimension(:), pointer :: c_value => null()
@@ -1953,6 +1970,11 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
       case("gateLowerEdgeLevel")
          if (is_in_network) then
             x = get_gate_lower_edge_level_c_loc(network%sts%struct(item_index))  
+         end if
+         return
+      case("crest_level", "CrestLevel", "crestLevel")
+         if (is_in_network) then
+            x = get_crest_level_c_loc(network%sts%struct(item_index))
          end if
          return
       end select
@@ -2574,6 +2596,8 @@ subroutine get_compound_field_name(c_var_name, c_field_index, c_field_name) bind
       select case(field_index)
       case(1)
          field_name = "gateLowerEdgeLevel"
+      case(2)
+         field_name = "CrestLevel"
       end select
    ! GATES
    case("gates")
@@ -3578,8 +3602,8 @@ subroutine write_partition_metis(c_netfile_in, c_netfile_out, c_npart, c_jaconti
    character(kind=c_char), intent(in)       :: c_netfile_out(MAXSTRLEN)
    integer(c_int), intent(in)               :: c_npart
    integer(c_int), intent(in)               :: c_jacontiguous
-   character(len=strlen(c_netfile_in))      :: netfile_in
-   character(len=strlen(c_netfile_out))     :: netfile_out
+   character(MAXSTRLEN)                     :: netfile_in
+   character(MAXSTRLEN)                     :: netfile_out
    integer                                  :: npart
    integer                                  :: jacontiguous
    integer                                  :: istat
@@ -3642,9 +3666,9 @@ subroutine write_partition_pol(c_netfile_in, c_netfile_out, c_polfile) bind(C, n
    character(kind=c_char), intent(in)       :: c_netfile_in(MAXSTRLEN)
    character(kind=c_char), intent(in)       :: c_netfile_out(MAXSTRLEN)
    character(kind=c_char), intent(in)       :: c_polfile(MAXSTRLEN)
-   character(len=strlen(c_netfile_in))      :: netfile_in
-   character(len=strlen(c_netfile_out))     :: netfile_out
-   character(len=strlen(c_polfile))         :: polfile
+   character(MAXSTRLEN)         :: netfile_in
+   character(MAXSTRLEN)         :: netfile_out
+   character(MAXSTRLEN)         :: polfile
    integer                                  :: minp,istat
    
    netfile_in = char_array_to_string(c_netfile_in, strlen(c_netfile_in))

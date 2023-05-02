@@ -1,6 +1,6 @@
 !----- LGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2011-2022.
+!  Copyright (C)  Stichting Deltares, 2011-2023.
 !
 !  This library is free software; you can redistribute it and/or
 !  modify it under the terms of the GNU Lesser General Public
@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!
 !!! DIO-streams: f90-version of streams for Delft-IO
@@ -523,9 +523,6 @@ function DioStreamConnect(stream, alsoForAsync) result(retVal)
 #if (defined(WIN32))
                  open (newunit=stream%lun, file=stream % name, action='read', &
                        shared, status='old', form= stream % form, iostat=ierr)
-#elif (defined(salford32))
-                 open (newunit=stream%lun, file=stream % name, action='read', &
-                       access='transparent', share='DENYWR', status='old', form= stream % form, iostat=ierr)
 #else
                  open (newunit=stream%lun, file=stream % name, action='read', &
                        status='old', form= stream % form, iostat=ierr)
@@ -538,9 +535,6 @@ function DioStreamConnect(stream, alsoForAsync) result(retVal)
 #if (defined(WIN32))
                  open (newunit=stream%lun, file=stream % name, action='write', &
                        shared, form= stream % form, iostat=ierr)
-#elif (defined(salford32))
-                 open (newunit=stream%lun, file=stream % name, action='write', &
-                       access='transparent', share='DENYWR', form= stream % form, iostat=ierr)
 #else
                  open (newunit=stream%lun, file=stream % name, action='write', &
                        form= stream % form, iostat=ierr)
@@ -883,8 +877,6 @@ subroutine DioStreamDelay
 
 #if (defined(WIN32))
     call sleepqq(delay)
-#elif (defined(salford32))
-    call sleep@(real(delay))
 #endif
 
     return
@@ -915,9 +907,6 @@ function DioStreamSleep(timeWaited) result(retVal)
 #if (defined(WIN32))
 ! sleepqq is millisecond sleep
     call sleepqq(sleepTime)
-    timeWaited = timeWaited + sleepTime
-#elif (defined(salford32))
-    call sleep@(real(sleepTime))
     timeWaited = timeWaited + sleepTime
 #endif
 

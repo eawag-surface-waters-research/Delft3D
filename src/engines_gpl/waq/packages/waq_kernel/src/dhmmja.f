@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2022.
+!!  Copyright (C)  Stichting Deltares, 2012-2023.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -162,12 +162,10 @@
       IIGNOS = IASIZE + 63
       IIGREF = IASIZE + 64
       IIGSEG = IASIZE + 65
-      IOWNS  = IASIZE + 66
-      IOWNQ  = IASIZE + 67
-      ipror  = IASIZE + 68
-      iprvpt = IASIZE + 69
-      iprdon = IASIZE + 70
-      IIDMPB = IASIZE + 71
+      ipror  = IASIZE + 66
+      iprvpt = IASIZE + 67
+      iprdon = IASIZE + 68
+      IIDMPB = IASIZE + 69
 
 !     Some logicals
 
@@ -564,18 +562,6 @@
       ARRDM1(IIGSEG) = NOSEG+NSEG2
       ARRDM2(IIGSEG) = NOGRID
       ARRDM3(IIGSEG) = 1
-!
-      ARRNAM(IOWNS)  = 'OWNERS'
-      ARRKND(IOWNS)  = 1
-      ARRDM1(IOWNS)  = NOSEG+NSEG2
-      ARRDM2(IOWNS)  = 1
-      ARRDM3(IOWNS)  = 1
-!
-      ARRNAM(IOWNQ)  = 'OWNERQ'
-      ARRKND(IOWNQ)  = 1
-      ARRDM1(IOWNQ)  = NOQ+NOQ4
-      ARRDM2(IOWNQ)  = 1
-      ARRDM3(IOWNQ)  = 1
 !
       arrnam(ipror)  = 'PROREF'
       arrknd(ipror)  = 1

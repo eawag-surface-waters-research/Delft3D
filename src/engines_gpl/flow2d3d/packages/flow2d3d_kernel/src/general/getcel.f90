@@ -3,7 +3,7 @@ subroutine getcel(filnam    ,grpnam    ,nelems    ,elmnms    ,elmdms    , &
                 & elmnam    ,celidt    ,wrilog    ,error     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -27,8 +27,8 @@ subroutine getcel(filnam    ,grpnam    ,nelems    ,elmnms    ,elmdms    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Detect the number of time steps on filnam (map-

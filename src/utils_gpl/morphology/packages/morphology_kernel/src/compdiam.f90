@@ -4,7 +4,7 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
                   & dg        ,dxx       ,dgsd      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -29,7 +29,7 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
 !                                                                               
 !-------------------------------------------------------------------------------
 !  $Id: compdiam.f90 878 2011-10-07 12:58:46Z mourits $
-!  $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20110420_OnlineVisualisation/src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/compdiam.f90 $
+!  : https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20110420_OnlineVisualisation/src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/compdiam.f90 $
 !!--description-----------------------------------------------------------------
 !
 ! Function: Determines the characteristic diameters of the sediment mixtures

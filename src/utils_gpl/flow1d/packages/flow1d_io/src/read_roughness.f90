@@ -1,7 +1,7 @@
 module m_read_roughness
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2022.                                
+!  Copyright (C)  Stichting Deltares, 2017-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify              
 !  it under the terms of the GNU Affero General Public License as               
@@ -25,8 +25,8 @@ module m_read_roughness
 !  Stichting Deltares. All rights reserved.
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !-------------------------------------------------------------------------------
    
    use m_Branch
@@ -61,9 +61,6 @@ module m_read_roughness
    integer, parameter, public       :: RoughFileMajorVersion = 3
    integer, parameter, public       :: RoughFileMinorVersion = 0
    
-   integer, parameter               :: RoughFileMajorVersionSobek = 1  !< Version number as used in Sobek 3
-   
-   
    ! History roughness file versions:
 
    ! 3.00 (2019-06-18): Use strings, instead of integers, for "frictionType" and "functionType".
@@ -92,11 +89,6 @@ contains
       character(len=IdLen)                  :: file
       double precision                       :: default
 
-      integer                                :: ibin = 0
-      character(len=IdLen)                  :: binfile
-      logical                                :: file_exist
-      integer                                :: istat
-      
       inputfiles = roughnessfiles
       default = 60d0
       def_type = 1
@@ -141,18 +133,18 @@ contains
       rgs%count = 3
       call realloc(rgs)
       rgs%rough(1)%id = 'Main'
+      rgs%rough(1)%frictionValuesFile = ''
       rgs%rough(2)%id = 'FloodPlain1'
+      rgs%rough(2)%frictionValuesFile = ''
       rgs%rough(3)%id = 'FloodPlain2'
+      rgs%rough(3)%frictionValuesFile = ''
       success = .true.
       do i = 1, 3
          if (success) then
             success = hashsearch_or_add(rgs%hashlist, rgs%rough(i)%id) == i
             rgs%rough(i)%spd_pos_idx = 0
-            rgs%rough(i)%spd_neg_idx = 0
             rgs%rough(i)%rgh_type_pos => null()
-            rgs%rough(i)%rgh_type_neg => null()
             rgs%rough(i)%fun_type_pos => null()
-            rgs%rough(i)%fun_type_neg => null()
             rgs%rough(i)%table        => null()
          endif
       enddo
@@ -279,8 +271,6 @@ contains
       endif
       
       select case(major)
-      case(RoughFileMajorVersionSobek)
-         call scan_roughness_input_v100(tree_ptr, rgs, brs, spdata, inputfile, default, def_type)
       case(RoughFileMajorVersion)
          call scan_roughness_input(tree_ptr, rgs, brs, spdata, inputfile, default, def_type)
       case default
@@ -306,19 +296,14 @@ contains
       integer, intent(inout)                 :: def_type   !< Default friction type
       
       integer                                :: count
-      integer                                :: functionType
       integer                                :: numlocations
       integer                                :: numlevels
-      integer                                :: itype
       integer                                :: irgh
       integer                                :: ibr
       integer                                :: i
-      integer                                :: nlev
       integer                                :: numSections
       integer                                :: maxlocations
       integer                                :: maxlevels
-      integer                                :: isp
-      logical                                :: flowdir
       logical                                :: success
       logical                                :: branchdef
       type(t_roughness), pointer             :: rgh
@@ -329,9 +314,6 @@ contains
       double precision, allocatable          :: locations(:)
       double precision, allocatable          :: values(:)
    
-      integer, pointer, dimension(:)         :: rgh_type
-      integer, pointer, dimension(:)         :: fun_type
-      
       character(len=Idlen)                   :: fricType
       character(len=Idlen)                   :: funcType
       character(len=IdLen)                  :: frictionValuesFileName
@@ -356,6 +338,8 @@ contains
          call setmessage(LEVEL_ERROR, 'In inputfile '//trim(inputfile)// ' more than 1 Global section is found, together with a Branch section, this is not allowed')
          return
       endif
+         
+      frictionValuesFileName = trim(inputfile)
       
       !> when branches are defined, the friction can be defined per branch, then additional arrays are required
       if (branchdef) then
@@ -367,7 +351,6 @@ contains
             return
          endif
 
-         frictionValuesFileName = ' '
          call prop_get_string(tree_ptr, 'General', 'frictionValuesFile', frictionValuesFileName, success)
 
          irgh = hashsearch_or_add(rgs%hashlist, frictionId)
@@ -420,8 +403,9 @@ contains
                endif
             endif
             
-            rgs%rough(irgh)%useGlobalFriction = .not. branchdef
+            rgs%rough(irgh)%useGlobalFriction  = .not. branchdef
             rgs%rough(irgh)%frictionValuesFile = frictionValuesFileName
+            rgs%rough(irgh)%id                 = frictionId
             fricType = ''
             call prop_get_string(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionType', fricType, success)
             if (.not. success) then
@@ -528,150 +512,4 @@ contains
   
    end subroutine scan_roughness_input
 
-
-   subroutine scan_roughness_input_v100(tree_ptr, rgs, brs, spdata, inputfile, default, def_type)
-      type(tree_data), pointer, intent(in)   :: tree_ptr   !< treedata pointer to input
-      type(t_roughnessSet), intent(inout)    :: rgs        !< Roughness set
-      type(t_branchSet), intent(in)          :: brs        !< Branches
-      type(t_spatial_dataSet), intent(inout) :: spdata     !< Spatial data set
-      character(len=IdLen), intent(in)      :: inputfile  !< Name of the input file
-      double precision, intent(inout)        :: default    !< Default friction parameter
-      integer, intent(inout)                 :: def_type   !< Default friction type
-      
-      integer                                :: count
-      integer                                :: itype
-      integer                                :: irgh
-      integer                                :: ibr
-      integer                                :: i
-      integer                                :: nlev
-      integer                                :: maxlevels
-      integer                                :: isp
-      logical                                :: flowdir
-      logical                                :: success
-      type(t_roughness), pointer             :: rgh
-      character(len=Idlen)                   :: sectionId
-      character(len=Idlen)                   :: branchid
-      double precision, allocatable          :: levels(:,:)
-   
-      integer, pointer, dimension(:)         :: rgh_type
-      integer, pointer, dimension(:)         :: fun_type
-     
-      ! Get section id
-      call prop_get_string(tree_ptr, 'Content', 'sectionId', sectionId, success)
-      if (.not. success) then
-         call setmessage(LEVEL_ERROR, 'SectionId not found in roughness definition file: '//trim(inputfile))
-         return
-      endif
-      call prop_get_integer(tree_ptr, 'Content', 'globalType', def_type, success)
-      def_type = frictiontype_v1_to_new(def_type)
-   
-      irgh = hashsearch_or_add(rgs%hashlist, sectionId)
-      if (irgh == rgs%count+1) then
-         rgs%count = irgh
-         if (rgs%count > rgs%size) then
-            call realloc(rgs)
-         endif
-         rgs%rough(irgh)%id           = sectionId
-         rgs%rough(irgh)%spd_pos_idx  = 0
-         rgs%rough(irgh)%spd_neg_idx  = 0
-         rgs%rough(irgh)%rgh_type_pos => null()
-         rgs%rough(irgh)%rgh_type_neg => null()
-         rgs%rough(irgh)%fun_type_pos => null()
-         rgs%rough(irgh)%fun_type_neg => null()
-      elseif (irgh > rgs%count+1) then
-         call setmessage(LEVEL_FATAL, 'Internal error in roughness reader')
-      endif
-
-      rgh => rgs%rough(irgh)
-      rgh%iSection = irgh
-      rgh%useGlobalFriction = .false.
-      flowDir = 0
-      call prop_get_logical(tree_ptr, 'Content', 'flowDirection', flowdir, success)
-   
-      if (.not.flowdir) then
-         if (associated(rgh%rgh_type_pos)) then
-            call setmessage(LEVEL_ERROR, 'Roughness section with section Id: '//trim(sectionId)//'and positive flow direction is defined twice. Second time was in '//trim(inputfile))
-            return
-         endif
-         allocate(rgh%rgh_type_pos(brs%count))
-         allocate(rgh%fun_type_pos(brs%count))
-         rgh_type => rgh%rgh_type_pos
-         fun_type => rgh%fun_type_pos
-      else
-         if (associated(rgh%rgh_type_neg)) then
-            call setmessage(LEVEL_ERROR, 'Roughness section with section Id: '//trim(sectionId)//'and negative flow direction is defined twice. Second time was in '//trim(inputfile))
-         endif
-         allocate(rgh%rgh_type_neg(brs%count))
-         allocate(rgh%fun_type_neg(brs%count))
-         rgh_type => rgh%rgh_type_neg
-         fun_type => rgh%fun_type_neg
-      endif
-      rgh_type = -1
-      fun_type = -1
-   
-      count = 0
-      if (associated(tree_ptr%child_nodes)) then
-            count = size(tree_ptr%child_nodes)
-      end if
-   
-      maxlevels = 1
-      do i = 1, count
-         call prop_get_integer(tree_ptr%child_nodes(i)%node_ptr, '', 'numLevels',nlev,success)
-         if (success .and. nlev > maxlevels) then
-            maxlevels = nlev
-         endif
-      enddo
-      allocate(levels(maxlevels, brs%count))
-   
-      do i = 1, count
-         itype = -1
-         if (tree_get_name(tree_ptr%child_nodes(i)%node_ptr) .ne. 'branchproperties') then
-            cycle
-         endif
-         call prop_get_integer(tree_ptr%child_nodes(i)%node_ptr, '', 'roughnessType',itype,success)
-         itype = frictiontype_v1_to_new(itype)
-         call prop_get_string(tree_ptr%child_nodes(i)%node_ptr, '', 'branchId',branchid, success)
-         ibr = hashsearch(brs%hashlist, branchid)
-         if (ibr <= 0 .or. ibr > brs%count) then
-            call setmessage(LEVEL_ERROR, 'Unknown branchid found ('//trim(branchid)//') in file: '//inputfile)
-            cycle
-         endif
-      
-         rgh_type(ibr) = itype
-         call prop_get_integer(tree_ptr%child_nodes(i)%node_ptr, '', 'functionType',fun_type(ibr),success)
-      enddo
-   
-      ! fill up missing branches, using branch orders
-      call init_at_branches(brs, rgh_type, fun_type, def_type)
-   
-      ! Read spatial data
-      call spatial_data_reader(isp, spdata, brs, inputfile, default, -def_type, .false.)
-      if (.not.flowdir) then
-         rgh%spd_pos_idx = isp
-      else
-         rgh%spd_neg_idx = isp
-      endif
-   
-      deallocate(levels)
-   
-   end subroutine scan_roughness_input_v100
-
-   !> set default values at the branches
-   subroutine init_at_branches(brs, rgh_type, fun_type, def_type)
-   
-      type(t_branchset), intent(in) :: brs                  !< Branches
-      integer, dimension(:), intent(inout) :: rgh_type      !< roughness type
-      integer, dimension(:), intent(inout) :: fun_type      !< roughness function type (default constant)
-      integer, intent(in) :: def_type                       !< default type
-      integer ibr
-
-      do ibr = 1, brs%count
-         if (rgh_type(ibr) < 0) then
-            rgh_type(ibr) = def_type
-            fun_type(ibr) = 0
-         endif
-      enddo
-   
-   end subroutine init_at_branches
-
-    end module m_read_roughness
+end module m_read_roughness

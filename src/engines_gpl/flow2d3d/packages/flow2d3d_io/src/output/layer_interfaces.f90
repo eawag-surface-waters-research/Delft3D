@@ -3,7 +3,7 @@ subroutine layer_interfaces(zmodel  ,kmax    ,mmax    ,nmaxus  ,s1     , &
                           & kfsmin  ,kfsmax  ,zkt     ,gdp     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -27,8 +27,8 @@ subroutine layer_interfaces(zmodel  ,kmax    ,mmax    ,nmaxus  ,s1     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Calculates the vertical coordinates of the layer interfaces

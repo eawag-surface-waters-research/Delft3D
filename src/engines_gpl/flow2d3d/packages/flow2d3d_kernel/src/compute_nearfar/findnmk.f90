@@ -2,7 +2,7 @@ subroutine findnmk(xz     ,yz     ,dps    ,s1     ,kcs    ,nmmax  ,thick   , &
                  & kmax   , x_jet ,y_jet  ,z_jet  ,nm_jet ,k_jet  ,gdp     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -26,8 +26,8 @@ subroutine findnmk(xz     ,yz     ,dps    ,s1     ,kcs    ,nmmax  ,thick   , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Finds n,m and k coordinates of "jet" points

@@ -29,7 +29,16 @@ add_library(${library_name} ${bloom_source}
                             ${trwp_source}
                             ${waq_process_source})
 
+
 # Set dependencies
+set(oss_dependencies_general deltares_common
+                             nefis
+                             solvesaphe
+                             waq_data
+                             waq_utils_c
+                             waq_utils_f)
+
+
 if (UNIX)
     # the `pkg_check_modules` function is created with this call
     find_package(PkgConfig REQUIRED)
@@ -38,12 +47,7 @@ if (UNIX)
     pkg_check_modules(NETCDF     REQUIRED IMPORTED_TARGET netcdf)
     pkg_check_modules(NETCDF_FTN REQUIRED IMPORTED_TARGET netcdf-fortran)
 
-    set(oss_dependencies    deltares_common
-                            nefis
-                            solvesaphe
-                            waq_data
-                            waq_utils_c
-                            waq_utils_f)
+    set(oss_dependencies ${oss_dependencies_general})
 
     target_link_libraries(${library_name}
          ${oss_dependencies}
@@ -51,14 +55,9 @@ if (UNIX)
          PkgConfig::NETCDF_FTN)
 endif(UNIX)
 if (WIN32)
-    set(oss_dependencies    deltares_common
-                            nefis
-                            netcdf4
-                            netcdff
-                            solvesaphe
-                            waq_data
-                            waq_utils_c
-                            waq_utils_f)
+    set(oss_dependencies ${oss_dependencies_general}
+                         netcdf4
+                         netcdff)
 
     target_link_libraries(${library_name} ${oss_dependencies})
 endif(WIN32)
@@ -70,7 +69,6 @@ target_include_directories(${library_name}  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}
 # Set additional compilation properties
 target_compile_options(${library_name} PRIVATE "${qauto_threaded_flags}")
 target_compile_options(${library_name} PRIVATE "${waq_default_flags}")
-target_compile_options(${library_name} PRIVATE "$<$<CONFIG:Debug>:${waq_debug_flags}>")
 
 # Define how the files should be structured in Visual studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${bloom_source}

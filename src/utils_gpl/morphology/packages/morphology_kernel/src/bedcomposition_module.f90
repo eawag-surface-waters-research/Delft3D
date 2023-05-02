@@ -1,7 +1,7 @@
 module bedcomposition_module
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -25,8 +25,8 @@ module bedcomposition_module
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--module description----------------------------------------------------------
 !
 ! This module keeps track of the bed composition at one or more locations. The
@@ -192,7 +192,7 @@ subroutine bedcomposition_module_info(messages)
     !
     type(message_stack) :: messages
     !
-    call addmessage(messages,'$Id$')
+    call addmessage(messages,'')
     call addmessage(messages,'$URL$')
 end subroutine bedcomposition_module_info
 !
@@ -229,7 +229,6 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
     real(fp)                                :: thick
     real(fp)                                :: thtrlyrnew
     real(fp), dimension(this%settings%nfrac):: dmi
-    type (bedcomp_work)                     :: work
     !
     character(message_len)                  :: message
     type (morlyrnumericstype)     , pointer :: morlyrnum
@@ -244,6 +243,7 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
 !
 !! executable statements -------------------------------------------------------
 !
+
     morlyrnum   => this%settings%morlyrnum
     rhofrac     => this%settings%rhofrac
     thtrlyr     => this%settings%thtrlyr
@@ -254,7 +254,7 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
     sedshort    => this%state%sedshort
     thlyr       => this%state%thlyr  
     !
-    istat = allocwork(this,work)
+    istat = allocwork(this)
     if (istat /= 0) return
     select case(this%settings%iunderlyr)
     case(2)
@@ -324,7 +324,7 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
                 !
                 ! store surplus of mass in underlayers
                 !
-                call lyrsedimentation(this , nm, thdiff, dmi, svfrac(1, nm), work)
+                call lyrsedimentation(this , nm, thdiff, dmi, svfrac(1, nm))
                 !
              elseif ( thdiff < 0.0_fp ) then
                 !
@@ -409,7 +409,7 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
           dz(nm) = dpsed(nm) - seddep0
        enddo
     endselect
-    istat = deallocwork(this,work)
+    istat = deallocwork(this)
 end function updmorlyr
 !
 !
@@ -447,7 +447,6 @@ function gettoplyr(this, dz_eros, dbodsd, messages  ) result (istat)
     real(fp)                                :: thick
     real(fp), dimension(this%settings%nfrac):: dmi 
     real(fp)                                :: dz_togo
-    type (bedcomp_work)                     :: work
     !
     character(message_len)                  :: message
     real(prec) , dimension(:,:)   , pointer :: bodsed
@@ -470,7 +469,7 @@ function gettoplyr(this, dz_eros, dbodsd, messages  ) result (istat)
     sedshort    => this%state%sedshort
     thlyr       => this%state%thlyr
     !
-    istat = allocwork(this,work)
+    istat = allocwork(this)
     if (istat /= 0) return
     select case(this%settings%iunderlyr)
     case(2)
@@ -547,7 +546,7 @@ function gettoplyr(this, dz_eros, dbodsd, messages  ) result (istat)
                 !
                 ! store surplus of mass in underlayers
                 !
-                call lyrsedimentation(this , nm, dz, dmi, svfrac(1, nm), work)
+                call lyrsedimentation(this , nm, dz, dmi, svfrac(1, nm))
                 !
              elseif ( dz < 0.0_fp ) then
                 !
@@ -639,7 +638,7 @@ function gettoplyr(this, dz_eros, dbodsd, messages  ) result (istat)
           endif
        enddo
     endselect
-    istat = deallocwork(this,work)
+    istat = deallocwork(this)
 end function gettoplyr
 !
 !
@@ -837,7 +836,7 @@ end subroutine lyrerosion
 !
 !
 !==============================================================================
-subroutine lyrsedimentation(this, nm, dzini, dmi, svfracdep, work)
+subroutine lyrsedimentation(this, nm, dzini, dmi, svfracdep)
 !!--description-----------------------------------------------------------------
 !
 !    Function:
@@ -857,7 +856,6 @@ subroutine lyrsedimentation(this, nm, dzini, dmi, svfracdep, work)
     real(fp)                                 , intent(in) :: dzini
     real(fp)                                 , intent(in) :: svfracdep
     real(fp), dimension(this%settings%nfrac)              :: dmi
-    type(bedcomp_work)                                    :: work
 !
 ! Local variables
 !
@@ -884,6 +882,7 @@ subroutine lyrsedimentation(this, nm, dzini, dmi, svfracdep, work)
     real(fp), dimension(:,:,:), pointer         :: msed
     real(fp), dimension(:,:)  , pointer         :: thlyr
     real(fp), dimension(this%settings%nfrac)    :: dmi2
+    type(bedcomp_work)        , pointer         :: work
 !
 !! executable statements -------------------------------------------------------
 !
@@ -894,6 +893,7 @@ subroutine lyrsedimentation(this, nm, dzini, dmi, svfracdep, work)
     svfrac      => this%state%svfrac
     msed        => this%state%msed
     thlyr       => this%state%thlyr
+    work        => this%work
     !
     kmin = 2
     if (this%settings%exchlyr) kmin = 3
@@ -2085,13 +2085,15 @@ function allocmorlyr(this) result (istat)
        if (istat == 0) state%preload = 0.0_fp
     endif
     !
-    if (istat == 0) istat = allocwork(this,this%work)
+    ! WARNING: Do not allocate this%work here
+    ! For some reason it needs to be allocated/deallocated in updmorlyr/gettoplyr
+    !
 end function allocmorlyr
 !
 !
 !
 !==============================================================================
-function allocwork(this, work) result (istat)
+function allocwork(this) result (istat)
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
@@ -2101,7 +2103,6 @@ function allocwork(this, work) result (istat)
     ! Function/routine arguments
     !
     type (bedcomp_data), intent(in)  :: this    
-    type (bedcomp_work), intent(out) :: work
     integer                          :: istat
     !
     ! Local variables
@@ -2117,18 +2118,23 @@ function allocwork(this, work) result (istat)
     nlyr  => this%settings%nlyr
     !
     istat = 0
-    if (istat == 0) allocate (work%msed2(nfrac, nlyr), stat = istat)
-    if (istat == 0) work%msed2 = dmiss
-    if (istat == 0) allocate (work%thlyr2(nlyr)     , stat = istat)
-    if (istat == 0) work%thlyr2 = dmiss
-    if (istat == 0) allocate (work%svfrac2(nlyr)    , stat = istat)
-    if (istat == 0) work%svfrac2 = dmiss
+    !
+    ! Deallocate if it already exists
+    if (associated(this%work%msed2)) deallocate (this%work%msed2  , stat = istat)
+    if (associated(this%work%msed2)) deallocate (this%work%thlyr2 , stat = istat)
+    if (associated(this%work%msed2)) deallocate (this%work%svfrac2, stat = istat)
+    if (istat == 0) allocate (this%work%msed2(nfrac, nlyr), stat = istat)
+    if (istat == 0) allocate (this%work%thlyr2(nlyr)      , stat = istat)
+    if (istat == 0) allocate (this%work%svfrac2(nlyr)     , stat = istat)
+    if (istat == 0) this%work%msed2 = dmiss
+    if (istat == 0) this%work%thlyr2 = dmiss
+    if (istat == 0) this%work%svfrac2 = dmiss
 end function allocwork
 !
 !
 !
 !==============================================================================
-function deallocwork(this, work) result (istat)
+function deallocwork(this) result (istat)
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
@@ -2138,7 +2144,6 @@ function deallocwork(this, work) result (istat)
     ! Function/routine arguments
     !
     type (bedcomp_data), intent(in)  :: this    
-    type (bedcomp_work), intent(out) :: work
     integer                          :: istat
     !
     ! Local variables
@@ -2147,9 +2152,9 @@ function deallocwork(this, work) result (istat)
     !! executable statements -------------------------------------------------------
     !
     istat = 0
-    if (istat == 0) deallocate (work%msed2  , stat = istat)
-    if (istat == 0) deallocate (work%thlyr2 , stat = istat)
-    if (istat == 0) deallocate (work%svfrac2, stat = istat)
+    if (istat == 0) deallocate (this%work%msed2  , stat = istat)
+    if (istat == 0) deallocate (this%work%thlyr2 , stat = istat)
+    if (istat == 0) deallocate (this%work%svfrac2, stat = istat)
 end function deallocwork
 !
 !
@@ -2203,6 +2208,10 @@ function clrmorlyr(this) result (istat)
        deallocate(this%state, STAT = istat)
        nullify(this%state)
     endif
+    if (associated(this%work)) then
+       istat = deallocwork(this)
+       deallocate(this%work, STAT = istat)
+    endif
 end function clrmorlyr
 !
 !
@@ -2245,7 +2254,7 @@ subroutine setbedfracprop(this, sedtyp, sedd50, logsedsig, rhofrac)
        endif
        this%settings%rhofrac(l) = rhofrac(l) ! either rhosol or cdryb
     enddo
-end subroutine
+end subroutine setbedfracprop
 !
 !
 !
@@ -2282,7 +2291,7 @@ function bedcomp_getpointer_logical_scalar(this, variable, val) result (istat)
        val => NULL()
     end select
     if (.not.associated(val)) istat = -1
-end function
+end function bedcomp_getpointer_logical_scalar
 !
 !
 !
@@ -2343,7 +2352,7 @@ function bedcomp_getpointer_integer_scalar(this, variable, val) result (istat)
        val => NULL()
     end select
     if (.not.associated(val)) istat = -1
-end function
+end function bedcomp_getpointer_integer_scalar
 !
 !
 !
@@ -2385,7 +2394,7 @@ function bedcomp_getpointer_fp_scalar(this, variable, val) result (istat)
        val => NULL()
     end select
     if (.not.associated(val)) istat = -1
-end function
+end function bedcomp_getpointer_fp_scalar
 !
 !
 !
@@ -2431,7 +2440,7 @@ function bedcomp_getpointer_fp_1darray(this, variable, val) result (istat)
        val => NULL()
     end select
     if (.not.associated(val)) istat = -1    
-end function
+end function bedcomp_getpointer_fp_1darray
 !
 !
 !
@@ -2473,7 +2482,7 @@ function bedcomp_getpointer_fp_2darray(this, variable, val) result (istat)
        val => NULL()
     end select
     if (.not.associated(val)) istat = -1
-end function
+end function bedcomp_getpointer_fp_2darray
 !
 !
 !
@@ -2511,7 +2520,7 @@ function bedcomp_getpointer_fp_3darray(this, variable, val) result (istat)
        val => NULL()
     end select
     if (.not.associated(val)) istat = -1
-end function
+end function bedcomp_getpointer_fp_3darray
 !
 !
 !
@@ -2549,7 +2558,7 @@ function bedcomp_getpointer_prec_2darray(this, variable, val) result (istat)
        val => NULL()
     end select
     if (.not.associated(val)) istat = -1
-end function
+end function bedcomp_getpointer_prec_2darray
 !
 !
 !
@@ -2707,7 +2716,7 @@ subroutine bedcomp_use_bodsed(this)
        ! nothing to do, using bodsed as uniformly mixed sediment
        !
     endselect
-end subroutine
+end subroutine bedcomp_use_bodsed
 !
 !
 !
@@ -2759,7 +2768,7 @@ subroutine copybedcomp(this, nmfrom, nmto)
        enddo
        dpsed(nmto) = dpsed(nmfrom)
     end select
-end subroutine
+end subroutine copybedcomp
 !
 !
 !
@@ -2813,7 +2822,7 @@ subroutine updateporosity(this, nm, k)
     case default
        ! option not available for this bed composition model
     end select
-end subroutine
+end subroutine updateporosity
 !
 !
 !
@@ -2875,8 +2884,11 @@ subroutine getporosity(this, mfrac, poros)
     case default
        poros         = 0.0_fp
     end select
-end subroutine
-
+end subroutine getporosity
+!
+!
+!
+!==============================================================================
 subroutine consolidate(this, nm)
 !!--description-----------------------------------------------------------------
 !

@@ -2,7 +2,7 @@ subroutine strgrd ( icom, runid, mmax, nmax, mmaxgl, nmaxgl, &
                   & nfg , nlg  , mfg , mlg , gdp   )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -26,8 +26,8 @@ subroutine strgrd ( icom, runid, mmax, nmax, mmaxgl, nmaxgl, &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Stores array ICOM for own subdomain in scratch file to be later used

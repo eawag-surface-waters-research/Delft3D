@@ -2,7 +2,7 @@ subroutine totiwe(kmxdt     ,kmxt      ,ratio     ,singul    ,top       , &
                 & r1tg      ,h0        ,scale     ,kcrit     ,xkh       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2022.                                
+!  Copyright (C)  Stichting Deltares, 2011-2023.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -26,8 +26,8 @@ subroutine totiwe(kmxdt     ,kmxt      ,ratio     ,singul    ,top       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
+!  
+!  
 !!--description-----------------------------------------------------------------
 !
 !    Function: Compute ratio between twice Kin. IWE and <w^2>

@@ -65,6 +65,7 @@ libIOInput_la_SOURCES = \
          grdfil.f90 \
          hybfil.f90 \
          icfil.f90 \
+         area4.f90 \
          inicut.f90 \
          inimet.f90 \
          inimorlyr.f90 \

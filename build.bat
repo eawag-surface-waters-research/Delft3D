@@ -64,6 +64,7 @@ echo DIMR      : %root%\build_dimr\dimr.sln
 echo DWAQ      : %root%\build_dwaq\dwaq.sln
 echo D-Waves   : %root%\build_dwaves\dwaves.sln
 echo Tests     : %root%\build_tests\tests.sln
+echo Delft3D4  : %root%\build_delft3d4\delft3d4.sln
 echo.
 echo Finished
 goto :end
@@ -123,6 +124,11 @@ rem =================================
         set config=%1
         set mode=quiet
     )
+    if "%1" == "dwaves" (
+        set prepareonly=0
+        set config=%1
+        set mode=quiet
+    )
     if "%1" == "swan" (
         set prepareonly=0
         set config=%1
@@ -133,7 +139,17 @@ rem =================================
         set config=%1
         set mode=quiet
     )
-    
+    if "%1" == "delft3d4" (
+        set prepareonly=0
+        set config=%1
+        set mode=quiet
+    )
+    if "%1" == "flow2d3d" (
+        set prepareonly=0
+        set config=%1
+        set mode=quiet
+    )
+
   set "options=-vs:0 -ifort:0 -coverage: -prepareonly:"
 
   rem see: https://stackoverflow.com/questions/3973824/windows-bat-file-optional-argument-parsing answer 2.
@@ -177,7 +193,18 @@ rem =================================
     rem # On TeamCity VS2019 is installed without IFORT
 
 
-    
+
+    if NOT "%VS2022INSTALLDIR%" == "" (
+        set vs=2022
+        echo Found: VisualStudio 17 2022
+        if NOT "%IFORT_COMPILER21%" == "" (
+            set ifort=23
+            echo Found: Intel Fortran 2023
+        )
+        goto :endfun
+    )     
+        
+        
     if NOT "%VS2017INSTALLDIR%" == "" (
         set vs=2017
         echo Found: VisualStudio 15 2017
@@ -228,7 +255,7 @@ rem =================================
             echo Found: Intel Fortran 2016
         )
         goto :endfun
-    )   
+    )
     :endfun
     if NOT !-vs! == 0 (
     set vs=!-vs!
@@ -240,7 +267,7 @@ rem =================================
     echo overriding ifort with !-ifort!
     )
     goto :endproc
-   
+
 
 rem ================================
 rem === Check CMake installation ===
@@ -272,9 +299,7 @@ rem === Prepare_sln    ====
 rem =======================
 :PrepareSln
     if "!mode!" == "quiet" (
-        if "%config%" == "all" (
-            echo "Calling prepare_sln.py is not needed ..."
-        )
+        echo "Mode is 'quiet': Calling prepare_sln.py is not needed ..."
     ) else (
         echo.
         echo "Calling prepare_sln.py in interactive mode ..."
@@ -310,6 +335,9 @@ rem =======================
     if "!vs!" == "2019" (
         set generator="Visual Studio 16 2019"
     )
+    if "!vs!" == "2022" (
+        set generator="Visual Studio 17 2022"
+    )
     goto :endproc
 
 
@@ -342,7 +370,7 @@ rem =================
     rem # Execute vcvarsall.bat in case of compilation
     if %prepareonly% EQU 1 goto :endproc
     if !ERRORLEVEL! NEQ 0 goto :endproc
-    
+
     echo.
     if !generator! == "Visual Studio 14 2015" (
         echo "Calling vcvarsall.bat for VisualStudio 2015 ..."
@@ -355,6 +383,10 @@ rem =================
     if !generator! == "Visual Studio 16 2019" (
         echo "Calling vcvarsall.bat for VisualStudio 2019 ..."
         call "%VS2019INSTALLDIR%\VC\Auxiliary\Build\vcvarsall.bat" amd64
+    )
+    if !generator! == "Visual Studio 17 2022" (
+        echo "Calling vcvarsall.bat for VisualStudio 2022 ..."
+        call "%VS2022INSTALLDIR%\VC\Auxiliary\Build\vcvarsall.bat" amd64
     )
     
     rem # Execution of vcvarsall results in a jump to the C-drive. Jump back to the script directory
@@ -436,14 +468,12 @@ rem =======================
 :VSbuild
     echo.
     echo "Building with VisualStudio: %~1 ..."
-    
     set currentWorkDir=%CD%
-    devenv.com %~1.sln /Clean "Release|x64"
-    devenv.com %~1.sln /Build "Release|x64" 1>%currentWorkDir%\build_%~1.log 2>&1
+    devenv.com %~1.sln /Rebuild "Release|x64" 1>%currentWorkDir%\build_%~1.log 2>&1
     if !ERRORLEVEL! NEQ 0 call :errorMessage
 
     rem # In build.log, replace "error" by TeamCity messages
-    %root%\src\third_party_open\commandline\bin\win32\sed.exe -e "/[Ee]rror[\:\ ]/s/^/\#\#teamcity\[buildStatus status\=\'FAILURE\' text\=\' /g;/buildStatus/s/$/\'\]/g" %currentWorkDir%\build_%~1.log 
+    %root%\src\third_party_open\commandline\bin\win32\sed.exe -e "/[Ee]rror[\:\ ]/s/^/\#\#teamcity\[buildStatus status\=\'FAILURE\' text\=\' /g;/buildStatus/s/$/\'\]/g" %currentWorkDir%\build_%~1.log
     goto :endproc
 
 
@@ -500,6 +530,22 @@ rem =======================
         rmdir /s /q %root%\build_all\x64\Release > del.log 2>&1
         del /f/q del.log
     )
+    if "!config!" == "delft3d4" (
+        echo.
+        echo "Installing in build_delft3d4 ..."
+        xcopy %root%\build_delft3d4\x64\Release\dflow2d3d                %root%\build_delft3d4\x64\dflow2d3d\       /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_delft3d4\x64\Release\dimr                     %root%\build_delft3d4\x64\dimr\            /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_delft3d4\x64\Release\dpart                    %root%\build_delft3d4\x64\dpart\           /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_delft3d4\x64\Release\dwaq                     %root%\build_delft3d4\x64\dwaq\            /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_delft3d4\x64\Release\dwaves                   %root%\build_delft3d4\x64\dwaves\          /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_delft3d4\x64\Release\share                    %root%\build_delft3d4\x64\share\           /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_delft3d4\x64\Release\swan                     %root%\build_delft3d4\x64\swan\            /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_delft3d4\x64\Release\d_hydro\bin\*.exe        %root%\build_delft3d4\x64\dflow2d3d\bin\   /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_delft3d4\x64\Release\dmor                     %root%\build_delft3d4\x64\dmor\            /E /C /Y /Q > del.log 2>&1
+
+        rmdir /s /q %root%\build_delft3d4\x64\Release > del.log 2>&1
+        del /f/q del.log
+    )
     goto :endproc
 
 
@@ -533,6 +579,8 @@ rem =======================
     echo "- dwaq"
     echo "- dimr"
     echo "- tests"
+    echo "- delft3d4"
+    echo "- flow2d3d"
     echo.
     echo "[OPTIONS]: usage [OPTION], sometimes followed by a value, space separated, in any order"
     echo "-coverage: Instrument object files for code-coverage tool (codecov) Example: -coverage"
@@ -541,7 +589,7 @@ rem =======================
     echo "-ifort: desired intel fortran compiler version.                     Example: -ifort 21
     echo.
     echo "More info  : https://oss.deltares.nl/web/delft3d/source-code"
-    echo "About CMake: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/cmake/doc/README"
+    echo "About CMake: https://git.deltares.nl/oss/delft3d/-/tree/main/src/cmake/doc/README"
     echo.
     set ERRORLEVEL=1
     goto :end
@@ -581,5 +629,5 @@ rem =======================
 :endproc
    rem # No exit  here, otherwise the script exits directly at the first missing artefact
    rem # No pause here, otherwise a pause will appear after each procedure execution
-   
+
 
