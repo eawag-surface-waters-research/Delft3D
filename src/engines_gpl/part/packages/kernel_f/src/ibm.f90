@@ -21,7 +21,7 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-module ibm_mod
+module abm_mod
 !
 !  data definition module(s)
 !
@@ -48,7 +48,7 @@ use intpltd_stagedev_mod        ! explicit interface
 implicit none
 
 contains
-      subroutine ibm    ( lunrep   , itime    , idelt    , nmax     , mmax     ,    &
+      subroutine abm    ( lunrep   , itime    , idelt    , nmax     , mmax     ,    &
                           layt     , nosegl   , nolay    , mnmaxk   , lgrid    ,    &
                           lgrid2   , lgrid3   , nopart   , npwndw   , nosubs   ,    &
                           npart    , mpart    , kpart    , xpart    , ypart    ,    &
@@ -56,7 +56,7 @@ contains
                           nocons   , const    , conc     , xa       , ya       ,    &
                           angle    , vol1     , vol2     , flow     , depth    ,    &
                           vdiff1   , salin1   , temper1  , v_swim   , d_swim   ,    &
-                          itstrtp  , vel1     , vel2     , ibmmt    , ibmsd    ,    &
+                          itstrtp  , vel1     , vel2     , abmmt    , abmsd    ,    &
                           chronrev , selstage , zmodel   , laybot   , laytop   )
 
       ! function  : calculates individual based model specifics
@@ -203,7 +203,7 @@ contains
       logical                    :: frelease = .false.  ! first release (used for rev chron)
       logical, pointer, save     :: ebb_flow( : )       ! true if flow is ebb
 
-      integer                    :: ibmmt                          ! actual model type
+      integer                    :: abmmt                          ! actual model type
 
       integer, parameter         :: model_none             = 0     ! model type none
       integer, parameter         :: model_european_eel     = 1     ! model type European eel
@@ -233,15 +233,15 @@ contains
       integer,parameter          :: h_behaviour_temp_sal = 2  ! horizontal behaviour towards lowest salinity
                                                               ! avoinding temperature boundaries
 
-      integer                    :: ibmsd                     ! stage development method
+      integer                    :: abmsd                     ! stage development method
 
       integer,parameter          :: dev_fixed           = 0   ! value based stage development
       integer,parameter          :: dev_linear          = 1   ! linear exponential stage development
       integer,parameter          :: dev_intpltd         = 2   ! interplolated stage development
       integer,parameter          :: dev_asian_carp_egg  = 3   ! asian carp egg stage development
 
-      logical                    :: chronrev                  ! reverse chronological order of IBM model
-      real                       :: selstage                  ! stage for release in reversed IBM model
+      logical                    :: chronrev                  ! reverse chronological order of ABM model
+      real                       :: selstage                  ! stage for release in reversed ABM model
 
       real                       :: vswim                  ! swimming velocity
       real                       :: low_sal                ! lowest salinity
@@ -292,7 +292,7 @@ contains
       real   , parameter         :: twopi = pi*2.0
       integer                    :: nconst                 ! count of constants
       integer                    :: nfix                   ! number of constants
-      integer, parameter         :: nfix_std           = 9 ! fixed number of constants (for standard IBM setup)
+      integer, parameter         :: nfix_std           = 9 ! fixed number of constants (for standard ABM setup)
       integer, parameter         :: nvar               =18 ! variable number of constants per stage
 
       integer, save              :: ifirst = 1
@@ -300,7 +300,7 @@ contains
       integer(4),save            :: ithndl = 0             ! handle to time this subroutine
 
       ! Asian carp model specific parameters
-      integer, parameter         :: nfix_ace          = 20 ! fixed number of constants (for asian carp egg IBM setup)
+      integer, parameter         :: nfix_ace          = 20 ! fixed number of constants (for asian carp egg ABM setup)
       real , save                :: factor_alpha           ! derived factor to predict species specific egg diameter at 22 degrees Celsius (unitless)
       real , save                :: factor_beta            ! derived factor to predict species specific egg diameter at 22 degrees Celsius (unitless)
       real , save                :: factor_delta           ! derived factor to predict species specific egg density at 22 degrees Celsius (unitless)
@@ -342,11 +342,11 @@ contains
             stop
          endif
 
-         if( ibmmt .eq. model_asian_carp_eggs ) then    ! asian carp eggs model
+         if( abmmt .eq. model_asian_carp_eggs ) then    ! asian carp eggs model
              ! If number of constants .ne. to 9 (fixed number of constants) +
              ! number of stages * 18 (variable number of constants per stage) then
              ! deactivate the larvae model
-             if( ibmsd .ne. dev_asian_carp_egg ) then
+             if( abmsd .ne. dev_asian_carp_egg ) then
                 write(lunrep,*) 'ERROR "dev_asian_carp_egg" is not activated for stage development, no larvae model activated'
                 write(*,*) 'ERROR "dev_asian_carp_egg" is not activated for stage development, no larvae model activated'
                 l_larvae = .false.
@@ -395,7 +395,7 @@ contains
         nconst         = 9                           ! count constants used
 
         write(*,*) nfix, nvar
-        write(*,*) "IBM parameters"
+        write(*,*) "ABM parameters"
         write(*,*) "istage_nursery : ", istage_nursery
         write(*,*) "layer_release : ", layer_release
         write(*,*) "it_start_m2 : ", it_start_m2
@@ -405,7 +405,7 @@ contains
         write(*,*) "iniday : ", iniday
         write(*,*) "tide_opt : ", tide_opt
 
-        if( ibmmt .eq. model_asian_carp_eggs .and. ibmsd .eq. dev_asian_carp_egg ) then
+        if( abmmt .eq. model_asian_carp_eggs .and. abmsd .eq. dev_asian_carp_egg ) then
 
             ! asian carp eggs model
             factor_alpha       = const(nconst + 1)              !factor_alpha
@@ -664,7 +664,7 @@ contains
             endif
 
             !determine the duration that needs to be calculated
-            select case ( ibmsd )   !If the stage is not 0
+            select case ( abmsd )   !If the stage is not 0
 
                 case(dev_fixed)                                                             !Stage development 0
                     a = astage(istage)                               ! Determine the a-coefficient for stage development
@@ -681,7 +681,7 @@ contains
                     duration = astage(istage) + bstage(istage) * (1-dev_factor)
 
                 case(dev_asian_carp_egg)                                                     !Stage development 3
-                    if( ibmmt .ne. 6 ) then
+                    if( abmmt .ne. 6 ) then
                         write(lunrep,*) ' error, stage development method for asian carp egg defined, but not set as model'  ! Give an error notice that stage development is not defined
                         call stop_exit(1)                                                         ! Stop the calculation
                     endif
@@ -806,7 +806,7 @@ contains
             ! behv_mangrove FOR OTHER CONFIGURATIONS
             ! ADDAPTION IN THE CODE NEEDED
 
-            select case ( ibmmt )
+            select case ( abmmt )
 
                 case(model_none)
 
@@ -940,9 +940,9 @@ contains
                                         factor_eta, factor_gamma, factor_phi    )
 
 
-                case default                                                                  !IBM model Default
+                case default                                                                  !ABM model Default
 
-                    write(lunrep,*) ' error, IBM model type not defined'                      ! Give an error notice that vertical behaviour is not defined
+                    write(lunrep,*) ' error, ABM model type not defined'                      ! Give an error notice that vertical behaviour is not defined
                     call stop_exit(1)                                                         ! Stop the calculation
 
 
