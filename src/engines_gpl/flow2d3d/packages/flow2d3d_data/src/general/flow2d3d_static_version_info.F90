@@ -21,9 +21,9 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-#INCLUDE "wave_version.h"
+#INCLUDE "flow2d3d_version.h"
 
-module dwaves_static_version_info
+module flow2d3d_static_version_info
     implicit none
 
     character(*),  public, parameter :: company      = COMPANY_NAME
@@ -37,7 +37,8 @@ module dwaves_static_version_info
     character(*),  public, parameter :: revision     = REVISION_STR
     character(*),  public, parameter :: branch       = 'HeadURL: '//BRANCH
 
-    character(*),  public, parameter :: version_full = trim(major)//'.'//trim(minor)//'.'//trim(revision)//'.'//trim(build_nr)
+    character(*),  public, parameter :: version_shrt        = trim(major)//'.'//trim(minor)
+    character(*),  public, parameter :: version_full        = trim(major)//'.'//trim(minor)//'.'//trim(revision)//'.'//trim(build_nr)
     character(*),  public, parameter :: version_suffix      = version_full
     character(*),  public, parameter :: version_suffix_full = ' Version '//version_suffix//', '//__DATE__//', '//__TIME__
     character(*),  public, parameter :: version_prefix      = company
@@ -49,5 +50,5 @@ module dwaves_static_version_info
     ! "strings" on Linux can extract it.
     integer, protected, save :: offset = 5
 
-end module dwaves_static_version_info
+end module flow2d3d_static_version_info
 

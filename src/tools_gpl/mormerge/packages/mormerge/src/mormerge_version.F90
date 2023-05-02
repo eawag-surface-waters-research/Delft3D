@@ -25,27 +25,28 @@
 !
 !-------------------------------------------------------------------------------
 
-module dwaves_version_module
-    use dwaves_static_version_info
+module mormerge_version_module
+    use mormerge_static_version_info
 
     implicit none
 
-    character(*),  public, parameter :: dwaves_version_full = version_prefix // ', ' // product_name // version_suffix
-    character(*),  public, parameter :: dwaves_version_id   = version_prefix_id // ', ' // product_name // ' ' // version_suffix_full
-    character(*),  public, parameter :: dwaves_branch       = branch
+    character(*),  public, parameter :: mormerge_version_full = version_prefix // ', ' // product_name // version_suffix
+    character(*),  public, parameter :: mormerge_version_id   = version_prefix_id // ', ' // product_name // ' ' // version_suffix_full
+    character(*),  public, parameter :: mormerge_branch       = branch
 
 contains
 
-    subroutine getfullversionstring_dwaves(stringout)
+    subroutine getfullversionstring_mormerge(stringout)
         character(*), intent(out) :: stringout
 
-        stringout = dwaves_version_id(offset:)
-    end subroutine getfullversionstring_dwaves
+        stringout = mormerge_version_id(offset:)
+    end subroutine getfullversionstring_mormerge
 
-    subroutine getbranch_dwaves(stringout)
+    subroutine getbranch_mormerge(stringout)
         character(*), intent(out) :: stringout
 
-        stringout = dwaves_branch(offset:)
-    end subroutine getbranch_dwaves
+        stringout = mormerge_branch(offset:)
+    end subroutine getbranch_mormerge
 
-end module dwaves_version_module
+end module mormerge_version_module
+
