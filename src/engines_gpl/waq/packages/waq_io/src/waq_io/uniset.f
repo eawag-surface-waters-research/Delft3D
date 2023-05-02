@@ -44,6 +44,7 @@
 
       use timers       !   performance timers
       use m_dhdelf
+      use m_dhgnam
 
       implicit none
 

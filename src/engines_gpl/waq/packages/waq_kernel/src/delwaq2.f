@@ -111,6 +111,7 @@
       use m_sysa          ! Pointers in real array workspace
       use m_sysj          ! Pointers in integer array workspace
       use m_sysc          ! Pointers in character array workspace
+      use m_dhgnam
 
       implicit none
 
