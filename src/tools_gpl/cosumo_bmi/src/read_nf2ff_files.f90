@@ -269,15 +269,25 @@ subroutine nf_2_flow(filename, idis, error)
             idim = 1
         endif
     endif
-    nf_intake_idimMAX = max(nf_intake_idimMAX, idim)
-    call reallocP(nf_intake, (/ idis,nf_intake_idimMAX,3  /), keepExisting=.true., fill = 0.0_fp)
-    if (idim == 1) then
-        call prop_get(file_ptr, 'NF2FF/NFResult/intakes', nf_intake(idis,idim,:), 3)
-    else
-        do i=1,idim
-            write(key,'(a,i0)') 'NF2FF/NFResult/intakes/', i
-            call prop_get(file_ptr, trim(key), nf_intake(idis,i,:), 3)
-        enddo
+    if (idim == 0) then
+        ! No intake points in the NF2FF file, use the single intake point from the Cosumo file
+        idim = 1
+        nf_intake_idimMAX = max(nf_intake_idimMAX, idim)
+        call reallocP(nf_intake, (/ idis,nf_intake_idimMAX,3  /), keepExisting=.true., fill = 0.0_fp)
+        nf_intake(idis,1,1) = x_intake(idis)
+        nf_intake(idis,1,2) = y_intake(idis)
+        nf_intake(idis,1,3) = 0.0_fp
+    else  
+        nf_intake_idimMAX = max(nf_intake_idimMAX, idim)
+        call reallocP(nf_intake, (/ idis,nf_intake_idimMAX,3  /), keepExisting=.true., fill = 0.0_fp)
+        if (idim == 1) then
+            call prop_get(file_ptr, 'NF2FF/NFResult/intakes', nf_intake(idis,idim,:), 3)
+        else
+            do i=1,idim
+                write(key,'(a,i0)') 'NF2FF/NFResult/intakes/', i
+                call prop_get(file_ptr, trim(key), nf_intake(idis,i,:), 3)
+            enddo
+        endif
     endif
     !
     ! Sinks
