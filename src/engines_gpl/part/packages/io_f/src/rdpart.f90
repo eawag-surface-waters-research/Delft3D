@@ -1973,7 +1973,7 @@
       call alloc ( "npart ", npart , npmax        )
       call alloc ( "rbuff ", rbuff , 3           , npmax  )
       call alloc ( "t0buoy", t0buoy, npmax        )
-      call alloc ( "track ", track , 8           , npmax  )
+      call alloc ( "track ", track , 10          , npmax  )
       call alloc ( "mpart ", mpart , npmax        )
       call alloc ( "wsettl", wsettl, npmax        )
       call alloc ( "xa0   ", xa0   , npmax        )
