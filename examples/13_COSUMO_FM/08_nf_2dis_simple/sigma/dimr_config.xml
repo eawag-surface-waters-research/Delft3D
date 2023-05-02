@@ -28,6 +28,7 @@
         <workingDir>cosumo</workingDir>
         <!-- component specific -->
         <inputFile>COSUMOsettings.xml</inputFile>
+        <parameter key="skipUniqueId" value="true"/>
     </component>
 
     <coupler name="flow2cosumo">
@@ -125,14 +126,6 @@
         <item type="pointer">
             <sourceName>nf_src_mom</sourceName>
             <targetName>sourcesinks/COSUMO/nf_src_mom</targetName>
-        </item>
-        <item type="pointer">
-            <sourceName>nf_dif_dia</sourceName>
-            <targetName>sourcesinks/COSUMO/nf_dif_dia</targetName>
-        </item>
-        <item type="pointer">
-            <sourceName>nf_dif_ang</sourceName>
-            <targetName>sourcesinks/COSUMO/nf_dif_ang</targetName>
         </item>
         <logger>
           <workingDir>.</workingDir>
