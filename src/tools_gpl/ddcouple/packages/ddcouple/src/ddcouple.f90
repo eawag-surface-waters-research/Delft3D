@@ -28,6 +28,7 @@ program ddcouple
       use delwaq_version_module
       use m_dattim
       use m_dhfext
+      use m_dhgarg
 
       implicit none
 

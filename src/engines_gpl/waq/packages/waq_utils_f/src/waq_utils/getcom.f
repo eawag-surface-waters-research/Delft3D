@@ -55,6 +55,7 @@
 !
       USE Timers
       use m_dhcarg
+      use m_dhgarg
 
       INTEGER        ARGMOD, INTARG, IERR
       REAL           REAARG

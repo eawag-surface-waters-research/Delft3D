@@ -41,6 +41,7 @@
 !                                          when name is enterd interactive from keyboard
 !
       USE ISO_FORTRAN_ENV, ONLY: INPUT_UNIT, OUTPUT_UNIT
+      use m_dhgarg
 
       CHARACTER*(*) NAME
       CHARACTER*(*) CHECK
