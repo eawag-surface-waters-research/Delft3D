@@ -375,6 +375,7 @@ subroutine getUniqueId(id, seedString)
     real(fp)                           :: rrandom   !< Output of random_number, in [0.0,1.0]
     !
     ! Body
+    charsum = 0
     if (present(seedString)) then
         do i=1,len(seedString)
             charsum=charsum+ichar(seedString(i:i))
