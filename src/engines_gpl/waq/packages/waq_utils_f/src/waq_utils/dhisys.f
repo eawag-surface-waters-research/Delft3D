@@ -41,6 +41,7 @@
 !     ISYSN   INTEGER       *     OUTPUT  copy of the SYSI common block
 !
 !     declarations
+      use m_dhimov
       use m_sysn          ! System characteristics
       use m_sysi          ! Timer characteristics
 !

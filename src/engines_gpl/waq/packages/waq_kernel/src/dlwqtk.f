@@ -52,6 +52,7 @@
 !
 !     DECLARATIONS        :
 !
+      use m_dhimov
       use timers
       INTEGER       ITIME , NOSEG , IS    , ISFLAG, IFFLAG,
      +              IFIOPK, IKMRK1
