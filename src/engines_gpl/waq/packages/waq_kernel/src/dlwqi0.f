@@ -56,6 +56,7 @@
 !                           MOVE  , copy's arrays
 !                           ZERO  , zeros an real arrays
 !
+      use m_dhisys
       use grids
       use waqmem
       use delwaq2_data
@@ -117,7 +118,7 @@
 !     copy common to (possible) shared array to share these values with
 !     other processes (domain decomposition)
 !
-      CALL DHISYS ( J(ISYSI), J(ISYSN) )
+      CALL DHISYS ( J(ISYSI:), J(ISYSN:) )
 !
       J(ILP  ) = IPAGE
       J(ILP+1) =    10
