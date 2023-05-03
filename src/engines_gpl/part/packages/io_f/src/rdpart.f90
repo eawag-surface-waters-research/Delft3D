@@ -374,7 +374,7 @@
          case ( 6 )
             write ( *, * ) ' You are using the probabilistic density driven settling model '
          case ( 7 )
-            write ( *, * ) ' You are using the general Individual Based Model (ABM)'
+            write ( *, * ) ' You are using the general Agent Based Model (ABM)'
             pblay  = 0.0
          case default
             write(lun2 , 2015) modtyp
@@ -483,7 +483,7 @@
          case ( 4 )
             write ( lun2, 2002 ) 'Oil model - dispersion and evaporation included'
          case ( 7 )
-            write ( lun2, 2001) 'General Individual Based Model (ABM)'
+            write ( lun2, 2001) 'General Agent Based Model (ABM)'
       end select
 
       subst2( nosubs+2 ) = 'nr of particles'
