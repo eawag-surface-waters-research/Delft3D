@@ -958,7 +958,6 @@ rem ==========================
     call :copyDimrDependentRuntimeLibraries                                                                             !dest_share!
     call :copyFile "!build_dir!\dimr\!configuration!\dimr.exe"                                                          !dest_bin!
 
-    call :copyFile "!checkout_src_root!\engines_gpl\d_hydro\scripts\create_config_xml.tcl"                              !dest_menu!
     call :copyFile "!checkout_src_root!\engines_gpl\dimr\scripts\generic\win64\*.*"                                     !dest_scripts!
     call :copyDir  "!checkout_src_root!\engines_gpl\dimr\schemas"                                                       !dest_schema!
     )
@@ -1654,7 +1653,6 @@ rem ==========================
         call :makeAllDirs
         call :copyDHydroDependentRuntimeLibraries                                                             !dest_share!
         call :copyFile "!build_dir!\d_hydro\!configuration!\d_hydro.exe"                                      !dest_bin!
-        call :copyFile "!checkout_src_root!\engines_gpl\d_hydro\scripts\create_config_xml.tcl"                !dest_menu!
     )
 
 goto :endproc

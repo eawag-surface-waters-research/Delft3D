@@ -21,9 +21,9 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-#INCLUDE "wave_version.h"
+#INCLUDE "mormerge_version.h"
 
-module dwaves_static_version_info
+module mormerge_static_version_info
     implicit none
 
     character(*),  public, parameter :: company      = COMPANY_NAME
@@ -41,7 +41,7 @@ module dwaves_static_version_info
     character(*),  public, parameter :: version_suffix      = version_full
     character(*),  public, parameter :: version_suffix_full = ' Version '//version_suffix//', '//__DATE__//', '//__TIME__
     character(*),  public, parameter :: version_prefix      = company
-    character(*),  public, parameter :: version_prefix_id   = '@(#)'// company
+    character(*),  public, parameter :: version_prefix_id   = '@(#) '// company
 
     ! While in principle we can use a literal constant, this allows the complier/linker to get rid of the
     ! literal string. Since we want that string to be present in the executable or DLL, we need to use
@@ -49,5 +49,4 @@ module dwaves_static_version_info
     ! "strings" on Linux can extract it.
     integer, protected, save :: offset = 5
 
-end module dwaves_static_version_info
-
+end module mormerge_static_version_info

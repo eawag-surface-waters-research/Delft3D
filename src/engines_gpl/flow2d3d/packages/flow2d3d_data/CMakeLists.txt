@@ -16,16 +16,26 @@ message(STATUS "Configuring '${library_name}' with the following delftio include
 message(STATUS "Configuring '${library_name}' with the following esmfsm include path: '${esmfsm_module_include_path}'")
 
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
+set(flow2d3d_root_path ${CMAKE_CURRENT_SOURCE_DIR}/../../)
+set(flow2d3d_version_path ${flow2d3d_root_path}/version)
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
+
 set(include_path ${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${include_path}
                     ${mpi_include_path}
                     ${deltares_common_include_path}
                     ${delftio_include_path}
                     ${esmfsm_module_include_path}
-                    ${morphology_kernel_module_include_path})
+                    ${morphology_kernel_module_include_path}
+                    ${version_include_dir}
+                    ${flow2d3d_version_path})
 
 # Set public include path to make it accessible for other components
 set(public_include_path ${include_path})
+
+
+set(fortran_version_files ${flow2d3d_root_path}/packages/flow2d3d_data/src/general/flow2d3d_version.F90
+                          ${flow2d3d_root_path}/packages/flow2d3d_data/src/general/flow2d3d_static_version_info.F90)
 
 # Set directory which contains all source files
 set(src_path src)
@@ -55,6 +65,7 @@ get_fortran_source_files(${src_path}/parallel_mpi parallel_mpi_files)
 
 # Define library
 add_library(${library_name} ${include_files}
+                            ${fortran_version_files}
                             ${allocation_files}
                             ${basics_files}
                             ${gdp_files}
@@ -62,7 +73,7 @@ add_library(${library_name} ${include_files}
                             ${parallel_mpi_files})
 
 # Set additional compilation properties
-set_source_files_properties(
+set_source_files_properties(${fortran_version_files}
                      ${parallel_mpi_files}
                      PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")
 

@@ -19,7 +19,3 @@ src/engines_gpl/dflowfm/**/unstruc_version.F90
 # flow related tools version files
 src/tools_gpl/dfm_volume_tool/**/dfm_volume_tool_version.F90
 src/tools_gpl/dfmoutput/**/dfmoutput_version.F90
-
-# mormerge version files
-src/tools_gpl/mormerge/packages/mormerge/src/mormerge_version.F90
-src/tools_gpl/mormerge/res/version_number.rc
