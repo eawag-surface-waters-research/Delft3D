@@ -67,6 +67,7 @@
 
 !     Files               : Monitoring file if needed for messages
 
+      use m_dhagg2
       use m_dhgvar
       use m_dhgpoi
       use timers
@@ -89,7 +90,7 @@
       integer( 4), intent(in   ) :: noseg                       !< Nr. of computational volumes
       integer( 4), intent(in   ) :: nodef                       !< Number of values in the deafult array
       integer( 4), intent(in   ) :: novar                       !<
-      real   ( 4), intent(in   ) :: conc  (notot,noseg,nogrid)  !< Model concentrations
+      real   ( 4), intent(inout) :: conc  (notot,noseg,nogrid)  !< Model concentrations
       real   ( 4), intent(in   ) :: volume(      noseg,nogrid)  !< Segment volumes
       integer( 4), intent(in   ) :: itime                       !< Time in system clock units
       integer( 4), intent(in   ) :: idt                         !< Time step system clock units
