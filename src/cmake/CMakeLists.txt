@@ -40,13 +40,13 @@ endif()
 if (WIN32)
     message(STATUS "Setting compiler flags in windows")
     set(CMAKE_Fortran_FLAGS "/W1 /nologo /libs:dll /threads /MP")
-    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} ${check_uninit_flag} ${check_stack_flag} ${check_bounds_flag} ${traceback}")
+    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} ${check_uninit_flag} ${check_stack_flag} ${check_bounds_flag} ${traceback_flag}")
 endif(WIN32)
 
 if (UNIX)
     message(STATUS "Setting compiler flags in unix")
     set(CMAKE_Fortran_FLAGS "${compiler_flags}")
-    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} ${check_bounds_flag}")
+    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} ${check_uninit_flag} ${check_stack_flag} ${check_bounds_flag} ${traceback_flag}")
 endif(UNIX)
 
 # Set available build configurations for the .sln file
