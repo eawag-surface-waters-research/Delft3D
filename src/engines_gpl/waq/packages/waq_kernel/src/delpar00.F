@@ -225,7 +225,7 @@
      &                  ypart   , zpart   , npart   , mpart   , kpart   ,
      &                  iptime  , npmax   , nrowsmax, lunut   )
       endif
-      if ( modtyp .ne. model_ibm .and. idp_file .ne. ' ' ) then
+      if ( modtyp .ne. model_abm .and. idp_file .ne. ' ' ) then
          if (modtyp .ne. model_prob_dens_settling) then
             write ( lunut, * ) ' Opening initial particles file:', idp_file(1:len_trim(idp_file))
             call openfl ( luini, idp_file, 0 )

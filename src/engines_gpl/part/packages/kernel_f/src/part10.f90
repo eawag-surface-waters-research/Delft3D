@@ -107,7 +107,7 @@ contains
                                                         ! 4 = oil model                 &
                                                         ! 5 = 1-layer temperature model &
                                                         ! 6 = plastics model
-                                                        ! 7 = ibm model
+                                                        ! 7 = abm model
       integer(ip), intent(in)    :: nfract              ! nr of oil fractions, each fraction 3 substances &
                                                         ! floating, dispersed and sticked
       integer(ip), intent(in)    :: npwndw              ! first active particle
@@ -787,7 +787,7 @@ contains
             dvz         = 2.0 * sq6 * sqrt( disp*itdelt ) *   &
                              ( rnd(rseed)-0.5 ) / depthl / dred
          endif
-        if (modtyp.ne.model_ibm) then
+        if (modtyp.ne.model_abm) then
           dvzs = wsettl(ipart)*itdelt/depthl          !  settling      ?? what is the effect of this?? jvb: no bouncing for settling particles
           dvzt = dvzs + dvz                           !  vertical diffusion
         else
@@ -991,7 +991,7 @@ contains
                vz1    = flow ( n0 + idep   + 2*mnmaxk) / vol
             endif
          endif
-         if (modtyp.eq.model_ibm) then
+         if (modtyp.eq.model_abm) then
             depthl = volume(n0+idep)/area(n0)
             vzs  = wsettl(ipart)/depthl             !  settling
             if ( kpp .ne. ktopp ) vz0  = vz0 + vzs
@@ -1303,7 +1303,7 @@ contains
 
 !**      xnew,ynew is inclusive of diffusion (dax,day); c1 = 0.0 for 3d
 
-         if (modtyp.eq.model_ibm) then 
+         if (modtyp.eq.model_abm) then 
             sdir         = d_swim(ipart) * twopi / 360.0
             displacement = v_swim(ipart)*idelt
             dx_swim      = displacement*sin(sdir+sangl)
