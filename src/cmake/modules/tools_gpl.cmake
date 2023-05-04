@@ -18,19 +18,11 @@ set(waqpb_import_module ${waqpb_module_path}/waqpb_import)
 set(waqpb_export_module ${waqpb_module_path}/waqpb_export)
 
 # Waqmerge
-set(waqmerge_module_path "${tools_gpl_path}/waqmerge/packages/")
-set(waqmerge_version_number_module ${tools_gpl_path}/waqmerge/packages/waqmerge_version_number)
 set(waqmerge_module ${tools_gpl_path}/waqmerge/packages/waqmerge)
 
 # Ddcouple
-set(ddcouple_module_path "${tools_gpl_path}/ddcouple/packages/")
-set(ddcouple_version_number_module ${tools_gpl_path}/ddcouple/packages/ddcouple_version_number)
 set(ddcouple_module ${tools_gpl_path}/ddcouple/packages/ddcouple)
 
-# Waq_Run_processes
-set(waq_run_processes_module_path "${tools_gpl_path}/waq_run_processes/packages/")
-set(waq_run_processes_version_number_module ${waq_run_processes_module_path}/waq_run_processes_version_number)
-set(waq_run_processes_module ${waq_run_processes_module_path}/waq_run_processes)
 
 # Duprol2delwaq
 set(duprol2delwaq_module ${tools_gpl_path}/duprol2delwaq/packages/parse)
