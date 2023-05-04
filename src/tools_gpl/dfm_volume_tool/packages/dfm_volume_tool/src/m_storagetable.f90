@@ -44,6 +44,7 @@ private
    public generateVolumeTableOnBranches
    public getBedToplevel
    public calculateDeadStorage
+   public addvolumeandsurface
 
 contains
   
@@ -111,7 +112,7 @@ subroutine generateVolumeTableOnBranches(volume, surface, storage, deadstorage, 
 
 end subroutine generateVolumeTableOnBranches
 
-!> Add the volume and surface for this volume table to the aggregated volume and surface
+!> Add the volume and surface for this gridpoints volume table to the aggregated volume and surface
 subroutine AddVolumeAndSurface(vol, sur, deadstorage, wl_deadstorage, voltb, bedlevel, increment, numlevels)
 double precision, dimension(:), intent(inout) :: vol              !< Aggregated volume
 double precision, dimension(:), intent(inout) :: sur              !< Aggregated surface
