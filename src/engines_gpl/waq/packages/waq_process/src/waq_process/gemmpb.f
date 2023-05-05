@@ -51,6 +51,7 @@ C     150399  A. Blauw        MPB can't consume more than the min.flux
 C     311003  Jan van Beek    process two types at once and a lot more
 C***********************************************************************
 
+      use m_dhkmrk
       use m_dherrs
 
       IMPLICIT NONE

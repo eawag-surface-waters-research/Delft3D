@@ -52,6 +52,7 @@
 !
 !     DECLARATIONS        :
 !
+      use m_dhkmrk
       use m_dhimov
       use timers
       INTEGER       ITIME , NOSEG , IS    , ISFLAG, IFFLAG,

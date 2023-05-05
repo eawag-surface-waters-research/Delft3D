@@ -24,6 +24,8 @@
       subroutine caltau ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
+      use m_dhkmrk
+
 !>\file
 !>       Calculation of bottom friction
 

@@ -61,6 +61,7 @@
 !                           LUN( 6) = unit intermediate file (grid)
 !                           LUN( 7) = unit intermediate file (volumes)
 
+      use m_dhkmrk
       use grids        !   for the storage of contraction grids
       use rd_token     !   for the reading of tokens
       use partmem      !   for PARTicle tracking

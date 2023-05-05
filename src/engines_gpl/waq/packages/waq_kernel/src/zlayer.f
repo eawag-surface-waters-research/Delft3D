@@ -64,6 +64,7 @@
 !                           dhkmst  - to set features
 !                           dhkmrk  - to get features
 
+      use m_dhkmrk
       use timers
       implicit none
 

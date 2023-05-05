@@ -35,6 +35,7 @@
 ! NOLAY   I*4 1 I     number of layers
 !
 
+      use m_dhkmrk
       use      bloom_data_vtrans
 
       implicit none

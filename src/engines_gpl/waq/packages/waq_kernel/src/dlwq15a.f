@@ -70,6 +70,7 @@
 
 !     Subroutines called  : wascal : the user specified wasteload dll
 
+      use m_dhkmrk
       use timers
       implicit none
 

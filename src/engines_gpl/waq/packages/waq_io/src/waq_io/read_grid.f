@@ -233,6 +233,8 @@
       contains
 
       subroutine read_attributes_for_bottomgrid( lunut, iarray, nosegl, ierr )
+      use m_dhkmrk
+
       integer :: lunut, nosegl, ierr
       integer, dimension(:) :: iarray
 

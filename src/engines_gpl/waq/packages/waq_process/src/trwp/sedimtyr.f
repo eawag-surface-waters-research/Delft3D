@@ -24,6 +24,8 @@
       subroutine SEDTYR    ( pmsa  , fl    , ipoint, increm, noseg ,
      &                       noflux, iexpnt, iknmrk, noq1  , noq2  ,
      &                       noq3  , noq4  )
+      use m_dhkmrk
+
 
 !>\file
 !>       Sedimentation of the free (non-aggregated) tyre/road wear particles

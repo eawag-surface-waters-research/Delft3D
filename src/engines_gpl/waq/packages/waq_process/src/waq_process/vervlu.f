@@ -64,6 +64,7 @@
 
 !     Name     Type   Library
 !     ------   -----  ------------
+      use m_dhkmrk
       USE PHYSICALCONSTS, ONLY: CtoKelvin
       IMPLICIT REAL (A-H,J-Z)
 

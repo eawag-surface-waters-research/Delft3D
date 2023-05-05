@@ -41,6 +41,7 @@
 !     ------   -----  ------------
 
 ! 3DL
+      use m_dhkmrk
       use      bloom_data_3dl
       use      bloom_data_vtrans
 ! END3DL
