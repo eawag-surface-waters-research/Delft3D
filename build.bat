@@ -124,6 +124,11 @@ rem =================================
         set config=%1
         set mode=quiet
     )
+    if "%1" == "dwaves" (
+        set prepareonly=0
+        set config=%1
+        set mode=quiet
+    )
     if "%1" == "swan" (
         set prepareonly=0
         set config=%1
@@ -189,6 +194,17 @@ rem =================================
 
 
 
+    if NOT "%VS2022INSTALLDIR%" == "" (
+        set vs=2022
+        echo Found: VisualStudio 17 2022
+        if NOT "%IFORT_COMPILER21%" == "" (
+            set ifort=23
+            echo Found: Intel Fortran 2023
+        )
+        goto :endfun
+    )     
+        
+        
     if NOT "%VS2017INSTALLDIR%" == "" (
         set vs=2017
         echo Found: VisualStudio 15 2017
@@ -319,6 +335,9 @@ rem =======================
     if "!vs!" == "2019" (
         set generator="Visual Studio 16 2019"
     )
+    if "!vs!" == "2022" (
+        set generator="Visual Studio 17 2022"
+    )
     goto :endproc
 
 
@@ -365,7 +384,11 @@ rem =================
         echo "Calling vcvarsall.bat for VisualStudio 2019 ..."
         call "%VS2019INSTALLDIR%\VC\Auxiliary\Build\vcvarsall.bat" amd64
     )
-
+    if !generator! == "Visual Studio 17 2022" (
+        echo "Calling vcvarsall.bat for VisualStudio 2022 ..."
+        call "%VS2022INSTALLDIR%\VC\Auxiliary\Build\vcvarsall.bat" amd64
+    )
+    
     rem # Execution of vcvarsall results in a jump to the C-drive. Jump back to the script directory
     cd /d "%root%\"
     if !ERRORLEVEL! NEQ 0 call :errorMessage
@@ -445,10 +468,8 @@ rem =======================
 :VSbuild
     echo.
     echo "Building with VisualStudio: %~1 ..."
-
     set currentWorkDir=%CD%
-    devenv.com %~1.sln /Clean "Release|x64"
-    devenv.com %~1.sln /Build "Release|x64" 1>%currentWorkDir%\build_%~1.log 2>&1
+    devenv.com %~1.sln /Rebuild "Release|x64" 1>%currentWorkDir%\build_%~1.log 2>&1
     if !ERRORLEVEL! NEQ 0 call :errorMessage
 
     rem # In build.log, replace "error" by TeamCity messages

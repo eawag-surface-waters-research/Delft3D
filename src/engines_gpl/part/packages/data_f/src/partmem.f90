@@ -379,12 +379,12 @@ module spec_feat_par
       real     ( sp), pointer  :: xpolscreens(:)   ! x-coordinates of screen polygon
       real     ( sp), pointer  :: ypolscreens(:)   ! y-coordinates of screen polygon
 
-!     IBM      
-      logical                  :: ibmmodel          ! is IBM keyword active
+!     ABM      
+      logical                  :: abmmodel          ! is ABM keyword active
       logical                  :: chronrev          ! is chronology reversed
-      character( 256)          :: ibmmodelname      ! name of IBM model used
-      character( 256)          :: ibmstagedev       ! name of IBM model stage developement used
-      integer  ( sp)           :: ibmmt             ! nr of IBM model used
-      integer  ( sp)           :: ibmsd             ! nr of IBM model stage developement used
-      real     ( sp)           :: selstage          ! nr of IBM model stage for chronology reversed model
+      character( 256)          :: abmmodelname      ! name of ABM model used
+      character( 256)          :: abmstagedev       ! name of ABM model stage developement used
+      integer  ( sp)           :: abmmt             ! nr of ABM model used
+      integer  ( sp)           :: abmsd             ! nr of ABM model stage developement used
+      real     ( sp)           :: selstage          ! nr of ABM model stage for chronology reversed model
 end module spec_feat_par

@@ -34,6 +34,7 @@ subroutine datsel ()
 !!--declarations----------------------------------------------------------------
     use precision
     use deltares_common_version_module
+    use datsel_version_module
     implicit none
 ! Local parameters
 !

@@ -33,6 +33,7 @@ subroutine main_lint ()
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use lint_version_module
     implicit none
 !
 ! Local parameters

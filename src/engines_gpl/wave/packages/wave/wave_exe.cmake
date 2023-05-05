@@ -7,6 +7,7 @@ set(icon_file resource/wl.ico)
 # Define executable
 set(executable_name wave_exe)
 add_executable(${executable_name}   ${executable_files}
+                                    ${rc_version_file}
                                     ${icon_file})
 
 # Set additional compilation properties
@@ -34,8 +35,6 @@ if (WIN32)
 
     oss_include_libraries(${executable_name} exe_dependencies)
     target_link_libraries(${executable_name} ${exe_dependencies})
-    
-    include_directories(${mpi_include_path})
 
 endif(WIN32)
 
@@ -71,11 +70,9 @@ if(UNIX)
          ${exe_dependencies}
          PkgConfig::NETCDF
          PkgConfig::NETCDF_FTN)
-
-    include_directories(${mpi_include_path})
-    
 endif(UNIX)
 
+include_directories(${mpi_include_path} ${version_include_dir})
 
 if (WIN32)
     # Set linker properties
