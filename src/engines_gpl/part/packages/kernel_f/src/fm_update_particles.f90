@@ -59,55 +59,48 @@ subroutine update_particles(q,h0,h1,Dt)
    data ithndl / 0 /
    if ( timon ) call timstrt( "update_particles", ithndl )
 
-   ierror = 1
-
    ! reconstruct velocity field
-   call reconst_vel(q, h0, h1, ierror)
+   call reconst_vel(q, h0, h1)
 
-   if ( ierror == 0 ) then
+   if ( Nopart.gt.0 ) then
+      ! set remaining time to time step
+      dtremaining = Dt
+      numzero = 0
+   end if
 
-      if ( Nopart.gt.0 ) then
-         ! set remaining time to time step
-         dtremaining = Dt
-         numzero = 0
+   do iter=1,MAXITER
+      ! update particles in cells
+      call update_particles_in_cells(numremaining(1), ierror)
+      if ( ierror.ne.0 ) then
+          if ( timon ) call timstop ( ithndl )
+          return
+      endif
+
+      write(*,*) 'iter=', iter, 'numremaining=', numremaining(1)
+      if ( numremaining(1).eq.0 ) then
+         write(*,*) 'iter=', iter
+         exit
       end if
+   end do
 
-      do iter=1,MAXITER
-         ! update particles in cells
-         call update_particles_in_cells(numremaining(1), ierror)
-         if ( ierror.ne.0 ) then
-             if ( timon ) call timstop ( ithndl )
-             return
-         endif
-
-         write(*,*) 'iter=', iter, 'numremaining=', numremaining(1)
-         if ( numremaining(1).eq.0 ) then
-            write(*,*) 'iter=', iter
-            exit
+   ! check for remaining particles
+   if ( numremaining(1).gt.0 ) then
+      ! plot remaining particles
+      do i=1,Nopart
+         if ( dtremaining(i).gt.0d0 .and. mpart(i).gt.0 ) then
+            if ( jsferic.eq.0 ) then
+               xx = xpart(i)
+               yy = ypart(i)
+            else
+               call Cart3Dtospher(xpart(i),ypart(i),zpart(i),xx,yy,ptref)
+            end if
+            write(*,"(I0, ':', 2E25.15, ', ', I0)") i, xx, yy, mpart(i)
          end if
       end do
-
-      ! check for remaining particles
-      if ( numremaining(1).gt.0 ) then
-         ! plot remaining particles
-         do i=1,Nopart
-            if ( dtremaining(i).gt.0d0 .and. mpart(i).gt.0 ) then
-               if ( jsferic.eq.0 ) then
-                  xx = xpart(i)
-                  yy = ypart(i)
-               else
-                  call Cart3Dtospher(xpart(i),ypart(i),zpart(i),xx,yy,ptref)
-               end if
-               write(*,"(I0, ':', 2E25.15, ', ', I0)") i, xx, yy, mpart(i)
-            end if
-         end do
-         call mess(LEVEL_WARN, 'update_particles: iter>MAXITER')
-         if ( timon ) call timstop ( ithndl )
-         return
-      end if
-
-      ierror = 0
-   endif
+      call mess(LEVEL_WARN, 'update_particles: iter>MAXITER')
+      if ( timon ) call timstop ( ithndl )
+      return
+   end if
 
    if ( timon ) call timstop ( ithndl )
 end subroutine update_particles

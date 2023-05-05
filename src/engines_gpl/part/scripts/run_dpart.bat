@@ -9,7 +9,7 @@ setlocal enabledelayedexpansion
     rem
     rem Set the config file
     rem
-set argfile= 
+set argfile=
 if [%1] EQU [] (
     goto usage
 ) else (
@@ -21,8 +21,10 @@ if [%1] EQU [] (
 )
 echo Configfile:%argfile%
 if not exist %argfile% (
-    echo ERROR: configfile "%argfile%" does not exist
-    goto usage
+    if not exist %argfile%.inp (
+        echo ERROR: configfile "%argfile%" does not exist
+        goto usage
+    )
 )
 
 
@@ -49,7 +51,7 @@ set partdir=%D3D_HOME%\%ARCH%\dpart\bin
     rem Run
 set PATH=%partdir%;%sharedir%;%~dp0
 echo executing in this window: "%partdir%\delpar.exe" "%argfile%"
-"%partdir%\delpar.exe" "%argfile%"
+"%partdir%\delpar.exe" "%argfile%" 1>screen.out 2>&1
 
 goto end
 

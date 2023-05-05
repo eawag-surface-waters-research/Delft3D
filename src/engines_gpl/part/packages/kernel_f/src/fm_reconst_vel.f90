@@ -27,7 +27,19 @@
 !
 !-------------------------------------------------------------------------------
 
-!> reconstruct velocity in cells
+
+!> Construct the coefficients for reconstructing the flow velocity in the triangular (inner) cells
+!! It calculates the coefficients for the normal velocities on the three sides as well as the
+!! slope of the velocity in the normal direction. As in the case of spherical coordinates
+!! 3D cartesian coordinates are used to determine the position on the globe, the number of
+!! coefficients differs for the plane and the spherical cases.
+!!
+!! See partfmmem.f90 for an explanation of the variables.
+!!
+!! The method is described in the memo by Mart Borsboom, dd. december 2015 (reference 1220026.014)
+!!
+!! Areconst - coefficients per internal cell, output
+!!
 subroutine reconst_vel_coeffs_fmx()
 
    use m_partrecons
@@ -41,7 +53,7 @@ subroutine reconst_vel_coeffs_fmx()
 
    integer,                          parameter   :: N = 4
 
-   double precision, dimension(N,N)              :: Amat ! matrix
+   double precision, dimension(N,N)              :: Amat
    double precision, dimension(N)                :: rhs
 
    double precision                              :: cs, sn
@@ -49,13 +61,11 @@ subroutine reconst_vel_coeffs_fmx()
    integer                                       :: i, icell, j, jj, k, L, NN
    integer                                       :: k1, k2
    integer                                       :: i12, isign
-   integer                                       :: ierror
 
    integer(4) ithndl              ! handle to time this subroutine
    data ithndl / 0 /
    if ( timon ) call timstrt( "reconst_vel_coeffs_fm", ithndl )
 
-   ierror = 1
 
    ! allocate startpointers
    call realloc(jreconst, numcells+1, keepExisting=.false., fill=0)
@@ -85,8 +95,9 @@ subroutine reconst_vel_coeffs_fmx()
       k = iabs(cell2nod(icell))
 
       ! fill system for (ux,uy) = (ux0, uy0) + alpha (x-x0, y-y0)
-
-      ! loop over edges (netlinks)
+      !
+      ! loop over edges of the internal cells (netlinks)
+      !
       i = 0
       do j=jcell2edge(icell),jcell2edge(icell+1)-1
          i = i+1
@@ -147,14 +158,18 @@ subroutine reconst_vel_coeffs_fmx()
       end if
    end do
 
-   ierror = 0
-
    if ( timon ) call timstop ( ithndl )
 
 end subroutine reconst_vel_coeffs_fmx
 
-!> reconstruct velocity in cells
-subroutine reconst_vel(q, h0, h1, ierror)
+
+!> Reconstruct velocity in (internal) cells
+!! The velocities are velocities normal to the edges and there is linear gradient off the edge.
+!!
+!! u0x, u0y, u0z - cartesian components of the velocity in the cell, output
+!! alphafm - coefficient for linear gradient
+!!
+subroutine reconst_vel(q, h0, h1)
    use partmem, only: hyd
    use m_flowgeom, only: Ndx, Lnx, bl
    use m_flowparameters, only: epshs
@@ -166,11 +181,9 @@ subroutine reconst_vel(q, h0, h1, ierror)
 
    implicit none
 
-   double precision, dimension(Lnx), intent(in)  :: q    ! flowlink-based discharge (m3/s)
-   double precision, dimension(Ndx), intent(in)  :: h0   ! flownode-based water level (m) at begin of interval
-   double precision, dimension(Ndx), intent(in)  :: h1   ! flownode-based water level (m) at end of interval
-
-   integer,                          intent(out) :: ierror
+   double precision, dimension(Lnx), intent(in)  :: q    !< flowlink-based discharge (m3/s)
+   double precision, dimension(Ndx), intent(in)  :: h0   !< flownode-based water level (m) at begin of interval
+   double precision, dimension(Ndx), intent(in)  :: h1   !< flownode-based water level (m) at end of interval
 
    integer,                          parameter   :: N = 4
 
@@ -183,8 +196,6 @@ subroutine reconst_vel(q, h0, h1, ierror)
    integer(4) ithndl              ! handle to time this subroutine
    data ithndl / 0 /
    if ( timon ) call timstrt( "reconst_vel", ithndl )
-
-   ierror = 1
 
    ! get fluxes at all edges, including internal
    call set_fluxes(Lnx, q, qe)
@@ -200,10 +211,12 @@ subroutine reconst_vel(q, h0, h1, ierror)
    do lay = 1,hyd%nolay
       do icell=1,numcells
          ! get flownode number (for s, bl)
-         k = iabs(cell2nod(icell)) + (lay-1) * hyd%nosegl
+         k = abs(cell2nod(icell)) + (lay-1) * hyd%nosegl
          icell3d = icell + (lay-1) * numcells
 
-         ! get water depth
+         !
+         ! Get water depth - take the change from the start to the end into account
+         !
          hk0 = h0(k) !s0(k)-bl(k)
          hk1 = h1(k) !s1(k)-bl(k)
          if ( abs(hk1-hk0).gt.DTOL ) then
@@ -221,6 +234,16 @@ subroutine reconst_vel(q, h0, h1, ierror)
          if ( h.le.epshs ) cycle
 
          if ( jsferic.eq.0 ) then
+            !
+            ! Get the link index for this edge - first in the upper layer,
+            ! then in the actual layer.
+            ! un is the velocity normal to the edge
+            ! u0x, u0y and u0z are the cartesian components of that velocity
+            ! alphafm is the linear gradient off the edge
+            !
+            ! As qe is the flow rate through the edge, we need to divide by the
+            ! surface area (width times water height in that layer)
+            !
             do j=jreconst(icell),jreconst(icell+1)-1
                L   = ireconst(j)
                L3d = L + (lay-1) * numedges
@@ -243,11 +266,12 @@ subroutine reconst_vel(q, h0, h1, ierror)
       end do
    end do
 
-   ierror = 0
    if ( timon ) call timstop ( ithndl )
 end subroutine reconst_vel
 
-!> set all fluxes, including internal
+
+!> Set all fluxes, including internal
+!!
 subroutine set_fluxes(Lnx,q,qe)
    use partmem, only: hyd
    use m_partmesh
@@ -256,10 +280,10 @@ subroutine set_fluxes(Lnx,q,qe)
 
    implicit none
 
-   integer,                        intent(in)  :: Lnx
-   double precision, dimension(*), intent(in)  :: q
+   integer,                        intent(in)  :: Lnx        !< Number of flow links
+   double precision, dimension(*), intent(in)  :: q          !< Flow rate for each edge in original FM grid
 
-   double precision, dimension(*), intent(out) :: qe
+   double precision, dimension(*), intent(out) :: qe         !< Flow rate (flux) for all edges (including internal)
 
    integer                                     :: j, L, Lf, lay, l3d
 
@@ -283,7 +307,10 @@ subroutine set_fluxes(Lnx,q,qe)
    if ( timon ) call timstop ( ithndl )
 end subroutine set_fluxes
 
-!> compute mapping from prescribed (at flowlinks) to all fluxes (at all edges, including "internal")
+
+!> Compute mapping from prescribed (at flowlinks) to all fluxes (at all edges, including "internal")
+!! Part of the grid administration
+!!
 subroutine comp_fluxcoeffs()
    use m_partmesh
    use m_partfluxes
@@ -461,7 +488,9 @@ subroutine comp_fluxcoeffs()
    if ( timon ) call timstop ( ithndl )
 end subroutine comp_fluxcoeffs
 
-!> (re)allocate flux coefficients
+
+!> (Re)allocate arrays for storing flux coefficients
+!!
 subroutine realloc_partfluxes()
    use m_partmesh
    use m_partfluxes
@@ -477,7 +506,9 @@ subroutine realloc_partfluxes()
    call realloc(Aflux2link, N,  keepExisting=.false., fill=0d0)
 end subroutine realloc_partfluxes
 
-!> deallocate flux_coeffs
+
+!> Deallocate arrays for flux coefficients
+!!
 subroutine dealloc_partfluxes()
    use m_partfluxes
    implicit none
@@ -487,7 +518,9 @@ subroutine dealloc_partfluxes()
    if ( allocated(Aflux2link) ) deallocate(Aflux2link)
 end subroutine dealloc_partfluxes
 
-!> (re)allocate flux coefficients et cetera
+
+!> (Re)allocate arrays for flux coefficients, flow rates, velocity components
+!!
 subroutine realloc_partrecons()
    use partmem, only: hyd
    use m_partmesh
@@ -508,11 +541,12 @@ subroutine realloc_partrecons()
    call realloc(alphafm, numcells*hyd%nolay, keepExisting=.false., fill=DMISS)
 
    call realloc(ireconst, numcells+1, keepExisting=.false., fill=0)
-   return
-   end subroutine realloc_partrecons
 
-   !> deallocate flux_coeffs
-   subroutine dealloc_partrecons()
+end subroutine realloc_partrecons
+
+
+!> Deallocate flux_coeffs
+subroutine dealloc_partrecons()
    use m_partrecons
    implicit none
 
@@ -528,8 +562,10 @@ subroutine realloc_partrecons()
    if ( allocated(Areconst) ) deallocate(Areconst)
 end subroutine dealloc_partrecons
 
-!> find common value of two-dimensional arrays i1 and i2
-!> it is assumed there is at most one common value
+
+!> Find common value of two arrays i1 and i2 of size 2.
+!! It is assumed there is at most one common value.
+!! Return the common values
 integer function icommonval(i1, i2)
    implicit none
 
@@ -544,7 +580,9 @@ integer function icommonval(i1, i2)
    end if
 end function icommonval
 
-!> allocate auxiliary fluxes
+
+!> Allocate auxiliary fluxes
+!!
 subroutine alloc_auxfluxes()
    use m_particles
    use m_flowgeom, only: Ndx, Lnx
@@ -555,7 +593,9 @@ subroutine alloc_auxfluxes()
    call realloc(qpart, Lnx, fill=0d0, keepExisting=.false.)
 end subroutine alloc_auxfluxes
 
-!> deallocate auxiliary fluxes
+
+!> Deallocate auxiliary fluxes
+!!
 subroutine dealloc_auxfluxes()
    use m_particles
    implicit none
