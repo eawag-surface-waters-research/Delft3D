@@ -514,7 +514,7 @@ subroutine comp_concentration(h, nconst, iconst, c)
    data ithndl / 0 /
    if ( timon ) call timstrt( "comp_concentration", ithndl )
 
-   c = 0d0
+   c(iconst,:,:) = 0d0
 
    !  count number of particles per cell
    do i=1,Nopart
