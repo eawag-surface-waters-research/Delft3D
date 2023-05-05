@@ -127,6 +127,8 @@
    call realloc(xrpart, npmax)
    call realloc(yrpart, npmax)
    call realloc(zrpart, npmax)
+   !call realloc(krpart, npmax)
+   !call realloc(hrpart, npmax)
 
    call realloc_particles(npmax, .true., ierror)
    irpart = 1

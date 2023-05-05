@@ -82,12 +82,16 @@ subroutine part_readhydstep(hyd,itime,istat)
   
           end do
       end do
+      ! vertical exchanges:
+      ! - ndx is the total number of segments
+      ! - we have hyd%nosegl segments per layer
+      ! - the number of interfaces between the layers is one less than the number of layers,
+      !   hence the correction.
+      !
       do K = 1,hyd%nolay-1
           do L = 1, hyd%nosegl  ! vertical
              iq  = offset + L + (K-1) * hyd%nosegl  !
-             !write(*,*) "qq",ndx,hyd%nosegl,offset, iq
              q1(iq) = hyd%flow(iq)
-                   ! write(*,*) K,L,iq,q1(iq)
           end do
       end do
    end if
