@@ -136,7 +136,7 @@ module oildspfm_mod
       use precision_part         ! single/double precision
       use partmem
       use m_transport
-      use m_particles
+      use m_particles, laypart => kpart
       use m_flow
       use m_flowtimes
       use timers            ! to time the performance
@@ -636,7 +636,7 @@ module oildspfm_mod
          enddo
 
          ic   = mpart(i)
-         ilay = lpart(i)
+         ilay = laypart(i)
          if (ic > 0) ic = iabs(cell2nod(ic))
 ! references to the gridcell (is in this case can be replaced by kpart (segment number)         ic = lgrid3(npart(i), mpart(i))
          if ( ic .gt. 0 ) then !che

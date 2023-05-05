@@ -61,13 +61,11 @@ subroutine reconst_vel_coeffs_fmx()
    integer                                       :: i, icell, j, jj, k, L, NN
    integer                                       :: k1, k2
    integer                                       :: i12, isign
-   integer                                       :: ierror
 
    integer(4) ithndl              ! handle to time this subroutine
    data ithndl / 0 /
    if ( timon ) call timstrt( "reconst_vel_coeffs_fm", ithndl )
 
-   ierror = 1
 
    ! allocate startpointers
    call realloc(jreconst, numcells+1, keepExisting=.false., fill=0)
@@ -159,8 +157,6 @@ subroutine reconst_vel_coeffs_fmx()
 
       end if
    end do
-
-   ierror = 0
 
    if ( timon ) call timstop ( ithndl )
 

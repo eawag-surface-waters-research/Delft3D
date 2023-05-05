@@ -547,7 +547,7 @@ subroutine ini_part_grid(hyd)
    call dealloc_particles()
    call dealloc_auxfluxes()
 
-   kmx = 0 ! for now 2D only
+   kmx = hyd%nolay
 
    !     fill network_data
    call part_fill_networkdata(hyd, hyd%waqgeom, hyd%openbndsect_coll)
