@@ -219,10 +219,7 @@ subroutine calculateDeadStorage(wl_deadstorage, network, bndvalues, inslevtube, 
       k2      = bndindex(2,n)
       L       = bndindex(3,n)
       itpbn   = bndindex(4,n)
-      if (     itpbn == 1) then                        ! waterlevelbnd
-         wl_deadstorage(k2) = bndvalues(n)
-         !wl_deadstorage(kb) = bndvalues(n)
-      endif
+      wl_deadstorage(kb) = bndvalues(n)
    enddo
 
    ! Set the waterlevel at the suction side of a pump to the turn off level.

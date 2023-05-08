@@ -223,6 +223,7 @@ if (ierr==0) then
    call BMI_GET_VAR_POINTER(dfm, string_to_char_array('ln'), xptr)
    call c_f_pointer(xptr, lnog, (/2, lnx/))
    
+   call BMI_GET_VAR_POINTER(dfm, string_to_char_array('kbndz'), xptr)
    call c_f_pointer(xptr, bndindex, (/MAXDIMS, numbnd/))
    
    call BMI_GET_VAR_POINTER(dfm, string_to_char_array('vltb'), xptr)

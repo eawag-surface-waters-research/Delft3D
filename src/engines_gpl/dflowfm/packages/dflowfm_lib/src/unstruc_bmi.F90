@@ -1233,6 +1233,8 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
       x = c_loc(vltbOnLinks)
    case('network')
       x = c_loc(Network)
+   case('kbndz')
+      x = c_loc(kbndz)
    end select
 
    ! Try to parse variable name as slash-separated id (e.g., 'weirs/Lith/crest_level')
