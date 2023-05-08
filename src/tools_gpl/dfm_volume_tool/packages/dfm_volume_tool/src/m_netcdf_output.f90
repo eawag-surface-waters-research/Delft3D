@@ -194,7 +194,7 @@ subroutine  write_volume_surface_arrays(ioutput, ids, levels, volume, surface, s
    ! Create 1D-array of location ID's
    varid_id          = SetupVariable(ioutput,'id',          nf90_char,   (/ dimid_chars,dimid_ids /),  '', 'Id',       '-')     
    ierr = nf90_put_att(ioutput, varid_id, 'cf_role', 'timeseries_id')
-   varid_levels      = SetupVariable(ioutput,'levels',      nf90_double, (/ dimid_levels/),            '', 'Levels',    'm AD') 
+   varid_levels      = SetupVariable(ioutput,'levels',      nf90_double, (/ dimid_levels/),            '', 'Levels',    'm') 
    varid_volume      = SetupVariable(ioutput,'volume',      nf90_double, (/ dimid_levels, dimid_ids/), '', 'Volume',    'm3') 
    varid_surface     = SetupVariable(ioutput,'surface',     nf90_double, (/ dimid_levels, dimid_ids/), '', 'Surface',   'm2') 
    varid_deadstorage = SetupVariable(ioutput,'dead_storage',nf90_double, (/ dimid_levels, dimid_ids/), '', 'Dead storage',    'm3') 
