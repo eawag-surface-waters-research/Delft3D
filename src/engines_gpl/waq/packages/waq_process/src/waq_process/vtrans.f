@@ -35,6 +35,7 @@
 ! NOLAY   I*4 1 I     number of layers
 !
 
+      use m_dhltim
       use m_dhkmrk
       use      bloom_data_vtrans
 
@@ -73,7 +74,6 @@
       integer                  :: nolayi
       integer                  :: idummy
       integer                  :: ierr2
-      logical                  :: dhltim
 !
       ip1  = ipoint( 1)
       ip2  = ipoint( 2)
