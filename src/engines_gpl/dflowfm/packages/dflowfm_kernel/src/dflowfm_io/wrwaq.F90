@@ -2695,12 +2695,12 @@ subroutine waq_wri_vel(itim, filenamevel, lunvel)
    !
    !           Local variables
    !
-   integer :: i, k, kb, kt, ktx, kk
+   integer :: i, k, kb, kt, ktx, kk, n
    !
    !! executable statements -------------------------------------------------------
    !
    waqpar%vel = 0d0
-
+  
    if (.not. allocated(ucmag)) then
       call realloc(ucmag, ndkx, keepExisting=.false.)
    end if
@@ -2709,8 +2709,14 @@ subroutine waq_wri_vel(itim, filenamevel, lunvel)
    call getucxucyeulmag(ndkx, workx, worky, ucmag, 1, 1)
 
    if (waqpar%aggre == 0 .and. waqpar%kmxnxa == 1) then
-      do i = 1, ndxi
-         waqpar%vel(i) = ucmag(i)
+    
+      do i = 1, ndxi 
+         if (kmx == 0) then
+            n = i
+         else
+            n = kbot(i)
+         endif 
+         waqpar%vel(i) = ucmag(n)
       end do
    else if (waqpar%aggre == 0 .and. waqpar%aggrel == 0) then
       do k = 1, ndxi
@@ -3092,7 +3098,12 @@ subroutine waq_wri_flo(itim, ti_waq, filename, lun)
    ! Average the accumulated discharges.
    if (waqpar%aggre == 0 .and. waqpar%kmxnxa == 1) then
       do i = 1, lnx
-         waqpar%qag(i) = q1waq(i) / dble(ti_waq)
+         if (kmx == 0) then
+            L = i
+         else
+            L = Lbot(i)
+         endif
+         waqpar%qag(i) = q1waq(L) / dble(ti_waq)
       end do
    else if (waqpar%aggre == 0 .and. waqpar%aggrel == 0) then
       do L = 1, lnx
