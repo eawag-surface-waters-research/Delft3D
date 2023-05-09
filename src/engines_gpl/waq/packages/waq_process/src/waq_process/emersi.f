@@ -33,6 +33,7 @@
 !
 !***********************************************************************
 
+      use m_dhnolay
       use m_dhkmrk
       use bottomset     !  module with definition of the waterbottom segments
 
