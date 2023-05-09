@@ -675,7 +675,8 @@
    subroutine mba_write_bal_header(lunbal, numconst, const_names, iconst2sys, nosys, notot, isys2wqbot, syname_sub, nomba, mbaname, nflux, &
                                    totfluxsys, stochi, fluxname, fluxprocname, nfluxsys, ipfluxsys, fluxsys)
 
-   use unstruc_version_module, only: unstruc_version_full, get_unstruc_source
+   use dflowfm_version_module, only: version_full
+   use dflowfm_version_module, only: getbranch_dflowfm
 
    implicit none
 
@@ -714,8 +715,8 @@
    integer                     :: ifluxsys
 
    write (lunbal, '("=============================================================")')
-   write(lunbal,'(A)') trim(unstruc_version_full)
-   call get_unstruc_source(tex)
+   write(lunbal,'(A)') trim(version_full)
+   call getbranch_dflowfm(tex)
    write(lunbal,'(A)') 'Source: '//trim(tex)
    call datum(rundat)
    write(lunbal,'(A)') 'File creation date: '//rundat

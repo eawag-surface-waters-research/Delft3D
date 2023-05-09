@@ -9,13 +9,9 @@ set(dflowfm_cli_path "${CMAKE_CURRENT_SOURCE_DIR}/src/")
 # Set the directory referring to the res folder
 set(res_path ${dflowfm_path}/res)
 
-# Set version file variables
-set(ini_version_file ${res_path}/version_number.ini)
-set(rc_version_file ${res_path}/version_number-cli.rc)
-
-# Generate the version files
-generate_version_files(${rc_version_file} ${ini_version_file} TRUE)
-set(svn_version_file ${rc_version_file}.svn)
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
+set(dflowfm_version_header_path ${dflowfm_path}/version)
+set(rc_version_file ${dflowfm_version_header_path}/dflowfm_cli_version.rc)
 
 # Interacter
 if(WITH_INTERACTER)
@@ -41,15 +37,7 @@ set(icon_file ${res_path}/dflowfm_icon.rc)
 set(executable_name dflowfm-cli)
 add_executable(${executable_name}   ${source}
                                     ${icon_file}
-                                    ${rc_version_file} 
-                                    ${svn_version_file} 
-                                    ${ini_version_file})
-
-# Define prebuild event
-prebuild_version_number(${executable_name}  ${rc_version_file} 
-                                            ${checkout_src_root}
-                                            ${ini_version_file} 
-                                            ON)
+                                    ${rc_version_file})
 
 # Add dependencies
 if(UNIX)
@@ -179,7 +167,9 @@ target_link_libraries(${executable_name} netcdf)
 if (WIN32)
     include_directories(${mpi_include_path}
                         ${petsc_path}
-                        ${tecplot_path})
+                        ${tecplot_path}
+                        ${version_include_dir}
+                        ${dflowfm_version_path})
                         
 
     # Set linker properties
@@ -222,8 +212,8 @@ if (WIN32)
 endif(WIN32)
 
 # Create the folder structure in Visual Studio
-source_group("Version Files" FILES  ${ini_version_file} ${rc_version_file} ${svn_version_file})
-source_group("Resources" FILES  ${icon_file})
+source_group("Resources" FILES  ${icon_file}
+                                ${rc_version_file})
 
 # Create the folder structure in vfproj
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source})
