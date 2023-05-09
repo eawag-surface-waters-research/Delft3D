@@ -39,6 +39,7 @@ use tree_structures
 use unstruc_messages
 use m_globalparameters, only : t_filenames
 use time_module, only : ymd2modified_jul, datetimestring_to_seconds
+use dflowfm_version_module, only: getbranch_dflowfm
 
 implicit none
 
@@ -718,7 +719,6 @@ subroutine readMDUFile(filename, istat)
     use m_fm_wq_processes
     use m_xbeach_avgoutput
     use unstruc_netcdf, only: UNC_CONV_CFOLD, UNC_CONV_UGRID, unc_set_ncformat, unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS, unc_nounlimited, unc_noforcedflush, unc_uuidgen, unc_metadatafile
-    use unstruc_version_module
     use dfm_error
     use MessageHandling
     use system_utils, only: split_filename
@@ -2616,7 +2616,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     use m_sferic,                only : anglat, anglon, jsferic, jasfer3D
     use m_physcoef
     use unstruc_netcdf, only: unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS, unc_nounlimited, unc_noforcedflush, unc_uuidgen, unc_metadatafile
-    use unstruc_version_module
+    use dflowfm_version_module
     use m_equatorial
     use m_sediment
     use m_netw,                  only : Makeorthocenters
@@ -2652,8 +2652,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
 ! Put settings for .mdu file into a property tree first
     call tree_create(trim(md_ident), prop_ptr)
-    call prop_set(prop_ptr, 'General', 'Program',   unstruc_program,     'Program')
-    call prop_set(prop_ptr, 'General', 'Version',   unstruc_version,     'Version number of computational kernel')
+    call prop_set(prop_ptr, 'General', 'Program',   product_name,     'Program')
+    call prop_set(prop_ptr, 'General', 'Version',   version_full,     'Version number of computational kernel')
     call prop_set(prop_ptr, 'General', 'fileType',  'modelDef',          'File type. Do not edit this.')
     tmpstr = ''
     write(tmpstr, '(i0,".",i2.2)') MDUFormatMajorVersion, MDUFormatMinorVersion
@@ -4147,8 +4147,8 @@ endif
 
     call datum(rundat)
     write(mout, '(a,a)') '# Generated on ', trim(rundat)
-    write(mout, '(a,a)') '# ', trim(unstruc_version_full)
-    call get_unstruc_source(msgbuf)
+    write(mout, '(a,a)') '# ', trim(version_full)
+    call getbranch_dflowfm(msgbuf)
     write(mout, '(a,a)') '# Source:', trim(msgbuf)
     call prop_write_inifile(mout, prop_ptr, istat)
     call tree_destroy(prop_ptr)

@@ -429,7 +429,7 @@ end subroutine reset_waq
 
 !> Write the coupled hydrodynamics information file (.hyd)
 subroutine waq_wri_hyd()
-   use unstruc_version_module, only: unstruc_version_full
+   use dflowfm_version_module, only: version_full
    use unstruc_files
    use m_flowparameters
    use m_flowtimes
@@ -459,7 +459,7 @@ subroutine waq_wri_hyd()
    call dateandtimenow(iyea,imon,iday,ihou,imin,isec)
    write(datetime ,'(i4.4,a,i2.2,a,i2.2,a,i2.2,a,i2.2,a,i2.2)') iyea, '-', imon, '-', iday, ', ', ihou, ':', imin, ':', isec
    tex = 'file-creation-date  ' //datetime
-   write(lunhyd,'(a/a)') 'file-created-by  '//trim(unstruc_version_full), tex
+   write(lunhyd,'(a/a)') 'file-created-by  '//trim(version_full), tex
 
    write (lunhyd, '(a,a)') 'task      ','full-coupling'
 
