@@ -40,6 +40,7 @@
 
 !     global declarations
 
+      use m_dhnlun
       use timers
       use delwaq2_data
       use grids

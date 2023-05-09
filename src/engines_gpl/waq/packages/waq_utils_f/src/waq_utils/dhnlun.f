@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dhnlun
+
+      implicit none
+
+      contains
+
 
       subroutine dhnlun(istart,lun)
 
@@ -48,3 +54,4 @@
 
       return
       end
+      end module m_dhnlun

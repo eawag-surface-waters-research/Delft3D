@@ -22,6 +22,8 @@
 !!  rights reserved.
 
       module dlwqdata_mod
+       use m_dhnlun
+
 !
 !          module contains everything for model data input and storage
 !          created March 2004 by Jan van Beek

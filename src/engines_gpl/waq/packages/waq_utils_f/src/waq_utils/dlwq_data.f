@@ -22,6 +22,8 @@
 !!  rights reserved.
 
       module dlwq_data
+       use m_dhnlun
+
 !
 !          module contains everything for model data input and storage
 !          created March 2004 by Jan van Beek

@@ -27,6 +27,7 @@
 
       ! global definitions
 
+      use m_dhnlun
       use dlwqdata_mod
       implicit none
 
