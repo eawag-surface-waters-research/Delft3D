@@ -41,6 +41,7 @@
 !     ------   -----  ------------
 
 ! 3DL
+      use m_dhnoseg
       use m_dhnolay
       use m_dhkmrk
       use      bloom_data_3dl

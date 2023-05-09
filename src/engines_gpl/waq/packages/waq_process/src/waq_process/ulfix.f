@@ -24,6 +24,7 @@
       subroutine ulfix  ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
+      use m_dhnoseg
       use m_dhnolay
       use m_dhkmrk
 

@@ -35,6 +35,7 @@
 ! NOLAY   I*4 1 I     number of layers
 !
 
+      use m_dhnoseg
       use m_dhnolay
       use m_dhltim
       use m_dhkmrk
