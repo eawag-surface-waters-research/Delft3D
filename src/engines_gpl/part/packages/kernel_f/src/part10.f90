@@ -484,7 +484,7 @@ contains
 !$OMP PARALLEL DO PRIVATE ( np, mp, kp, kpp, ktopp, kbotp, n0, n0old, a, n03d, xp, &
 !$OMP                       yp, zp, tp, itdelt, ddfac, dran1, abuac, deltt, dred,  &
 !$OMP                       kd, icvis, icvist, ivisit, lstick, wsum, isub, jsub,   &
-!$OMP                       ifract, pstick, wstick, ldispo, trp, t0, dax, day,     &
+!$OMP                       ifract, pstick, wstick, ldispo, trp, t0, dax, day,     & 
 !$OMP                       n1, n2, dxp, dyp, depth1, idep, vol, vy0, vy1,         &
 !$OMP                       vx0, vx1, vvx, vvy, vx, vy, vxr, vyr, ubstar, ubstar_b,&
 !$OMP                       vz0, vz1, disp, dvz, depthl, dvzs, dvzt, vzs, icounz,  &

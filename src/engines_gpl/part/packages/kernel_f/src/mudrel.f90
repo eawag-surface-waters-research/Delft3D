@@ -440,7 +440,6 @@ contains
 !
             nm = nmax*mmax
 !
-            ipc = 0
             do 100 ipp = nptot + 1, nptot + nprest
 !
 !.. add the remainder from segment with largest remainder
