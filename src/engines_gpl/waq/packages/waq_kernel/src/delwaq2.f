@@ -26,6 +26,7 @@
 !       A, J and C are now pointers to arrays
 !
       MODULE DELWAQ2
+      use m_gkwini
       use m_getcom
       use m_dhopnf
 

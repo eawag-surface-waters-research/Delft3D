@@ -25,6 +25,7 @@
 
       ! add attributes to processes from file
 
+      use m_gkwini
       use m_getcom
       use m_dhucas
       use processet

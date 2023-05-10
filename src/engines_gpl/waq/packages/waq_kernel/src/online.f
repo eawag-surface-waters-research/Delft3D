@@ -464,6 +464,7 @@
      +                   BOUND , NOLOC , PROLOC, NODEF , DEFAUL,
      +                   NTDMPQ, DANAM , SYNAME, paname, sfname,
      +                   funame, IOUTPS, IOPOIN, OUNAM )
+      use m_gkwini
       use m_getcom
       use m_dhopnf
       use timers
