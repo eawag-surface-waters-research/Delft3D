@@ -45,6 +45,7 @@
 !     Declaration of arguments
 !
 
+      use m_dhzeri
       use timers
 
       INTEGER             LUREP , NOCONS, NOPA  , NOFUN , NOSFUN,
