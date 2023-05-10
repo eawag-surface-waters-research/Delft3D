@@ -24,6 +24,7 @@
       SUBROUTINE FFFIND ( LUNUT , SGET , AFILE , BFILE , ISTEP ,
      *                    IT2   , IT3  , IT4   , NUMBR , IERR  )
 !
+      use m_dhpath
       use m_dhopnf
       use m_sysi          ! Timer characteristics
       

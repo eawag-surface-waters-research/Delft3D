@@ -33,6 +33,7 @@
 
       ! global declarations
 
+      use m_dhpath
       use hydmod
       use m_dherrs
       use rd_token       ! tokenized reading
