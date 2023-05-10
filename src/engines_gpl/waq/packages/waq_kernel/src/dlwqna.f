@@ -71,6 +71,7 @@
 !     LUN     INTEGER    *      INPUT  array with unit numbers
 !     LCHAR   CHAR*(*)   *      INPUT  filenames
 !
+      use m_fileutils
       use grids
       use timers
       use delwaq2_data

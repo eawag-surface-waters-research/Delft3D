@@ -58,6 +58,7 @@
 !                          DHOPNF, opens files
 !                          ZERCUM, zero's the cummulative array's
 !
+      use m_fileutils
       use grids
       use timers
       use delwaq2_data

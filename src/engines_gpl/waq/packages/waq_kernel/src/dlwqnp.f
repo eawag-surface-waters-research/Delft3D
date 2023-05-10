@@ -35,6 +35,7 @@
 !>                         Method has the option to treat additional velocities, like
 !>                         settling of suspended matter, upwind to avoid wiggles.\n
 
+      use m_fileutils
       use grids
       use timers
       use delwaq2_data
