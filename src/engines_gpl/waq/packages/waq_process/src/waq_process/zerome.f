@@ -22,6 +22,8 @@
 !!  rights reserved.
 
       SUBROUTINE ZEROME ( NAME )
+      use m_monsys
+
       CHARACTER*(*) NAME
       INTEGER LUNREP
 

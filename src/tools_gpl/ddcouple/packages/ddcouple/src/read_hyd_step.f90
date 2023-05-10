@@ -25,6 +25,7 @@
 
       ! global declarations
 
+      use m_monsys
       use hydmod
       implicit none
 

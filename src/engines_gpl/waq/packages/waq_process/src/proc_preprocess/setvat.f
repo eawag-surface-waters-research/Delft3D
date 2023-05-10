@@ -46,6 +46,7 @@
 !
 !     Declaration of arguments
 !
+      use m_monsys
       use timers       !   performance timers
 
       INTEGER             LUREP , NOCONS, NOPA  , NOFUN , NOSFUN,

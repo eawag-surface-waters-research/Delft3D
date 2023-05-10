@@ -27,6 +27,7 @@
 
       ! global declarations
 
+      use m_monsys
       use hydmod
       use :: m_hyd_keys, only: key, nokey     ! keywords in hydfile
       use delwaq_version_module

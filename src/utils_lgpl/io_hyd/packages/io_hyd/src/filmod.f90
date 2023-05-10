@@ -28,6 +28,8 @@
 !  
 
       module filmod
+      use m_monsys
+
 
       ! module contains everything for the files
       ! created June 2004 by Jan van Beek

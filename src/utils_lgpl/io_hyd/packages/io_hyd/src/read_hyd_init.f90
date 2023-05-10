@@ -33,6 +33,7 @@
 
       ! global declarations
 
+      use m_monsys
       use hydmod
       use io_netcdf
       use m_read_waqgeom

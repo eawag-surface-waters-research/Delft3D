@@ -33,6 +33,7 @@
 
       ! global declarations
 
+      use m_monsys
       use filmod                   ! module contains everything for the files
       implicit none
 
@@ -92,6 +93,7 @@
 
       ! global declarations
 
+      use m_monsys
       use filmod                   ! module contains everything for the files
       implicit none
 

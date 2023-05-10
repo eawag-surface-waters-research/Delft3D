@@ -22,6 +22,8 @@
 !!  rights reserved.
 
       module partable
+      use m_monsys
+
 
 ! NB This is a module, because the subroutine partab allocates the array proref
 !                      that is used outside of partab, through dlwqp1 in wripro.

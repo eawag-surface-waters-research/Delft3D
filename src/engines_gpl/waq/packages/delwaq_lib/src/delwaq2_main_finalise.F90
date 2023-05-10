@@ -25,6 +25,7 @@
 
 subroutine delwaq2_main_finalise(action, lunrep, rundat)
 
+    use m_monsys
     use m_actions
     use m_dattim
 

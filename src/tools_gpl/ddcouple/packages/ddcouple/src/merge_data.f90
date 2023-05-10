@@ -27,6 +27,7 @@
 
       ! global declarations
 
+      use m_monsys
       use dlwqdata_mod             ! module contains everything for the data
       implicit none
 

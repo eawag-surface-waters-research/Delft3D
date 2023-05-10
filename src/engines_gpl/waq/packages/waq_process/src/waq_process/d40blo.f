@@ -41,6 +41,7 @@
 !     ------   -----  ------------
 
 ! 3DL
+      use m_monsys
       use m_dhnoseg
       use m_dhnolay
       use m_dhkmrk
@@ -920,6 +921,8 @@
 
 
       subroutine blstop(mes,i)
+      use m_monsys
+
 
       character*12 mes
       integer      lunrep

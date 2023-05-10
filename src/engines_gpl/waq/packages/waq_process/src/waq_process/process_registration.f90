@@ -22,6 +22,8 @@
 !!  rights reserved.
 
 module process_registration
+use m_monsys
+
     implicit none
 
     private

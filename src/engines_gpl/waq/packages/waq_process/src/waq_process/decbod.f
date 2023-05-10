@@ -24,6 +24,8 @@
       subroutine decbod ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
+      use m_monsys
+
 !>\file
 !>       Oxydation of BOD-fractions with Monod kinetics for the TEWOR models
 

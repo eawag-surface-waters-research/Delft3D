@@ -22,6 +22,7 @@
 !!  rights reserved.
       module m_dhaggr
 
+      use m_monsys
       use m_getcom
 
       implicit none

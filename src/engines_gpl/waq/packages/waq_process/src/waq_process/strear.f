@@ -24,6 +24,8 @@
       subroutine strear ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
+      use m_monsys
+
 !>\file
 !>       Aeration at weirs (Gameson and Nakasone) (input is array of structures)
 

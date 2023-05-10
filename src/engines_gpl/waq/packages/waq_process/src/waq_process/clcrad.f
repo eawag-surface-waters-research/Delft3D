@@ -30,6 +30,7 @@
 !                active water segments
 !
 
+      use m_monsys
       use m_dhkmrk
       USE BottomSet     !  Module with definition of the waterbottom segments
 

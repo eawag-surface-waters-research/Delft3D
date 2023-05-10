@@ -27,6 +27,7 @@
 
       ! global declarations
 
+      use m_monsys
       use m_julian
       use m_dhpath
       use hydmod

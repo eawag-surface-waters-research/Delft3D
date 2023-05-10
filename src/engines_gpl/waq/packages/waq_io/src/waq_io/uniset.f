@@ -42,6 +42,7 @@
 !                         lun( 3) = unit intermediate file (harmonics)
 !                         lun( 4) = unit intermediate file (pointers)
 
+      use m_monsys
       use m_getcom
       use m_dhpath
       use m_dhopnf

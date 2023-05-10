@@ -33,6 +33,7 @@
 
       ! global declarations
 
+      use m_monsys
       use hydmod
       use system_utils
       use :: m_hyd_keys, only: key, nokey     ! keywords in hydfile

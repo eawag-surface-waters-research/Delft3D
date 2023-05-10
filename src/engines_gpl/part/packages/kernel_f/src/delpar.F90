@@ -305,6 +305,7 @@
       !
       !  module declarations
       !
+      use m_monsys
       use precision_part                  ! single/double precision
       use timers
       use fileinfo  , lun=> lunit    ! logical unit numbers for files
