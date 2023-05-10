@@ -41,8 +41,8 @@ contains
       subroutine  p10cor( tmin1, tmin0 , xp   , yp    , zp    , xpold , &
                           ypold, zpold , chi0 , chi1  , dtstop, rj0   , &
                           vx   , vy    , vz   , vvx   , vvy   , vvz   , &
-                          c2   , c3    , ipc  , vx0   , vy0   , vz0   , &
-                          ipcgo, accrjv)
+                          c2   , c3    , vx0   , vy0   , vz0   , &
+                          accrjv)
 !
 !
 !                   Deltares
@@ -64,8 +64,6 @@ contains
 !                             otherwise only the corrected time is needed
 !                             for the predicted position (=corrected position)
 !
-!     notes                 : option ipc=3 from dunsbergen is implemented
-!                             interpolation routine (uvwint) is revised
 !
 !     logical unit numbers  : none.
 !
@@ -86,9 +84,6 @@ contains
 !     dx      real      mnmaxk    input   delta x for the segments
 !     dy      real      mnmaxk    input   delta y for the segments
 !     flow    real    2*mnmaxk    input   flows in two directions
-!     ipc     integer     1       in/out  option numerical scheme
-!     ipcgo   integer     1       in/out  when 0 time step ends for particle
-!                                         due to corrector (1 on input)
 !     mp      integer     1       in/out  1th grid index particles
 !     np      integer     1       in/out  2th grid index particles
 !     kp      integer     1       in/out  3th grid index particles
@@ -114,9 +109,7 @@ contains
       real (sp), parameter :: acc = 1.0e-15, accura = 1.0e-5
 !
 !     local scalars
-!
-      integer(ip) :: ipc, ipcgo
-!
+
 !     local scalars
 !
       real   (sp) :: abs  , accrjv , c2     , c3   , chi0  , chi1   , dtstop
@@ -132,37 +125,7 @@ contains
 !
 !.. compute the derivatives ds/dt at old and new positions
 !
-      if(ipc==3) then
-         if(abs(chi0) > accura) then
-            chi0 = rj0/chi0
-         else
-!rjv        chi0 = 1.0
-!*jvk
-            chi0 = rj0
-         endif
-         if(abs(chi1) > accura) then
-            chi1 = rj0/chi1
-         else
-!rjv        chi1 = 1.0
-!*jvk
-            chi1 = rj0
-         endif
-         if (abs(chi1-chi0) > acc) then
-           tcor = tmin0*(chi1-chi0)/(rj0*log(1.0+(chi1-chi0)/chi0))
-         else
-           tcor = tmin0*chi0/rj0
-         endif
-      elseif(ipc==5) then
-           tcor = 2.0*tmin0*chi0/(chi0+chi1)
-!jvk:
-!
-!          tcor = 2.0*tmin0     /(chi0+chi1)
-      else
-           write(*,*) ' Numerical option ipc = ',ipc
-           write(*,*) ' Error: this option for ipc is not implemented '
-           call stop_exit(1)
-      endif
-!
+
 !     determine whether predicted particle position must be
 !     corrected and whether time must be corrected
 !
@@ -178,28 +141,7 @@ contains
 !
           if (tmin1 >= dtstop) then
              tmin1  = dtstop
-!jvk  !!!!!!
-             ipcgo  = 0
-!
-!     corrected s(t) required for travelling tmin1
-!
-             if(ipc==3) then
-                if (chi1-chi0 > acc) then
-                   tmingo = tcor*rj0                       &
-                            *log(1.0+tmin1*(chi1-chi0)/(tcor*chi0))  &
-                            /(chi1-chi0)
-                else
-                   tmingo = tmin1*rj0/chi0
-                endif
-             elseif(ipc==5) then
-                tmingo = 0.5*(chi0+chi1)*tmin1/chi0
-!jvk:
-!
-!               tmingo = 0.5*(chi0+chi1)*tmin1
-             else
-                write (*,*) ' This option for ipc is not implemented '
-                call stop_exit(1)
-             endif
+
 !
 !     corrected position differs from predicted one and becomes:
 !

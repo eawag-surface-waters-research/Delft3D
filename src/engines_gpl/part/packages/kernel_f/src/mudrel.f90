@@ -126,7 +126,7 @@ contains
 !     local scalars
 !
       integer(ip) :: i     , iftime, iopt   , is    , isfil , isout , it    , itime , iu
-      integer(ip) :: i1    , ihulp , ilay   , int   , ipp   , ipc   , isg2  , jseg  , mod
+      integer(ip) :: i1    , ihulp , ilay   , int   , ipp   , isg2  , jseg  , mod
       integer(ip) :: il    , im    , in     , ipos  , ips2  , iseg  , isub  , layt  , mmax
       integer(ip) :: iutime, lurep , nose2  , nosegm, nosy2 , nosyss , nosudx, nact  , nm
       integer(ip) :: nmax  , nosubs, nprest , npseg , ndprt , ndprt2, nopart, noseg2, noumx2
@@ -439,21 +439,8 @@ contains
 110         continue
 !
             nm = nmax*mmax
-!
-            ipc = 0
+
             do 100 ipp = nptot + 1, nptot + nprest
-!
-99             ipc = ipc + 1
-               if(ipc > nact) call error('ipc gt nact in muderel')
-               jseg = ipnt(ipc)
-               i1 = mod(jseg,nm)
-               if(i1==0) i1 = nm
-               in = mod(i1,nmax)
-               if(in==0) in = nmax
-               im = 1 + (i1 - in)/nmax
-               if((im-1)*nmax /= (i1-in)) call error('Error 1 mudrel')
-               il = 1 + (jseg-i1)/nm
-               if((il-1)*nm /= (jseg-i1)) call error('Error 2 mudrel')
 !
 !.. add the remainder from segment with largest remainder
 !.. to segment with less remainder, max 1 part per segment
@@ -470,8 +457,6 @@ contains
                   if(volume(jseg) > (0.0)) then
                      totma2 = totma2 + wpart1
                   endif
-               else
-                  goto 99
                endif
 100         continue
 !
