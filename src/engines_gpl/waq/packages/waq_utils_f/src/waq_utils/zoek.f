@@ -37,6 +37,7 @@
 !                           BCZOEK, (block data) sets default search mode
 !
       SUBROUTINE ZOEK ( NAAM  , NOTOT , SYNAME, NZOEK , IAINDX)
+      use m_errsys
       USE Timers
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
@@ -188,6 +189,8 @@
       END
 !
       SUBROUTINE SETZMO (ICASST)
+      use m_errsys
+
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
 !

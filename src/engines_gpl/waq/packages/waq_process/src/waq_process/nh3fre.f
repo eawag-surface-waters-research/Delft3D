@@ -51,6 +51,7 @@
 !-----------------------------------------------------------------------
 !     Name     Type   Library
 !     ------   -----  ------------
+      use m_errsys
       USE PHYSICALCONSTS, ONLY: CtoKelvin
       IMPLICIT REAL (A-H,J-Z)
 

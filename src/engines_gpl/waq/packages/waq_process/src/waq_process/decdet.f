@@ -30,6 +30,8 @@
       subroutine decdet ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
+      use m_errsys
+
 !>\file
 !>       Mineralisation & conversion of detritus POC1,POC2,POC3,POC4,DOC
 

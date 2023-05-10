@@ -28,6 +28,7 @@
 !>\file
 !>       detect and activate primary processes (which act directly on substances)
 
+      use m_errsys
       use processet
       use timers       !   performance timers
 
