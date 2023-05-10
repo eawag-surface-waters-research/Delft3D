@@ -456,7 +456,7 @@ contains
                if((il-1)*nm /= (jseg-i1)) call error('Error 2 mudrel')
 !
 !.. add the remainder from segment with largest remainder
-!.. to segment with less remiander, max 1 part per segment
+!.. to segment with less remainder, max 1 part per segment
 !
 !
                if ( lgrid(in,im)  >  0 ) then
