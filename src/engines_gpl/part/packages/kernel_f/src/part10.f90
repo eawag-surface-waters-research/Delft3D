@@ -56,7 +56,6 @@ contains
 
 
 !     subroutines called    : stop_exit  - stops with return code (typical 1 for stop on error)
-!                             p10cor  - function unknow
 !                             part07  - not documented here
 !                             part11  - not documented here
 
@@ -70,7 +69,6 @@ contains
       use precision_part        ! single/double precision
       use timers           ! performance timer
       use typos
-      use p10cor_mod
       use grid_search_mod
       use spec_feat_par    ! special feature parameters
       use random_generator

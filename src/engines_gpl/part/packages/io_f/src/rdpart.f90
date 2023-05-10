@@ -95,6 +95,7 @@
       real     ( sp), pointer     :: ypoltmp(:)      ! temp y-coordinates polygon
       integer  ( ip)                 nrowstmp        ! temp length polygon
       integer  ( ip)                 npmargin        ! allocation margin in number of particles
+      integer  ( ip)              :: ipc             ! numerical integration scheme
 
       character( 20)                 cplastic        ! plastic name
       real     ( sp)                 rdpldensity     ! read plastic density
@@ -235,7 +236,7 @@
          call stop_exit(1)
       endif
       if ( ipc /= 1 ) then
-         write ( lun2, '(/A,I3)')  ) 'Error: Numerical scheme must be 1. &
+         write ( lun2, '(/A,I3)')  'Error: Numerical scheme must be 1. &
                         Current value given is: ', ipc
          call stop_exit(1)
       endif
