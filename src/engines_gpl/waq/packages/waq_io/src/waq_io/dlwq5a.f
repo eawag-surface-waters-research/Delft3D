@@ -76,6 +76,7 @@
 !                          LUN(14) = unit intermediate file (boundaries)
 !                          LUN(15) = unit intermediate file (wastes)
 
+      use m_dhopnf
       use rd_token
       use timers       !   performance timers
       use dlwq_data

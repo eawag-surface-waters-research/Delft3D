@@ -22,6 +22,8 @@
 !!  rights reserved.
 
       module dlwqi0_mod
+      use m_dhopnf
+
       contains
       subroutine dlwqi0 ( nlun   , a      , j      , c      , imaxa  ,
      &                    imaxi  , imaxc  , ipage  , lun    , lchar  ,

@@ -69,6 +69,7 @@
 !                           LUN(4) = unit intermediate file (pointers)
 !                           LUN(5) = unit intermediate file (timesteps)
 
+      use m_dhopnf
       use rd_token     !   for the reading of tokens
       use subs02
       use partmem      !   for PARTicle tracking

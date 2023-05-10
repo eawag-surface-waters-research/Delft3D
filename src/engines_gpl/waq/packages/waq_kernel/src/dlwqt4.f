@@ -44,6 +44,7 @@
 
 !     SUBROUTINES CALLED  : SRSTOP, stops execution
 
+      use m_dhopnf
       use timers
       use delwaq2_data
       USE HydroSet           ! for composed hydrodynamics

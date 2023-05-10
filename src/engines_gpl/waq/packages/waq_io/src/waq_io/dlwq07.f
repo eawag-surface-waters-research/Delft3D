@@ -32,6 +32,7 @@
 
 !     Global declarations
 
+      use m_dhopnf
       use grids          ! for the storage of contraction grids
       use dlwq_data      ! for definition and storage of data
       use rd_token       ! tokenized reading

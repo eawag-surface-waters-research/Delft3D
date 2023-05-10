@@ -70,6 +70,7 @@
 !
 !     Declaration of arguments
 !
+      use m_dhopnf
       use timers
       use output
 

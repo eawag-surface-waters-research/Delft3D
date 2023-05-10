@@ -42,6 +42,7 @@
 !                         lun( 3) = unit intermediate file (harmonics)
 !                         lun( 4) = unit intermediate file (pointers)
 
+      use m_dhopnf
       use timers       !   performance timers
       use m_dhdelf
       use m_dhgnam

@@ -26,6 +26,7 @@
 !>                    delwaq1_write_messages
 
 subroutine delwaq1_write_messages(errorcode)
+    use m_dhopnf
     use m_delwaq1_data
     use m_dattim
 

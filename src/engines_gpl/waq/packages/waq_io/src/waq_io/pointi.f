@@ -47,6 +47,7 @@
 !     Logical units      : lunut   = unit formatted output file
 !                          lun( 8) = unit intermediate file ('to-from')
 
+      use m_dhopnf
       use grids          ! for the storage of contraction grids
       use rd_token       ! for the reading of tokens
       use timers       !   performance timers

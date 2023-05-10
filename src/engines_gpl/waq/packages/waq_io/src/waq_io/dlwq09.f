@@ -47,6 +47,7 @@
 
 !     Logical units     : -
 
+      use m_dhopnf
       use rd_token     !   for the reading of tokens
       use Output
       use timers       !   performance timers

@@ -53,6 +53,7 @@
 !     Functions called   : gridpointercollfind to find the number of the reference grid by name
 !                                              function is contained in the grids module
 
+      use m_dhopnf
       use grids            !   for the storage of contraction grids
       use rd_token         !   for the reading of tokens
       use timers       !   performance timers

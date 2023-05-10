@@ -52,6 +52,7 @@
 !
 !     DECLARATIONS        :
 !
+      use m_dhopnf
       use m_dhkmrk
       use m_dhimov
       use timers

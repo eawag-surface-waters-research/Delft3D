@@ -70,6 +70,7 @@
 !                          lun( 4) = unit intermediate file (pointers)
 !                          lun(is) = unit intermediate file (items)
 
+      use m_dhopnf
       use timers       !   performance timers
       use rd_token
       use m_sysn          ! System characteristics

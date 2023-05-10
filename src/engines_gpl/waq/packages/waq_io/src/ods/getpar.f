@@ -24,6 +24,8 @@
       SUBROUTINE GETPAR ( FNAME  , ITYPE  , PARDEF , MAXDEF , ITMDEP ,
      *                    LOCDEP , MAXLST , LANG   , PARLST , PARUNI ,
      *                    IPRTYP , IPRCOD , NRLST  , IERROR , OPTION )
+      use m_dhopnf
+
 !
 !
 !     Deltares        MARINE & COASTAL MANAGEMENT

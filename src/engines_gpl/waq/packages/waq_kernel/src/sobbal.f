@@ -91,6 +91,7 @@
 !     WSTDMP  REAL     NOTOT,NOWST,2  I   accumulated wasteloads 1/2 in and out
 !     ==================================================================
 !
+      use m_dhopnf
       use timers
       INTEGER       NOTOT , ITIME , NOSYS ,
      j              NOFLUX, NDMPAR, NDMPQ , NTDMPQ,

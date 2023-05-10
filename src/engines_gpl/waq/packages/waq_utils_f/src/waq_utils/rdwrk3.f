@@ -44,6 +44,7 @@
 !     ITOTC   INTEGER    1         OUT     Dimension character array
 !
 !     declarations
+      use m_dhopnf
       use m_dhgnam
       use m_sysn          ! System characteristics
       use m_sysi          ! Timer characteristics

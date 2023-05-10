@@ -83,6 +83,7 @@
 !                          lun( 4) = unit binary intermediate file for pointers
 !                          lun(is) = unit binary intermediate file for function
 
+      use m_dhopnf
       use timers       !   performance timers
       use rd_token
       use m_sysn          ! System characteristics

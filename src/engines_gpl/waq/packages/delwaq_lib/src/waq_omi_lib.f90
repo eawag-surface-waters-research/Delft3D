@@ -31,6 +31,9 @@
 
 !> Utilities for the routines here (effectively a private module)
 module waq_omi_utils
+use m_dhopnf
+use m_dhopnf
+
 
     integer, parameter :: LEVEL_FATAL   = 1
     integer, parameter :: LEVEL_ERROR   = 2

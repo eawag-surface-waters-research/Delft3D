@@ -26,6 +26,8 @@
 !       A, J and C are now pointers to arrays
 !
       MODULE DELWAQ2
+      use m_dhopnf
+
 
       CONTAINS
 

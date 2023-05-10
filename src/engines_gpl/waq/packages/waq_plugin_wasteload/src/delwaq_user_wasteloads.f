@@ -23,6 +23,7 @@
 
       module delwaq_user_wasteloads
 
+      use m_dhopnf
       use m_dhnolay
       use delwaq_loads
       use waq_plugin_wasteload_version_module

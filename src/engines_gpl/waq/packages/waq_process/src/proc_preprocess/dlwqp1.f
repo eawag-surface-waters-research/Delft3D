@@ -41,6 +41,7 @@
 !>                             .
 !>                          to a consistent set of sequential processes for the simulation part
 
+      use m_dhopnf
       use timers       !   performance timers
       use dlwq_data
       use processet
@@ -54,7 +55,7 @@
 
       ! declaration of arguments
 
-      integer             , intent(in   ) :: lun(*)          !< unit numbers
+      integer             , intent(inout) :: lun(*)          !< unit numbers
       character(len=*)    , intent(inout) :: lchar(*)        !< filenames
       type(procespropcoll), intent(in   ) :: statprocesdef   !< the statistical proces definition
       type(itempropcoll)  , intent(in   ) :: allitems        !< all items of the proces system

@@ -22,6 +22,8 @@
 !!  rights reserved.
 
       module pointr_mod
+      use m_dhopnf
+
       contains
       subroutine pointr ( lun    , lchar  , noseg  , nmax   , mmax   ,
      &                    kmax   , noq    , noq1   , noq2   , noq3   ,
