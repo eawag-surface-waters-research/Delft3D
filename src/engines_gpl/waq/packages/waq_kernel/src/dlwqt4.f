@@ -54,7 +54,7 @@
 
 !     kind     function         name        description
 
-      integer           , intent(in   )         :: lun(*)          ! logical unitnumbers of files
+      integer           , intent(inout)         :: lun(*)          ! logical unitnumbers of files
       character*(*)     , intent(in   )         :: luntxt(*)       ! file names
       integer           , intent(in   )         :: ftype(*)        ! type of the files
       integer           , intent(in   )         :: lunout          ! unit number monitor file

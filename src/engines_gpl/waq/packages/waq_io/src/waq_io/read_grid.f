@@ -62,7 +62,7 @@
 
 !     declaration of arguments
 
-      integer               , intent(in   ) :: lun(*)        !< unit numbers used
+      integer               , intent(inout) :: lun(*)        !< unit numbers used
       type(GridPointer)     , intent(inout) :: aGrid         !< collection off all grid definitions
       type(GridPointerColl) , intent(in   ) :: GridPs        !< collection off all grid definitions
       logical               , intent(in   ) :: oldproc       !< true if old processing

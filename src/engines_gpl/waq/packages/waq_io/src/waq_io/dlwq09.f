@@ -59,7 +59,7 @@
 
 !     kind           function         name                Description
 
-      integer  ( 4), intent(in   ) :: lun   (*)         !< array with unit numbers
+      integer  ( 4), intent(inout) :: lun   (*)         !< array with unit numbers
       character( *), intent(inout) :: lchar (*)         !< array with file names of the files
       integer  ( 4), intent(inout) :: filtype(*)        !< type of binary file
       integer  ( 4), intent(in   ) :: icmax             !< size of the character workspace

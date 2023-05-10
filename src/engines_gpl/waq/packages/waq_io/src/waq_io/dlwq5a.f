@@ -86,7 +86,7 @@
 
       implicit none
 
-      integer  ( 4), intent(in   ) :: lun  (*)      !< array with unit numbers
+      integer  ( 4), intent(inout) :: lun  (*)      !< array with unit numbers
       character( *), intent(inout) :: lchar(*)      !< filenames
       integer  ( 4), intent(in   ) :: iu            !< index in LUN array of workfile
       integer  ( 4), intent(in   ) :: iwidth        !< width of the output file

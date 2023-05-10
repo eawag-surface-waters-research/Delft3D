@@ -49,7 +49,7 @@
 
 !     kind                    function         name           Descriptipon
 
-      integer               , intent(in   ) :: lun(*)       !< unit numbers used
+      integer               , intent(inout) :: lun(*)       !< unit numbers used
       character(len=*)      , intent(in   ) :: lchar(*)     !< filenames
       integer  ( 4)         , intent(inout) :: filtype(*)   !< type of binary file
       type(inputfilestack)  , intent(inout) :: inpfil       !< input file structure with include stack and flags

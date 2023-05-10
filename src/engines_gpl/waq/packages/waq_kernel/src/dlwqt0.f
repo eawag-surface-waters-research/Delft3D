@@ -65,7 +65,7 @@
 
 !     type     kind  function         name                         description
 
-      integer  ( 4), intent(in   ) :: lun   (*)                  !< Array with unit numbers
+      integer  ( 4), intent(inout) :: lun   (*)                  !< Array with unit numbers
       integer  ( 4), intent(in   ) :: itime                      !< Model timer
       integer  ( 4), intent(inout) :: itimel                     !< Model timer one step ago
       real     ( 4), intent(inout) :: harmat(nharms)             !< Matrices harmonic components

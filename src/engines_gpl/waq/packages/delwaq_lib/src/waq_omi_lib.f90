@@ -31,9 +31,7 @@
 
 !> Utilities for the routines here (effectively a private module)
 module waq_omi_utils
-use m_dhopnf
-use m_dhopnf
-
+    use m_dhopnf
 
     integer, parameter :: LEVEL_FATAL   = 1
     integer, parameter :: LEVEL_ERROR   = 2
@@ -1563,6 +1561,7 @@ integer function WriteRestartFile ( lcharmap )
     !DEC$ ATTRIBUTES DECORATE, ALIAS : 'WRITERESTARTFILE' :: WriteRestartFile
 
     use delwaq2_global_data
+    use m_dhopnf
     use m_sysn          ! System characteristics
     use m_sysc          ! Pointers in character array workspace
     use m_sysa          ! Pointers in real array workspace

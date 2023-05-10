@@ -76,7 +76,7 @@
 
 !     Kind                    Function         Name               Description
 
-      integer           ( 4), intent(in   ) :: lun  (*)      !< array with unit numbers
+      integer           ( 4), intent(inout) :: lun  (*)      !< array with unit numbers
       character         ( *), intent(inout) :: lchar(*)      !< filenames
       integer           ( 4), intent(inout) :: filtype(*)    !< type of binary file
       integer           ( 4), intent(in   ) :: noseg         !< nr of computational volumes

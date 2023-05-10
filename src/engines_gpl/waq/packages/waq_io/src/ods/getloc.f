@@ -68,10 +68,12 @@
       integer               :: extpos  ! position of extension
       integer               :: extlen  ! length of file extension
       logical               :: mapfil  ! true if map file extension
+      integer               :: lun
 !
 !         Open the DELWAQ .HIS file
 !
-      CALL DHOPNF ( 10 , FNAME(1) , 24 , 2 , IERROR )
+      lun = 10
+      CALL DHOPNF ( lun  , FNAME(1) , 24 , 2 , IERROR )
       IF ( IERROR .NE. 0 ) RETURN
 
       ! map or his
@@ -86,9 +88,9 @@
 !
 !         Read primary system characteristics
 !
-      READ ( 10 , ERR=100 )   FNAME(3)(1:160)
-      READ ( 10 , ERR=110 )   NOTOT, NODUMP
-      READ ( 10 , ERR=120 ) ( FNAME(3)(181:200) , K = 1,NOTOT )
+      READ ( lun , ERR=100 )   FNAME(3)(1:160)
+      READ ( lun , ERR=110 )   NOTOT, NODUMP
+      READ ( lun , ERR=120 ) ( FNAME(3)(181:200) , K = 1,NOTOT )
 !
 !         Read parameter names and try to find the wanted subset
 !
@@ -99,7 +101,7 @@
       DO 40 I1 = 1 , NODUMP , MAXLST
          MAXK = MIN(NODUMP,I1+MAXLST-NRLST-1) - I1 + 1
          if ( .not. mapfil ) then
-            READ ( 10 , ERR=130 ) ( IDUMMY, LOCLST(K), K = NRLST+1, NRLST+MAXK)
+            READ ( lun , ERR=130 ) ( IDUMMY, LOCLST(K), K = NRLST+1, NRLST+MAXK)
          else
             do k = nrlst+1, nrlst+maxk
                write(loclst(k), '(''segment '',i8)' ) k
@@ -141,6 +143,6 @@
 !
 !         Close the unit
 !
-  200 CLOSE ( 10 )
+  200 CLOSE ( lun )
       RETURN
       END

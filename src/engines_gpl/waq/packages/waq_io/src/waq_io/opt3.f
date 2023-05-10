@@ -95,7 +95,7 @@
 
 !     kind           function         name                Descriptipon
 
-      integer  ( 4), intent(in   ) :: lun   (*)         !< array with unit numbers
+      integer  ( 4), intent(inout) :: lun   (*)         !< array with unit numbers
       character( *), intent(in   ) :: lchar (*)         !< array with file names of the files
       integer  ( 4), intent(in   ) :: is                !< entry in lun for this call
       integer  ( 4), intent(in   ) :: nitem             !< number of required items

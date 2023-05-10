@@ -58,7 +58,7 @@
 !     type     kind  function         name             description
 
       integer   (4) , intent(in   ) :: iopt1          !< Input option
-      integer   (4) , intent(in   ) :: lun  (*)       !< DELWAQ Unit number array
+      integer   (4) , intent(inout) :: lun  (*)       !< DELWAQ Unit number array
       integer   (4) , intent(in   ) :: is             !< entry in LUN for item
       character*(*) , intent(inout) :: lchar(*)       !< IN/OUT  Filenames
       logical       , intent(in   ) :: dtflg1         !< 'date'-format 1st time scale

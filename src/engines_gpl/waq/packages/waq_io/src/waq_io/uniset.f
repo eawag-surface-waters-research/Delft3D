@@ -54,7 +54,7 @@
 !     kind           function         name            Descriptipon
 
       integer  ( 4), intent(in   ) :: nolun         !< Amount of unit numbers
-      integer  ( 4), intent(in   ) :: lun  (nolun)  !< Unit numbers
+      integer  ( 4), intent(inout) :: lun  (nolun)  !< Unit numbers
       character( *), intent(inout) :: lchar(nolun)  !< File names
       character( *), intent(in   ) :: runid         !< Runid
 

@@ -52,7 +52,7 @@
 
 !     kind                       function         name                   Descriptipon
 
-      integer                  , intent(in   ) :: lun                  !< unit number binary input file
+      integer                  , intent(inout) :: lun                  !< unit number binary input file
       character(len=*)         , intent(in   ) :: lch                  !< name input file
       integer                  , intent(in   ) :: lunrep               !< unit number report file
       integer                  , intent(in   ) :: noseg                !< number of segments

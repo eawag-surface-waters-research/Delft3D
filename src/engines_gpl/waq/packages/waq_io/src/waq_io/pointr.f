@@ -69,7 +69,7 @@
 
 !     kind           function         name            Descriptipon
 
-      integer  ( 4), intent(in   ) :: lun   (*)     !< array with unit numbers
+      integer  ( 4), intent(inout) :: lun   (*)     !< array with unit numbers
       character( *), intent(inout) :: lchar (*)     !< array with file names of the files
       integer  ( 4), intent(in   ) :: noseg         !< number of computational volumes
       integer  ( 4), intent(in   ) :: nmax          !< dimension of first direction of grid

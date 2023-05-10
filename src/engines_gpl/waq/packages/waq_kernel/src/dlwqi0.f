@@ -83,7 +83,7 @@
       integer              , intent(inout) :: imaxi         !< dimension   J-array
       integer              , intent(inout) :: imaxc         !< dimension   C-array
       integer              , intent(in   ) :: ipage         !< pagelength of the output file
-      integer              , intent(in   ) :: lun    (nlun) !< array with unit numbers
+      integer              , intent(inout) :: lun    (nlun) !< array with unit numbers
       character(*)         , intent(in   ) :: lchar  (nlun) !< filenames
       integer              , intent(in   ) :: filtype(nlun) !< type of file
       type(gridpointercoll), intent(out)   :: gridps        !< collection off all grid definitions
@@ -99,7 +99,7 @@
       INTEGER       SENDBUF(3)
       CHARACTER*4   cext                          ! inital conditions file extention
 
-      INTEGER       IERRIO
+      INTEGER       IERRIO, new_lun
 
 !     Common to define external communications in SOBEK
 !     OLCFWQ             Flag indicating ONLINE running of CF and WQ
@@ -166,7 +166,8 @@
       IF ( IERRD .EQ. 0 ) THEN
          DO I = 1 , NUFIL
             READ ( LUN(41) , * ) iftyp, FINAM
-            CALL DHOPNF ( 800+I , FINAM , 3 , 2+iftyp , IOERR )
+            new_lun =  800+I
+            CALL DHOPNF ( new_lun , FINAM , 3 , 2+iftyp , IOERR )
             IF ( IOERR .NE. 0 ) THEN
                WRITE ( LUN(19) , '(A,I3,A,A)' )
      *         ' ERROR opening file on unit: ',800+I,' filename: ',FINAM

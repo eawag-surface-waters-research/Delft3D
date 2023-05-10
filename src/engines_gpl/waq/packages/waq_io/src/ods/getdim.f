@@ -68,11 +68,13 @@
       integer               :: extpos  ! position of extension
       integer               :: extlen  ! length of file extension
       logical               :: mapfil  ! true if map file extension
+      integer               :: lun
 
 !
 !         Open the DELWAQ .HIS file
 !
-      CALL DHOPNF ( 10 , FNAME(1) , 24 , 2 , IERROR )
+      lun = 10
+      CALL DHOPNF ( lun , FNAME(1) , 24 , 2 , IERROR )
       IF ( IERROR .NE. 0 ) RETURN
 
       ! map or his
@@ -87,11 +89,11 @@
 !
 !         Read primary system characteristics
 !
-      READ ( 10 , ERR=100 )   FNAME(3)(1:160)
-      READ ( 10 , ERR=110 )   NOTOT, NODUMP
-      READ ( 10 , ERR=120 ) ( FNAME(3)(181:200) , K = 1,NOTOT )
+      READ ( lun , ERR=100 )   FNAME(3)(1:160)
+      READ ( lun , ERR=110 )   NOTOT, NODUMP
+      READ ( lun , ERR=120 ) ( FNAME(3)(181:200) , K = 1,NOTOT )
       if ( .not. mapfil ) then
-         READ ( 10 , ERR=130 ) ( IDUMMY, FNAME(3)(221:240) , K = 1,NODUMP )
+         READ ( lun , ERR=130 ) ( IDUMMY, FNAME(3)(221:240) , K = 1,NODUMP )
       endif
 !
 !         Read the values at all times
@@ -99,7 +101,7 @@
       NTT   = NODUMP*NOTOT
       NOTIM = 0
 cjvb  NTT = 0
-   10 READ ( 10 , ERR=140 , END=20 )   IDUMMY, ( ADUMMY , K=1,NTT )
+   10 READ ( lun , ERR=140 , END=20 )   IDUMMY, ( ADUMMY , K=1,NTT )
       NOTIM = NOTIM + 1
       GOTO 10
 !
@@ -122,7 +124,7 @@ cjvb  NTT = 0
       GOTO 200
   140 IERROR = 14
 !
-  200 CLOSE ( 10 )
+  200 CLOSE ( lun )
       RETURN
 !
       END
