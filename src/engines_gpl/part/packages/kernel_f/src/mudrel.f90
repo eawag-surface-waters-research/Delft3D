@@ -438,10 +438,9 @@ contains
 120            continue
 110         continue
 !
-            ipc = 0
-!
             nm = nmax*mmax
-
+!
+            ipc = 0
             do 100 ipp = nptot + 1, nptot + nprest
 !               
 99             ipc = ipc + 1

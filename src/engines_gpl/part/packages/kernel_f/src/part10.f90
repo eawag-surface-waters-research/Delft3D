@@ -251,7 +251,6 @@ contains
       real(sp)      :: c2g                     ! = grav / chezy / chezy
       real(sp)      :: c3                      ! something undeterminded yet, fixed at 1.0
       real(sp)      :: cdrag                   ! wind drag in fraction = drand(3)
-      real(sp)      :: cf                      ! help variable
       real(sp)      :: chi0                    ! variable in correction process
       real(sp)      :: chi1                    ! variable in correction process
       real(sp)      :: dax                     ! delta of diffusive spreading x
@@ -482,16 +481,16 @@ contains
 
       timon_org = timon
       timon     = .false.
-!$OMP PARALLEL DO PRIVATE ( np, mp, kp, kpp, ktopp, kbotp, n0, n0old, a, n03d, xp,   &
+!$OMP PARALLEL DO PRIVATE ( np, mp, kp, kpp, ktopp, kbotp, n0, n0old, a, n03d, xp, &
 !$OMP                       yp, zp, tp, itdelt, ddfac, dran1, abuac, deltt, dred,  &
 !$OMP                       kd, icvis, icvist, ivisit, lstick, wsum, isub, jsub,   &
 !$OMP                       ifract, pstick, wstick, ldispo, trp, t0, dax, day,     &
 !$OMP                       n1, n2, dxp, dyp, depth1, idep, vol, vy0, vy1,         &
 !$OMP                       vx0, vx1, vvx, vvy, vx, vy, vxr, vyr, ubstar, ubstar_b,&
 !$OMP                       vz0, vz1, disp, dvz, depthl, dvzs, dvzt, vzs, icounz,  &
-!$OMP                       znew, sangl, zp2, c1, f1, c2, c3, xnew,           &
-!$OMP                       idepm1, vvz, vz, umagp, cf, rtimx, idx, rtimy, idy,    &
-!$OMP                       rtimz, idz, rtim, rtim1, xpold, ypold, zpold,   &
+!$OMP                       znew, sangl, zp2, c1, f1, c2, c3, xnew,                &
+!$OMP                       idepm1, vvz, vz, umagp, rtimx, idx, rtimy, idy,        &
+!$OMP                       rtimz, idz, rtim, rtim1, xpold, ypold, zpold,          &
 !$OMP                       chi0, vxnew, vynew, vznew, chi1, ynew, vxw, vyw,       &
 !$OMP                       deppar, yy, n0new, depth2, dstick, xx, n03d2, disp2,   &
 !$OMP                       pbounce, xpnew, ypnew, xrest, yrest, dxpnew,           &
