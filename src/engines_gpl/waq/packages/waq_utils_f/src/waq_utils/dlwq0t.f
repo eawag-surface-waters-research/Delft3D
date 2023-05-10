@@ -22,6 +22,8 @@
 !!  rights reserved.
 
       module dlwq0t_data
+      use m_julian
+
       
       integer :: dlwq0t_itstrt   ! Simulation start time ( scu )
       integer :: dlwq0t_itstop   ! Simulation stop time ( scu )
@@ -54,7 +56,6 @@
 
 !     External functions :
 
-      real      ( 8) julian   !  computes julian date from (idate,itime) integers
       integer        mod      !  modulo operation
 
 !     Logical units      : none

@@ -56,16 +56,15 @@
 !     OPTION  CHAR*256   1        IN/OUT  For future use
 !
 !
+      use m_julian
       use m_dhucas
       use m_dhopnf
       use m_dhfext
 
       CHARACTER*256    FNAME (3) , OPTION
       INTEGER          ITMTYP(*)
-      DOUBLE PRECISION TIMLST(*) , TIMDEF(2,*) , ATIME , OTIME, SECOND,
-     *                 JULIAN
+      DOUBLE PRECISION TIMLST(*) , TIMDEF(2,*) , ATIME , OTIME, SECOND
       LOGICAL          SETALL
-      EXTERNAL         JULIAN
 !
       REAL, ALLOCATABLE :: RDATA(:)
       character*256         :: ext     ! file extension

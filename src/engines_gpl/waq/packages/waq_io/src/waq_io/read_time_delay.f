@@ -46,13 +46,12 @@
 
 !     Global declarations
 
+      use m_julian
       use rd_token       ! for definition and storage of data
       use timers         ! performance timers
       use m_sysi          ! Timer characteristics
 
       implicit none
-
-      real(8) julian     ! returns 64 bits real Julian data
 
 !     Arguments
 

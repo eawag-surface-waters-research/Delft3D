@@ -27,6 +27,7 @@
 
       ! global declarations
 
+      use m_julian
       use m_dhpath
       use hydmod
       use m_dherrs
@@ -75,7 +76,6 @@
       integer             :: is                     ! second
       integer             :: idate                  ! date
       integer             :: itime                  ! time
-      real*8              :: julian                 ! julian function
       logical, parameter  :: untileol = .true.      ! read until the end of the line
 
 

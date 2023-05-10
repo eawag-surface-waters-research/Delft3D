@@ -25,6 +25,7 @@
 
       use hydmod
       use m_getcom
+      use m_julian
       use io_ugrid
       use system_utils
       use delwaq_version_module
@@ -60,7 +61,6 @@
       real(8)              :: input_t0_jul  ! input reference time (julian)
       integer              :: input_t0_d    ! input reference date (ymd)
       integer              :: input_t0_t    ! input reference time (hms)
-      real*8               :: julian        ! function to convert ymd, hms to julian day
       real                 :: wdayshift     ! time in days (after shift)
       logical              :: l_regular     ! regular aggregartion option
       logical              :: l_expand      ! expand to full matrix

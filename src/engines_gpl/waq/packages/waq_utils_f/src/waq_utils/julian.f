@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_julian
+
+      implicit none
+
+      contains
+
 
       DOUBLE PRECISION FUNCTION JULIAN ( IDATE , ITIME )
 !
@@ -141,3 +147,4 @@
       ENDIF
   999 RETURN
       END
+      end module m_julian

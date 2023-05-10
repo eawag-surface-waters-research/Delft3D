@@ -55,14 +55,14 @@
 !     OPTION  CHAR*256   1        IN/OUT  For future use
 !
 !
+      use m_julian
       use m_dhucas
       use m_dhopnf
       use m_dhfext
 
       CHARACTER*256 FNAME (3) , OPTION
       DIMENSION     LOC(*)    , DATA(*)
-      REAL*8        TIM(3)    , OTIME  , ATIME    , SECOND  , JULIAN
-      EXTERNAL      JULIAN
+      REAL*8        TIM(3)    , OTIME  , ATIME    , SECOND
       real  amiss
       character*256         :: ext     ! file extension
       integer               :: extpos  ! position of extension
@@ -162,6 +162,7 @@
 !
 !     SUBROUTINES CALLED :
 
+      use m_julian
       use m_dhucas
       use m_dhfext
       use m_dhopnf
@@ -187,8 +188,7 @@
 !
       CHARACTER*256 FNAME (3) , OPTION
       DIMENSION     LOC(*)    , DATA(*)
-      REAL*8        TIM(3)    , OTIME  , ATIME    , SECOND  , JULIAN
-      EXTERNAL      JULIAN
+      REAL*8        TIM(3)    , OTIME  , ATIME    , SECOND
       real  amiss
       character*256         :: ext     ! file extension
       integer               :: extpos  ! position of extension

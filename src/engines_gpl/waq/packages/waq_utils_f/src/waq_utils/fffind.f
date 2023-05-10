@@ -21,6 +21,8 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
       module m_fffind
+      use m_julian
+
 
       implicit none
 
@@ -41,14 +43,14 @@
       integer :: IYEAR4 , IMONTH4 , IDAY4 , IHOUR4 , IMIN4 , ISEC4
       integer :: IDATE , ITIME , ITIM , ITIM2 , ISTEP , IDTF , LUNUT
       INTEGER :: NUMBR
-      
+
       CHARACTER*25  SGET  , S1
       CHARACTER*255 AFILE , BFILE
 
 !
 !     local declarations
 !
-      REAL*8        REFTIM, STARTTIM, STOPTIM, AFACT, JULIAN
+      REAL*8        REFTIM, STARTTIM, STOPTIM, AFACT
       CHARACTER*255 FILPATH
       INTEGER       PATHLEN
 !
