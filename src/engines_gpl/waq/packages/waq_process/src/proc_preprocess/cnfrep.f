@@ -24,6 +24,7 @@
       subroutine cnfrep( noalg   , noprot, namprot, nampact, nopralg,
      +                   nampralg)
 
+      use m_dhslen
       use timers       !   performance timers
 
       integer        noalg , noprot , nopralg
