@@ -25,6 +25,7 @@ subroutine dlwq_boundio( lunrep, notot , nosys , noseg , nobnd ,&
                          syname, bndid , ibpnt , conc  , bound ,&
                          runid )
 
+    use m_getcom
     use m_dhpath
     use M_WQParComm
     use M_WQHBComm

@@ -24,6 +24,7 @@
       program agrhyd
 
       use hydmod
+      use m_getcom
       use io_ugrid
       use system_utils
       use delwaq_version_module

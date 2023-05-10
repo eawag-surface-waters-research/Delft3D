@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_getcom
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE GETCOM ( COMSTR, ARGMOD, FOUND , INTARG, REAARG,
      +                    CHAARG, IERR  )
@@ -59,6 +65,7 @@
       use m_dhgarg
 
       INTEGER        ARGMOD, INTARG, IERR
+      INTEGER        I , I1 , I2 , IA , IF ,  ILEN , ILENC
       REAL           REAARG
       LOGICAL        FOUND
       CHARACTER*(*)  COMSTR, CHAARG
@@ -162,3 +169,4 @@
       if ( timon ) call timstop( ithndl )
       RETURN
       END
+      end module m_getcom

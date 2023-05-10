@@ -22,6 +22,8 @@
 !!  rights reserved.
       module m_dhaggr
 
+      use m_getcom
+
       implicit none
 
       contains

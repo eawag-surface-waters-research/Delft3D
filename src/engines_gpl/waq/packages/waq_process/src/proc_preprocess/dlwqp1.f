@@ -41,6 +41,7 @@
 !>                             .
 !>                          to a consistent set of sequential processes for the simulation part
 
+      use m_getcom
       use m_dhopnf
       use timers       !   performance timers
       use dlwq_data
