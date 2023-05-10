@@ -57,6 +57,7 @@
 !     OPTION  CHAR*256   1        IN/OUT  For future use
 !
 !
+      use m_dhucas
       use m_dhopnf
       use m_dhfext
 

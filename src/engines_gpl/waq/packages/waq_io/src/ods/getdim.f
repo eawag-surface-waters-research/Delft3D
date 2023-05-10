@@ -58,6 +58,7 @@
 !            NDIM(3) = nr of time steps in the file
 !
 !
+      use m_dhucas
       use m_dhopnf
       use m_dhfext
 

@@ -24,6 +24,7 @@
 program ddcouple
 
       use hydmod
+      use m_dhucas
       use merge_step_mod
       use delwaq_version_module
       use m_dattim

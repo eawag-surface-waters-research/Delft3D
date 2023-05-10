@@ -53,6 +53,7 @@
 !
 !     Declaration of arguments
 !
+      use m_dhucas
       USE Timers
       use m_dhcarg
       use m_dhgarg

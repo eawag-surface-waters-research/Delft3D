@@ -25,6 +25,7 @@
 
       ! add attributes to processes from file
 
+      use m_dhucas
       use processet
       use timers       !   performance timers
 
