@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_fffind
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE FFFIND ( LUNUT , SGET , AFILE , BFILE , ISTEP ,
      *                    IT2   , IT3  , IT4   , NUMBR , IERR  )
@@ -27,6 +33,14 @@
       use m_dhpath
       use m_dhopnf
       use m_sysi          ! Timer characteristics
+
+      integer :: ILUN , IERR , I , K , A, IT2 , IT3 , IT4
+      integer :: IYEAR1 , IMONTH1 , IDAY1 , IHOUR1 , IMIN1 , ISEC1
+      integer :: IYEAR2 , IMONTH2 , IDAY2 , IHOUR2 , IMIN2 , ISEC2
+      integer :: IYEAR3 , IMONTH3 , IDAY3 , IHOUR3 , IMIN3 , ISEC3
+      integer :: IYEAR4 , IMONTH4 , IDAY4 , IHOUR4 , IMIN4 , ISEC4
+      integer :: IDATE , ITIME , ITIM , ITIM2 , ISTEP , IDTF , LUNUT
+      INTEGER :: NUMBR
       
       CHARACTER*25  SGET  , S1
       CHARACTER*255 AFILE , BFILE
@@ -133,3 +147,4 @@
 !
       END
 !                                      *** end of addition of July 2002
+      end module m_fffind

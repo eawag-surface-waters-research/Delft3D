@@ -46,6 +46,7 @@
 
 !     LOGICAL UNITS      : LUN(33) = working unit for opening binary files
 
+      use m_fffind
       use m_dhopnf
       use timers       !   performance timers
       use rd_token
