@@ -22,6 +22,7 @@
 !!  rights reserved.
 
       module ProcesSet
+      use m_zoek
       use m_monsys
       use m_srstop
 !

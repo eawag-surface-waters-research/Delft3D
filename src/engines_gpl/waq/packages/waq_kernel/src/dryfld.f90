@@ -22,6 +22,7 @@
 !!  rights reserved.
 
       module dryfld_mod
+       use m_zoek
        use m_dhkmst
 
           implicit none
