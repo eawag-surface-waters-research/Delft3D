@@ -41,6 +41,7 @@
 !>                             .
 !>                          to a consistent set of sequential processes for the simulation part
 
+      use m_srstop
       use m_rdwrk4
       use m_monsys
       use m_getcom

@@ -25,6 +25,7 @@
 
       ! add the dispersion and velocity stochi for fractions
 
+      use m_srstop
       use ProcesSet
       use timers       !   performance timers
 

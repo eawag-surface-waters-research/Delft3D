@@ -21,6 +21,8 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
       module m_dhopnf
+      use m_srstop
+
 
       implicit none
 

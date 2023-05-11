@@ -24,6 +24,7 @@
       subroutine delpar00 ( mdpfile, noseg  , noq    , dwqvol , dwqflo ,
      &                      nosfun , sfname , segfun )
 
+      use m_srstop
       use partmem      !   for PARTicle tracking
       use alloc_mod    !   for PARTicle tracking
       use writrk_mod   !   for PARTicle tracking

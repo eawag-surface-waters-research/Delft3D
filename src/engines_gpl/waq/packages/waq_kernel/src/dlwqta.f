@@ -40,6 +40,7 @@
 
 !     global declarations
 
+      use m_srstop
       use m_dhopnf
       use m_dhnlun
       use timers

@@ -41,6 +41,7 @@
 !     ------   -----  ------------
 
 ! 3DL
+      use m_srstop
       use m_monsys
       use m_dhnoseg
       use m_dhnolay
@@ -907,6 +908,8 @@
       end subroutine d40blo
 
       subroutine blstopinit(lunrep, inputname)
+      use m_srstop
+
 
       character*10 inputname
 
@@ -921,6 +924,7 @@
 
 
       subroutine blstop(mes,i)
+      use m_srstop
       use m_monsys
 
 

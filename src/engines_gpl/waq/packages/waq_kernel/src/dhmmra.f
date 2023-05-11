@@ -22,6 +22,7 @@
 !!  rights reserved.
 
       module dhmmra_mod
+      use m_srstop
       use m_getcom
 
       contains

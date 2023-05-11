@@ -21,6 +21,7 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
       module m_dhgnam
+      use m_srstop
       use m_getcom
 
 

@@ -27,6 +27,7 @@
 
       ! global declarations
 
+      use m_srstop
       use hydmod
       use m_aggregation_types
       use m_dhaggr

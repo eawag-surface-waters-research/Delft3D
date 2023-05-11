@@ -29,6 +29,7 @@
 
       ! global declarations
 
+      use m_srstop
       use hydmod
       use m_aggregate_waqgeom
       use m_aggregation_types

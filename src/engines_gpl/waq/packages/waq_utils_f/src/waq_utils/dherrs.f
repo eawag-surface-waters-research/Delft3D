@@ -23,7 +23,8 @@
       module m_dherrs
 
       use m_monsys
-      
+      use m_srstop
+
       implicit none
 
       contains

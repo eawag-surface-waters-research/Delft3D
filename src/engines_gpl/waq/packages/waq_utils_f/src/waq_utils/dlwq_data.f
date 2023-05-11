@@ -23,6 +23,7 @@
 
       module dlwq_data
        use m_dhnlun
+       use m_srstop
 
 !
 !          module contains everything for model data input and storage
@@ -894,7 +895,7 @@
 
          select case (ftype)
              case ( 2 )
-                 open ( newunit = lun, file = dlwqdata%filename, iostat = ierror, form='unformatted', access='stream'  , 
+                 open ( newunit = lun, file = dlwqdata%filename, iostat = ierror, form='unformatted', access='stream'  ,
      &                  status = 'old' )
              case ( 12 )
                  open ( newunit = lun, file = dlwqdata%filename, iostat = ierror, form='unformatted' , status = 'old' )

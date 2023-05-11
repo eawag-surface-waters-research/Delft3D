@@ -56,6 +56,7 @@
 !     IERR    INTEGER        1  IN/OUT  cummulative error count
 !     NOWARN  INTEGER        1  IN/OUT  cummulative warning count
 !
+      use m_srstop
       use m_dhslen
       USE ProcesSet
       use timers       !   performance timers

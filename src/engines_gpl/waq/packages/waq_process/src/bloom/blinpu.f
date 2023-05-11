@@ -26,6 +26,7 @@
       subroutine blinpu (ntyp_m, ntyp_a, ngro_a, algtyp, lmixo, lfixn, lcarb, nunucom, nutcon, flxcon, con2out,
      &                   swblsolint, swblobject, bltemlim, blbasmor, swblgrochk, blbiobas, swblmorchk, bltoplev)
       
+      use m_srstop
       use m_getidentification
       use bloom_data_dim
       use bloom_data_size 

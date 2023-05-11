@@ -26,6 +26,7 @@
 
       ! add processes per fractions
 
+      use m_srstop
       use processet
       use timers       !   performance timers
 

@@ -72,6 +72,7 @@
 !
 !     Declaration of arguments
 !
+      use m_srstop
       use m_move
       use m_fileutils
       use grids

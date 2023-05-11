@@ -61,6 +61,7 @@
 !
 !     Declaration of arguments
 !
+      use m_srstop
       use timers       !   performance timers
 
       INTEGER       LUNWRO, LUREP , NOUTP , NRVART, NBUFMX,

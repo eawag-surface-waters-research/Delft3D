@@ -61,6 +61,7 @@
 !                           LUN( 6) = unit intermediate file (grid)
 !                           LUN( 7) = unit intermediate file (volumes)
 
+      use m_srstop
       use m_dhopnf
       use m_dhkmrk
       use grids        !   for the storage of contraction grids

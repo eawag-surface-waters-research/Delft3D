@@ -293,6 +293,7 @@
       SUBROUTINE MESSAG ( LUNOUT , MESSGE , ISFLAG , LLUN   , SFILE  ,
      *                                               ITIME  , ITIME1 )
 
+      use m_srstop
       use timers
       CHARACTER*24  MSGTXT(6)
       CHARACTER*(*) SFILE

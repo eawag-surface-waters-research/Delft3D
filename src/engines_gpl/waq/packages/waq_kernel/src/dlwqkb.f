@@ -56,6 +56,7 @@
 !
 !     DECLARATIONS        :
 !
+      use m_srstop
       use m_dhimov
       use timers
       INTEGER       LUNIN  , LUNOUT , ITIME  , IDTIME , ITIME1 ,

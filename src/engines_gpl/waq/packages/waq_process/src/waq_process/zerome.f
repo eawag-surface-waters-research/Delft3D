@@ -22,6 +22,7 @@
 !!  rights reserved.
 
       SUBROUTINE ZEROME ( NAME )
+      use m_srstop
       use m_monsys
 
       CHARACTER*(*) NAME

@@ -23,6 +23,8 @@
 
       SUBROUTINE STRIP ( LUNIN  , LFILE  , LUNUT  , LUREP  , NPOS   ,
      *                                              CCHAR  , VRSION )
+      use m_srstop
+
 !
 !
 !     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT

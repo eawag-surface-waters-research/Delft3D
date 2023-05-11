@@ -67,6 +67,7 @@
 
 !     Files               : Monitoring file if needed for messages
 
+      use m_srstop
       use m_monsys
       use m_getcom
       use m_dhagg2

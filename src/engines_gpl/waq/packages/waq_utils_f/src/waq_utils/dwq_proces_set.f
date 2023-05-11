@@ -23,7 +23,7 @@
 
       module ProcesSet
       use m_monsys
-
+      use m_srstop
 !
 !          module contains everything for proces definition and proces input-output
 !          created September 2002 by Jan van Beek

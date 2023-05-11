@@ -28,6 +28,7 @@
      +                    nx    , ny    , lgrid , bound , noloc ,
      +                    proloc, nodef , defaul, lunrep)
 
+      use m_srstop
       use m_monsys
       use m_gkwini
       use m_getcom

@@ -23,6 +23,7 @@
 
       subroutine init_3dl( noseg , nosegw, nosegl, nolay , ngro  , ntyp  )
       
+      use m_srstop
       use m_monsys
       use bloom_data_3dl
 

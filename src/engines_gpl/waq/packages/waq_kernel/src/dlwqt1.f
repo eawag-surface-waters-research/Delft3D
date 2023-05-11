@@ -91,6 +91,7 @@
 !
 !     DECLARATIONS        :
 !
+      use m_srstop
       use m_dhopnf
       use timers
       use delwaq2_data

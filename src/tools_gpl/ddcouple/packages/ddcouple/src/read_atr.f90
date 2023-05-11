@@ -27,6 +27,7 @@
 
       ! global declarations
 
+      use m_srstop
       use m_monsys
       use m_dhkmrk
       use filmod                   ! module contains everything for the files

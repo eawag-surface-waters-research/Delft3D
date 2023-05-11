@@ -22,6 +22,7 @@
 !!  rights reserved.
 
       module dlwqi0_mod
+      use m_srstop
       use m_move
       use m_makpnt
       use m_dhopnf

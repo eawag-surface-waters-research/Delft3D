@@ -22,6 +22,7 @@
 !!  rights reserved.
 
       module dlwqdata_mod
+       use m_srstop
        use m_monsys
        use m_dhucas
        use m_dhopnf

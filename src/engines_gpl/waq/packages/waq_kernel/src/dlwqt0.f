@@ -52,6 +52,7 @@
 !                           DLWQTA, make values for const,param,func,sfunc
 !                           DLWQTK, make values for kenmerk array
 !                           DHOPNF, opens files
+      use m_srstop
       use m_dhopnf
       use timers
       use delwaq2_data

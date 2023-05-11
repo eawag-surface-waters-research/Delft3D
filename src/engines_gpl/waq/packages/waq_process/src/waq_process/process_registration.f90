@@ -22,6 +22,7 @@
 !!  rights reserved.
 
 module process_registration
+use m_srstop
 use m_monsys
 
     implicit none
