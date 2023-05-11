@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module m_rd_stt
+
+implicit none
+
+contains
+
 
    subroutine rd_stt(lunrep, sttfil, statprocesdef, allitems, noinfo, iwar, ierr)
    
@@ -65,3 +71,4 @@
    close(ilun(1))
 
    end subroutine rd_stt
+end module m_rd_stt
