@@ -41,6 +41,7 @@
 !                          putget, handles i/o to nefis file for int/real
 !
 
+      use m_putgtc
       use m_monsys
       use m_filldm
       use timers
