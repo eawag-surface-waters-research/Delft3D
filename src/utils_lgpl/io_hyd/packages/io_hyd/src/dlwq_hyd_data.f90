@@ -22,6 +22,7 @@
 !!  rights reserved.
 
       module dlwq_hyd_data
+      use m_zoek
       use m_srstop
       use m_monsys
       use m_dhopnf

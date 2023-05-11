@@ -32,6 +32,7 @@
 
 !     Global declarations
 
+      use m_zoek
       use m_srstop
       use m_dhopnf
       use grids          ! for the storage of contraction grids

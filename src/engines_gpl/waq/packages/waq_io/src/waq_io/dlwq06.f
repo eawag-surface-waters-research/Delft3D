@@ -61,6 +61,7 @@
 !                          lun( 4) = unit intermediate file (pointers)
 !                          lun(15) = unit intermediate file (waste load)
 
+      use m_zoek
       use m_srstop
       use rd_token
       use timers       !   performance timers

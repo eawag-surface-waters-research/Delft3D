@@ -22,6 +22,7 @@
 !!  rights reserved.
 
       subroutine gkwini ( lu , group , keywrd , value )
+      use m_zoek
       use m_gkwini
 c=======================================================================
 c            Rijkswaterstaat/RIZA and DELFT HYDRAULICS
@@ -277,6 +278,7 @@ C     Skip trailing blanks
       return
       end
       subroutine gl_ini ( lu , group , keywrd , lvalue )
+      use m_zoek
       use m_gkwini
 
       integer       lu

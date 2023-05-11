@@ -46,6 +46,7 @@
 !
 !     Declaration of arguments
 !
+      use m_zoek
       use m_srstop
       use m_monsys
       use timers       !   performance timers

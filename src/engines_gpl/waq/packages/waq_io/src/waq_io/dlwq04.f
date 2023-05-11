@@ -69,6 +69,7 @@
 !                            LUN(12) = unit intermediate file (velocities)
 !                            LUN(13) = unit intermediate file (lengths)
 
+      use m_zoek
       use m_srstop
       use m_dhopnf
       use Grids        !   for the storage of contraction grids

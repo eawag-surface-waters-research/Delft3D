@@ -22,6 +22,7 @@
 !!  rights reserved.
 
       module dlwq0t_data
+      use m_zoek
       use m_julian
 
       

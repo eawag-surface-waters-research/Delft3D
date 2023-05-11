@@ -28,6 +28,7 @@
 !>\file
 !>       detect and activate primary processes (which act directly on substances)
 
+      use m_zoek
       use m_monsys
       use m_errsys
       use processet

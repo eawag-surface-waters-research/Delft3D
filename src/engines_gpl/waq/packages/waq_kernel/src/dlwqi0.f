@@ -22,6 +22,7 @@
 !!  rights reserved.
 
       module dlwqi0_mod
+      use m_zoek
       use m_zero
       use m_srstop
       use m_move

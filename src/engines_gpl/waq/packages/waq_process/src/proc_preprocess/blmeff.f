@@ -23,6 +23,7 @@
 
       subroutine blmeff (lunrep, lunblm, verspe, lunfrm, grname, nuecog, typnam, noalg)
 !
+      use m_zoek
       use m_srstop
       use timers        !   performance timers
 

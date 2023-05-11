@@ -375,6 +375,7 @@
 
       subroutine map_input (Nvarin, varin, Nlocin, locin,
      j                      Nvar  , var  , nloc  , loc  , map )
+      use m_zoek
       use timers
 
       integer           Nvarin, Nlocin, Nvar  , nloc

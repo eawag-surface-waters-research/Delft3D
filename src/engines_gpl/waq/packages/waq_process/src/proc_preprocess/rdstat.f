@@ -65,6 +65,7 @@
 !     PSTART  INTEGER  NPERIOD     OUTPUT  period start
 !     PSTOP   INTEGER  NPERIOD     OUTPUT  period stop
 !
+      use m_zoek
       use timers       !   performance timers
       USE      DHRALLOC
       use m_cnvtim

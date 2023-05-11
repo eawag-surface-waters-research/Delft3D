@@ -41,6 +41,7 @@
 !>                             .
 !>                          to a consistent set of sequential processes for the simulation part
 
+      use m_zoek
       use m_startup_screen
       use m_srstop
       use m_rdwrk4

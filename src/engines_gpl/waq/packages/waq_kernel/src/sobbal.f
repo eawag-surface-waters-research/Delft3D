@@ -1122,6 +1122,7 @@
 
       subroutine comsum (nosum , tfacto, notot , syname, sfacto, nocons, coname, cons  )
 
+      use m_zoek
       use m_srstop
       use m_monsys
       use timers

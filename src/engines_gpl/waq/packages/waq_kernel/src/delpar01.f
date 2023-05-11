@@ -26,6 +26,7 @@
      &                      iaflag  , intopt  , ndmps   , isdmp   , dmps    ,
      &                      amass2  )
 
+      use m_zoek
       use partmem      !   for PARTicle tracking
       use timers
       use parths_mod                 ! explicit interface

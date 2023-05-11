@@ -33,6 +33,7 @@
 
       ! global declarations
 
+      use m_zoek
       use m_monsys
       use m_julian
       use m_dhpath

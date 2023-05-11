@@ -22,6 +22,7 @@
 !!  rights reserved.
 
       module dlwq_data
+       use m_zoek
        use m_dhnlun
        use m_srstop
 

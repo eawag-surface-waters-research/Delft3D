@@ -45,6 +45,7 @@
 
 !      Logical units      :
 
+      use m_zoek
       use timers       !   performance timers
       use           stasub
       use           dhralloc

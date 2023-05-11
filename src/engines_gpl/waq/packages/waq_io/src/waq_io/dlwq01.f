@@ -55,6 +55,7 @@
 !                           lun(29) = unit formatted output file
 !                           lun( 2) = unit system-intermediate file
 
+      use m_zoek
       use m_srstop
       use m_rdvers
       use m_julian
