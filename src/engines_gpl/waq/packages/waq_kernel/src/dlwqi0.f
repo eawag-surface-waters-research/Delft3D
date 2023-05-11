@@ -22,6 +22,7 @@
 !!  rights reserved.
 
       module dlwqi0_mod
+      use m_makpnt
       use m_dhopnf
 
       contains
@@ -246,7 +247,7 @@
             enddo
          endif
          call makpnt( nmax    , mmax    , kmax    , noseg   , nobnd   ,
-     &                noq     , noq1    , noq2    , j(ilgra), j(ixpnt),
+     &                noq     , noq1    , noq2    , j(ilgra:), j(ixpnt:),
      &                cellpnt , flowpnt )
          finam = lchar(8)(1:index(lchar(8),'.',.true.))//'cco'
          call dhopnf ( lun(8), finam, 8, 2+ftype(8), ierrd )

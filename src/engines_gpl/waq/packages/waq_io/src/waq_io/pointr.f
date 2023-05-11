@@ -22,6 +22,7 @@
 !!  rights reserved.
 
       module pointr_mod
+      use m_makpnt
       use m_dhopnf
 
       contains

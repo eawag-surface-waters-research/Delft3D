@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_makpnt
+
+      implicit none
+
+      contains
+
 
       subroutine makpnt( nmax   , mmax   , kmax   , noseg  , nobnd  ,
      &                   noq    , noq1   , noq2   , lgrida , ipoint ,
@@ -259,3 +265,4 @@
 
       return
       end subroutine
+      end module m_makpnt
