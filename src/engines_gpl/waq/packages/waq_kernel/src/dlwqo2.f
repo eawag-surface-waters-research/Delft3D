@@ -156,6 +156,7 @@
 !     intopt  integer     1       input   Integration and balance suboptions
 !     ==================================================================
 !
+      use m_zero
       use m_srstop
       use m_getcom
       use timers

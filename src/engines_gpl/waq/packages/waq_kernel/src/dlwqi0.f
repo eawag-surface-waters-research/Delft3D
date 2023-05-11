@@ -22,6 +22,7 @@
 !!  rights reserved.
 
       module dlwqi0_mod
+      use m_zero
       use m_srstop
       use m_move
       use m_makpnt
@@ -402,16 +403,16 @@
       ENDIF
       CALL MOVE   ( A(IBSET:), A(IBOUN:), NOBND*NOSUBz )
       CALL MOVE   ( A(IBSET:), A(IBSAV:), NOBND*NOSUBz )
-      CALL ZERO   ( A(IDERV), NOTOT*NOSSS )
-      CALL ZERO   ( A(IMAS2), NOTOT*5     )
-      CALL ZERO   ( A(IWDMP), NOTOT*NOWST*2  )
+      CALL ZERO   ( A(IDERV:), NOTOT*NOSSS )
+      CALL ZERO   ( A(IMAS2:), NOTOT*5     )
+      CALL ZERO   ( A(IWDMP:), NOTOT*NOWST*2  )
       IF ( MOD(INTOPT,16) .GT. 7 ) THEN
-         CALL ZERO( A(IDMPQ), NOSYS*NDMPQ*2  )
-         CALL ZERO( A(IDMPS), NOTOT*NDMPS*3  )
-         CALL ZERO( A(ISMAS), NOTOT*NDMPAR*6 )
-         CALL ZERO( A(IFLXI), NDMPAR*NFLUX   )
-         CALL ZERO( A(IFLXD), NDMPS*NFLUX    )
-         CALL ZERO( A(ITRRA), NOSYS*NORAAI   )
+         CALL ZERO( A(IDMPQ:), NOSYS*NDMPQ*2  )
+         CALL ZERO( A(IDMPS:), NOTOT*NDMPS*3  )
+         CALL ZERO( A(ISMAS:), NOTOT*NDMPAR*6 )
+         CALL ZERO( A(IFLXI:), NDMPAR*NFLUX   )
+         CALL ZERO( A(IFLXD:), NDMPS*NFLUX    )
+         CALL ZERO( A(ITRRA:), NOSYS*NORAAI   )
       ENDIF
 
 !         make start masses for dynamic and iterative computation
