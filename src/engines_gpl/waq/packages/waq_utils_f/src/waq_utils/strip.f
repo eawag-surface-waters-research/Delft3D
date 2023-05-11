@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_strip
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE STRIP ( LUNIN  , LFILE  , LUNUT  , LUREP  , NPOS   ,
      *                                              CCHAR  , VRSION )
@@ -55,6 +61,9 @@
       CHARACTER*1    CCHAR
       CHARACTER*(*)  LFILE
       LOGICAL        EMPTY, STRING
+      integer :: LUNIN, LUNUT, LUREP
+      integer :: NPOS, IL, I, IS
+      real    :: VERS2, VRSION
 !
       IF ( NPOS .GT. 2000 ) GOTO 60
 !
@@ -122,3 +131,4 @@
      *         /' In file ',I4,' , maximum is 1000 ' )
 !
       END
+      end module m_strip
