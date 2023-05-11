@@ -1,26 +1,20 @@
 # Set directories
 # Set the directory of where the source code is located.
 set(src_path src)
+set(res_path res)
 # Set version file variables
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
-set(ini_version_file ${CMAKE_CURRENT_SOURCE_DIR}/res/version_number.ini)
-
-# Generate the version files
-set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/dfm_volume_tool_version.F90)
-generate_version_files(${fortran_version_file} ${ini_version_file})
-
 # Gather the source files
 get_fortran_source_files(${src_path} sources)
-
-                            
+set(rc_version_file ${res_path}/dfm_volume_tool_version.rc)
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
+set(fortran_version_files ${src_path}/dfm_volume_tool_version.F90
+                          ${src_path}/dfm_volume_tool_static_version_info.F90)  
+set_source_files_properties(${fortran_version_files}
+                            PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")                          
 # Define the executable
 set(executable_name dfm_volume_tool)
-add_executable(${executable_name} ${sources} ${fortran_version_file})
-
-# Define prebuild event
-prebuild_version_number(${executable_name} ${fortran_version_file} 
-                                        ${checkout_src_root} 
-                                        ${ini_version_file})
+add_executable(${executable_name} ${sources} ${rc_version_file})
 
 # Add dependencies
 if (UNIX)
@@ -70,6 +64,9 @@ if(UNIX)
 
     message(STATUS "Setting target_compile_definitions in Unix")    
    set_property(TARGET ${executable_name} PROPERTY LINKER_LANGUAGE Fortran)
+   
+   include_directories(${version_include_dir}
+					   ${res_path})
 endif(UNIX)
 
 if (WIN32)
@@ -90,7 +87,9 @@ target_link_libraries(${executable_name} netcdf)
 
 if (WIN32)
     include_directories(${mpi_include_path}
-                        ${tecplot_path})
+                        ${tecplot_path}
+						${version_include_dir}
+						${res_path})
                         
 
     # Set linker properties

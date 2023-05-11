@@ -9,14 +9,12 @@ set(dflowfm_path "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 # Set the directory referring to the ref folder
 set(res_path ${dflowfm_path}/res)
 
-# Set version file variables
-set(ini_version_file ${res_path}/version_number.ini)
-set(rc_version_file ${res_path}/version_number_dll.rc)
+#Version includes
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
+set(dflowfm_version_header_path ${dflowfm_path}/version)
+set(rc_version_file ${dflowfm_version_header_path}/dflowfm_dll_version.rc)
 
-# Generate the version files
-generate_version_files(${rc_version_file} ${ini_version_file})
-set(svn_version_file ${rc_version_file}.svn)
-
+include_directories(${version_include_dir})
 if(UNIX)
    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/${include_path}")
 endif(UNIX)
@@ -31,14 +29,7 @@ file(GLOB includes ${include_path}/*.inc)
 set(library_name dflowfm_dll)
 add_library(${library_name} SHARED  ${source}
                                     ${includes}
-                                    ${rc_version_file} 
-                                    ${svn_version_file} 
-                                    ${ini_version_file})
-
-# Define prebuild event
-prebuild_version_number(${library_name} ${rc_version_file} 
-                                        ${checkout_src_root}
-                                        ${ini_version_file})
+                                    ${rc_version_file})
 
 # Add dependencies
 if (UNIX)
@@ -93,8 +84,6 @@ if (UNIX)
          "metis")
 endif(UNIX)
 
-
-
 if (WIN32)
     set(oss_dependencies    deltares_common
                             deltares_common_c
@@ -137,7 +126,6 @@ if (WIN32)
 
     target_link_libraries(${library_name} ${oss_dependencies})
 endif(WIN32)
-
 
 if (WIN32)
     set_target_properties(${library_name} PROPERTIES LINK_FLAGS ${openmp_flag})
@@ -203,6 +191,7 @@ set_target_properties (${library_name} PROPERTIES OUTPUT_NAME  dflowfm)
 
 # Create the folder structure in vfproj
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source} ${includes})
+source_group(Resources FILES    ${rc_version_file})
 set_target_properties (${library_name} PROPERTIES FOLDER engines_gpl/dflowfm)
 
 # post-build

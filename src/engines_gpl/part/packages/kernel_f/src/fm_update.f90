@@ -31,7 +31,7 @@
 subroutine update_part(itime)
    use partmem
    use m_part_regular, only: npart
-   use m_particles
+   use m_particles, laypart => kpart
    use m_flowtimes
    use m_flowgeom, only: Lnx, bl
    use m_flow
@@ -87,7 +87,8 @@ subroutine update_part(itime)
          call part09fm ( lun(2)   , itime    , nodye    , nwaste   , mwaste   ,    &
                          xwaste   , ywaste   , iwtime   , amassd   , aconc    ,    &
                          npart    , mpart    , xpart    , ypart    , zpart    ,    &
-                         wpart    , iptime   , nopart   , radius   , nrowswaste,   &
+                         wpart    , laypart,  hpart     , iptime   , nopart   ,    &
+                         radius   , nrowswaste,                                    &
                          xpolwaste           , ypolwaste           ,               &
                          ndprt    , nosubs   ,                           &
                          layt     , tcktot   , zmodel   , laytop   , laybot   ,    &
@@ -103,6 +104,7 @@ subroutine update_part(itime)
                          ictmax   , nwaste   , mwaste   , xwaste   , ywaste   ,    &
                          zwaste   , aconc    , rem      , npart    , ndprt    ,    &
                          mpart    , xpart    , ypart    , zpart    , wpart    ,    &
+                         laypart  , hpart    ,                                     &
                          iptime   , nopart   , pblay    , radius   , nrowswaste,   &
                          xpolwaste           , ypolwaste           ,               &
                          ftime    , tmassu   , nosubs   ,                          &

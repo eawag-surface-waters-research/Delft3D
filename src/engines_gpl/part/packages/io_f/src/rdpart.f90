@@ -181,7 +181,7 @@
 !                    4 - oil model
 !                    5 - (obsolete option)
 !                    6 - Probabilistic density driven settling model
-!                    7 - IBM model
+!                    7 - ABM model
 
       if ( gettoken( modtyp , ierr2 ) .ne. 0 ) goto 11
       if ( gettoken( notrak , ierr2 ) .ne. 0 ) goto 11
@@ -374,7 +374,7 @@
          case ( 6 )
             write ( *, * ) ' You are using the probabilistic density driven settling model '
          case ( 7 )
-            write ( *, * ) ' You are using the general Individual Based Model (IBM)'
+            write ( *, * ) ' You are using the general Agent Based Model (ABM)'
             pblay  = 0.0
          case default
             write(lun2 , 2015) modtyp
@@ -483,7 +483,7 @@
          case ( 4 )
             write ( lun2, 2002 ) 'Oil model - dispersion and evaporation included'
          case ( 7 )
-            write ( lun2, 2001) 'General Individual Based Model (IBM)'
+            write ( lun2, 2001) 'General Agent Based Model (ABM)'
       end select
 
       subst2( nosubs+2 ) = 'nr of particles'
@@ -670,9 +670,9 @@
       nrowsscreens = 0
       partinifile = ' '
       partrelfile = ' '
-      ibmmodel = .false.
-      ibmmodelname = ""
-      ibmstagedev = ""
+      abmmodel = .false.
+      abmmodelname = ""
+      abmstagedev = ""
       chronrev = .false.
       selstage = 0.0
 
@@ -810,49 +810,49 @@
                case ('partrelfile')
                   write ( lun2, '(/a)' ) '  Found keyword "partrelfile".'
                   if ( gettoken( partrelfile  , ierr2 ) .ne. 0 ) goto 9302   ! part FM ini file
-               case ('ibmmodel')
-                  if (modtyp /= model_ibm) goto 9401
-                  write ( lun2, '(/a)' ) '  Found keyword "ibmmodel".'
-                  ibmmodel = .true.
-                  if ( gettoken( ibmmodelname     , ierr2 ) .ne. 0 ) goto 9402   ! IBM model name
-                  write ( lun2, '(/a)' ) '  Found IBM model name : ', ibmmodelname
-                  select case (trim(ibmmodelname)) ! Set IBM model
+               case ('abmmodel')
+                  if (modtyp /= model_abm) goto 9401
+                  write ( lun2, '(/a)' ) '  Found keyword "abmmodel".'
+                  abmmodel = .true.
+                  if ( gettoken( abmmodelname     , ierr2 ) .ne. 0 ) goto 9402   ! ABM model name
+                  write ( lun2, '(/a)' ) '  Found ABM model name : ', abmmodelname
+                  select case (trim(abmmodelname)) ! Set ABM model
                     case ("test")
-                        ibmmt = 0        ! model type none
+                        abmmt = 0        ! model type none
                     case ("european_eel")
-                        ibmmt = 1        ! model type European eel
+                        abmmt = 1        ! model type European eel
                     case ("atlantic_salmon")
-                        ibmmt = 2        ! model type Atlantic salmon
+                        abmmt = 2        ! model type Atlantic salmon
                     case ("mauve_stinger")
-                        ibmmt = 3        ! model type Mauve stinger
+                        abmmt = 3        ! model type Mauve stinger
                     case ("horseshoecrab")
-                        ibmmt = 4        ! model type Horseshoe crab
+                        abmmt = 4        ! model type Horseshoe crab
                     case ("mangrove_seeds")
-                        ibmmt = 5        ! model type Mangrove propagules
+                        abmmt = 5        ! model type Mangrove propagules
                     case ("asian_carp_eggs")
-                        ibmmt = 6        ! model type Asian Carp Eggs
-                    case default         !IBM model not filled
-                        write(lun2, '(/a)') ' Unrecognised IBM model name : ', trim(ibmmodelname)
+                        abmmt = 6        ! model type Asian Carp Eggs
+                    case default         !ABM model not filled
+                        write(lun2, '(/a)') ' Unrecognised ABM model name : ', trim(abmmodelname)
                         goto 9403
                   end select
-                  if ( gettoken( ibmstagedev , ierr2 ) .ne. 0 ) goto 9404   ! IBM stage development
-                    write ( lun2, '(/a)' ) ' Found IBM stage development name : ', ibmstagedev
+                  if ( gettoken( abmstagedev , ierr2 ) .ne. 0 ) goto 9404   ! ABM stage development
+                    write ( lun2, '(/a)' ) ' Found ABM stage development name : ', abmstagedev
                   ! Set stage development
-                  select case (trim(ibmstagedev))
+                  select case (trim(abmstagedev))
                     case ("dev_fixed")
-                        ibmsd = 0 !dev_fixed
+                        abmsd = 0 !dev_fixed
                     case ("dev_linear")
-                        ibmsd = 1 !dev_linear
+                        abmsd = 1 !dev_linear
                     case ("dev_interpolate")
-                        ibmsd = 2 !dev_intpltd
+                        abmsd = 2 !dev_intpltd
                     case ("dev_asian_carp_eggs")
-                        ibmsd = 3 !dev_asian_carp_eggs
-                    case default        !IBM model not filled
-                        write(lun2, '(/a)') ' Unrecognised IBM model stage development : ', trim(ibmstagedev)
+                        abmsd = 3 !dev_asian_carp_eggs
+                    case default        !ABM model not filled
+                        write(lun2, '(/a)') ' Unrecognised ABM model stage development : ', trim(abmstagedev)
                         goto 9405
                    end select
                case ('revchron')
-                  if (modtyp /= model_ibm) goto 9406
+                  if (modtyp /= model_abm) goto 9406
                   write ( lun2, '(/a)' ) '  Found keyword "revchron".'
                   chronrev = .true.
                   if ( gettoken( selstage     , ierr2 ) .ne. 0 ) goto 9407   ! Give stage for release
@@ -2503,17 +2503,17 @@
       call stop_exit(1)
 9302  write(lun2,*) ' Error: reading part FM elease file name!'
       call stop_exit(1)
-9401  write(lun2,*) ' Error: found "IBMmodel" keyword, but this is not a IBM model (modtyp /= 7 (model_ibm)) '
+9401  write(lun2,*) ' Error: found "ABMmodel" keyword, but this is not a ABM model (modtyp /= 7 (model_abm)) '
       call stop_exit(1)
-9402  write(lun2,*) ' Error: expected ibm model name!'
+9402  write(lun2,*) ' Error: expected abm model name!'
       call stop_exit(1)
-9403  write(lun2,*) ' Error: no suitable ibm model name supplied!'
+9403  write(lun2,*) ' Error: no suitable abm model name supplied!'
       call stop_exit(1)
-9404  write(lun2,*) ' Error: expected ibm stage development method name!'
+9404  write(lun2,*) ' Error: expected abm stage development method name!'
       call stop_exit(1)
 9405  write(lun2,*) ' Error: no suitable stage delelopment method name supplied!'
       call stop_exit(1)
-9406  write(lun2,*) ' Error: found "RevChron" keyword, but this is not a IBM model (modtyp /= 7 (model_ibm)) '
+9406  write(lun2,*) ' Error: found "RevChron" keyword, but this is not a ABM model (modtyp /= 7 (model_abm)) '
       call stop_exit(1)
 9407  write(lun2,*) ' Error: expected stage of reversed release!'
       call stop_exit(1)

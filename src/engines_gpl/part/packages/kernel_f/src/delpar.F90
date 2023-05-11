@@ -335,7 +335,7 @@
       use partmem
       use m_part_regular
       use alloc_mod
-      use ibm_mod
+      use abm_mod
       use larvae_mod
       use omp_lib
 
@@ -558,7 +558,7 @@
                        ypart   , zpart   , npart   , mpart   , kpart   ,    &
                        iptime  , npmax   , nrowsmax, lunpr   )
       endif
-      if ( idp_file .ne. ' ' .and. modtyp .ne. model_ibm ) then
+      if ( idp_file .ne. ' ' .and. modtyp .ne. model_abm ) then
          if (modtyp .ne. model_prob_dens_settling) then
             write ( lunpr, * ) ' Opening initial particles file:', idp_file(1:len_trim(idp_file))
             call openfl ( lunini, idp_file, 0 )
@@ -753,15 +753,15 @@
                              amassd   , ioptrad  , ndisapp  , idisset  , tydisp   ,    &
                              efdisp   , xpoldis  , ypoldis  , nrowsdis , wpartini ,    &
                              iptime)
-            case ( 7 )     ! = ibm model
-               if ( mod(itime,86400) .eq. 0 ) then !jvb for output within ibm module this is a temporary hack
+            case ( 7 )     ! = abm model
+               if ( mod(itime,86400) .eq. 0 ) then !jvb for output within abm module this is a temporary hack
                   call part11 ( lgrid    , xb       , yb       , nmaxp    , npart    ,    &
                                 mpart    , xpart    , ypart    , xa       , ya       ,    &
                                 nopart   , npwndw   , lgrid2   , kpart    , zpart    ,    &
                                 za       , locdep   , dpsp     , layt     , mmaxp    ,    &
                                 tcktot   )
                endif
-               call ibm    ( lun(2)   , itime    , idelt    , nmaxp    , mmaxp    ,    &
+               call abm    ( lun(2)   , itime    , idelt    , nmaxp    , mmaxp    ,    &
                              layt     , noseglp  , nolayp   , mnmaxk   , lgrid    ,    &
                              lgrid2   , lgrid3   , nopart   , npwndw   , nosubs   ,    &
                              npart    , mpart    , kpart    , xpart    , ypart    ,    &
@@ -769,7 +769,7 @@
                              noconsp  , const    , concp    , xa       , ya       ,    &
                              angle    , vol1     , vol2     , flow     , depth    ,    &
                              vdiff1   , salin1   , temper1  , v_swim   , d_swim   ,    &
-                             itstrtp  , vel1     , vel2     , ibmmt    , ibmsd    ,    &
+                             itstrtp  , vel1     , vel2     , abmmt    , abmsd    ,    &
                              chronrev , selstage , zmodel   , laybot   , laytop   )
 
          end select

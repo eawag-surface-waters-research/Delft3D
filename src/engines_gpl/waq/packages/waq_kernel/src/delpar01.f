@@ -46,7 +46,7 @@
       use partini_mod
       use m_part_regular
       use larvae_mod
-      use ibm_mod
+      use abm_mod
 
       implicit none
 
@@ -105,8 +105,8 @@
       lunut = lunitp(2)
 
 !           this replaces the call to rdhydr
-      if ( modtyp .eq.model_ibm ) then
-        if(idp_file .ne. ' ' .and. itime .eq. nint(const(8))*86400 ) then ! release at day iniday - specific for IBM module (modtyp=model_ibm) FMK 13-2-2017
+      if ( modtyp .eq.model_abm ) then
+        if(idp_file .ne. ' ' .and. itime .eq. nint(const(8))*86400 ) then ! release at day iniday - specific for ABM module (modtyp=model_abm) FMK 13-2-2017
             call partini( nopart, nosubs, idp_file, wpart  , xpart ,
      &                    ypart , zpart , npart   , mpart  , kpart ,
      &                    iptime, lunpr )
@@ -344,15 +344,15 @@
      &                    efdisp   , xpoldis  , ypoldis  , nrowsdis , wpartini ,
      &                    iptime)
 
-         case ( 7 )     ! = ibm model
-              if ( mod(itime,86400) .eq. 0 ) then !jvb for output within ibm module this is a temporary hack
+         case ( 7 )     ! = abm model
+              if ( mod(itime,86400) .eq. 0 ) then !jvb for output within abm module this is a temporary hack
                  call part11 ( lgrid , xb       , yb       , nmaxp    , npart,
      &                         mpart  , xpart    , ypart    , xa       , ya   ,
      &                         nopart , npwndw   , lgrid2   , kpart    , zpart,
      &                         za     , locdep   , dpsp     , layt     , mmaxp,
      &                         tcktot   )
               endif
-               call ibm( lunut   , itime    , idelt    , nmaxp    , mmaxp    ,
+               call abm( lunut   , itime    , idelt    , nmaxp    , mmaxp    ,
      &                   layt     , noseglp  , nolayp   , mnmaxk   , lgrid    ,
      &                   lgrid2   , lgrid3   , nopart   , npwndw   , nosubs   ,
      &                   npart    , mpart    , kpart    , xpart    , ypart    ,
@@ -360,7 +360,7 @@
      &                   noconsp  , const    , concp    , xa       , ya       ,
      &                   angle    , vol1     , vol2     , flow     , depth    ,
      &                   vdiff1   , salin1   , temper1  , v_swim   , d_swim   ,
-     &                   itstrtp  , vel1     , vel2     , ibmmt    , ibmsd    ,
+     &                   itstrtp  , vel1     , vel2     , abmmt    , abmsd    ,
      &                   chronrev , selstage , zmodel   , laybot   , laytop   )
          end select
 
@@ -452,11 +452,11 @@
      &                 wsettl   , irfac    , anfac    , lsettl   , locdep   ,
      &                 tcktot   , dpsp     )
       else
-! jvb removed this line (commented, so execute if not modtyp=model_ibm?
-           if (modtyp.ne.model_ibm) wsettl = 1.0  ! whole array assignment
+! jvb removed this line (commented, so execute if not modtyp=model_abm?
+           if (modtyp.ne.model_abm) wsettl = 1.0  ! whole array assignment
          endif
-! jvb removed call to partvs (commented, so execute if not modtyp=model_ibm?
-         if (modtyp.ne.model_ibm) call partvs ( lunut   , itime    , nosubs   , nopart   , ivtset   ,
+! jvb removed call to partvs (commented, so execute if not modtyp=model_abm?
+         if (modtyp.ne.model_abm) call partvs ( lunut   , itime    , nosubs   , nopart   , ivtset   ,
      &              ivtime   , vsfour   , vsfact   , wpart    , wsettl   ,
      &              modtyp   , nmaxp    , mmaxp    , lgrid3   , noslay   ,
      &              npart    , mpart    , kpart    , nosegp   , noseglp  ,
