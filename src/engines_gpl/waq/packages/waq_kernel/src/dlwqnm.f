@@ -75,6 +75,7 @@
 !                          sgmres, solves (iteratively) system of equations
 !                          zercum, zero's the cummulative array's
 
+      use m_move
       use m_fileutils
       use grids
       use timers

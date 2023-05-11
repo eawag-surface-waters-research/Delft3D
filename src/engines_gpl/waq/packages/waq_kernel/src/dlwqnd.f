@@ -72,6 +72,7 @@
 !     LUN     INTEGER    *      INPUT  array with unit numbers
 !     LCHAR   CHAR*(*)   *      INPUT  filenames
 !
+      use m_move
       use m_fileutils
       use grids
       use timers

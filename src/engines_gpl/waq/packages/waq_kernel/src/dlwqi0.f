@@ -22,6 +22,7 @@
 !!  rights reserved.
 
       module dlwqi0_mod
+      use m_move
       use m_makpnt
       use m_dhopnf
 
@@ -398,8 +399,8 @@
       ELSE
          NOSUBz = NOSYS
       ENDIF
-      CALL MOVE   ( A(IBSET), A(IBOUN), NOBND*NOSUBz )
-      CALL MOVE   ( A(IBSET), A(IBSAV), NOBND*NOSUBz )
+      CALL MOVE   ( A(IBSET:), A(IBOUN:), NOBND*NOSUBz )
+      CALL MOVE   ( A(IBSET:), A(IBSAV:), NOBND*NOSUBz )
       CALL ZERO   ( A(IDERV), NOTOT*NOSSS )
       CALL ZERO   ( A(IMAS2), NOTOT*5     )
       CALL ZERO   ( A(IWDMP), NOTOT*NOWST*2  )
