@@ -41,6 +41,7 @@
 !>                             .
 !>                          to a consistent set of sequential processes for the simulation part
 
+      use m_rdwrk4
       use m_monsys
       use m_getcom
       use m_dhopnf
@@ -522,7 +523,7 @@
      +              novelo , diname , vename , idpnt  , ivpnt  ,
      +              ndmpar , ntdmpq , ntdmps , noqtt  , noraai ,
      +              ntraaq , nobtyp , nowtyp , nogrid , grdref ,
-     +              sysgrd , sysndt , notot  )
+     +              sysgrd , sysndt  )
       write ( lurep   , 2020 ) (modid(i),i=1,2)
       write ( lurep   , 2030 ) (modid(i),i=3,4)
       close ( lun(2) )

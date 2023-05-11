@@ -47,6 +47,7 @@
 
 !     Logical units     : -
 
+      use m_rdwrk4
       use m_dhopnf
       use rd_token     !   for the reading of tokens
       use Output
@@ -221,7 +222,7 @@
      &                   novelo  , diname  , vename  , iar     , iar     ,
      &                   ndmpar  , ntdmpq  , ntdmps  , noqtt   , noraai  ,
      &                   ntraaq  , nobtyp  , nowtyp  , nogrid  , iar     ,
-     &                   iar     , iar     , notot   )
+     &                   iar     , iar   )
             close ( lun(2) )
 
 !           Get output pointers

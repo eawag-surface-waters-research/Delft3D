@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_rdwrk4
+
+      implicit none
+
+      contains
+
 
       subroutine rdwrk4 ( iin    , lurep  , modid  , sysid  , notot  ,
      &                    nodump , nosys  , nobnd  , nowst  , nocons ,
@@ -222,3 +228,4 @@
      &         '   simulation impossible            !!')
 
       end
+      end module m_rdwrk4
