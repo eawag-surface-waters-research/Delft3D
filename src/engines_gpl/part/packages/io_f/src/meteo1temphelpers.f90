@@ -184,26 +184,6 @@ subroutine zoekja(minp, rec, text, ja)
 end subroutine zoekja
 
 
-!> Searches for a keyword in file and returns the text value.
-!! 'key=text'
-subroutine zoekval(minp, key, val, ja)
-    implicit none
-    integer, intent(out)           :: ja    !< Whether key was found or not.
-    integer, intent(in)            :: minp  !< File pointer
-    character(*), intent(out)      :: val !< 
-    character(*), intent(in)       :: key
-
-    character(len=255) :: rec
-    integer :: l1
-
-    call zoekja(minp,rec,trim(key), ja)
-    if (ja .eq. 1) then
-        l1 = index(rec,'=') + 1
-        read(rec(l1:),*) val
-    else
-        return
-    endif
-end subroutine zoekval
 
 !> Searches for an optional keyword on current line and returns the text value.
 !! 'key=text'. Rewinds the file pointer to the original line.

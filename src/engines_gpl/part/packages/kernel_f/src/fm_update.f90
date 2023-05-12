@@ -158,13 +158,3 @@ subroutine update_part(itime)
 end subroutine update_part
 
 
-subroutine finalize_part()
-   use m_particles
-   implicit none
-
-   call dealloc_partmesh()
-   call dealloc_partfluxes()
-   call dealloc_partrecons()
-   call dealloc_particles()
-   call dealloc_auxfluxes()
-end subroutine finalize_part

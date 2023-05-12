@@ -49,9 +49,6 @@
 !                                      rate
 !                             part14 - add continuous release
 !                             part15 - adapt wind and direction for actual time
-!                             part16 - output dump-file towards delwaq overtake
-!                                      (output map-file for eliminating
-!                                      particles of certain age)
 !                             part17 - calculate actual decaycoefficient
 !                             parths - make history plots
 !                             partur - adds user-defined releases from file to system
@@ -75,7 +72,6 @@
 !                             part12 - two substances/layers in map file
 !                             part13 - two substances in plot file
 !                             part14 - vertical position particles
-!                             part16 - two substances in deriv file
 !                             part18 - added
 !                             rdparm - two names, vertical position
 !                                      waste loads
