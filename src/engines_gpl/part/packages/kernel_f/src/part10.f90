@@ -34,8 +34,8 @@ contains
                           wvelo  , wdir   , decays , wpart  , pblay  ,      &
                           npwndw , vdiff  , nosubs , dfact  , modtyp ,      &
                           t0buoy , abuoy  , kpart  , mmax   , layt   ,      &
-                          wsettl , depth  , ldiffz , ldiffh , lcorr  ,      &
-                          acomp  , ipc    , accur  , xcor   , ycor   ,      &
+                          wsettl , depth  , ldiffz , ldiffh , &
+                          acomp  , accur  , xcor   , ycor   , &
                           tcktot , lun2   , alpha  , mapsub , nfract ,      &
                           taucs  , tauce  , chezy  , rhow   , lsettl ,      &
                           mstick , nstick , ioptdv , cdisp  , dminim ,      &
@@ -56,7 +56,6 @@ contains
 
 
 !     subroutines called    : stop_exit  - stops with return code (typical 1 for stop on error)
-!                             p10cor  - function unknow
 !                             part07  - not documented here
 !                             part11  - not documented here
 
@@ -70,7 +69,6 @@ contains
       use precision_part        ! single/double precision
       use timers           ! performance timer
       use typos
-      use p10cor_mod
       use grid_search_mod
       use spec_feat_par    ! special feature parameters
       use random_generator
@@ -92,8 +90,6 @@ contains
       integer(ip), intent(in)    :: idelt               ! time step size in seconds
       integer(ip), intent(in)    :: ioptdv              ! if 0 constant vertical diffusion &
                                                         ! if 1 depth averaged algebraic model
-      integer(ip), intent(in)    :: ipc                 ! if > 1 predictor corrector method used &
-                                                        ! if   5 something special happens
       integer(ip), pointer    :: lgrid (:, : )          ! grid with active grid numbers, negatives for open boundaries
       integer(ip), pointer    :: lgrid2(:, : )          ! total grid with grid numbers
       logical    , intent(in) :: zmodel                 ! layer type
@@ -125,7 +121,6 @@ contains
       integer(ip), pointer :: floil ( : )         ! contains values 1 or 0
 !
       logical    , intent(in)    :: acomp               ! use an analytical function for umagi
-      logical    , intent(in)    :: lcorr               ! if true, apply the corrector step
       logical    , intent(in)    :: ldiffh              ! horizontal diffusion is on/off
       logical    , intent(in)    :: ldiffz              ! vertical diffusion is on/off
       logical    , intent(in)    :: lsettl              ! if on deposition/erosion may occur at the bed
@@ -214,7 +209,6 @@ contains
       integer(ip)   :: ierror                  ! needed to call part07
       integer(ip)   :: ifract                  ! loop counter for nfract
       integer(ip)   :: ipart                   ! loop counter particle loop
-      integer(ip)   :: ipcgo                   ! unclear helpvariable
       integer(ip)   :: isub                    ! loop counter nosubs
       integer(ip)   :: itdelt                  ! delta-t of the particle for smooth loading
       integer(ip)   :: ivisit( 4 )             ! part of the strange construct of icvis
@@ -257,7 +251,6 @@ contains
       real(sp)      :: c2g                     ! = grav / chezy / chezy
       real(sp)      :: c3                      ! something undeterminded yet, fixed at 1.0
       real(sp)      :: cdrag                   ! wind drag in fraction = drand(3)
-      real(sp)      :: cf                      ! help variable
       real(sp)      :: chi0                    ! variable in correction process
       real(sp)      :: chi1                    ! variable in correction process
       real(sp)      :: dax                     ! delta of diffusive spreading x
@@ -488,16 +481,16 @@ contains
 
       timon_org = timon
       timon     = .false.
-!$OMP PARALLEL DO PRIVATE ( np, mp, kp, kpp, ktopp, kbotp, n0, n0old, a, n03d, xp,   &
+!$OMP PARALLEL DO PRIVATE ( np, mp, kp, kpp, ktopp, kbotp, n0, n0old, a, n03d, xp, &
 !$OMP                       yp, zp, tp, itdelt, ddfac, dran1, abuac, deltt, dred,  &
 !$OMP                       kd, icvis, icvist, ivisit, lstick, wsum, isub, jsub,   &
-!$OMP                       ifract, pstick, wstick, ldispo, trp, t0, dax, day,     &
+!$OMP                       ifract, pstick, wstick, ldispo, trp, t0, dax, day,     & 
 !$OMP                       n1, n2, dxp, dyp, depth1, idep, vol, vy0, vy1,         &
 !$OMP                       vx0, vx1, vvx, vvy, vx, vy, vxr, vyr, ubstar, ubstar_b,&
 !$OMP                       vz0, vz1, disp, dvz, depthl, dvzs, dvzt, vzs, icounz,  &
-!$OMP                       znew, sangl, zp2, c1, f1, c2, c3, ipc, xnew,           &
-!$OMP                       idepm1, vvz, vz, umagp, cf, rtimx, idx, rtimy, idy,    &
-!$OMP                       rtimz, idz, rtim, rtim1, ipcgo, xpold, ypold, zpold,   &
+!$OMP                       znew, sangl, zp2, c1, f1, c2, c3, xnew,                &
+!$OMP                       idepm1, vvz, vz, umagp, rtimx, idx, rtimy, idy,        &
+!$OMP                       rtimz, idz, rtim, rtim1, xpold, ypold, zpold,          &
 !$OMP                       chi0, vxnew, vynew, vznew, chi1, ynew, vxw, vyw,       &
 !$OMP                       deppar, yy, n0new, depth2, dstick, xx, n03d2, disp2,   &
 !$OMP                       pbounce, xpnew, ypnew, xrest, yrest, dxpnew,           &
@@ -1025,25 +1018,6 @@ contains
          vxr = vx  * dxp         !     only used for dispersion
          vyr = vy  * dyp         !     only used for dispersion
 
-!**      velocity correction directly in first step..
-
-         if ( lcorr ) then
-            if ( ipc .eq. 5 ) then
-               umagp = sqrt(vx*vx + vy*vy + vz*vz)   ! normal magnitude
-               if ( abs(umagp) .le. 1.0e-15) then
-                  cf = 1.0
-               else           ! higher order ( and thus not conserving ! ) velocity
-                  cf = umagi ( xp    , yp    , vz    , np    , mp    ,   &
-                               kpp   , nmax  , mmax  , layt  , flow  ,   &
-                               depth , lgrid , vol   , xcor  , ycor  ,   &
-                               lgrid2, mnmaxk, acomp , tcktot)
-                  cf = cf/umagp
-               endif
-            else
-               cf = 1.0
-            endif
-            c2 = c2*cf
-         endif
 
 !**      time of flight particle in x direction
 
@@ -1142,7 +1116,6 @@ contains
 
          rtim  = min( rtimx, rtimy, rtimz, deltt )
          rtim1 = rtim
-         ipcgo = 1
 
          if ( abs(vvx) .gt. accur ) then
             xp = ( vx/vvx ) * exp( vvx*c2*rtim ) - vx0/vvx
@@ -1162,50 +1135,11 @@ contains
             zp = zp + vz*c3*rtim
          endif
 
-!**
-         if ( lcorr ) then
-            ipcgo = 1
-            xpold = xp
-            ypold = yp
-            zpold = zp
-            umagp = sqrt(vx*vx + vy*vy + vz*vz)   ! normal magnitude
-            if ( abs(umagp) .le. 1.0e-15) then
-               chi0 = 1.0
-            else           ! higher order ( and thus not conserving ! ) velocity
-               chi0 = umagi ( xpold , ypold , vz    , np    , mp    ,  &
-                              kpp   , nmax  , mmax  , layt  , flow  ,  &
-                              depth , lgrid , vol   , xcor  , ycor  ,  &
-                              lgrid2, mnmaxk, acomp , tcktot)
-               chi0 = chi0/umagp
-            endif
-            vxnew = vx0 + xp * vvx
-            vynew = vy0 + yp * vvy
-            vznew = vz0 + zp * vvz
-            umagp = sqrt(vxnew*vxnew + vynew*vynew + vznew*vznew)
-            if ( abs(umagp) .le. 1.0e-15 ) then
-               chi1 = 1.0
-            else
-               chi1 = umagi ( xp    , yp    , vznew , np    , mp    ,   &
-                              kpp   , nmax  , mmax  , layt  , flow  ,   &
-                              depth , lgrid , vol   , xcor  , ycor  ,   &
-                              lgrid2, mnmaxk, acomp , tcktot)
-               chi1 = chi1 / umagp
-            endif
-
-            call p10cor ( rtim1 , rtim  , xp    , yp    , zp    ,   &
-                          xpold , ypold , zpold , chi0  , chi1  ,   &
-                          deltt , vol   , vx    , vy    , vz    ,   &
-                          vvx   , vvy   , vvz   , c2    , c3    ,   &
-                          ipc   , vx0   , vy0   , vz0   , ipcgo ,   &
-                          accur )
-
-         endif
 
 !**      did the time step end ?
 
          if ( rtim1 .lt. deltt ) then
-            if ( rtim  .lt. deltt .and.   &    ! see p10cor for the meaning of these
-                 ipcgo .eq.  1         ) then  ! strange things  !lp!
+            if ( rtim  .lt. deltt ) then
 
 !             logically one of the 3 conditions below should hold,
 !             so either rtim=rtimx or rtim=rtimy or rtim=rtimz
