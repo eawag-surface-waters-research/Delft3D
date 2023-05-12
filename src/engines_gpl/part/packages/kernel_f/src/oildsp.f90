@@ -468,8 +468,6 @@ module oildsp_mod
                oilmass = 0.0
 
                oilmass = oilmass + amassd(1+(ifrac-1)*3,id)
-!              rhooil(ifrac)  = rhooil(ifrac) + amassd(1+(ifrac-1)*3,id)*rhotmp(ifrac)
-!              if (oilmass.gt.0.0) rhooil(ifrac)=rhooil(ifrac)/oilmass
                vol0    = oilmass/rhooil(ifrac)                      !     volume = mass/rho
                difrho  = (rhow - rhooil(ifrac))/rhow
                if ( difrho .lt. 0 ) then
@@ -840,7 +838,6 @@ module oildsp_mod
             dviso = visowat(ifrac) *                                                            &
                     exp( 2.5 * fwatoil(ifrac,i) /( 1.0 - 0.65 * fwatoil(ifrac,i) ) ) -          &
                     visowat(ifrac)
-!            if ( ioptd(ifrac) .eq. 1 ) then          ! this is only done when the dispersion option is  1 (Delvigne&Sweeney)
                if (ioptev(ifrac).ge.0)then
                   totfe(ifrac,i) = totfe(ifrac,i) + tmpfracte(ifrac) * ( 1.0 - totfe(ifrac,i) )  ! when fixed firt order constant for evap is used
                elseif (ioptev(ifrac).lt.-0.5) then

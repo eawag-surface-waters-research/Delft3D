@@ -409,7 +409,6 @@ module oildspfm_mod
 
                oilmass = oilmass + amassd(1+(ifrac-1)*3,id)
 !              rhooil(ifrac)  = rhooil(ifrac) + amassd(1+(ifrac-1)*3,id)*rhotmp(ifrac)
-!              if (oilmass.gt.0.0) rhooil(ifrac)=rhooil(ifrac)/oilmass
                voloil0    = oilmass/rhooil(ifrac)                      !     volume = mass/rho
                difrho  = (rhow - rhooil(ifrac))/rhow
                if ( difrho .lt. 0 ) then
@@ -713,7 +712,6 @@ module oildspfm_mod
             dviso = visowat(ifrac) *                                                            &
                     exp( 2.5 * fwatoil(ifrac,i) /( 1.0 - 0.65 * fwatoil(ifrac,i) ) ) -          &
                     visowat(ifrac)
-!            if ( ioptd(ifrac) .eq. 1 ) then          ! this is only done when the dispersion option is  1 (Delvigne&Sweeney)
                if (ioptev(ifrac).ge.0)then
                   totfe(ifrac,i) = totfe(ifrac,i) + tmpfracte(ifrac) * ( 1.0 - totfe(ifrac,i) )  ! when fixed firt order constant for evap is used
                elseif (ioptev(ifrac).lt.-0.5) then
@@ -727,7 +725,6 @@ module oildspfm_mod
                rhooilv(ifrac,i) = rhow*fwatoil(ifrac,i) + rhooil(ifrac)*(1.0-fwatoil(ifrac,i))         &
                                   * ( 1.0 + cde * totfe(ifrac,i)   ) * ( 1.0 - cdt * (temp0-temp0) ) !if we work with temp dependent density then change temp0-temp0 into temp-reftemp (reference temperature)
                                                                                                     !the var temp is used for the calculation of the evaporation
-!            endif
    50    continue
 
 !     End of the loop ovver all particles i

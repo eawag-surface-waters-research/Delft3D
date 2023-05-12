@@ -226,7 +226,7 @@ contains
 
 !        correct the position for particules that ended up in a dry cell or outside the grid
 
-i!     distribute the particles for this waste over the vertical
+!     distribute the particles for this waste over the vertical
 
          do i = nopart+1,nopart+ndprt(id)
             do

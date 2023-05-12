@@ -335,7 +335,6 @@
       use m_part_regular
       use alloc_mod
       use abm_mod
-      use larvae_mod
       use omp_lib
 
       implicit none                  ! force explicit typing

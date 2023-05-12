@@ -2749,24 +2749,4 @@ subroutine getdim_asc ( lun , asc_file , npart_ini, nrowsmax , &
       return
       end function more_data
 
-      subroutine open_inifile ( lun, finam)
-      use precision_part       ! flexible size definition
-      implicit none
-
-      character(len=256) :: finam
-!
-!     local scalars
-!
-      integer(ip) :: lun
-!
-      open ( newunit = lun, file = finam, access='stream', form='unformatted', status = 'old', &
-              err = 99)
-!
-      return
-!
- 99   write(*,'(//a,a40)') ' Error on opening file: ',finam
-      write(*,'(  a    )') ' Please check if file exists'
-      write(*,'(  a    )') ' Please check correct file type'
-      call stop_exit(1)
-!
-      end subroutine
+      
