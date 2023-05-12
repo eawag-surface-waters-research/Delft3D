@@ -207,7 +207,6 @@ contains
                dyp = sin(dpangle) * dradius
                xpart(i) = xwasth + dxp !radius(iload)/2. * rnd(rseed)
                ypart(i) = ywasth + dyp !radius(iload)/2. * rnd(rseed)
-              ! trpart(ipart) = iwtime(iload)
                if (jsferic == 1) then
                   dradius = atan2(dradius,earth_radius)*raddeg_hp !in degrees
                   dxp = cos(dpangle) * dradius ! distance in degrees
@@ -220,21 +219,14 @@ contains
                endif
             else
                radiuh = 0
-!              spread the particles over a polygon
-!               !call findpoly   (nmax, mmax, lgrid, lgrid2, xp, yp, nrowswaste(id), &
-!               !                 xpolwaste(1:nrowswaste(id), id), ypolwaste(1:nrowswaste(id), id), &
-!               !                 xpart(i), ypart(i), npart(i), mpart(i))
             end if
 !
          enddo
 
-         !call calculate_position_in_grid(ndprt(id), xadd, yadd, nopart, xpart, ypart, zpart, mpart)
 
 !        correct the position for particules that ended up in a dry cell or outside the grid
 
-         !call correct_position( ndprt(i), xpart(nopart+1:), ypart(nopart+1:), npart(nopart+1:)
-
-!     distribute the particles for this waste over the vertical
+i!     distribute the particles for this waste over the vertical
 
          do i = nopart+1,nopart+ndprt(id)
             do

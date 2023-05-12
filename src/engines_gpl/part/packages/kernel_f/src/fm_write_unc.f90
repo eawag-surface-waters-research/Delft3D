@@ -414,7 +414,6 @@ subroutine unc_write_part(ifile, itime, id_trk_parttime, id_trk_partx, id_trk_pa
    ! and the position within the layer. Then write it to the file
    !
    if ( kmx > 0 ) then
-      !call comp_height( zz, laypart, hpart )
       ierr = nf90_put_var(ifile, id_trk_partz, zz, start=(/ 1,itime /), count=(/ NopartTot,1 /) )
    end if
 

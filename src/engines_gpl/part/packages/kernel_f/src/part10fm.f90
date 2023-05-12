@@ -115,8 +115,6 @@ contains
          nqzero = i-1
       endif
 ! Here we need to check which segments have a closed boundary
-      ! call make_closedbc_segment()
-!      stop
       !
       ! Note AM (2 september 2021): this loop needs revising, but for the moment let us concentrate on
       ! the diffusion coefficient
@@ -131,7 +129,6 @@ contains
         endif
         skip_pt = .FALSE.
         if (niter==0) mirror = .TRUE.
-!        if (mpart_prevt(ipart) == 0 .and. time0>tstart_user+dts) skip_pt = .TRUE.
         partdomain =  mpart(ipart) == 0 ! this is for the particles that come out of advection outside model domain
         ! if after the advectio the particle is outside the gridthen also set the previous mpart to 0 to avoid resetting back into the domain
         if (partdomain) then
@@ -394,15 +391,9 @@ contains
           !now we can calculate the new displacement in the direction of hte flow
           dwx = (cdrag*(dpxwind-ux0old)) * dts
           dwy = (cdrag*(dpywind-uy0old)) * dts
-!          if (jsfer_old == 1) then
-!             call Cart3Dtospher(xpart(ipart),ypart(ipart),zpart(ipart),xx,yy,ptref)
-!             xx = xx + dwx
-!             yy = yy + dwy
-!             call sphertocart3D(xx,yy,xpart(ipart),ypart(ipart),zpart(ipart))
-!          else
-             xpart(ipart) = xpartold  + dwx
-             ypart(ipart) = ypartold  + dwy
-!          endif
+          xpart(ipart) = xpartold  + dwx
+          ypart(ipart) = ypartold  + dwy
+
           xx(1) = xpart(ipart)
           yy(1) = ypart(ipart)
           if (jsferic == 1) call Cart3Dtospher(xpart(ipart),ypart(ipart),zpart(ipart),xx(1),yy(1),ptref)

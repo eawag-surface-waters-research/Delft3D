@@ -502,69 +502,6 @@ module oildspfm_mod
          endif
       enddo
 !
-! ================================plotgrid concentrations for high accuracy=========================================
-!
-!     this part was added in order to imporve the accuracy of the
-!     calculation of concentrations for oil dispersion
-!     it was shown that on the map grid this is not always ok
-!     4/8/2000
-!
-!     note: loop 30 was copied from routine part13 (loop 160 there)
-!           all not related to oil was removed from this loop
-!
-! no zoom grid for the moment
-!      if ( lplgr ) then
-!         call part11 ( lgrid  , xb     , yb     , nmax   , npart  ,   &
-!                       mpart  , xpart  , ypart  , xa     , ya     ,   &
-!                       nopart , npwndw , lgrid2 , kpart  , zpart  ,   &
-!                       za     , locdep , dps    , nolay  , mmax   ,   &
-!                       tcktot )
-!         windw1 =  window(1)
-!         windw3 =  window(3)
-!         xpf    = (window(2) - windw1) / mmap
-!         ypf    = (window(4) - windw3) / nmap
-!         amap   = 0.0
-!         do 30 i1 = npwndw, nopart
-!            ix = int((xa(i1) - windw1) / xpf) + 1
-!            if ( ix .le. 0 .or. ix .gt. mmap ) cycle
-!            iy = int((ya(i1) - windw3) / ypf) + 1
-!            if ( iy .le. 0 .or. iy .gt. nmap ) cycle
-!            i2 = lgrid(npart(i1), mpart(i1))
-!            if ( i2 .le. 1 ) cycle                            ! NB this probably should be 0 lp
-!            if ( area(i2) .le. 0.0 ) cycle
-!            ilay = kpart(i1)
-!            if ( lsettl .and. ilay .eq. nolay ) then
-!               iseg = (ilay-2)*nmax*mmax + i2
-!            else
-!               iseg = (ilay-1)*nmax*mmax + i2
-!            endif
-!            fvolum = surf * (volume(iseg)/area(i2))           ! the volume of one plot grid cell
-!            if ( fvolum .le. 0.0 ) cycle
-!            do 20 isub = 1, nosubs
-!               if ( isfile(isub) .eq. 1) cycle
-!               am = wpart(isub, i1)
-!               ac = am/fvolum
-!               if ( isub .lt. 3*nfract ) then
-!                  jsub = mod(isub-1,3) + 1
-!                  if ( jsub .eq. 2 ) then                     ! this is the submerged fraction
-!                     if ( lsettl .and. ilay .eq. nolay ) then
-!                        ac = am/surf
-!                     endif
-!                  elseif ( mstick(isub) .lt. 0 ) then         ! this is the sticky part of this fraction (nr 3)
-!                     ac = am/surf                             ! <==
-!                  else
-!                     ac = am/surf                             ! is this wrong ?
-!                  endif
-!               elseif ( lsettl .and. ilay .eq. nolay ) then   ! substances above the three oil fractions
-!                  ac = am/surf                                ! settled mass of this fraction
-!               elseif ( mstick(isub) .lt. 0 ) then            ! the sticky part of non-oil
-!                  ac = am/surf
-!               endif
-!               amap(isub, ilay, iy, ix) = amap(isub, ilay, iy, ix) + ac
-!  20        continue
-!  30     continue
-!      endif
-!
 ! ==============end oh high accuracy loop===============================================================
 !
 !.. determine evaporation per particle and dispersion per particle
@@ -720,16 +657,7 @@ module oildspfm_mod
                      cdelv = cdelv * voil
                      qentr = cdelv * wfact
                      cfloat = constituents(ioilt(ifrac),ic,ilay)      ! from the map file
-!                     if ( lplgr ) then                               ! but if possible, from the
-!                        ix = int((xa(i) - windw1) / xpf) + 1         ! more detailed plot grid
-!                        iy = int((ya(i) - windw3) / ypf) + 1
-!                        if (ix .gt. 0 .and. ix .le. mmap .and.    &
-!                            iy .gt. 0 .and. iy .le. nmap       ) then
-!                           ilay   = kpart(i)
-!                           isub   = ioilt(ifrac)
-!                           cfloat = amap(isub, ilay, iy, ix)
-!                        endif
-!                     endif
+
                      if ( cfloat .gt. 0.0 ) then
                         tmpfractd(ifrac)   = qentr*dts / rhooilv(ifrac,i) / hmin
                         if ( tmpfractd(ifrac) .gt. 1.0 ) tmpfractd(ifrac) = 1.0

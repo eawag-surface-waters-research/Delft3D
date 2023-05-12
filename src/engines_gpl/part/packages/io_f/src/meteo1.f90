@@ -811,9 +811,6 @@ function reaspwheader(minp      ,mx        ,nx        ,dxa        ,dya        , 
        if (k==4) read (rec(2:), *, err = 102) radius
     enddo
 
-!    if (sferic) then !hk: This has already been set by the flow grid. Here do no more than check consistency
-!       call meteosetsferic()
-!    endif
 
     !
     mx  = mx + 1              ! 1 KOLOM EXTRA VOOR 360 GRADEN = 0 GRADEN IVM INTERPOLATIE
@@ -1621,7 +1618,6 @@ function addprovider(idom, qid, kx, filename, filetype, method, operand, nump, i
 
      success = reaspwheader(minp,mx,nx,dxa,dya,mncoor)
      xe(2) = dxa ; ye(2) = dya
-!    call meteosetmncoord(mncoor) ! zet iets in private module meteo, moet hier eigenlijk uit
 
   case ( fourier )
 
@@ -3695,13 +3691,11 @@ subroutine dlauny(x         ,y         ,ns        )
        if (den/=0) then
           z = (x2*(x2 - x3) + y2*(y2 - y3))/den
        else
-          ! call qnerror('COINCIDING POINTS'  ,' '       ,' '       )
        endif
        xcent(ie) = 0.5D0*(x3 - z*y3)
        ycent(ie) = 0.5D0*(y3 + z*x3)
     enddo
     !
-    !     CALL READYY('CREATING TRIANGLE NETWORK',0.0)
     interval = max(1, ns/100)
     do in = 1, ns
 
@@ -3737,7 +3731,6 @@ subroutine dlauny(x         ,y         ,ns        )
              maxtri = max(maxtri, numtri + newel + 3)
              if (maxtri>nsm) then
                 write(*,*)'maxtri>nsm'
-                ! call qnerror('MAXIMUM NUMBER OF TRIANGLES EXCEEDED'     ,'REDUCE NUMBER OF SAMPLES IN'   ,'TRIANGULATION'      )
                 return
              endif
              indx(j, numtri + newel + j) = in
@@ -3746,7 +3739,6 @@ subroutine dlauny(x         ,y         ,ns        )
              inewe = numtri + newel + inew
              maxtri = max(maxtri, inewe)
              if (maxtri>nsm) then
-                ! call qnerror('MAXIMUM NUMBER OF TRIANGLES EXCEEDED'     ,'REDUCE NUMBER OF SAMPLES IN'   ,'TRIANGULATION'      )
                 write(*,*)'maxtri>nsm'
                 return
              endif
@@ -3843,10 +3835,6 @@ subroutine dlauny(x         ,y         ,ns        )
     ie = ie + 1
     if (ie<=numtri) goto 100
     !
-!    deallocate (xcent, ycent)
-    !
-    !     CALL READYY('CREATING TRIANGLE NETWORK',-1d0)
-!    write (mdia, *) numtri, maxtri
 end subroutine dlauny
 
 subroutine findtri_indices_weights(xp, yp, xs, ys, ns, zp, indxp)
@@ -4339,9 +4327,7 @@ subroutine polyint( xs, ys, zs ,kcs, ns,            &   ! interpolate in a polyl
     do m = 1, mnx
 
         if (jgetw .le. 1) then
-            !call polyindexweight( x(m), y(m), xs, ys, kcs, ns, xyen(:,m), k1, rl)    ! interpolate in a polyline like way
             call polyindexweight( x(m), y(m), xyen(1,m), xyen(2,m), xs, ys, kcs, ns, k1, rl)    ! interpolate in a polyline like way
-            !call findtri_indices_weights (x(n),y( n), xs, ys, ns, zp, indxp)     ! zoeken bij 0 en 1
             if (jgetw .eq. 1) then                                              ! zetten bij 1
                 indxn(1,m) = k1
                 wfn(1,m)   = rl
@@ -4360,68 +4346,6 @@ subroutine polyint( xs, ys, zs ,kcs, ns,            &   ! interpolate in a polyl
     enddo
 
 end subroutine polyint
-
-!subroutine polyindexweight( xe, ye, xs, ys, kcs, ns, xyen, k1, rl)    ! interpolate in a polyline like way
-!
-! ! Global variables
-! integer ,                intent(in)     :: ns       ! Dimension of polygon OR LINE BOUNDARY
-! double precision, dimension(:),  intent(in) :: xs       ! polygon
-! double precision, dimension(:),  intent(in) :: ys
-! integer, dimension(:),  intent(in)      :: kcs      ! polygon mask
-! double precision                        :: xyen(:)
-! double precision                        :: xe, ye, rl
-!
-!
-! integer :: ja1, ja2, k, km, k1, k2
-! double precision:: x1,x2,y1,y2,dis,xn,yn,dx,dy
-! double precision:: dism, dis1, dis2, rl1, rl2, dbdistance
-!
-!
-! dism = 1e30
-! do k = 1, ns
-!    dis  = DbdISTANCE( Xe,Ye,XS(K),YS(K) )
-!    if (dis < dism) then
-!       dism = dis
-!       km   = k
-!    endif
-! enddo
-!
-! k1 = 0
-!
-! if (km == 1) then
-!    x1 = xs(km  ); y1 = ys(km  )
-!    x2 = xs(km+1); y2 = ys(km+1)
-!    call LINEDISQ(Xe,Ye,X1,Y1,X2,Y2,JA1,DIS1,XN,YN,RL)
-!    if (ja1 == 1) then
-!       if (dis1 < rdis) k1 = km
-!    endif
-! else if (km == ns) then
-!    x1 = xs(km-1); y1 = ys(km-1)
-!    x2 = xs(km  ); y2 = ys(km  )
-!    call LINEDISQ(Xe,Ye,X1,Y1,X2,Y2,JA1,DIS1,XN,YN,RL)
-!    if (ja1 == 1) then
-!       if (dis1 < rdis) k1 = km-1
-!    endif
-! else
-!    x1 = xs(km-1); y1 = ys(km-1)
-!    x2 = xs(km)  ; y2 = ys(km)
-!    call LINEDISQ(Xe,Ye,X1,Y1,X2,Y2,JA1,DIS1,XN,YN,RL1)
-!    x1 = xs(km)  ; y1 = ys(km)
-!    x2 = xs(km+1); y2 = ys(km+1)
-!    call LINEDISQ(Xe,Ye,X1,Y1,X2,Y2,JA2,DIS2,XN,YN,RL2)
-!    if      (ja1 == 1) then ! if on line 1
-!        if (dis1 < rdis) then
-!           k1 = km-1 ; rl = rl1
-!        endif
-!    else if (ja2 == 1) then
-!        if (dis2 < rdis) then
-!           k1 = km ; rl = rl2
-!        endif
-!    else ! niet op een van beiden, maar wel in de buurt, uitwerken. Nu dus alleen convexe randen
-!    endif
-! endif
-!
-!end subroutine polyindexweight
 
 
 !> Selects the index of the polyline segment that intersects with line e--en
@@ -5104,8 +5028,6 @@ function updateprovider(dataprovider, tim, elementsets) result(success)
                                        !hier niet mx*nx, mx = elsetq
                     end if
 
-!                    call polyint (xs, ys, zs , kcss(ns+1:), ns,             &
-!                                  x , y , z  , kcs , kx, mx, jpoly, xyen)
                  endif
 
                  dataprovider%field(1-it1)%time = t0max
@@ -5428,7 +5350,6 @@ use m_alloc
 
   success = .false.
 
-  ! call realloc(subdoms, ndoms, stat= ierr )
   allocate (subdoms(ndoms), stat = ierr)
 
   if (ierr == 0) then
