@@ -27,6 +27,8 @@
 !
 !*******************************************************************************
 !
+      use m_dhkmrk
+      use m_dherrs
       IMPLICIT NONE
 !
 !     Type    Name         I/O Description

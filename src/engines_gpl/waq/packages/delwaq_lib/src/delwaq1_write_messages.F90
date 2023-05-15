@@ -26,8 +26,10 @@
 !>                    delwaq1_write_messages
 
 subroutine delwaq1_write_messages(errorcode)
+    use m_dhopnf
     use m_delwaq1_data
-      
+    use m_dattim
+
     implicit none
 
     integer, intent(inout)                        :: errorcode
@@ -38,7 +40,7 @@ subroutine delwaq1_write_messages(errorcode)
     write (   *   ,'(  ''  Number of WARNINGS            :'',I6)') iwar
     write (   *   ,'(  ''  Number of ERRORS during input :'',I6)') ierr
     write (   *   ,'(  '' '')')
-    
+
     if ( ierr .eq. 0 ) then
         novec = min(novec,(nosss+nobnd-1))
         itota = 0

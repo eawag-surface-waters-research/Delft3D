@@ -49,6 +49,7 @@
 !     NOSEG   INTEGER  1           INPUT   total number of segments
 !
 !
+      use m_dhopnf
       use timers
 
       DIMENSION     CONC  ( NOTOT, NOSEG ) , LUN(*)

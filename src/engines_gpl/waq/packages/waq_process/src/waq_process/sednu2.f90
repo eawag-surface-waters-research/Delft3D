@@ -24,6 +24,8 @@
       subroutine sednu2 ( pmsa   , fl     , ipoint , increm , noseg  , &
                           noflux , iexpnt , iknmrk , noq1   , noq2   , &
                           noq3   , noq4   )
+      use m_dhkmrk
+
 
 
 ! This version is used for developing the interaction of POX-2 with the sediment buffer model

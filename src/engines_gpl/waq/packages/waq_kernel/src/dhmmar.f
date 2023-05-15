@@ -22,6 +22,8 @@
 !!  rights reserved.
 
       MODULE DHMMAR_MOD
+      use m_srstop
+
       CONTAINS
       SUBROUTINE DHMMAR(LUNREP,J,C,PART)
 !

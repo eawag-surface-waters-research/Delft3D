@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dhucas
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DHUCAS( STR1 , STR2 , NOCHR )
 !
@@ -38,7 +44,7 @@
 !
 !     Declaration of arguments
 !
-      INTEGER       NOCHR
+      INTEGER       NOCHR , IC , NN
       CHARACTER*(*) STR1  , STR2
 !
 !     Local declaration
@@ -61,3 +67,4 @@
 !
       RETURN
       END
+      end module m_dhucas

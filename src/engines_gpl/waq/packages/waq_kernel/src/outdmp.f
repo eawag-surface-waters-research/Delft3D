@@ -65,6 +65,7 @@
 !
 !     Declaration of arguments
 !
+      use m_reptim
       use timers
 
       INTEGER       IOUT  , ITIME , NX    , NY    , NOTOT ,

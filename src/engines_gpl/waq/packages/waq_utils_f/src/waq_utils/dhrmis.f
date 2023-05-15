@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dhrmis
+
+      implicit none
+
+      contains
+
 
       LOGICAL FUNCTION DHRMIS (VALUE)
 !
@@ -39,6 +45,7 @@
 !     VALUE   REAL        1       INPUT   Value to be checked
 !
       REAL    VALUE
+      integer RMISS
 !
 !     Local declaration
 !
@@ -54,3 +61,4 @@
 !
       RETURN
       END
+      end module m_dhrmis

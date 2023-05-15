@@ -24,6 +24,8 @@
       SUBROUTINE MPBNUT ( PMSA   , FL     , IPOINT , INCREM , NOSEG  ,
      +                    NOFLUX , IEXPNT , IKNMRK , NOQ1   , NOQ2   ,
      +                    NOQ3   , NOQ4   )
+      use m_dhkmrk
+
 C**********************************************************************
 C     +----------------------------------------+
 C     |    D E L F T   H Y D R A U L I C S     |

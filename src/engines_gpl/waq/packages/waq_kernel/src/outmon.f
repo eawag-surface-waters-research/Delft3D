@@ -66,6 +66,7 @@
 !     ITSTOP  INTEGER     1       INPUT   stop time
 !
 !
+      use m_reptim
       use timers
 
       INTEGER      IOUT  , ITIME , NODUMP, NOTOT , ISFLAG,

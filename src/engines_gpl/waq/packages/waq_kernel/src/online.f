@@ -375,6 +375,7 @@
 
       subroutine map_input (Nvarin, varin, Nlocin, locin,
      j                      Nvar  , var  , nloc  , loc  , map )
+      use m_zoek
       use timers
 
       integer           Nvarin, Nlocin, Nvar  , nloc
@@ -464,6 +465,9 @@
      +                   BOUND , NOLOC , PROLOC, NODEF , DEFAUL,
      +                   NTDMPQ, DANAM , SYNAME, paname, sfname,
      +                   funame, IOUTPS, IOPOIN, OUNAM )
+      use m_gkwini
+      use m_getcom
+      use m_dhopnf
       use timers
 
 

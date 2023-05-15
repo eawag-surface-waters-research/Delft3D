@@ -20,9 +20,18 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module m_rd_sub
+use m_zoek
+
+
+implicit none
+
+contains
+
 
    subroutine rd_sub(allocated,input_file,nosys,notot,nocons,noout,syname,syunit,coname,covalue,ouname,oudesc,ierr,cerr)
 
+   use m_monsys
    use dlwq_data      ! for definition and storage of data
    use rd_token       ! tokenized reading
 
@@ -330,3 +339,4 @@
 
    return
    end subroutine
+end module m_rd_sub

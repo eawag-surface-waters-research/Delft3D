@@ -199,6 +199,8 @@
 
       subroutine lookupeffi(rad,effi,numgr)
 
+      use m_srstop
+      use m_monsys
       use bloom_data_dim
       use bloom_data_arran
 

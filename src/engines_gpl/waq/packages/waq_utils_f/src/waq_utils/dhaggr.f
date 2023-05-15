@@ -20,6 +20,16 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dhaggr
+
+      use m_srstop
+      use m_monsys
+      use m_getcom
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DHAGGR ( NOSEG1, NOSEG2, NOTOTI, NOTOTW, NOTOTH,
      +                    NOTOTO, ISYSI , ISYSW , ISYSH , ISYSO ,
@@ -191,3 +201,4 @@
       RETURN
  2000 FORMAT ( ' ERROR: undefind aggregation type in DHAGGR :',I8 )
       END
+      end module m_dhaggr

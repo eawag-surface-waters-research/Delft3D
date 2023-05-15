@@ -74,7 +74,9 @@
 !     Iwar    INTEGER    1         OUTPUT  cumulative warning count
 !
 !
+      use m_zoek
       use timers       !   performance timers
+      use m_cnvtim
 
       INTEGER       IIMAX
       CHARACTER*(*) LCH   (LSTACK) , CHULP , CNAMES(*)

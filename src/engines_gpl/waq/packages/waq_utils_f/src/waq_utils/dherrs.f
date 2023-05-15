@@ -20,12 +20,22 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dherrs
+
+      use m_monsys
+      use m_srstop
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DHERRS(STRING,IERR)
 !
       CHARACTER*(*) STRING
 
       INTEGER       LUNREP
+      INTEGER       IERR
 
 !     message to screen
 
@@ -73,3 +83,4 @@
 
       RETURN
       END
+      end module m_dherrs

@@ -70,6 +70,7 @@
 !                          lun( 4) = unit intermediate file (pointers)
 !                          lun(is) = unit intermediate file (items)
 
+      use m_dhopnf
       use timers       !   performance timers
       use rd_token
       use m_sysn          ! System characteristics
@@ -81,7 +82,7 @@
 
 !     kind           function         name           Descriptipon
 
-      integer  ( 4), intent(in   ) :: lun    (*)    !< array with unit numbers
+      integer  ( 4), intent(inout) :: lun    (*)    !< array with unit numbers
       integer  ( 4), intent(in   ) :: is            !< entry in lun for this call
       integer  ( 4), intent(in   ) :: noql1         !< number of exchanges 1st direction
       integer  ( 4), intent(in   ) :: noql2         !< number of exchanges 2nd direction

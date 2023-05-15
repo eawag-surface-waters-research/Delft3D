@@ -22,10 +22,15 @@
 !!  rights reserved.
 
       program agrhyd
+
       use hydmod
+      use m_getcom
+      use m_julian
       use io_ugrid
       use system_utils
       use delwaq_version_module
+      use m_dattim
+
       implicit none
 
       type(t_hyd)          :: input_hyd     ! description of the input hydrodynamics
@@ -48,15 +53,14 @@
       character(len=256)   :: name          ! base name of the output files
       integer              :: output_start  ! output start time
       integer              :: output_stop   ! output stop time
-      integer              :: output_shift  ! output shift time 
-      character(14)        :: output_t0     ! output reference time 
+      integer              :: output_shift  ! output shift time
+      character(14)        :: output_t0     ! output reference time
       real(8)              :: output_t0_jul ! output reference time (julian)
       integer              :: output_t0_d   ! output reference date (ymd)
       integer              :: output_t0_t   ! output reference time (hms)
       real(8)              :: input_t0_jul  ! input reference time (julian)
       integer              :: input_t0_d    ! input reference date (ymd)
       integer              :: input_t0_t    ! input reference time (hms)
-      real*8               :: julian        ! function to convert ymd, hms to julian day
       real                 :: wdayshift     ! time in days (after shift)
       logical              :: l_regular     ! regular aggregartion option
       logical              :: l_expand      ! expand to full matrix
@@ -214,7 +218,7 @@
             endif
          endif
       enddo
-      
+
       ! report and check
 
       if ( input_hyd%geometry .ne. HYD_GEOM_CURVI .and. &
@@ -526,7 +530,7 @@
                output_shift = nint((input_t0_jul - output_t0_jul) * 86400)
                output_hyd%hyd_ref = output_t0
                output_hyd%cnv_ref = output_t0
-            endif      
+            endif
          endif
          if (output_shift.eq.0.and.output_hyd%cnv_ref.eq.output_t0) then
             write(lunrep,*) 'warning: interpet reference_time_output is identical to current reference time'
@@ -589,10 +593,10 @@
       cpatch = -1
       npatch = -1
       do ipatch = 0, 9
-         if (l_patch(ipatch)) then 
+         if (l_patch(ipatch)) then
             ! read the first timestep of the patch to see where the patch starts
             call read_hyd_step(input_patch_hyd(ipatch),itime_first_patch(ipatch),iend)
-            
+
             if (iend.ne.0) then
                write(lunrep,*) 'error: could not read first timestep of input hydrodynamics patch : '// &
                                trim(input_patch_hyd(ipatch)%file_hyd%name)
@@ -610,19 +614,19 @@
             exit
          endif
       enddo
-      
+
 !     time loop
 
       write(*,'(A)') 'timestamp       seconds        days'
       write(lunrep,'(A)') 'timestamp       seconds        days'
-      
+
       do
          if (cpatch.eq.-1) then
             call read_hyd_step(input_hyd,itime,iend)
          else
             call read_hyd_step(input_patch_hyd(cpatch),itime,iend)
          endif
-         if (l_patch(npatch)) then 
+         if (l_patch(npatch)) then
             if(itime.ge.itime_first_patch(npatch)) then
 !              switch a the next patch
                cpatch = npatch
@@ -648,7 +652,7 @@
                enddo
             endif
          endif
-         
+
          if ( iend .ne. 0 ) exit
          rday = itime/86400.
          write(*,'(A,I10,F12.3)') 'reading step:',itime,rday

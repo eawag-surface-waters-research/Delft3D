@@ -64,6 +64,7 @@
 
 !     Routines called     : none
 
+      use m_getcom
       use timers
       implicit none
 

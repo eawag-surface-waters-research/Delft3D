@@ -54,6 +54,7 @@
 !     Logical units     : LUN(27) = unitnumber stripped DELWAQ input file
 !                         LUN(29) = unitnumber formatted output file
 
+      use m_zoek
       use rd_token     !   for the reading of tokens
       use timers       !   performance timers
 

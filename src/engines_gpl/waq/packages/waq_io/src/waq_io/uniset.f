@@ -42,7 +42,14 @@
 !                         lun( 3) = unit intermediate file (harmonics)
 !                         lun( 4) = unit intermediate file (pointers)
 
+      use m_srstop
+      use m_monsys
+      use m_getcom
+      use m_dhpath
+      use m_dhopnf
       use timers       !   performance timers
+      use m_dhdelf
+      use m_dhgnam
 
       implicit none
 
@@ -51,7 +58,7 @@
 !     kind           function         name            Descriptipon
 
       integer  ( 4), intent(in   ) :: nolun         !< Amount of unit numbers
-      integer  ( 4), intent(in   ) :: lun  (nolun)  !< Unit numbers
+      integer  ( 4), intent(inout) :: lun  (nolun)  !< Unit numbers
       character( *), intent(inout) :: lchar(nolun)  !< File names
       character( *), intent(in   ) :: runid         !< Runid
 
@@ -70,7 +77,7 @@
       integer         outpathlen
       character*(256) outid
       integer         ierr2
-      
+
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "uniset", ithndl )
 
@@ -82,7 +89,7 @@
 !        Specific output dir?
       call getcom ( '-output', 3, specout, idummy, rdummy, outputpath, ierr2)
       if (specout) then
-         if (ierr2.eq.0) then 
+         if (ierr2.eq.0) then
             write (*,'(A)') 'Found -output switch with the following path:'
             write (*,'(/A)') trim(outputpath)
             write (*,'(/A/)') 'Make sure this path exists, or DELWAQ will not run!'
@@ -103,9 +110,9 @@
          endif
       endif
 
-!        Pad the model name in the file names   
+!        Pad the model name in the file names
       do ilun = 1 , nolun
-         if ( specout .and. index( lchar(ilun), '.wrk' ) .eq. 0 .and. 
+         if ( specout .and. index( lchar(ilun), '.wrk' ) .eq. 0 .and.
      &        index( lchar(ilun), '.inp' ) .eq. 0 ) then
             lchar(ilun) = trim(outid)//lchar(ilun)
          else

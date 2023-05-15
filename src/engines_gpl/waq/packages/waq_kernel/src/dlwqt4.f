@@ -44,6 +44,7 @@
 
 !     SUBROUTINES CALLED  : SRSTOP, stops execution
 
+      use m_dhopnf
       use timers
       use delwaq2_data
       USE HydroSet           ! for composed hydrodynamics
@@ -53,7 +54,7 @@
 
 !     kind     function         name        description
 
-      integer           , intent(in   )         :: lun(*)          ! logical unitnumbers of files
+      integer           , intent(inout)         :: lun(*)          ! logical unitnumbers of files
       character*(*)     , intent(in   )         :: luntxt(*)       ! file names
       integer           , intent(in   )         :: ftype(*)        ! type of the files
       integer           , intent(in   )         :: lunout          ! unit number monitor file
@@ -292,6 +293,7 @@
       SUBROUTINE MESSAG ( LUNOUT , MESSGE , ISFLAG , LLUN   , SFILE  ,
      *                                               ITIME  , ITIME1 )
 
+      use m_srstop
       use timers
       CHARACTER*24  MSGTXT(6)
       CHARACTER*(*) SFILE

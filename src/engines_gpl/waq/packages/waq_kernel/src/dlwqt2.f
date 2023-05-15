@@ -51,6 +51,7 @@
 !
 !     DECLARATIONS        :
 !
+      use m_srstop
       use timers
 
       DIMENSION     RESULT(NTOTAL)

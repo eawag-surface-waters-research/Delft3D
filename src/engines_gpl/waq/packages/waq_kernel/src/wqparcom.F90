@@ -23,6 +23,7 @@
 
 module M_WQParComm
 
+use m_monsys
 use waq_Dio_plt_rw
 
 implicit none
@@ -433,4 +434,3 @@ function WQParAddCommBlock(wqParComm) result(commBlock)
 end function WQParAddCommBlock
 
 end module M_WQParComm
-

@@ -48,6 +48,7 @@
 !     SUBROUTINES CALLED  : SRSTOP, stops execution
 !
 
+      use m_srstop
       use timers
       use grids
       use delwaq2_data

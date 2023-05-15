@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_monsys
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE MONSYS(STRING,ILEVEL)
 !
@@ -107,6 +113,7 @@
 !
       RETURN
       END
+      end module m_monsys
       BLOCK DATA BDMON
 !
       INTEGER         LUNMON,MONLEV

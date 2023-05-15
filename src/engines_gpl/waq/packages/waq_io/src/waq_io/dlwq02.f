@@ -69,6 +69,9 @@
 !                           LUN(4) = unit intermediate file (pointers)
 !                           LUN(5) = unit intermediate file (timesteps)
 
+      use m_zoek
+      use m_srstop
+      use m_dhopnf
       use rd_token     !   for the reading of tokens
       use subs02
       use partmem      !   for PARTicle tracking
@@ -77,6 +80,7 @@
       use dlwq0t_data
       use timers       !   performance timers
       use m_sysi          ! Timer characteristics
+      use m_cnvtim
 
 
       implicit none
@@ -85,7 +89,7 @@
 
 !     kind           function         name                Descriptipon
 
-      integer  ( 4), intent(in   ) :: lun    (*)        !< array with unit numbers
+      integer  ( 4), intent(inout) :: lun    (*)        !< array with unit numbers
       character( *), intent(inout) :: lchar  (*)        !< array with file names of the files
       integer  ( 4), intent(inout) :: filtype(*)        !< type of binary file
       integer  ( 4), intent(inout) :: nrftot (*)        !< number of function items
@@ -260,7 +264,7 @@
      &                    1        , .false.  )
             call report_date_time  ( lunitp(2))
             call rdlgri ( nfilesp  , lunitp   , fnamep   )
-            call rdccol ( nmaxp    , mmaxp    , lunitp(5), fnamep(5), 
+            call rdccol ( nmaxp    , mmaxp    , lunitp(5), fnamep(5),
      &                    lgrid2   , xb       , yb       , lunitp(2))
             call part01 ( lgrid    , lgrid2   , xb       , yb       , dx      ,
      &                    dy       , area     , angle    , nmaxp    , mmaxp   )

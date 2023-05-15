@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_movchr
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE MOVCHR ( CAR    , NSTRT  , NOTOT  )
 !
@@ -44,6 +50,7 @@
 !
 !
       CHARACTER*(*) CAR(*)
+      integer :: NSTRT , NOTOT , I
 !
       DO 10 I=NOTOT,NSTRT,-1
          CAR(I+1) = CAR(I)
@@ -51,3 +58,4 @@
 !
       RETURN
       END
+      end module m_movchr

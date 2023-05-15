@@ -26,6 +26,7 @@
 
       ! function : sets the top of the column for every segment
 
+      use m_dhkmrk
       use timers
       implicit none
 

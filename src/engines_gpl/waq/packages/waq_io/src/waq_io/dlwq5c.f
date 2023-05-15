@@ -99,6 +99,7 @@
 !     IF (SCALE) First NODIM entries the scale factors
 !     Then the matrix of values to be read in eg in this routine
 !
+      use m_zoek
       use timers       !   performance timers
       use m_sysi          ! Timer characteristics
 
