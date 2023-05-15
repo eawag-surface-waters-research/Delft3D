@@ -30,6 +30,9 @@
 module m_debug
    !
    ! Module with arrays to write debug quantities to nc map files
+   ! Enable use by setting enableDebugArrays to 1 in the mdu [output] block.
+   ! Code has to be uncommented and adapted to your needs in flow_modelinit 
+   ! and unc_write_map_filepointer_ugrid.
    !
    public
       integer                                         :: jawritedebug

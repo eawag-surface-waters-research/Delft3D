@@ -419,9 +419,9 @@
  call timstop(handle_extra(31)) ! end set fcru mor
 
 ! Initialise debug array
- if (jawritedebug) then
-   call init_debugarr(lnx,stmpar%lsedtot)
- endif
+ !if (jawritedebug) then
+ !  call init_debugarr(lnx,stmpar%lsedtot)
+ !endif
 
  call flow_initimestep(1, iresult)                   ! 1 also sets zws0
 
