@@ -26,8 +26,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! 
-! 
+!
+!
 
    subroutine mba_init()
 
@@ -320,13 +320,13 @@
 
    datembastart = ""
    if (mjd2date(refdate_mjd + timembastart/86400.0, iyear, imonth, iday, ihour, imin, sec) /= 0) then
-      write(datembastart, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, int(sec)      
+      write(datembastart, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, int(sec)
    endif
    datembaend = ""
    if (mjd2date(refdate_mjd + timembaend/86400.0, iyear, imonth, iday, ihour, imin, sec) /= 0) then
       write(datembaend, '(i4,"-",i2.2,"-",i2.2," ",i2.2,":",i2.2,":",i2.2)') iyear, imonth, iday, ihour, imin, int(sec)
    endif
-   
+
 !  New total volumes and masses
    call mba_sum(nombs, nomba, mbadefdomain, mbavolumeend, mbamassend)
 
@@ -675,7 +675,7 @@
    subroutine mba_write_bal_header(lunbal, numconst, const_names, iconst2sys, nosys, notot, isys2wqbot, syname_sub, nomba, mbaname, nflux, &
                                    totfluxsys, stochi, fluxname, fluxprocname, nfluxsys, ipfluxsys, fluxsys)
 
-   use dflowfm_version_module, only: version_full
+   use dflowfm_version_module, only: getfullversionstring_dflowfm
    use dflowfm_version_module, only: getbranch_dflowfm
 
    implicit none
@@ -707,6 +707,7 @@
 
    character(255)              :: tex
    character(20)               :: rundat
+   character(160)              :: version_id
    integer                     :: imba
    integer                     :: iconst
    integer                     :: isys
@@ -714,8 +715,10 @@
    integer                     :: jflux
    integer                     :: ifluxsys
 
+   call getfullversionstring_dflowfm(version_id)
+
    write (lunbal, '("=============================================================")')
-   write(lunbal,'(A)') trim(version_full)
+   write(lunbal,'(A)') trim(version_id)
    call getbranch_dflowfm(tex)
    write(lunbal,'(A)') 'Source: '//trim(tex)
    call datum(rundat)
