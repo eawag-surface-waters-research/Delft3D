@@ -48,7 +48,7 @@ module static_version_info
     ! literal string. Since we want that string to be present in the executable or DLL, we need to use
     ! this trick instead. It fools the compiler into retaining the full string, so that a tool like
     ! "strings" on Linux can extract it.
-    integer, protected, save :: offset = 5
+    integer, protected, save :: offset = 6
 
 end module static_version_info
 

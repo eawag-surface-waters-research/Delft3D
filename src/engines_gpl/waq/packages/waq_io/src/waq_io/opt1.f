@@ -46,15 +46,21 @@
 
 !     LOGICAL UNITS      : LUN(33) = working unit for opening binary files
 
+      use m_zoek
+      use m_fffind
+      use m_dhopnf
       use timers       !   performance timers
       use rd_token
+      use m_cnvtim
+      use m_dhfext
+
       implicit none
 
 !     Parameters    :
 !     type     kind  function         name             description
 
       integer   (4) , intent(in   ) :: iopt1          !< Input option
-      integer   (4) , intent(in   ) :: lun  (*)       !< DELWAQ Unit number array
+      integer   (4) , intent(inout) :: lun  (*)       !< DELWAQ Unit number array
       integer   (4) , intent(in   ) :: is             !< entry in LUN for item
       character*(*) , intent(inout) :: lchar(*)       !< IN/OUT  Filenames
       logical       , intent(in   ) :: dtflg1         !< 'date'-format 1st time scale

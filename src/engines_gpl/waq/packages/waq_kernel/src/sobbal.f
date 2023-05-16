@@ -91,6 +91,11 @@
 !     WSTDMP  REAL     NOTOT,NOWST,2  I   accumulated wasteloads 1/2 in and out
 !     ==================================================================
 !
+      use m_srstop
+      use m_monsys
+      use m_gkwini
+      use m_getcom
+      use m_dhopnf
       use timers
       INTEGER       NOTOT , ITIME , NOSYS ,
      j              NOFLUX, NDMPAR, NDMPQ , NTDMPQ,
@@ -1117,6 +1122,9 @@
 
       subroutine comsum (nosum , tfacto, notot , syname, sfacto, nocons, coname, cons  )
 
+      use m_zoek
+      use m_srstop
+      use m_monsys
       use timers
       use bloom_data_mass_balance
 

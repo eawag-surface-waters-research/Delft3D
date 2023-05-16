@@ -141,7 +141,6 @@
 !     iofset  integer     1                             offset to real timings
 !     ipnt    integer  mnmax                            help pointer
 !     ipoil   integer     1                             oil-indicator mass/m^2 or mass/m^3
-!     ipc     integer     1                             option for predictor corrector
 !     ipset   integer  ipmax                            times for a plot file
 !     iptime  integer  npmax                            particle age
 !     iptmax  integer     1                             nr of plot grids
@@ -162,7 +161,6 @@
 !     kpart   integer  npmax                            3th grid index particles
 !     kwaste  integer     1                             k-values waste loads in model
 !     layt    integer     1                             number of layers hydr.database
-!     lcorr   logical     1                             switch pred. corrector scheme
 !     ldiffh  logical     1                             exchange horizont diffusion on/off
 !     ldiffz  logical     1                             exchange vertical diffusion on/off
 !     lgrid   integer  nmax *mmax                        active grid
@@ -301,6 +299,7 @@
       !
       !  module declarations
       !
+      use m_monsys
       use precision_part                  ! single/double precision
       use timers
       use fileinfo  , lun=> lunit    ! logical unit numbers for files
@@ -862,8 +861,8 @@
                        wvelo    , wdir     , decays   , wpart    , pblay    ,    &
                        npwndw   , vdiff    , nosubs   , dfact    , modtyp   ,    &
                        t0buoy   , abuoy    , kpart    , mmaxp    , layt     ,    &
-                       wsettl   , depth    , ldiffz   , ldiffh   , lcorr    ,    &
-                       acomp    , ipc      , accrjv   , xb       , yb       ,    &
+                       wsettl   , depth    , ldiffz   , ldiffh   , &
+                       acomp    , accrjv   , xb       , yb       ,    &
                        tcktot   , lun(2)   , alpha    , mapsub   , nfract   ,    &
                        taucs    , tauce    , chezy    , rhow     , lsettl   ,    &
                        mstick   , nstick   , ioptdv   , cdisp    , dminim   ,    &

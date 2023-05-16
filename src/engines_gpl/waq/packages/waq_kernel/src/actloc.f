@@ -69,7 +69,10 @@
 !
 !     Declaration of arguments
 !
+      use m_dhgvar
+      use m_dhgpoi
       use timers
+      use m_dhdagg
 
       INTEGER    NRVAR , NOCONS, NOPA  , NOFUN , NOSFUN,
      +           NOTOT , NOSEG , NOLOC , NOGRID, NOVAR

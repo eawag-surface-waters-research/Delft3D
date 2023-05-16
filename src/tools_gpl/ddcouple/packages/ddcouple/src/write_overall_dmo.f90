@@ -28,6 +28,8 @@
       ! global declarations
 
       use hydmod                   ! module contains everything for the hydrodynamic description
+      use m_dhfext
+
       implicit none
 
       type(t_hyd)          :: hyd              ! description of the overall hydrodynamics

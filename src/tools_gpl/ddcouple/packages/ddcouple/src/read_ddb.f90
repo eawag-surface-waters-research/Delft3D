@@ -27,7 +27,12 @@
 
       ! global declarations
 
+      use m_monsys
       use hydmod
+      use m_dherrs
+      use m_dhfext
+
+
       implicit none
 
       ! declaration of the arguments

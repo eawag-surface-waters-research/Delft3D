@@ -22,6 +22,9 @@
 !!  rights reserved.
 
       module dhmmra_mod
+      use m_srstop
+      use m_getcom
+
       contains
       subroutine dhmmra ( lunrep, l_decl, arrpoi, arrtyp, arrbyt,
      &                    arrlen, arrknd, arrdm1, arrdm2, arrdm3,

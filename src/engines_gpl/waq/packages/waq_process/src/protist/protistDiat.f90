@@ -30,6 +30,7 @@ subroutine PRODIA     ( pmsa   , fl     , ipoint , increm, noseg , &
 !
 !*******************************************************************************
 !
+use m_dhkmrk
 use protist_math_functions
 use protist_cell_functions
 use protist_uptake_functions

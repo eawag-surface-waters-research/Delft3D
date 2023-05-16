@@ -29,6 +29,7 @@
 !
 !     Read the BLOOM-species database.
 !
+      use m_srstop
       use timers       !   performance timers
 
       implicit none

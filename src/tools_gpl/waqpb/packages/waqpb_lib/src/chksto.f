@@ -29,6 +29,8 @@
 
       subroutine chksto ( flux  , subs  , stoch , nstoc ,
      j                    itemid, nitem, io_mes )
+      use m_zoek
+
 
       integer      nstoc , nitem, io_mes
       character*10 flux(nstoc),subs(nstoc),itemid(nitem)

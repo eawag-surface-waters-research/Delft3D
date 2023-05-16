@@ -34,6 +34,8 @@
 
       ! global declarations
 
+      use m_srstop
+      use m_monsys
       use delwaq_loads
       use delwaq_user_wasteloads
       use timers

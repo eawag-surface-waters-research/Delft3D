@@ -23,6 +23,7 @@
 
       MODULE WORKSPACE
 
+      use m_srstop
       USE PARTITION_ARRAYS
       USE DHMMAR_MOD
       USE DHMMCA_MOD

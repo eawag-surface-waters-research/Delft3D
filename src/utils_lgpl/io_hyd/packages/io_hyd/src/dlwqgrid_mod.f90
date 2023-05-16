@@ -28,6 +28,8 @@
 !  
 
       module dlwqgrid_mod
+      use m_srstop
+
 !
 !          module contains everything for specification of multiple grids
 !          created 17 October 2002 by Leo Postma

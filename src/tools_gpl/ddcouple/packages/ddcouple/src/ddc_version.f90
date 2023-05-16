@@ -24,7 +24,8 @@
 subroutine ddc_version(lunrep)
 
     use delwaq_version_module
-       
+    use m_dattim
+
     ! print version to report file
 
     integer, intent(in)      :: lunrep        ! unit number report file

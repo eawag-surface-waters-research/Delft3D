@@ -1,6 +1,10 @@
       subroutine ESPACE     ( pmsa   , fl     , ipoint , increm, noseg , &
                               noflux , iexpnt , iknmrk , noq1  , noq2  , &
                               noq3   , noq4   )
+      use m_gkwini
+      use m_errsys
+      use m_dhkmrk
+
 !!!!!!!DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'ESPACE' :: ESPACE
 !
 !*******************************************************************************

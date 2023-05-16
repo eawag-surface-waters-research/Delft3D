@@ -47,6 +47,8 @@
 
 !     Logical units     : -
 
+      use m_rdwrk4
+      use m_dhopnf
       use rd_token     !   for the reading of tokens
       use Output
       use timers       !   performance timers
@@ -58,7 +60,7 @@
 
 !     kind           function         name                Description
 
-      integer  ( 4), intent(in   ) :: lun   (*)         !< array with unit numbers
+      integer  ( 4), intent(inout) :: lun   (*)         !< array with unit numbers
       character( *), intent(inout) :: lchar (*)         !< array with file names of the files
       integer  ( 4), intent(inout) :: filtype(*)        !< type of binary file
       integer  ( 4), intent(in   ) :: icmax             !< size of the character workspace
@@ -220,7 +222,7 @@
      &                   novelo  , diname  , vename  , iar     , iar     ,
      &                   ndmpar  , ntdmpq  , ntdmps  , noqtt   , noraai  ,
      &                   ntraaq  , nobtyp  , nowtyp  , nogrid  , iar     ,
-     &                   iar     , iar     , notot   )
+     &                   iar     , iar   )
             close ( lun(2) )
 
 !           Get output pointers

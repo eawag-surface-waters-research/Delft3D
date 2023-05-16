@@ -22,6 +22,8 @@
 !!  rights reserved.
 
 module partition_arrays
+use m_srstop
+
 
 !     Deltares Software Centre
 

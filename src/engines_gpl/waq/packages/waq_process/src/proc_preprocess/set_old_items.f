@@ -36,6 +36,8 @@
 !>/File
 !>      rename items according the old_items table
 
+      use m_zoek
+      use m_srstop
       use timers         !< performance timers
       use dlwq_data      !< data definitions
       use processet      !< use processet definitions

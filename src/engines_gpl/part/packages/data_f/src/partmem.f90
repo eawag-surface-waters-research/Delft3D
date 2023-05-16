@@ -67,8 +67,6 @@ module partmem
       integer  ( ip)           :: nolayp        ! number of layers   <== pas op
       integer  ( ip)           :: noslay        ! number of layers inclusive of optional bed layer
       integer  ( ip)           :: idelt         ! simulation time step inputfile
-      integer  ( ip)           :: ipc           ! choice numerical scheme
-      logical  ( ip)           :: lcorr         ! switch for predcorrector scheme
       integer  ( ip)           :: ioptdv        ! vertical diffusion option
       real     ( rp)           :: alpha         ! scale factor for vertical diffusivity
       real     ( rp)           :: cdisp         ! vertical diffusivity constant

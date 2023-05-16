@@ -44,6 +44,7 @@
 
 
 
+      use m_srstop
       use timers                         ! WAQ performance timers
       implicit none
 

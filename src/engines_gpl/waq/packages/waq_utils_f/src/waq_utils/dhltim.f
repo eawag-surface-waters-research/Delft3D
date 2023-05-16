@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dhltim
+
+      implicit none
+
+      contains
+
 
       logical function dhltim(itime,idtact)
 !
@@ -47,3 +53,4 @@
 
       return
       end
+      end module m_dhltim

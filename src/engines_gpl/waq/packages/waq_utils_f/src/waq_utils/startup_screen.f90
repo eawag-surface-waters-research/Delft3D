@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module m_startup_screen
+
+implicit none
+
+contains
+
 
       subroutine startup_screen(lunrep)
 
@@ -28,7 +34,10 @@
 
       ! Declaration of arguments
 
+      use m_getidentification
       use timers
+      use m_dattim
+
       implicit none
 
       integer      , intent(in   ) :: lunrep   !< Unit number report file
@@ -77,3 +86,4 @@
       if ( timon ) call timstop( ithndl )
 
       end subroutine startup_screen
+end module m_startup_screen

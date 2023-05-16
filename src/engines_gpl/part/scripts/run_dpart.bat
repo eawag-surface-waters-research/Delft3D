@@ -51,7 +51,7 @@ set partdir=%D3D_HOME%\%ARCH%\dpart\bin
     rem Run
 set PATH=%partdir%;%sharedir%;%~dp0
 echo executing in this window: "%partdir%\delpar.exe" "%argfile%"
-"%partdir%\delpar.exe" "%argfile%" 1>screen.out 2>&1
+"%partdir%\delpar.exe" "%argfile%"
 
 goto end
 

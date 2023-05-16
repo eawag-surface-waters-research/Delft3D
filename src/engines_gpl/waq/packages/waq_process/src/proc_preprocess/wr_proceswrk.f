@@ -44,6 +44,7 @@
 
 !     Created   : Aug   2012 by Jan van Beek
 
+      use m_dhopnf
       use timers         !< performance timers
       use processet      !< use processet definitions
       use output         !< use output definitions
@@ -81,7 +82,7 @@
       character(len=20)   , intent(in   ) :: sfname(*)              !< segm.func. names
       character(len=20)   , intent(in   ) :: syname(*)              !< substance names
       integer             , intent(in   ) :: intopt                 !< integration sub options
-      integer             , intent(in   ) :: lun(*)                 !< unit numbers
+      integer             , intent(inout) :: lun(*)                 !< unit numbers
       character(len=*)    , intent(in   ) :: lchar(*)               !< filenames
       integer             , intent(in   ) :: noutp                  !< total number of output files
       integer             , intent(in   ) :: ioutps(7,*)            !< (old) output structure

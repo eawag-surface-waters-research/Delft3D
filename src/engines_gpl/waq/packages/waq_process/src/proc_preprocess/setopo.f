@@ -26,6 +26,8 @@
 
       ! set output pointers
 
+      use m_zoek
+      use m_monsys
       use timers         !< performance timers
       use processet
       use output

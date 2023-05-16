@@ -23,6 +23,7 @@
 
       subroutine wq_processes_pmsa_size ( lunrep, noseg, noq, isizea)
 
+      use m_srstop
       use partition_arrays
       use processes_input
       use processes_pointers

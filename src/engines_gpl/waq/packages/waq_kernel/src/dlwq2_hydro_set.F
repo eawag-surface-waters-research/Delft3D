@@ -22,6 +22,8 @@
 !!  rights reserved.
 
       module HydroSet
+      use m_srstop
+
 !
 !          module contains everything for composition of hydrodynamics from multiple files
 !          created 19 July 2002 by Leo Postma

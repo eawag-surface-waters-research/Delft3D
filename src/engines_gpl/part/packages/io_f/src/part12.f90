@@ -23,6 +23,7 @@
 
 module part12_mod
 
+use m_filldm
 use openfl_mod
 
 contains

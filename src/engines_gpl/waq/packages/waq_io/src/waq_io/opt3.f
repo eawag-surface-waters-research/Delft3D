@@ -83,6 +83,7 @@
 !                          lun( 4) = unit binary intermediate file for pointers
 !                          lun(is) = unit binary intermediate file for function
 
+      use m_dhopnf
       use timers       !   performance timers
       use rd_token
       use m_sysn          ! System characteristics
@@ -94,7 +95,7 @@
 
 !     kind           function         name                Descriptipon
 
-      integer  ( 4), intent(in   ) :: lun   (*)         !< array with unit numbers
+      integer  ( 4), intent(inout) :: lun   (*)         !< array with unit numbers
       character( *), intent(in   ) :: lchar (*)         !< array with file names of the files
       integer  ( 4), intent(in   ) :: is                !< entry in lun for this call
       integer  ( 4), intent(in   ) :: nitem             !< number of required items

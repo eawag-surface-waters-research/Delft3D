@@ -28,6 +28,8 @@
 !  
 
       subroutine wrisub ( lu )
+      use m_zoek
+
 
       include 'data.inc'
       integer     i, lu, iitem

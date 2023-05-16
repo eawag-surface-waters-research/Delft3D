@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dhnoseg
+
+      implicit none
+
+      contains
+
 
       subroutine dhnoseg( pnoseg )
 !
@@ -72,7 +78,7 @@
 !     declarations
       use m_sysn          ! System characteristics
 !
-      integer       pnoseg
+      integer       pnoseg, kmx, nosegfm
 
 
       noseg = nosegfm
@@ -80,3 +86,4 @@
 
       return
       end
+      end module m_dhnoseg

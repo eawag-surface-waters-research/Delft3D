@@ -27,10 +27,12 @@
 !
 !-------------------------------------------------------------------------------
 
-! 
-! 
+!
+!
 
 module m_fm_wq_processes
+   use m_rd_sub
+   use m_dhnoseg
    use precision
    use processes_input
    use processes_pointers

@@ -62,6 +62,7 @@
 !     DANAM   CHAR*20  NDMPAR     INPUT   names of dump area's
 !
 !
+      use m_reptim
       use timers
 
       INTEGER      IOUT  , ITIME , NOTOT , ISFLAG, IBFLAG,

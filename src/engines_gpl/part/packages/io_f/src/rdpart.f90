@@ -95,6 +95,7 @@
       real     ( sp), pointer     :: ypoltmp(:)      ! temp y-coordinates polygon
       integer  ( ip)                 nrowstmp        ! temp length polygon
       integer  ( ip)                 npmargin        ! allocation margin in number of particles
+      integer  ( ip)              :: ipc             ! numerical integration scheme
 
       character( 20)                 cplastic        ! plastic name
       real     ( sp)                 rdpldensity     ! read plastic density
@@ -234,12 +235,10 @@
          write ( *   , 2022 )
          call stop_exit(1)
       endif
-      if ( ipc .le. 1 ) then
-         lcorr = .false.
-         write ( lun2, * ) ' Predictor corrector scheme is not used '
-      else
-         lcorr = .true.
-         write ( lun2, * ) ' Predictor corrector scheme is used '
+      if ( ipc /= 1 ) then
+         write ( lun2, '(/A,I3)')  'Error: Numerical scheme must be 1. &
+                        Current value given is: ', ipc
+         call stop_exit(1)
       endif
 
 !    read vertical diffusivity parameters
@@ -2171,7 +2170,7 @@
 !     error formats
 !
  2015 format('  Error 1001. Model-type-choice', i5, '; out of range!'  )
- 2022 format('  Error 1101. Time step is not a diviior of time step ',  &
+ 2022 format('  Error 1101. Time step is not a divider of time step ',  &
              '  in hydrodynamic database: interpol. errors will occur' )
  2023 format('  Error 1100. Time step should be less equal than step',  &
               ' in hydrodynamic database '                          )

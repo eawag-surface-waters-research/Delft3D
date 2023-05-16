@@ -22,6 +22,8 @@
 !!  rights reserved.
 
             module dhmmja_mod
+            use m_srstop
+
       contains
       subroutine dhmmja ( lunrep, l_decl, arrpoi, arrtyp, arrbyt,
      &                    arrlen, arrknd, arrdm1, arrdm2, arrdm3,

@@ -71,6 +71,7 @@
      J                     IOUTP , NNOTRA,
      J                     NALTOX, NTOX  , ICTOX , ALITOX)
 
+      use m_zoek
       use m_charon
 
       INTEGER         NAIJ2 , MMAX  , I     , J     , INDEX , NTOX  ,
