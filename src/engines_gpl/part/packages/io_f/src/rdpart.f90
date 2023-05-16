@@ -1944,7 +1944,6 @@
             call alloc ( cwork, pg(i)%imask ,                    pg(i)%nmap, pg(i)%mmap )
          enddo
       endif
-!      if ( idummy .gt. 0 ) call alloc ( "subsud", subsud, idummy*2 )
       call alloc ( "dfact ", dfact , nosubs       )
       call alloc ( "fstick", fstick, nosubs       )
       call alloc ( "isfile", isfile, nosub_max    )
@@ -1967,7 +1966,6 @@
       call alloc ( "imap  ", imap  , npmax       , 3      )
       call alloc ( "kpart ", kpart , npmax        )
       call alloc ( "mpart0", mpart0, npmax        )
-!      call alloc ( "vrtdsp", vrtdsp, 7           , npmax  )  ! only used for debugging
       call alloc ( "npart0", npart0, npmax        )
       call alloc ( "npart ", npart , npmax        )
       call alloc ( "rbuff ", rbuff , 3           , npmax  )
@@ -2750,24 +2748,4 @@ subroutine getdim_asc ( lun , asc_file , npart_ini, nrowsmax , &
       return
       end function more_data
 
-      subroutine open_inifile ( lun, finam)
-      use precision_part       ! flexible size definition
-      implicit none
-
-      character(len=256) :: finam
-!
-!     local scalars
-!
-      integer(ip) :: lun
-!
-      open ( newunit = lun, file = finam, access='stream', form='unformatted', status = 'old', &
-              err = 99)
-!
-      return
-!
- 99   write(*,'(//a,a40)') ' Error on opening file: ',finam
-      write(*,'(  a    )') ' Please check if file exists'
-      write(*,'(  a    )') ' Please check correct file type'
-      call stop_exit(1)
-!
-      end subroutine
+      

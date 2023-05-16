@@ -310,35 +310,13 @@ module part14fm_mod
                abuoy (i) = 0.0
             endif
 
-!           if (radiuh.ne.-999.0) then
-!              spread the particles over a circle
-!              call findcircle ( xpart(i), ypart(i), radiuh  , npart(i), mpart(i),  &
-!                                lgrid   , dx      , dy      , lcircl  )
-!           else
-!              spread the particles over a polygon
-!              call findpoly   (nmax, mmax, lgrid, lgrid2, xp, yp, nrowswaste(ie), &
-!                               xpolwaste(1:nrowswaste(ie), ie), ypolwaste(1:nrowswaste(ie), ie), &
-!                               xpart(i), ypart(i), npart(i), mpart(i))
-!           end if
 
 !     horizontal distribution (spreaded in a circle if required - this is at present copied for part09fm
 
          nulay = 1
-!         ipart = 0
-!         do i = 1, ndprt(id)
-!            npart(i)   = 1
-!            laypart(nopart+i) = 1 !2D for the moment!
-!            xpart(i)   = xwasth
-!            ypart(nopart+i)   = ywasth
-!            mpart(nopart+i)   = mwasth
-!            radiuh            = 0.0
 
             if (radiuh.ne.-999.0) then
 !              spread the particles over a circle
-!               radiusr = radiuh * sqrt(rnd(rseed))
-!               dpangle    = 2.0D0 * pi * rnd(rseed)
-!               xpart(nopart+i) = xwasth + radiuh * sin(angle)
-!               ypart(nopart+i) = ywasth + radiuh * cos(angle)
 ! this is the code to deal with sferical models (if needed) te get the distances correct
                dpangle =2.0D0 * pi * rnd(rseed)
                dradius = rnd(rseed) * radiuh !noteradius is in m. need to convert to degrees.
@@ -357,17 +335,10 @@ module part14fm_mod
                  yy = yy + dyp
                  call sphertocart3D(xx,yy,xpart(i),ypart(i),zpart(i))
                endif
-            !   zpart(nopart+i) = zwaste(iload)
 
             else
                radiuh = 0
-!              spread the particles over a polygon
-!               !call findpoly   (nmax, mmax, lgrid, lgrid2, xp, yp, nrowswaste(id), &
-!               !                 xpolwaste(1:nrowswaste(id), id), ypolwaste(1:nrowswaste(id), id), &
-!               !                 xpart(i), ypart(i), npart(i), mpart(i))
             end if
-!
-!         enddo
 
 
 !         give the particles a layer number

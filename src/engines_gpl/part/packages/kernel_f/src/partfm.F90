@@ -127,13 +127,10 @@
    call realloc(xrpart, npmax)
    call realloc(yrpart, npmax)
    call realloc(zrpart, npmax)
-   !call realloc(krpart, npmax)
-   !call realloc(hrpart, npmax)
-
+    
    call realloc_particles(npmax, .true., ierror)
    irpart = 1
    ptref = 0.0D0
-   !call part_findcell(Nrpart,xrpart,yrpart,mrpart,ierror)
 
    if ( notrak > 0 ) call unc_init_trk()
    call unc_init_map(hyd%crs, hyd%waqgeom, hyd%nosegl, hyd%nolay)

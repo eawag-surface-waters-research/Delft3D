@@ -562,9 +562,6 @@ contains
          enddo
       enddo
 !
-!     reinitialize sliding particle window start point if necessary
-!     (otherwise: return to calling program); this sliding pointer is
-!     set in part16
 !
       if ( npwndn .gt. 0 ) then
 !       reinitialize removed particles; this isn't needed but is't

@@ -66,7 +66,6 @@ subroutine update_part(itime)
 
    if ( Lsurface ) then
       do LL=1,Lnx
-         !         call getLbotLtop(LL,Lb,Lt)
          qfreesurf(LL) = huni ! u1(Lt)*huni*wu(LL) -> q from top layer!
       end do
    end if
@@ -133,21 +132,13 @@ subroutine update_part(itime)
             qpart = 0d0
          end if
 
-         !        sum fluxes of this computational time step
-         !         if ( .not.Lsurface ) then
-         !            call part_sumfluxes(q1,Dts)
-         !         else
-         !            call part_sumfluxes(qfreesurf,Dts)
-         !         end if
 
          if ( time1.ge.timenext ) then
             !           finish particle timestep
             qpart = qpart/(time1-timelast)
             if ( .not.Lsurface ) then
                call update_particles(q0, hbegin, h1, time1-timelast)
-               !               call update_particles(qpart, hbegin, h1, time1-timelast)
             else
-!               call update_particles(qfreesurf, bl+huni, bl+huni, time1-timelast)
                call update_particles(q0, bl+huni, bl+huni, time1-timelast)
 
             end if
@@ -167,13 +158,3 @@ subroutine update_part(itime)
 end subroutine update_part
 
 
-subroutine finalize_part()
-   use m_particles
-   implicit none
-
-   call dealloc_partmesh()
-   call dealloc_partfluxes()
-   call dealloc_partrecons()
-   call dealloc_particles()
-   call dealloc_auxfluxes()
-end subroutine finalize_part

@@ -802,21 +802,6 @@ contains
          icounz = 0
          znew   = zp + dvzt
          do while ( znew .gt. 1.0 .or. znew .lt. 0.0 )
-!           icounz = icounz + 1
-!           if ( icounz .gt. 90 ) then
-!              write(*,*) ' Error: particle now',icounz,' times back '
-!              write(*,*) ' Vertical displacements too large ?? '
-!              write(*,*) ' Particle no.= ',ipart
-!              write(lun2,*) ' Error: particle now',icounz,' times back'
-!              write(lun2,*) '    Particle number  = ',ipart
-!              write(lun2,*) '    Last     layer   = ',kp
-!              write(lun2,*) '    Last     z-value = ',dvzt
-!              write(lun2,*) '    Last     dvz     = ',dvz
-!              write(lun2,*) '    Last     dvzs    = ',dvzs
-!              write(lun2,*) '    Last     z-value = ',dvzt
-!              write(lun2,*) '    Last     depth   = ',depthl
-!              if(icounz > 100) call stop_exit(1)
-!           endif
 
 !**      boundary conditions, check here also settling and erosion
 !**      of particles with critical velocities at the bed
