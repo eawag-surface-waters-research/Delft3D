@@ -527,7 +527,6 @@ namespace Deltares.UGrid.Api
             var includeArrays = true;
             
             DoIoNetCfdCall(() => IoNetCfdImports.ionc_get_meshgeom_dll(ref dataSetId, ref meshId, ref networkId, ref mesh2d, ref startIndex, ref includeArrays));
-            disposable2DMeshGeometry.NodesX = mesh2d.nodex.CreateValueArray<double>(mesh2dDimensions.numnode);
             Array.Copy(mesh2d.nodex.CreateValueArray<double>(mesh2dDimensions.numnode), disposable2DMeshGeometry.NodesX, disposable2DMeshGeometry.NodesX.Length);
             Array.Copy(mesh2d.nodey.CreateValueArray<double>(mesh2dDimensions.numnode), disposable2DMeshGeometry.NodesY, disposable2DMeshGeometry.NodesY.Length);
 
