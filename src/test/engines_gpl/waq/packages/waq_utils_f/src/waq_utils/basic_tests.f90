@@ -23,6 +23,7 @@
 
 module basic_tests
     use ftnunit
+    use m_zoek
 
     implicit none
 
