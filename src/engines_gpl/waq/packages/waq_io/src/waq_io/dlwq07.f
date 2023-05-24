@@ -32,6 +32,9 @@
 
 !     Global declarations
 
+      use m_zoek
+      use m_srstop
+      use m_dhopnf
       use grids          ! for the storage of contraction grids
       use dlwq_data      ! for definition and storage of data
       use rd_token       ! tokenized reading
@@ -48,7 +51,7 @@
 
 !     kind                    function         name           Descriptipon
 
-      integer               , intent(in   ) :: lun(*)       !< unit numbers used
+      integer               , intent(inout) :: lun(*)       !< unit numbers used
       character(len=*)      , intent(in   ) :: lchar(*)     !< filenames
       integer  ( 4)         , intent(inout) :: filtype(*)   !< type of binary file
       type(inputfilestack)  , intent(inout) :: inpfil       !< input file structure with include stack and flags

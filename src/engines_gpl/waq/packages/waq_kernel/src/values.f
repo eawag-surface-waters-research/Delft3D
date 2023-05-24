@@ -25,6 +25,7 @@
      *                    NOFUN  , NOSFUN , CONST  , CONAME , PARAM  ,
      *                    PANAME , FUNCS  , FUNAME , SFUNCS , SFNAME ,
      *                    LGET   , IERR   )
+      use m_zoek
       use timers
 
 !

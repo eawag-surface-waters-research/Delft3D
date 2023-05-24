@@ -28,6 +28,7 @@
 !                         *startup_screen, writes startup screen
 
 subroutine delwaq1_startup_screen()
+    use m_startup_screen
     use m_delwaq1_data
       
     implicit none

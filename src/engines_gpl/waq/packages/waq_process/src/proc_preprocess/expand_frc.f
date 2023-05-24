@@ -25,6 +25,7 @@
 
       ! expand processes per fractions
 
+      use m_zoek
       use processet
       use timers       !   performance timers
 

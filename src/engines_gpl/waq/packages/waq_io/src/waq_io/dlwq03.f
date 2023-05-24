@@ -61,6 +61,9 @@
 !                           LUN( 6) = unit intermediate file (grid)
 !                           LUN( 7) = unit intermediate file (volumes)
 
+      use m_srstop
+      use m_dhopnf
+      use m_dhkmrk
       use grids        !   for the storage of contraction grids
       use rd_token     !   for the reading of tokens
       use partmem      !   for PARTicle tracking
@@ -76,7 +79,7 @@
 
 !     kind           function         name                Descriptipon
 
-      integer  ( 4), intent(in   ) :: lun    (*)        !< array with unit numbers
+      integer  ( 4), intent(inout) :: lun    (*)        !< array with unit numbers
       character( *), intent(inout) :: lchar  (*)        !< array with file names of the files
       integer  ( 4), intent(inout) :: filtype(*)        !< type of binary file
       integer  ( 4), intent(inout) :: nrftot (*)        !< number of function items

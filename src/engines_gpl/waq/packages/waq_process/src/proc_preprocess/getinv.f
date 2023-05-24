@@ -31,6 +31,9 @@
       ! if nessacary turns on secondary processes
       ! fills defaults in defaul array
 
+      use m_zoek
+      use m_monsys
+      use m_dhrmis
       use timers       !   performance timers
       use dlwq_data
       use processet
@@ -90,7 +93,6 @@
       character(len=100)        :: line1           ! output buffer
       character(len=100)        :: line2           ! output buffer
       integer, parameter        :: nopred = 6      ! number of predefined defaults
-      logical                   :: dhrmis          ! external function chcks on missing value
       real, parameter           :: rmis0  = -888.  ! missing but no matter (set to 0.0)
       integer                   :: i_star          ! index of * in name
       integer(4)                :: ithndl = 0      ! handle for performance timer

@@ -29,14 +29,15 @@
 
 subroutine delwaq1_init(argc, argv)
     use m_delwaq1_data
-      
+    use m_dhgarg
+
     implicit none
-      
+
     integer, intent(in)                           :: argc
     character(len=*), dimension(argc), intent(in) :: argv
 
     !     Special system init
-      
+
     call timini ( )                          ! initializes timer
 
     call dhstore_command( argv )
@@ -86,6 +87,6 @@ subroutine delwaq1_init(argc, argv)
     GridPs%maxsize=0
 
     call uniset ( lun    , lchar , nolun , runid )
-      
-      
+
+
 end subroutine delwaq1_init

@@ -77,10 +77,9 @@ implicit none
    !! In case of C/C++ calling side, construct an MPI communicator, and call
    !! MPI_Fint MPI_Comm_c2f(MPI_Comm comm) to convert the C comm handle
    !! to a FORTRAN comm handle.
-   integer, target :: DFM_COMM_DFMWORLD  = NAMECLASH_MPI_COMM_WORLD !< [-] The MPI communicator for dflowfm (FORTRAN handle). {"rank": 0}
+   integer, target :: DFM_COMM_DFMWORLD = NAMECLASH_MPI_COMM_WORLD !< [-] The MPI communicator for dflowfm (FORTRAN handle). {"rank": 0}
    integer         :: DFM_COMM_ALLWORLD                             !< [-] The MPI communicator for dflowfm including the fetch proc (FORTRAN handle). {"rank": 0}#endif
 #endif
-
    type tghost
       integer, allocatable       :: list(:)            !< list of ghost nodes or links, in order of their corresponding other domain, dim(1:number of ghost nodes/links)
       integer, allocatable       :: N(:)               !< cumulative number of ghost nodes/links per domain in the list, starts with fictitious domain 0, dim(0:numdomains)
@@ -93,7 +92,7 @@ implicit none
    integer                       :: ndomains = 0       !< number of domains
    integer                       :: numranks = 1       !< number of ranks
    integer                       :: my_rank            !< own rank
-
+   
    integer                       :: use_fetch_proc = 0   !< if 1, then a separate proc is dedicated to calculate fetch parlength and depth
    integer                       :: fetch_proc_rank = -1 !< the rank of the fetch proc. it is the last proc of the entire proc group when it is active 
    
@@ -1652,7 +1651,7 @@ implicit none
        send_list, nr_send_list, ierror)
       
       use m_alloc
-      use network_data,    only: numk, xzw, yzw, xk, yk
+      use network_data,    only: numk,xzw, yzw, xk, yk
       use m_flowgeom,      only: xu, yu
       use geometry_module, only: dbdistance
       use m_missing,       only: dmiss
@@ -1674,9 +1673,9 @@ implicit none
       double precision, pointer           :: x_local(:), y_local(:)       !< pointers on flow nodes/links/corners
       integer                             :: i, ii, j, ghost_level, num, numnew
       integer                             :: numdomains, idum
+      integer                             :: node
       
       integer                             :: jafound
-	  integer                             :: node
       double precision, parameter         :: TOLERANCE=1d-4
       character(len=80)                   :: message2, message3
 
@@ -1735,7 +1734,7 @@ implicit none
                if ( jafound == 0 ) then
                   call qnerror('partition_fill_sendlist: numbering error', message2, message3)
                   goto 1234
-               end if
+               endif
             end if
          endif
       end do

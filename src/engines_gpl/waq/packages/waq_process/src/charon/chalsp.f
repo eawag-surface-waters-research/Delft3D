@@ -47,6 +47,8 @@
 !     ALIAS   C*(*)    2,NALIAS   I       Aliases
 
       SUBROUTINE CHALIA ( NIN , NAME , NC , NALIAS , ALIAS )
+      use m_zoek
+
 !
 !     Declarations
 !
@@ -72,6 +74,8 @@
       RETURN
       END
       SUBROUTINE CHALI2 ( NIN , NAME , NC , NALIAS , ALIAS )
+      use m_zoek
+
 !
 !     Declarations
 !

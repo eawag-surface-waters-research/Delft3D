@@ -20,6 +20,14 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_rdvers
+      use m_srstop
+
+
+      implicit none
+
+      contains
+
 
       subroutine rdvers ( lunin  , lfile  , lunut  , npos   , vrsion ,
      &                    ioutpt )
@@ -111,3 +119,4 @@
      &         /' ********** EXECUTION TERMINATED ********' )
 
       end
+      end module m_rdvers

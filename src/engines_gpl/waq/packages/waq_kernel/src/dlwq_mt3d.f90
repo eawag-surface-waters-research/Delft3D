@@ -32,6 +32,10 @@ subroutine dlwq_mt3d   ( lunrep, itime , idt   , itstop, notot ,&
          !               communicate flux averaged boundary concentrations
          !               read new boundary concentration from mt3d
 
+   use m_zoek
+   use m_srstop
+   use m_gkwini
+   use m_getcom
    use dlwq_mt3d_data
    use timers
 

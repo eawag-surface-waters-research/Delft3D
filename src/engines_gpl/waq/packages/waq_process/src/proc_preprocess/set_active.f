@@ -36,6 +36,9 @@
 
 !     Created   : Aug   2012 by Jan van Beek
 
+      use m_zoek
+      use m_srstop
+      use m_monsys
       use timers         !< performance timers
       use dlwq_data      !< data definitions
       use processet      !< use processet definitions

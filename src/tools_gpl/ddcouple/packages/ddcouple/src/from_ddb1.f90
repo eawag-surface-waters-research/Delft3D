@@ -28,6 +28,8 @@
       ! global declarations
 
       use hydmod
+      use m_dhfext
+
       implicit none
 
       ! declaration of the arguments
@@ -81,7 +83,7 @@
       enddo
 
       ! some prelim initialisation of hyd
-      
+
       call dhfext(hyd%file_hyd%name,filext, extpos, extlen)
       outhydname = 'com-'//trim(hyd%file_hyd%name(1:extpos-1))
       call set_hyd(hyd,outhydname)

@@ -25,6 +25,7 @@
      +                        noflux , iexpnt , iknmrk , noq1  , noq2  ,
      +                        noq3   , noq4   )
 
+      use m_dhkmrk
       use layered_sediment
 
       ! function distribute multiple vegetation fluxes over the vertical

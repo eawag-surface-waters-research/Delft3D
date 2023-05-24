@@ -346,7 +346,7 @@ contains
 
                case default                                                                  !Behaviour Default
                   write(lunrep,*) ' error, larval behaviour type not defined'                ! Write error in horizontal behaviour
-                  call stop_exit(1)                                                          ! Stop IBM calculation
+                  call stop_exit(1)                                                          ! Stop ABM calculation
             end select
 
       return                                                                                 !Return from the subroutine

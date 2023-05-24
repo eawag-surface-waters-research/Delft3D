@@ -85,6 +85,9 @@
 !     Name     Type   Library
 !     ------   -----  ------------
 
+      use m_srstop
+      use m_monsys
+      use m_dhkmrk
       USE PHYSICALCONSTS, ONLY : CtoKelvin
       IMPLICIT NONE
       REAL     PMSA  ( * ) , FL  (*)

@@ -45,6 +45,7 @@
 !
       SUBROUTINE CHSTOC (LUREP,NAIJ2)
       
+      use m_zoek
       use m_charon
 !
 !     Declarations

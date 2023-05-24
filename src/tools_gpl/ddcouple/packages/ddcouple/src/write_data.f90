@@ -26,6 +26,8 @@
                               ardata, funtyp)
 
       use filmod
+      use m_dhctim
+
       implicit none
 !
 !     Deltares

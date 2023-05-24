@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dhctim
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DHCTIM ( ITIME , ITIME2, DTFLG , DTFLG3 )
 !
@@ -46,6 +52,7 @@
 !
       INTEGER   ITIME , ITIME2
       LOGICAL   DTFLG , DTFLG3
+      REAL      IYEAR, IHLP, IDAY, IHOUR, IMIN, ISEC
 !
       IF ( DTFLG ) THEN
          IF ( DTFLG3 ) THEN
@@ -68,3 +75,4 @@
 !
       RETURN
       END
+      end module m_dhctim

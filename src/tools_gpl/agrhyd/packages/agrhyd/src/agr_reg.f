@@ -23,6 +23,8 @@
 
       subroutine agr_reg(input_hyd, output_hyd, m_fact, n_fact, m_offset, n_offset, ipnt   )
 
+      use m_srstop
+      use m_monsys
       use hydmod
       implicit none
 

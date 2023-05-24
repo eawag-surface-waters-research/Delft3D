@@ -78,6 +78,8 @@
 !
 !     Declaration of arguments
 !
+      use m_zero
+      use m_fileutils
       use grids
       use timers
       use waqmem

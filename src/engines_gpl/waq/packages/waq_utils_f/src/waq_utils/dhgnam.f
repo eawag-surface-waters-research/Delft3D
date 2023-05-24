@@ -20,6 +20,15 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dhgnam
+      use m_srstop
+      use m_getcom
+
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DHGNAM ( NAME   , CHECK )
 !
@@ -41,6 +50,7 @@
 !                                          when name is enterd interactive from keyboard
 !
       USE ISO_FORTRAN_ENV, ONLY: INPUT_UNIT, OUTPUT_UNIT
+      use m_dhgarg
 
       CHARACTER*(*) NAME
       CHARACTER*(*) CHECK
@@ -53,7 +63,10 @@
       CHARACTER*3   ANSWER
       LOGICAL       EXI  ,LFOUND
       CHARACTER*1   CRJV  , CJVB  , CDUMMY
-      INTEGER       LUNAM
+      INTEGER       LUNAM, MAXNAM, IDUMMY, IERR, INDX, INDX1, INDX2, IOERR
+      REAL          RDUMMY
+
+
       CRJV = '/'
       CJVB = '\\'
 !
@@ -164,3 +177,4 @@
 !
       RETURN
       END
+      end module m_dhgnam

@@ -55,16 +55,16 @@
 !                           lun(29) = unit formatted output file
 !                           lun( 2) = unit system-intermediate file
 
+      use m_zoek
+      use m_srstop
+      use m_rdvers
+      use m_julian
       use rd_token     !   tokenized reading
       use dlwq0t_data
       use timers       !   performance timers
       use computeRefday
 
       implicit none
-
-!       Functions called  :
-
-      double precision julian  ! makes Julian date from calendar dates, returns the Julian date
 
 !     Parameters
 

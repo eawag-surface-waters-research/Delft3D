@@ -31,6 +31,8 @@
 !>
 !>                         Performs only calculation of new concentrations due processes
 
+      use m_move
+      use m_fileutils
       use grids
       use timers
       use delwaq2_data

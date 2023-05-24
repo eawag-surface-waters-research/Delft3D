@@ -26,6 +26,13 @@
 !       A, J and C are now pointers to arrays
 !
       MODULE DELWAQ2
+      use m_startup_screen
+      use m_srstop
+      use m_monsys
+      use m_gkwini
+      use m_getcom
+      use m_dhopnf
+
 
       CONTAINS
 
@@ -111,6 +118,7 @@
       use m_sysa          ! Pointers in real array workspace
       use m_sysj          ! Pointers in integer array workspace
       use m_sysc          ! Pointers in character array workspace
+      use m_dhgnam
 
       implicit none
 

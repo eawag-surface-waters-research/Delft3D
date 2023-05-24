@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dhisys
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DHISYS ( ISYSI , ISYSN )
 !
@@ -41,10 +47,11 @@
 !     ISYSN   INTEGER       *     OUTPUT  copy of the SYSI common block
 !
 !     declarations
+      use m_dhimov
       use m_sysn          ! System characteristics
       use m_sysi          ! Timer characteristics
 !
-      INTEGER       ISYSI(*), ISYSN(*)
+      INTEGER       ISYSI(:), ISYSN(:)
 
 !     Fill the array's
 !
@@ -53,3 +60,4 @@
 !
       RETURN
       END
+      end module m_dhisys

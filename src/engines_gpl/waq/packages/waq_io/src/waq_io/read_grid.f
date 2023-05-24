@@ -53,6 +53,8 @@
 !     Functions called   : gridpointercollfind to find the number of the reference grid by name
 !                                              function is contained in the grids module
 
+      use m_srstop
+      use m_dhopnf
       use grids            !   for the storage of contraction grids
       use rd_token         !   for the reading of tokens
       use timers       !   performance timers
@@ -61,7 +63,7 @@
 
 !     declaration of arguments
 
-      integer               , intent(in   ) :: lun(*)        !< unit numbers used
+      integer               , intent(inout) :: lun(*)        !< unit numbers used
       type(GridPointer)     , intent(inout) :: aGrid         !< collection off all grid definitions
       type(GridPointerColl) , intent(in   ) :: GridPs        !< collection off all grid definitions
       logical               , intent(in   ) :: oldproc       !< true if old processing
@@ -233,6 +235,8 @@
       contains
 
       subroutine read_attributes_for_bottomgrid( lunut, iarray, nosegl, ierr )
+      use m_dhkmrk
+
       integer :: lunut, nosegl, ierr
       integer, dimension(:) :: iarray
 

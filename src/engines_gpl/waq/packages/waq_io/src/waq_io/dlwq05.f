@@ -59,8 +59,12 @@
 !                           LUN( 4) = unit intermediate file (pointers)
 !                           LUN(14) = unit intermediate file (boundaries)
 
+      use m_zoek
+      use m_srstop
+      use m_getcom
       use rd_token     !   for the reading of tokens
       use timers       !   performance timers
+      use m_cnvtim
 
 !     kind           function         name                Descriptipon
 

@@ -51,6 +51,8 @@
 !
 !     Declaration of arguments
 !
+      use m_srstop
+      use m_monsys
       use timers
 
       INTEGER NOTOT , NOFLUX, NDMPAR, NOBALT

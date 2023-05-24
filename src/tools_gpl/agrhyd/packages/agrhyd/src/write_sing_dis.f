@@ -29,6 +29,7 @@
 
       ! global declarations
 
+      use m_dhnlun
       use hydmod                   ! module contains everything for the hydrodynamics
       implicit none
 

@@ -38,6 +38,7 @@
 !     Logical units     : LUNUT = unitnumber output log-file
 !                         ILUN  = array with input unit nr's stack
 
+      use m_srstop
       use rd_token
       use timers       !   performance timers
 

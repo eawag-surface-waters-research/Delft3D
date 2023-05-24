@@ -10,6 +10,7 @@ add_library(${library_name} ${source_files})
 
 
 set(oss_dependencies_general deltares_common
+                             waq_utils_f
                              io_netcdf
                              io_hyd)
                              

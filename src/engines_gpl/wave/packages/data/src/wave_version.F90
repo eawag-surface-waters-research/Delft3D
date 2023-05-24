@@ -32,7 +32,7 @@ module dwaves_version_module
 
     character(*),  public, parameter :: dwaves_version_full = version_prefix // ', ' // product_name // version_suffix
     character(*),  public, parameter :: dwaves_version_id   = version_prefix_id // ', ' // product_name // ' ' // version_suffix_full
-    character(*),  public, parameter :: dwaves_branch       = version_prefix_id // ', ' // branch
+    character(*),  public, parameter :: dwaves_branch       = branch
 
 contains
 
