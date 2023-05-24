@@ -33,8 +33,8 @@
 !
       real(4) pmsa(*)     !I/O Process Manager System Array, window of routine to process library
       real(4) fl(*)       ! O  Array of fluxes made by this process in mass/volume/time
-      integer ipoint(  3) ! I  Array of pointers in pmsa to get and store the data
-      integer increm(  3) ! I  Increments in ipoint for segment loop, 0=constant, 1=spatially varying
+      integer ipoint(  4) ! I  Array of pointers in pmsa to get and store the data
+      integer increm(  4) ! I  Increments in ipoint for segment loop, 0=constant, 1=spatially varying
       integer noseg       ! I  Number of computational elements in the whole model schematisation
       integer noflux      ! I  Number of fluxes, increment in the fl array
       integer iexpnt(4,*) ! I  From, To, From-1 and To+1 segment numbers of the exchange surfaces
@@ -43,7 +43,7 @@
       integer noq2        ! I  Nr of exchanges in 2nd direction, noq1+noq2 gives hor. dir. reg. grid
       integer noq3        ! I  Nr of exchanges in 3rd direction, vertical direction, pos. downward
       integer noq4        ! I  Nr of exchanges in the bottom (bottom layers, specialist use only)
-      integer ipnt(  3)   !    Local work array for the pointering
+      integer ipnt(  4)   !    Local work array for the pointering
       integer iseg        !    Local loop counter for computational element loop
 !
 !*******************************************************************************
@@ -52,6 +52,7 @@
 !
       real(4) watersrc    ! I  Source of water to be traced                       (g/m3)
       real(4) ageconc     ! I  Age concentration                                  (g.d/m3)
+      real(4) age_threshold     ! I  user defined threshold to avoid small concentration (g/m3), default 0.0
       real(4) ageprod     ! F  production of waterage                             (d)
       integer Iageprod    !    Pointer to the production of waterage
 !
@@ -64,6 +65,7 @@
 !
          watersrc       = pmsa( ipnt(  1) )
          ageconc        = pmsa( ipnt(  2) )
+         age_threshold  = pmsa( ipnt(  3) )
 !
 !   *****     Insert your code here  *****
 !
@@ -73,10 +75,10 @@
 !
          fl  ( Iageprod    ) = ageprod
 
-         if ( watersrc /= 0.0 ) then
-             pmsa(ipnt(3))       = ageconc / watersrc
+         if (watersrc .gt. age_threshold) then
+             pmsa(ipnt(4))       = ageconc / watersrc
          else
-             pmsa(ipnt(3))       = -999.0
+             pmsa(ipnt(4))       = -999.0
          endif
 !
          Iageprod    = Iageprod    + noflux
