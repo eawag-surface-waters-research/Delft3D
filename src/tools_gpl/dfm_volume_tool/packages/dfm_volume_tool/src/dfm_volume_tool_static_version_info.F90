@@ -44,7 +44,7 @@ module dfm_volume_tool_static_version_info
     character(*),  public, parameter :: source_code  = '@(#) '//char(0)
 
     character(*),  public, parameter :: version_prefix      = company
-    character(*),  public, parameter :: version_prefix_id   = '@(#) '// company
+    character(*),  public, parameter :: version_prefix_id   = '@(#)'// company
     character(*),  public, parameter :: version_suffix      = version_full
     character(*),  public, parameter :: version_suffix_full = ' Version '//version_suffix//', '//__DATE__//', '//__TIME__
 
