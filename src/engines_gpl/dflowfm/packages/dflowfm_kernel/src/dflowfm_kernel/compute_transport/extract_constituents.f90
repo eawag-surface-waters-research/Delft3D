@@ -168,9 +168,8 @@ subroutine extract_constituents()
   ! for in the bottom update when the cell becomes wet again. This prevents large concentration gradients and exploding bed levels.
   if (ISED1>0) then
     do ll=1,mxgr
-       ii = ISED1-ll+1 
        do k=1,ndx
-          if (hs(k)<=epshu) then
+          if (hs(k)<stmpar%morpar%sedthr) then
              call getkbotktop(k,kb,kt)
              ssccum(ll,k) = ssccum(ll,k)+sum(constituents(ISED1+ll-1,kb:kt))/dts*bai_mor(k)*vol1(k)
              constituents(ISED1+ll-1,kb:kt) = 0d0
