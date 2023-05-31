@@ -448,6 +448,8 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
 
  integer                           :: jalogsolverconvergence    !< log solver convergence message bloat (default 1, preferable 0)
  integer                           :: jalogtransportsolverlimiting    !< log transport solver limiting message bloat (default 0, preferable 0)
+ 
+ integer                           :: jadpuopt                  !< option for bed level at velocity point in case of tile approach bed level: 1 = max (default). This is equivalent to min in Delft3D 4; 2 = mean. 
 
  ! written to his file yes or no
  integer                           :: jahisbal                  !< Write mass balance/volume totals to his file, 0: no, 1: yes
@@ -1043,6 +1045,8 @@ subroutine default_flowparameters()
 
     jatransportautotimestepdiff = 0
     implicitdiffusion2D         = 0
+    
+    jadpuopt = 1
 
     call reset_flowparameters()
 end subroutine default_flowparameters
