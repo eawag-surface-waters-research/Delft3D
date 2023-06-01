@@ -428,7 +428,7 @@
                else
                   wqid1(iout,2) = -1
                endif
-               if ( index(syuni1(iout), 'm-2') > 0 ) then
+               if ( index(syuni1(iout), 'm-2') > 0 .or. index(syuni1(iout), '/m2') > 0 ) then
                   sumconc1(iout) = .true.
                else
                   sumconc1(iout) = .false.
@@ -449,7 +449,7 @@
                      goto 800
                   endif
                endif
-               if ( index(syuni2(iout), 'm-2') > 0 ) then
+               if ( index(syuni2(iout), 'm-2') > 0 .or. index(syuni2(iout), '/m2') > 0 ) then
                   sumconc2(iout) = .true.
                else
                   sumconc2(iout) = .false.
