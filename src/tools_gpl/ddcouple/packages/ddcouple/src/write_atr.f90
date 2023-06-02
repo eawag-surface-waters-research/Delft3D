@@ -27,6 +27,7 @@
 
       ! global declarations
 
+      use m_dhkmrk
       use hydmod                   ! module contains everything for the hydrodynamics
       implicit none
 

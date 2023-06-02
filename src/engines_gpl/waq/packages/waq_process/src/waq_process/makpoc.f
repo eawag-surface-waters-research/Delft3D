@@ -24,6 +24,9 @@
       subroutine makpoc ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
+      use m_srstop
+      use m_monsys
+
 !>\file
 !>       Derive OOC from IM-fractions and percentage POM in IMx
 

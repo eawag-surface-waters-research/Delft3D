@@ -29,6 +29,10 @@
 
       ! Checks which processes can be activated
 
+      use m_zoek
+      use m_monsys
+      use m_dhswtr
+      use m_dhrmis
       use dlwq_data
       use processet
       use timers       !   performance timers
@@ -81,7 +85,6 @@
       integer                   :: imis            ! index number of missing variables
       character(len=20)         :: misnam(mismax)  ! name missing variables
       character(len=50)         :: mistxt(mismax)  ! description missing variables
-      logical                   :: dhrmis          ! function checks on missing value
       logical                   :: iok             ! indicates if its ok
       integer                   :: i_star                ! index of * in name
       integer(4) :: ithndl = 0

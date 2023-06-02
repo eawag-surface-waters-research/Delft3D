@@ -26,9 +26,11 @@
 
       ! set grid for all processes
 
+      use m_zoek
       use dhralloc
       use processet
       use timers       !   performance timers
+      use m_dhggd
 
       implicit none
 

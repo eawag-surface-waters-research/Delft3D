@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module m_fileutils
+
+implicit none
+
+contains
+
 
 ! @file
 !     Auxiliary routines for handling files
@@ -41,3 +47,4 @@ subroutine close_files( lun )
       endif
    enddo
 end subroutine close_files
+end module m_fileutils

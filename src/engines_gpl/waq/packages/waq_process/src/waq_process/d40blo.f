@@ -41,6 +41,11 @@
 !     ------   -----  ------------
 
 ! 3DL
+      use m_srstop
+      use m_monsys
+      use m_dhnoseg
+      use m_dhnolay
+      use m_dhkmrk
       use      bloom_data_3dl
       use      bloom_data_vtrans
 ! END3DL
@@ -903,6 +908,8 @@
       end subroutine d40blo
 
       subroutine blstopinit(lunrep, inputname)
+      use m_srstop
+
 
       character*10 inputname
 
@@ -917,6 +924,9 @@
 
 
       subroutine blstop(mes,i)
+      use m_srstop
+      use m_monsys
+
 
       character*12 mes
       integer      lunrep

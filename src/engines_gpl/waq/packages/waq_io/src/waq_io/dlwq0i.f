@@ -52,6 +52,7 @@
 
 !     Modified          : April     2011 by Leo Postma
 !                                           Fortran 90 look and feel
+      use m_zoek
       use timers       !   performance timers
 
       implicit none

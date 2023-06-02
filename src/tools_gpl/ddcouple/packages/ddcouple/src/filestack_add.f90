@@ -27,6 +27,8 @@
 
       ! global definitions
 
+      use m_monsys
+      use m_dhnlun
       use dlwqdata_mod
       implicit none
 

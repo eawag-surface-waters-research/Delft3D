@@ -40,7 +40,8 @@ function read_commandline() result(istat)
    use string_module, only: str_lower, str_tolower
    use m_samples_refine
    use m_partitioninfo
-   use unstruc_version_module
+   use dflowfm_version_module
+   use dflowfm_version_module, only: getbranch_dflowfm, getfullversionstring_dflowfm
    use dfm_error
    use unstruc_api
    use m_makenet
@@ -245,9 +246,9 @@ function read_commandline() result(istat)
             ! Note: if use input was wrong here, result will be LEVEL_NONE (==silent). Desirable?
 
          case ('v', 'version')
-            call get_full_versionstring_unstruc_full(msgbuf)
+            call getfullversionstring_dflowfm(msgbuf)
             write (*,'(a)') trim(msgbuf)
-            call get_unstruc_source(msgbuf)
+            call getbranch_dflowfm(msgbuf)
             write (*,'(a)') 'Source: '//trim(msgbuf)
 #ifdef __INTEL_COMPILER
             write  (*, '(a,f5.2)') "Compiled with Intel ifort, version ", (0.01*__INTEL_COMPILER)

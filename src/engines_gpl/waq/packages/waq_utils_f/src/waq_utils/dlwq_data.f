@@ -22,6 +22,10 @@
 !!  rights reserved.
 
       module dlwq_data
+       use m_zoek
+       use m_dhnlun
+       use m_srstop
+
 !
 !          module contains everything for model data input and storage
 !          created March 2004 by Jan van Beek
@@ -892,7 +896,7 @@
 
          select case (ftype)
              case ( 2 )
-                 open ( newunit = lun, file = dlwqdata%filename, iostat = ierror, form='unformatted', access='stream'  , 
+                 open ( newunit = lun, file = dlwqdata%filename, iostat = ierror, form='unformatted', access='stream'  ,
      &                  status = 'old' )
              case ( 12 )
                  open ( newunit = lun, file = dlwqdata%filename, iostat = ierror, form='unformatted' , status = 'old' )

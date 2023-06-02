@@ -126,7 +126,7 @@ end subroutine get_output_var_names
 !! * step_method   (explicit, implicit, semi_implicit, iterative) 
 subroutine get_attribute(c_att_name, c_att_value) bind(C, name="get_attribute")
 !DEC$ ATTRIBUTES DLLEXPORT :: get_attribute
-use unstruc_version_module
+use dflowfm_version_module
    character(kind=c_char), intent(in)    :: c_att_name(MAXSTRLEN)  !< Attribute name as C-delimited character string.
    character(kind=c_char), intent(  out) :: c_att_value(MAXSTRLEN) !< Returned attribute value as C-delimited character string.
 
@@ -138,11 +138,11 @@ use unstruc_version_module
 
    select case (att_name)
    case ('model_name')
-      att_value = unstruc_program
+      att_value = product_name
    case ('version')
-      att_value = unstruc_version
+      att_value = version_full
    case ('author_name')
-      att_value = unstruc_company
+      att_value = company
    case ('grid_type')
       att_value = 'unstructured_grid'
    case ('time_step_type')
@@ -288,10 +288,10 @@ end subroutine set_logger_c_callback
 subroutine get_version_string(c_version_string) bind(C, name="get_version_string")
    !DEC$ ATTRIBUTES DLLEXPORT :: get_version_string
    use iso_c_binding, only: c_char
-   use unstruc_version_module, only: unstruc_version
+   use dflowfm_version_module, only: version_full
    character(kind=c_char), intent(out) :: c_version_string(MAXSTRLEN)
    character(len=MAXSTRLEN) :: name
-   name = unstruc_version
+   name = version_full
    c_version_string = string_to_char_array(trim(name), len(trim(name)))
 end subroutine get_version_string
 
@@ -1273,6 +1273,8 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
       x = c_loc(vltbOnLinks)
    case('network')
       x = c_loc(Network)
+   case('kbndz')
+      x = c_loc(kbndz)
    end select
 
    ! Try to parse variable name as slash-separated id (e.g., 'weirs/Lith/crest_level')

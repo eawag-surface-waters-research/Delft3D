@@ -52,6 +52,8 @@
 !                           DLWQTA, make values for const,param,func,sfunc
 !                           DLWQTK, make values for kenmerk array
 !                           DHOPNF, opens files
+      use m_srstop
+      use m_dhopnf
       use timers
       use delwaq2_data
       use grids
@@ -64,7 +66,7 @@
 
 !     type     kind  function         name                         description
 
-      integer  ( 4), intent(in   ) :: lun   (*)                  !< Array with unit numbers
+      integer  ( 4), intent(inout) :: lun   (*)                  !< Array with unit numbers
       integer  ( 4), intent(in   ) :: itime                      !< Model timer
       integer  ( 4), intent(inout) :: itimel                     !< Model timer one step ago
       real     ( 4), intent(inout) :: harmat(nharms)             !< Matrices harmonic components

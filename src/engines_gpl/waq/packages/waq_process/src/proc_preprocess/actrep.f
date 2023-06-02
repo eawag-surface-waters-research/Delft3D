@@ -29,6 +29,10 @@
 !>/File
 !>      replace active proto processes with actual processes
 
+      use m_srstop
+      use m_monsys
+      use m_dhucas
+      use m_dhslen
       use timers         !< performance timers
       use dlwq_data      !< data definitions
       use processet      !< use processet definitions

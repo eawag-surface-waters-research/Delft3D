@@ -73,6 +73,9 @@
 !     iwar    INTEGER    1         OUTPUT  Cumulative warning count
 !
 !
+      use m_zoek
+      use m_movint
+      use m_movchr
       use timers       !   performance timers
 
       INTEGER       ICMAX   , IIMAX    , CHKFLG

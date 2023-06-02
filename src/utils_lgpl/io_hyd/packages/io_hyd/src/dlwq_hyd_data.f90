@@ -22,6 +22,11 @@
 !!  rights reserved.
 
       module dlwq_hyd_data
+      use m_zoek
+      use m_srstop
+      use m_monsys
+      use m_dhopnf
+
 !
 !          module contains everything for model data input and storage
 !          created March 2004 by Jan van Beek

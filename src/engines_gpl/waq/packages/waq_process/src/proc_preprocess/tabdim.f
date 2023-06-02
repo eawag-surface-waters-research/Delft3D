@@ -64,6 +64,7 @@
 !
 !     IMPLICIT NONE for extra compiler checks
 !
+      use m_zoek
       use timers       !   performance timers
 
       IMPLICIT NONE

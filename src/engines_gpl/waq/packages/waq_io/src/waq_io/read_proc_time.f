@@ -38,6 +38,7 @@
 
 !     global declarations
 
+      use m_zoek
       use rd_token         !   for the reading of tokens
       use timers       !   performance timers
 

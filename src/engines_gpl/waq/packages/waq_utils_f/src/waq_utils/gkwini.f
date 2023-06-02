@@ -20,6 +20,13 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_gkwini
+      use m_zoek
+
+      implicit none
+
+      contains
+
 
       subroutine gkwini ( lu , group , keywrd , value )
 !
@@ -209,7 +216,7 @@
       integer       lu
       character*(*) group, keywrd
       logical, optional :: found
-      integer       ivalue
+      integer       ivalue, ierr
 
       ! local decalarations
 
@@ -230,7 +237,7 @@
       return
       end
       subroutine gr_ini ( lu , group , keywrd , rvalue, found )
-      integer       lu
+      integer       lu , ierr
       character*(*) group, keywrd
       logical, optional :: found
       real          rvalue
@@ -286,3 +293,4 @@
 
       return
       end
+      end module m_gkwini

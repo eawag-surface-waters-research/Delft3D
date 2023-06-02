@@ -1,5 +1,5 @@
 Deltares, D-Flow FM Version
-Source: https://svn.oss.deltares.nl/repos/delft3d/trunk/
+Source: main
 Compiled with Intel ifort, version
 Compiled with support for:
 IntGUI   : no

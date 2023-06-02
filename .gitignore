@@ -11,11 +11,3 @@ install_*/**
 
 # folders to exclude
 /src/**/obj/**
-
-# flow fm version files
-/src/engines_gpl/dflowfm/**/*.rc
-src/engines_gpl/dflowfm/**/unstruc_version.F90
-
-# flow related tools version files
-src/tools_gpl/dfm_volume_tool/**/dfm_volume_tool_version.F90
-src/tools_gpl/dfmoutput/**/dfmoutput_version.F90

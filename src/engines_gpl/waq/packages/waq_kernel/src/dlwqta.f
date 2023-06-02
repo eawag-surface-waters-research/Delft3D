@@ -40,6 +40,9 @@
 
 !     global declarations
 
+      use m_srstop
+      use m_dhopnf
+      use m_dhnlun
       use timers
       use delwaq2_data
       use grids
@@ -50,7 +53,7 @@
 
 !     kind                       function         name                   Descriptipon
 
-      integer                  , intent(in   ) :: lun                  !< unit number binary input file
+      integer                  , intent(inout) :: lun                  !< unit number binary input file
       character(len=*)         , intent(in   ) :: lch                  !< name input file
       integer                  , intent(in   ) :: lunrep               !< unit number report file
       integer                  , intent(in   ) :: noseg                !< number of segments

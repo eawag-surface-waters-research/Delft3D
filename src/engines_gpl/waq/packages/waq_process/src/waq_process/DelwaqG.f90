@@ -24,6 +24,10 @@
      subroutine DLWQG2     ( pmsa   , fl     , ipoint , increm, noseg , &
                               noflux , iexpnt , iknmrk , noq1  , noq2  , &
                               noq3   , noq4   )
+     use m_monsys
+     use m_errsys
+     use m_dhkmrk
+
 !XXXDEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'DLWQG2' :: DLWQG2
 !
 !*******************************************************************************
@@ -2306,6 +2310,8 @@
       end subroutine write_sedconc
 
       subroutine handle_zone_information( thickness, poros )
+      use m_monsys
+
       real, intent(in)       :: thickness, poros
 
       integer                            :: ierr, luzone, lumon, idx, ic, ip, ip2, ilay

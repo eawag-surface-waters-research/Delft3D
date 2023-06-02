@@ -23,6 +23,7 @@
 
       subroutine blfile (lunrep)
 
+      use m_srstop
       use bloom_data_io  
 
       implicit none

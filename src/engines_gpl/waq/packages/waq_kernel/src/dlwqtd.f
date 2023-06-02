@@ -72,6 +72,7 @@
 !     ALENG   REAL   2,NOQ+NOQ4   IN/OUT  Diffusion lengthes
 !
 !
+      use m_srstop
       use grids
       use timers
 

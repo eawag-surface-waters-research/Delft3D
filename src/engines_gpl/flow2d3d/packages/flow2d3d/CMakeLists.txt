@@ -110,6 +110,9 @@ set(oss_dependencies_general flow2d3d_manager
                              esmfsm_version_number
                              io_netcdf
                              io_hyd
+                             solvesaphe
+                             waq_utils_f
+                             waq_process
                              nefis
                              deltares_common_mpi
                              deltares_common

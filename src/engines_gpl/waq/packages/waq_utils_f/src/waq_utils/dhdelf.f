@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dhdelf
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DHDELF ( FILNAM, IERROR )
 !
@@ -83,3 +89,4 @@
       IERROR = 1
       RETURN
       END
+      end module m_dhdelf

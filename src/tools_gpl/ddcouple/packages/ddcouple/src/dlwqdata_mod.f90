@@ -22,6 +22,12 @@
 !!  rights reserved.
 
       module dlwqdata_mod
+       use m_srstop
+       use m_monsys
+       use m_dhucas
+       use m_dhopnf
+       use m_dhnlun
+
 !
 !          module contains everything for model data input and storage
 !          created March 2004 by Jan van Beek

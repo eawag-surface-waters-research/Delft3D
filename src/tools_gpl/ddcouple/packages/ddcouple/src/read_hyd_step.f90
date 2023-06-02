@@ -25,6 +25,8 @@
 
       ! global declarations
 
+      use m_srstop
+      use m_monsys
       use hydmod
       implicit none
 

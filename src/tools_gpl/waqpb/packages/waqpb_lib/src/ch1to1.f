@@ -28,6 +28,8 @@
 !  
 
       subroutine ch1to1 (lu_mes)
+      use m_zoek
+
 
       include 'data.inc'
 

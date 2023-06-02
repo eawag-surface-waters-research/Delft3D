@@ -39,6 +39,7 @@ use tree_structures
 use unstruc_messages
 use m_globalparameters, only : t_filenames
 use time_module, only : ymd2modified_jul, datetimestring_to_seconds
+use dflowfm_version_module, only: getbranch_dflowfm
 
 implicit none
 
@@ -718,7 +719,6 @@ subroutine readMDUFile(filename, istat)
     use m_fm_wq_processes
     use m_xbeach_avgoutput
     use unstruc_netcdf, only: UNC_CONV_CFOLD, UNC_CONV_UGRID, unc_set_ncformat, unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS, unc_nounlimited, unc_noforcedflush, unc_uuidgen, unc_metadatafile
-    use unstruc_version_module
     use dfm_error
     use MessageHandling
     use system_utils, only: split_filename
@@ -915,6 +915,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer( md_ptr, 'geometry', 'Nonlin1D'    , Nonlin1D)
     call prop_get_double ( md_ptr, 'geometry', 'Slotw2D'     , slotw2D)
     call prop_get_double ( md_ptr, 'geometry', 'Slotw1D'     , slotw1D)
+    call prop_get_integer( md_ptr, 'geometry', 'Dpuopt'      , jadpuopt)
     ! use slotw1d also in getcspars routines
     sl = slotw1D
 
@@ -1304,6 +1305,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double (md_ptr, 'physics', 'Dalton'            , Dalton)
     call prop_get_double (md_ptr, 'physics', 'Tempmax'           , Tempmax)
     call prop_get_double (md_ptr, 'physics', 'Tempmin'           , Tempmin)
+    call prop_get_integer(md_ptr, 'physics', 'Allowcoolingbelowzero'  , Jaallowcoolingbelowzero)
+  
     call prop_get_double (md_ptr, 'physics', 'Salimax'           , Salimax)
     call prop_get_double (md_ptr, 'physics', 'Salimin'           , Salimin)
     call prop_get_double (md_ptr, 'physics', 'Surftempsmofac'    , Surftempsmofac)
@@ -1323,8 +1326,6 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double (md_ptr, 'physics', 'Backgroundwatertemperature', Backgroundwatertemperature)
     ! Set molecular viscosity
     vismol = 4.d0/(20.d0 + backgroundwatertemperature)*1d-5 ! Van Rijn, 1993, from iniphys.f90
-
-    call prop_get_integer(md_ptr, 'physics', 'NFEntrainmentMomentum'  , NFEntrainmentMomentum)
 
     call prop_get_integer(md_ptr, 'veg',     'Vegetationmodelnr', javeg) ! Vegetation model nr, (0=no, 1=Baptist DFM)
     if( japillar == 2 ) then
@@ -1942,7 +1943,6 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_bnd', jamapbnd, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_Qin', jamapqin, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_every_dt', jaeverydt, success)
-    call prop_get_integer(md_ptr, 'output', 'Wrimap_NearField', jamapNearField, success)
 
     !if (md_mapformat /= 4 .and. jamapwindstress /= 0) then
      !  call mess(LEVEL_ERROR, 'writing windstress to mapfile is only implemented for NetCDF - UGrid (mapformat=4)')
@@ -2617,7 +2617,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     use m_sferic,                only : anglat, anglon, jsferic, jasfer3D
     use m_physcoef
     use unstruc_netcdf, only: unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS, unc_nounlimited, unc_noforcedflush, unc_uuidgen, unc_metadatafile
-    use unstruc_version_module
+    use dflowfm_version_module
     use m_equatorial
     use m_sediment
     use m_netw,                  only : Makeorthocenters
@@ -2653,8 +2653,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
 ! Put settings for .mdu file into a property tree first
     call tree_create(trim(md_ident), prop_ptr)
-    call prop_set(prop_ptr, 'General', 'Program',   unstruc_program,     'Program')
-    call prop_set(prop_ptr, 'General', 'Version',   unstruc_version,     'Version number of computational kernel')
+    call prop_set(prop_ptr, 'General', 'Program',   product_name,     'Program')
+    call prop_set(prop_ptr, 'General', 'Version',   version_full,     'Version number of computational kernel')
     call prop_set(prop_ptr, 'General', 'fileType',  'modelDef',          'File type. Do not edit this.')
     tmpstr = ''
     write(tmpstr, '(i0,".",i2.2)') MDUFormatMajorVersion, MDUFormatMinorVersion
@@ -2706,47 +2706,47 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
 
     call prop_set(prop_ptr, 'geometry', 'Uniformwidth1D',   wu1Duni,                'Uniform width for channel profiles not specified by profloc')
-    if (hh1Duni .ne. 2d0) then
+    if (writeall .or. hh1Duni .ne. 3d3) then
     call prop_set(prop_ptr, 'geometry', 'Uniformheight1D',  hh1Duni,                'Uniform height for channel profiles not specified by profloc')
     endif
-    if (abs(iproftypuni) .ne. 3) then
+    if (writeall .or. abs(iproftypuni) .ne. 3) then
     call prop_set(prop_ptr, 'geometry', 'Uniformtyp1D',  iproftypuni,               'Uniform type for channel profiles not specified by profloc')
     endif
 
-    if (wu1Duni5 .ne. 0.2d0) then
+    if (writeall .or. wu1Duni5 .ne. 0.2d0) then
     call prop_set(prop_ptr, 'geometry', 'Uniformwidth1Dstreetinlets',  wu1Duni5,   'Uniform width for street inlets')
     endif
-    if (hh1Duni5 .ne. 0.1d0) then
+    if (writeall .or. hh1Duni5 .ne. 0.1d0) then
     call prop_set(prop_ptr, 'geometry', 'Uniformheight1Dstreetinlets', hh1Duni5,   'Uniform height for street inlets')
     endif
-    if (abs(iproftypuni5) .ne. -2) then
+    if (writeall .or. abs(iproftypuni5) .ne. -2) then
     call prop_set(prop_ptr, 'geometry', 'Uniformtyp1Dstreetinlets',  iproftypuni5, 'Uniform type street inlets')
     endif
 
-    if (wu1Duni7 .ne. 0.1d0) then
+    if (writeall .or. wu1Duni7 .ne. 0.1d0) then
     call prop_set(prop_ptr, 'geometry', 'Uniformwidth1Droofgutterpipes',  wu1Duni7,   'Uniform width for roof gutter pipes')
     endif
-    if (hh1Duni7 .ne. 0.1d0) then
+    if (writeall .or. hh1Duni7 .ne. 0.1d0) then
     call prop_set(prop_ptr, 'geometry', 'Uniformheight1Droofgutterpipes', hh1Duni7,   'Uniform height for roof gutter pipes')
     endif
-    if (abs(iproftypuni7) .ne. -2) then
+    if (writeall .or. abs(iproftypuni7) .ne. -2) then
     call prop_set(prop_ptr, 'geometry', 'Uniformtyp1Droofgutterpipes',  iproftypuni7, 'Uniform type roof gutter pipes')
     endif
     if (writeall .or. len_trim(md_1d2dlinkfile) > 0) then
        call prop_set(prop_ptr, 'geometry', '1D2DLinkFile', trim(md_1d2dlinkfile), 'File *.ini containing custom parameters for 1D2D links'  )
     endif
 
-    if (dxmin1D .ne. 1d-3) then
+    if (writeall .or. dxmin1D .ne. 1d-3) then
     call prop_set(prop_ptr, 'geometry', 'Dxmin1D',          Dxmin1D,                'Minimum 1D link length, (except for duikers) ')
     endif
     call prop_set( prop_ptr, 'geometry', 'Dxwuimin2D'    , Dxwuimin2D,             'Smallest fraction dx/wu , set dx > Dxwuimin2D*wu, Default = 0.1' )
 
-    if (removesmalllinkstrsh .ne. 1d-1) then
+    if (writeall .or. removesmalllinkstrsh .ne. 1d-1) then
     call prop_set(prop_ptr, 'geometry', 'Removesmalllinkstrsh',   removesmalllinkstrsh,  '0-1, 0= no removes')
     endif
-    if (cosphiutrsh .ne. 5d-1) then
+    if (writeall .or. cosphiutrsh .ne. 5d-1) then
     call prop_set(prop_ptr, 'geometry', 'Cosphiutrsh',   cosphiutrsh,  '0-1, 1= no bad orthos')
-    endif
+endif
 
     if (writeall .or. ja1D2Dinternallinktype .ne. 1) then
        call prop_set(prop_ptr, 'geometry', '1D2Dinternallinktype', ja1D2Dinternallinktype, 'Link treatment method for type-3 internal links.')
@@ -2761,22 +2761,22 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
 
     call prop_set(prop_ptr, 'geometry', 'WaterLevIni',      sini,                   'Initial water levels sample file *.xyz using flood fill algorithm')
-    if (waterdepthini1D .ne. dmiss) then
+    if (writeall .or. waterdepthini1D .ne. dmiss) then
        call prop_set(prop_ptr,'geometry','waterdepthini1D', waterdepthini1D,        'Initial waterdepth in 1D ')
     endif
 
-    if (uniformhu .ne. dmiss) then
+    if (writeall .or. uniformhu .ne. dmiss) then
        call prop_set(prop_ptr,'geometry','Uniformhu',       uniformhu,              'Waterdepth in rigid-lid-like solution')
     endif
 
     call prop_set(prop_ptr, 'geometry', 'BedlevUni'  ,      zkuni,                  'Uniform bed level used at missing z values if BedlevType > 2')
-    if (bedslope .ne. 0d0) then
+    if (writeall .or. bedslope .ne. 0d0) then
        call prop_set(prop_ptr, 'geometry', 'Bedslope',      bedslope,               'Bed slope inclination if BedlevType > 2')
     endif
-    if (bedwaveamplitude .ne. 0d0) then
+    if (writeall .or. bedwaveamplitude .ne. 0d0) then
        call prop_set(prop_ptr, 'geometry', 'Bedwaveamplitude', bedwaveamplitude,    'Bed testcases')
     endif
-    if (bedwavelength .ne. 0d0) then
+    if (writeall .or. bedwavelength .ne. 0d0) then
        call prop_set(prop_ptr, 'geometry', 'Bedwavelength',    bedwavelength,       'Bed testcases')
     endif
 
@@ -2806,7 +2806,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'geometry', 'AngLat',  anglat,  'Angle of latitude S-N (deg), 0: no Coriolis')
     call prop_set(prop_ptr, 'geometry', 'AngLon',  anglon,  'Angle of longitude E-W (deg), 0: Greenwich, used in solar heat flux computation.')
 
-    if (jahelmert > 0) then
+    if (writeall .or. jahelmert > 0) then
        call prop_set(prop_ptr, 'geometry', 'Helmert',  jaHelmert,  'HELMERT yes/no, 1/0')
     endif
 
@@ -2814,17 +2814,17 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (jaconveyance3D .ne. 0) then 
     call prop_set(prop_ptr, 'geometry', 'Conveyance3D', Jaconveyance3D, '-1: R=HU,0: R=H, 1: R=A/P, 2: K=analytic-1D conv, 3: K=analytic-2D conv')
     endif 
-    if (nonlin2D .ne. 0) then
+    if (writeall .or. nonlin2D .ne. 0) then
     call prop_set(prop_ptr, 'geometry', 'Nonlin2D', Nonlin2D, 'Non-linear 2D volumes, 1 = yes, only used if ibedlevtype=3 and Conveyance2D>=1')
     endif
-    if (nonlin1D .ne. 0) then
+    if (writeall .or. nonlin1D .ne. 0) then
     call prop_set(prop_ptr, 'geometry', 'Nonlin1D', Nonlin1D, 'Non-linear 1D volumes, 1 = Preisman slot, 2 = pipes closed (Nested Newton)')
     endif
 
-    if (Slotw2D .ne. 1d-3) then
+    if (writeall .or. Slotw2D .ne. 1d-3) then
        call prop_set(prop_ptr, 'geometry', 'Slotw2D', Slotw2D, '-')
     endif
-    if (Slotw1D .ne. 1d-3) then
+    if (writeall .or. Slotw1D .ne. 1d-3) then
        call prop_set(prop_ptr, 'geometry', 'Slotw1D', Slotw1D, '-')
     endif
 
@@ -2866,15 +2866,15 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'geometry', 'Kmx' ,              kmx,               'Maximum number of vertical layers')
        call prop_set(prop_ptr, 'geometry', 'Layertype' ,        Layertype,         'Vertical layer type (1: all sigma, 2: all z, 3: use VertplizFile)')
        call prop_set(prop_ptr, 'geometry', 'Numtopsig' ,        Numtopsig,         'Number of sigma layers in top of z-layer model')
-       if (janumtopsiguniform .ne. 1) then
+       if (writeall .or. janumtopsiguniform .ne. 1) then
            call prop_set(prop_ptr, 'geometry', 'Numtopsiguniform' , jaNumtopsiguniform,         'Number of sigma layers above z-layers in a z-sigma model')
        endif
 
        call prop_set(prop_ptr, 'geometry', 'SigmaGrowthFactor', sigmagrowthfactor, 'Layer thickness growth factor from bed up')
-       if (dztop .ne. dmiss) then
+       if (writeall .or. dztop .ne. dmiss) then
           call prop_set(prop_ptr, 'geometry', 'Dztop', Dztop, 'Z-layer thickness of layers above level Dztopuniabovez')
        endif
-       if (Toplayminthick .ne. 0.01d0) then
+       if (writeall .or. Toplayminthick .ne. 0.01d0) then
           call prop_set(prop_ptr, 'geometry', 'Toplayminthick', Toplayminthick, 'Minimum top layer thickness(m), only for Z-layers')
        endif
 
@@ -2885,26 +2885,26 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
           call prop_set( prop_ptr, 'geometry', 'StretchCoef'     , laycof(1:3), 'Interface percentage from bed, bottom layers growth fac, top layers growth fac')
        endif
 
-       if (Floorlevtoplay .ne. dmiss) then
+       if (writeall .or. Floorlevtoplay .ne. dmiss) then
           call prop_set(prop_ptr, 'geometry', 'Floorlevtoplay', Floorlevtoplay, 'Floor level of top layer')
        endif
 
-       if (jaorgFloorlevtoplaydef .ne. 0) then
+       if (writeall .or. jaorgFloorlevtoplaydef .ne. 0) then
           call prop_set(prop_ptr, 'geometry', 'OrgFloorlevtoplaydef', jaorgFloorlevtoplaydef, 'keep original definition of Floor level of top layer')
        endif
 
-       if (zlaybot .ne. dmiss) then
+       if (writeall .or. zlaybot .ne. dmiss) then
           call prop_set(prop_ptr, 'geometry', 'ZlayBot', zlaybot, 'level of bottom layer in z-layers')
        endif
 
-       if (zlaytop .ne. dmiss) then
+       if (writeall .or. zlaytop .ne. dmiss) then
           call prop_set(prop_ptr, 'geometry', 'ZlayTop', zlaytop, 'level of top layer in z-layers')
        endif
 
-       if (dztopuniabovez .ne. dmiss) then
+       if (writeall .or. dztopuniabovez .ne. dmiss) then
           call prop_set(prop_ptr, 'geometry', 'Dztopuniabovez', Dztopuniabovez,'Above this level layers will have uniform Dztop, below we use SigmaGrowthFactor')
        endif
-       if (Tsigma .ne. 100d0) then
+       if (writeall .or. Tsigma .ne. 100d0) then
           call prop_set(prop_ptr, 'geometry', 'Tsigma', Tsigma ,'Sigma Adaptation period for Layertype==4 (s)')
        endif
 
@@ -2916,11 +2916,11 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
           call prop_set(prop_ptr, 'geometry', 'Keepzlay1bedvol'  , keepzlay1bedvol, 'only for keepzlayeringatbed=1: 1=correct bedcell volumes, 0=too large bedcell volumes') 
        endif
 
-       if (ihuz .ne. 1) then
+       if (writeall .or. ihuz .ne. 4) then
            call prop_set(prop_ptr, 'geometry', 'Ihuz'  , ihuz, 'if keepzlayeratbed>=2 : 1=central from bed til second, 2=all central, 3=from bed till highest equal levels')
        endif
 
-       if (ihuzcsig .ne. 1) then
+       if (writeall .or. ihuzcsig .ne. 3) then
            call prop_set(prop_ptr, 'geometry', 'ihuzcsig'  , ihuzcsig, 'if keepzlayeratbed>=2 : 1,2,3=av,mx,mn of Leftsig,Rightsig,4=uniform')
        endif
 
@@ -2957,13 +2957,13 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'numerics', 'Icoriolistype', icorio,    '0=No, 5=default, 3,4 no weights, 5-10 Kleptsova hu/hs, 25-30 Ham hs/hu, odd: 2D hs/hu, even: hsk/huk ')
     call prop_set(prop_ptr, 'numerics', 'Newcorio',      newcorio,  '0=prior to 27-11-2019, 1=no normal forcing on open bnds, plus 12 variants )')
 
-    if (jacorioconstant .ne. 0) then  
+    if (writeall .or. jacorioconstant .ne. 0) then  
         call prop_set(prop_ptr, 'numerics', 'Corioconstant', '0=default, 1=Coriolis constant in sferic models anyway,2=beta plane, both in cart. and spher. coord.')
     endif
-    if (Corioadamsbashfordfac .ne. 0) then
+    if (writeall .or. Corioadamsbashfordfac .ne. 0.5d0) then
        call prop_set(prop_ptr, 'numerics', 'Corioadamsbashfordfac', Corioadamsbashfordfac,    '0=No, 0.5d0=AdamsBashford, only for Newcorio=1)')
     endif
-    if (hhtrshcor>0) then
+    if (writeall .or. hhtrshcor>0) then
        call prop_set(prop_ptr, 'numerics', 'Coriohhtrsh', hhtrshcor,    '0=default=no safety in hu/hus weightings, only for Newcorio=1)')
     endif ! change hhtrshcor to Coriohhtrsh
 
@@ -3022,10 +3022,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'numerics', 'Junction1D'    , jaJunction1D, 'at 1D junctions: 0 = org 1D advec, 1 = same as along 1D channels')
     endif
 
-    if (jaZerozbndinflowadvection > 0) then
+    if (writeall .or. jaZerozbndinflowadvection > 0) then
        call prop_set(prop_ptr, 'numerics', 'Zerozbndinflowadvection', jaZerozbndinflowadvection, 'On waterlevel boundaries set incoming advection velocity to zero (0=no, 1=on inflow, 2=also on outflow)')
     endif
-    if (jaZlayercenterbedvel == 1) then
+    if (writeall .or. jaZlayercenterbedvel == 1) then
        call prop_set(prop_ptr, 'numerics', 'Zlayercenterbedvel', JaZlayercenterbedvel, 'reconstruction of center velocity at half closed bedcells (0=no, 1: copy bed link velocities)')
     endif
     if (writeall .or. jaStructurelayersactive == 1) then
@@ -3240,7 +3240,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     call prop_set_integer(prop_ptr, 'numerics', 'jasfer3D', jasfer3D, 'corrections for spherical coordinates')
 
-    if (jabarrieradvection /= 1) then
+    if (writeall .or. jabarrieradvection /= 1) then
        call prop_set_integer(prop_ptr, 'numerics', 'BarrierAdvection', jabarrieradvection, '1 = no correction, 2 = advection correction')
     endif
 
@@ -3297,7 +3297,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'physics', 'UnifFrictCoef1D',   frcuni1D,    'Uniform friction coefficient in 1D links (0: no friction)')
     call prop_set(prop_ptr, 'physics', 'UnifFrictCoef1D2D', frcuni1D2D,  'Uniform friction coefficient in 1D links (0: no friction)')
     call prop_set(prop_ptr, 'physics', 'UnifFrictCoefLin',  frcunilin,   'Uniform linear friction coefficient (0: no friction)')
-    if (frcuni1Dgrounlay > 0) then
+    if (writeall .or. frcuni1Dgrounlay > 0) then
        call prop_set(prop_ptr, 'physics', 'UnifFrictCoef1DgrLay',  frcuni1Dgrounlay,   'Uniform ground layer friction coefficient for ocean models (m/s) (0: no friction)')
     endif
     if (writeall) then
@@ -3376,28 +3376,30 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
        if (writeall .or. (tempmax .ne. dmiss .or. tempmin .ne. 0d0)) then
           call prop_set(prop_ptr, 'physics', 'Tempmax',  Tempmax , 'Limit the temperature')
-          call prop_set(prop_ptr, 'physics', 'Tempmin',  Tempmin , 'Limit the temperature')
+          call prop_set(prop_ptr, 'physics', 'Tempmin',  Tempmin , 'Limit the temperature, if -999, tempmin=(-0.0575d0 - 2.154996d-4*sal)*sal')
+       endif
+       if (writeall .or. Jaallowcoolingbelowzero .ne. 0) then
+          call prop_set(prop_ptr, 'physics', 'Allowcoolingbelowzero',  Jaallowcoolingbelowzero , '0 = no, 1 = yes')
        endif
        if (writeall .or. surftempsmofac > 0d0) then
           call prop_set(prop_ptr, 'physics', 'Surftempsmofac',  Surftempsmofac , 'Hor . Smoothing factor for surface water in heatflx comp. (0.0-1.0), 0=no')
        endif
-       if (Soiltempthick .ne. 0d0) then
+       if (writeall .or. Soiltempthick .ne. 0d0) then
           call prop_set(prop_ptr, 'physics', 'Soiltempthick',  Soiltempthick , 'Use soil temperature buffer if > 0, e.g. 0.2 (m)' )
        endif
-       if (jaheat_eachstep > 0) then
+       if (writeall .or. jaheat_eachstep > 0) then
           call prop_set(prop_ptr, 'physics', 'Heat_eachstep' , jaheat_eachstep,  '1=heat each timestep, 0=heat each usertimestep')
        endif
-       if (jaroro > 0) then
+       if (writeall .or. jaroro > 0) then
           call prop_set(prop_ptr, 'physics', 'RhoairRhowater' , jaroro        ,  'windstress rhoa/rhow: 0=Rhoair/Rhomean, 1=Rhoair/rhow(), 2=rhoa0()/rhow(), 3=rhoa10()/Rhow()')
        endif
 
-       if ( janudge > 0 .or. jainiwithnudge > 0 ) then
+       if (writeall .or.  janudge > 0 .or. jainiwithnudge > 0 ) then
           call prop_set_double(prop_ptr, 'physics', 'Nudgetimeuni', Tnudgeuni, 'Uniform nudge relaxation time')
           call prop_set_integer(prop_ptr, 'physics', 'IniWithNudge', jainiwithnudge, 'Initialize salinity and temperature with nudge variables')
        end if
 
     endif
-    call prop_set(prop_ptr, 'physics', 'NFEntrainmentMomentum', NFEntrainmentMomentum, '1: Switch on momentum transfer in NearField related entrainment')
 
 ! secondary flow
 ! output to mdu file
@@ -3488,7 +3490,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. relativewind > 0d0) then
        call prop_set(prop_ptr,    'wind', 'Relativewind',      relativewind,   'Wind speed relative to top-layer water speed*relativewind, 0d0=no relative wind, 1d0=using full top layer speed)')
     endif
-    if (kmx == 0 .and. jawindhuorzwsbased == 0 .or. kmx > 0 .and. jawindhuorzwsbased == 0) then
+    if (writeall .or. kmx == 0 .and. jawindhuorzwsbased == 0 .or. kmx > 0 .and. jawindhuorzwsbased == 0) then
        call prop_set(prop_ptr, 'wind', 'Windhuorzwsbased', jawindhuorzwsbased,   'Wind hu or zws based , 0 = hu, 1 = zws ' )
     endif
     if (writeall .or. jawindpartialdry == 0) then
@@ -3542,18 +3544,18 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'waves', 'jamapsigwav',         jamapsigwav,    '1: sign wave height on map output; 0: hrms wave height on map output. Default=0 (legacy behaviour).')
        call prop_set(prop_ptr, 'waves', 'hminlw',              hminlw,         'Cut-off depth for application of wave forces in momentum balance')
        ! prop_set_logical is not yet implemented call prop_set(prop_ptr, 'waves', 'FlowWithoutWaves',    flowWithoutWaves, 'True: Do not use Wave data in the flow computations, it will only be passed through to D-WAQ')
-       if (hwavuni .ne. 0d0) then
+       if (writeall .or. hwavuni .ne. 0d0) then
           call prop_set(prop_ptr, 'waves', 'Hwavuni'  ,        hwavuni,        'root mean square wave height (m)')
           call prop_set(prop_ptr, 'waves', 'Twavuni'  ,        twavuni,        'root mean square wave period (s)')
           call prop_set(prop_ptr, 'waves', 'Phiwavuni',        phiwavuni,      'root mean square wave direction, (deg), math convention')
        endif
-       if (jawaveswartdelwaq .ne. 0) then
+       if (writeall .or. jawaveswartdelwaq .ne. 0) then
           call prop_set(prop_ptr, 'waves', 'WaveSwartDelwaq'  , jaWaveSwartDelwaq, 'if WaveSwartDelwaq == 1 .and. Tiwaq > 0 then increase tauwave to Delwaq with 0.5rho*fw*uorbuorb' )
        endif
-       if (jawave == 1 .or. jawave == 2) then
+       if (writeall .or. jawave == 1 .or. jawave == 2) then
           call prop_set(prop_ptr, 'waves', 'Tifetchcomp'      , Tifetch,           'Time interval fetch comp (s) in wavemodel 1,2')
        endif
-       if (kmx>0) then
+       if (writeall .or. kmx>0) then
           call prop_set(prop_ptr, 'waves', '3Dstokesprofile'     , jawaveStokes    ,'Stokes profile. 0: no, 1:uniform over depth, 2: 2nd order Stokes theory; 3: 2, with vertical stokes gradient in adve ')
           call prop_set(prop_ptr, 'waves', '3Dwavestreaming'     , jawavestreaming ,'Influence of wave streaming. 0: no, 1: added to adve                                                                 ')
           call prop_set(prop_ptr, 'waves', '3Dwaveboundarylayer' , jawavedelta     ,'Boundary layer formulation. 1: Sana                                                                                  ')
@@ -3584,7 +3586,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     call prop_set(prop_ptr, 'time', 'Timestepanalysis',        jatimestepanalysis, '0=no, 1=see file *.steps')
 
-    if (ja_timestep_auto .ne. 1) then
+    if (writeall .or. ja_timestep_auto .ne. 1) then
         call prop_set(prop_ptr, 'time', 'AutoTimestep',  ja_timestep_auto, '0 = no, 1 = 2D (hor. out), 3=3D (hor. out), 5 = 3D (hor. inout + ver. inout), smallest dt')
     endif
     if (writeall .and. ja_timestep_auto_visc .ne. 1) then
@@ -4063,10 +4065,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'output', 'Wrimap_internal_tides_dissipation', jamapIntTidesDiss, 'Write internal tides dissipation to map file (1: yes, 0: no)')
     end if
 
-    if (writeall .or. jamapNearField /= 0) then
-        call prop_set(prop_ptr, 'output', 'Wrimap_NearField', jamapNearField, 'Write near field parameters (1: yes, 0: no)')
-    endif
-
     call prop_set(prop_ptr, 'output', 'Writepart_domain', japartdomain, 'Write partition domain info. for postprocessing')
 
     if ((jasal > 0 .or. jatem > 0 .or. jased > 0) .and. (writeall .or. jaRichardsononoutput > 0)) then
@@ -4150,8 +4148,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     call datum(rundat)
     write(mout, '(a,a)') '# Generated on ', trim(rundat)
-    write(mout, '(a,a)') '# ', trim(unstruc_version_full)
-    call get_unstruc_source(msgbuf)
+    write(mout, '(a,a)') '# ', trim(version_full)
+    call getbranch_dflowfm(msgbuf)
     write(mout, '(a,a)') '# Source:', trim(msgbuf)
     call prop_write_inifile(mout, prop_ptr, istat)
     call tree_destroy(prop_ptr)

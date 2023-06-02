@@ -36,10 +36,6 @@ if(NOT TARGET waqpb_export)
 endif()
 
 # Waqmerge
-if(NOT TARGET waqmerge_version_number)
-    add_subdirectory(${checkout_src_root}/${waqmerge_module} waqmerge_version_number)
-endif()
-
 if(NOT TARGET waqmerge)
     add_subdirectory(${checkout_src_root}/${waqmerge_module} waqmerge)
 endif()

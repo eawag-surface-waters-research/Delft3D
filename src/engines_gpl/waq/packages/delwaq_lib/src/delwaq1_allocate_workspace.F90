@@ -26,6 +26,7 @@
 !>                    delwaq1_allocate_workspace
 
 subroutine delwaq1_allocate_workspace(argc, argv, errorcode)
+    use m_getcom
     use m_delwaq1_data
       
     implicit none

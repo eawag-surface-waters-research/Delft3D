@@ -33,6 +33,8 @@
 
 !     Modified  : Aug   2012 by Jan van Beek : licence check configurations moved from rd_tabs
 
+      use m_zoek
+      use m_srstop
       use timers         !< performance timers
       use processet      !< use processet definitions
       implicit none
