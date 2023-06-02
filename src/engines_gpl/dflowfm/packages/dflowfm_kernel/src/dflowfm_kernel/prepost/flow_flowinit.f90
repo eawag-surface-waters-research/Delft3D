@@ -768,6 +768,15 @@ end if
 
  endif
 
+ if (kmx > 0 .and. initem2D > 0 ) then
+    do kk = 1,ndx
+       call getkbotktop(kk,kb,kt)
+       do k = kb, kt
+           tem1(k) = tem1(kk)
+       enddo
+    enddo
+ endif
+
  if (kmx > 0 .and. inised2D > 0 ) then
     do kk = 1,ndx
        if (sedh(kk) .ne. dmiss) then
