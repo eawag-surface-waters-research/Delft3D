@@ -127,8 +127,9 @@ subroutine santoss(h, d50, d90, hrms, tp, uorb, teta, uuu, vvv, umod, zumod, &
 !
 ! local variables
 !
+      logical                  :: includes_waves
       integer                  :: i
-      integer                             :: istat
+      integer                  :: istat
       integer                  :: j
       integer                  :: nt
       integer                  :: as_effects_
@@ -237,7 +238,6 @@ subroutine santoss(h, d50, d90, hrms, tp, uorb, teta, uuu, vvv, umod, zumod, &
       real(fp)                 :: uwmax
       real(fp)                 :: uwmin
       real(fp)                 :: wss
-      real(fp)                 :: zref           ! reference level net current velocity [m]
       
       integer :: choice_a, choice_b, choice_c, choice_d, choice_e
 !
@@ -259,7 +259,6 @@ subroutine santoss(h, d50, d90, hrms, tp, uorb, teta, uuu, vvv, umod, zumod, &
 !
     hs      = sqrt2*hrms              ! significant wave height [m]
     pcr     = 1.0_fp
-    zref    = zumod                   ! zmud is computed in dwnvel; for 3d it is the centre of the lowest layer above deltas; for 2d it equals h/e
     tanphi  = tan(30.0_fp*degrad)     ! fixed the angle of repose of the natural talud to 30 degrees
 !
 !   determine the rms orbital velocity
@@ -287,9 +286,7 @@ subroutine santoss(h, d50, d90, hrms, tp, uorb, teta, uuu, vvv, umod, zumod, &
             ang = ang_cur-ang_ubot+360.0_fp
         endif
 !
-        uwmax = 0.0_fp
-        uwmin = 0.0_fp
-        if (tp > 1.0e-12_fp .and. hs > 1.0e-12_fp) then
+        if (hs > 0.0_fp) then
             ! include wave effect
 !           
 !           calculate velocity and acceleration parameters for the wave 
@@ -307,13 +304,20 @@ subroutine santoss(h, d50, d90, hrms, tp, uorb, teta, uuu, vvv, umod, zumod, &
                 uwmax = max(uwmax,uorb_time_serie(i))
                 uwmin = min(uwmin,uorb_time_serie(i))
             enddo
+            
+            if (comparereal(uwmax,0.0_fp) == 0 .and. comparereal(uwmin,0.0_fp) == 0) then
+                includes_waves = .false.
+            else
+                includes_waves = .true.
+            endif
         else
             ! currents, but no waves
             uorb_time_serie = 0.0_fp
             tw = 0.0_fp
+            includes_waves = .false.
         endif
 
-        if (comparereal(uwmax,0.0_fp) == 0 .and. comparereal(uwmin,0.0_fp) == 0) then
+        if (.not. includes_waves) then
             ! currents, but no wave effect
             uw      =  0.0_fp
             aw      =  0.0_fp
@@ -352,10 +356,10 @@ subroutine santoss(h, d50, d90, hrms, tp, uorb, teta, uuu, vvv, umod, zumod, &
 !       calculate shields parameter
 !
 !       first for the case of only a current near the bed
-        if (comparereal(uwmax,0.0_fp)==0 .and. comparereal(uwmin,0.0_fp)==0) then
+        if (.not. includes_waves) then
             ! currents, but no wave effect
             call santoss_bsscurrent(i2d3d, ag, h, d50, d90, delta, unet, ang, &
-                     & zref, rh, rl, unet_delwblt, delwblt, sc, scx, scy)
+                     & zumod, rh, rl, unet_delwblt, delwblt, sc, scx, scy)
             screpr  = sc
             scxrepr = scx
             scyrepr = scy
@@ -381,7 +385,7 @@ subroutine santoss(h, d50, d90, hrms, tp, uorb, teta, uuu, vvv, umod, zumod, &
 !           using regular waves: so one friction factor and unet_delwblt for whole time serie.
 !           first call to santoss_bss1 using aw, uw, uwc and uwt based on santoss_orb call with unet_delwblt=0
             call santoss_bss1(i2d3d, ag, h, d50, d90, delta, aw, uw, &
-                     & unet, zref, rh, rl, uwc, uwt, ang, uc, ut, &
+                     & unet, zumod, rh, rl, uwc, uwt, ang, uc, ut, &
                      & theta, ksw, ksc, fc, fw, fcw, unet_delwblt, alpha, delwblt)
 
 !           final definition of (representative) velocities and partial periods
