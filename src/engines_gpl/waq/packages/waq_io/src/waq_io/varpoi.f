@@ -34,6 +34,7 @@
 
 !     Logical unitnumbers : lurep   - report file
 
+      use m_zoek
       use timers       !   performance timers
 
       implicit none

@@ -62,6 +62,7 @@
 !                       IT NEEDS A PROPER DECOMPOSED AND STORED MATRIX
 !                       A AS AN INPUT
 !
+      use m_srstop
       use timers
 
       DIMENSION A(*),B(*)

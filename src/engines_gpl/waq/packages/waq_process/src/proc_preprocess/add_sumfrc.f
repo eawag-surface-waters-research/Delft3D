@@ -26,6 +26,7 @@
 
       ! add calculation of the sum of the fractions
 
+      use m_srstop
       use processet
       use timers       !   performance timers
 

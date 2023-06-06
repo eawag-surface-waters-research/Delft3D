@@ -22,6 +22,9 @@
 !!  rights reserved.
 
       module dryfld_mod
+       use m_zoek
+       use m_dhkmst
+
           implicit none
           real(4), dimension(:), allocatable, save :: sumvol
       end module dryfld_mod

@@ -58,6 +58,8 @@ subroutine flow_sedmorinit()
     use MessageHandling
     use dfm_error
     use m_mormerge
+    use m_mormerge_mpi
+    use m_partitioninfo, only: jampi, my_rank, ndomains, DFM_COMM_DFMWORLD
     use m_xbeach_data, only: gammaxxb
     use m_waves, only: gammax
 
@@ -78,7 +80,6 @@ subroutine flow_sedmorinit()
     integer, dimension(:), allocatable        :: crossdef_used  !< count number of times a cross section definition is used
     integer, dimension(:), allocatable        :: node_processed !< flag (connection) nodes processed while checking cross sections
     type(t_branch), pointer                   :: pbr
-    double precision                          :: dim_real
     integer                                   :: outmorphopol !opposite of inmorphopol
 
 !! executable statements -------------------------------------------------------
@@ -470,22 +471,23 @@ subroutine flow_sedmorinit()
        end do
     end if
 
-    dim_real = 1d0
     if (stmpar%morpar%multi) then
-       !
-       ! Initialize mormerge
-       call initmerge(ierr, ndxi, stmpar%lsedtot, "singledomain", stmpar%morpar)
-       if (ierr /= DFM_NOERR) then
+       if (initialize_mormerge_mpi(stmpar%morpar, stmpar%lsedtot, ndxi, jampi, my_rank, ndomains, DFM_COMM_DFMWORLD) &
+           /= DFM_NOERR) then
           call mess(LEVEL_FATAL, 'unstruc::flow_sedmorinit - Mormerge initialization failed')
           goto 1234
+       end if 
+
+       allocate (stmpar%morpar%mergebuf(ndxi*stmpar%lsedtot), stat = ierr)
+       if (ierr /= 0) then
+          call mess(LEVEL_FATAL, 'unstruc::flow_sedmorinit - allocate buffer array failed')
+          goto 1234
        endif
-       !
+       
        call realloc(mergebodsed,(/stmpar%lsedtot, ndx/), stat=ierr,fill=0d0,keepExisting=.false.)
        !
-       if (jamormergedtuser>0) then    ! safety, set equal dt_user across mormerge processes once
-          call putarray (stmpar%morpar%mergehandle,dim_real,1)
-          call putarray (stmpar%morpar%mergehandle,dt_user,1)
-          call getarray (stmpar%morpar%mergehandle,dt_user,1)
+       if (jamormergedtuser>0 .and. my_rank == 0 ) then    ! safety, set equal dt_user across mormerge processes once
+          call put_get_time_step(stmpar%morpar%mergehandle, dt_user)
        endif
     endif
 

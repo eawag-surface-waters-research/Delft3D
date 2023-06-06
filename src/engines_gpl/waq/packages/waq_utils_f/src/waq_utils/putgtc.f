@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_putgtc
+
+      implicit none
+
+      contains
+
 
       subroutine putgtc(defnam    ,datnam    ,grpnam    ,nelems    ,
      *                  elmnms    ,elmdms    ,elmtps    ,nbytsg    ,
@@ -203,3 +209,4 @@ cf   *                    elmdes(lelmnr),elmdms(1,lelmnr),
 !
       return
       end
+      end module m_putgtc

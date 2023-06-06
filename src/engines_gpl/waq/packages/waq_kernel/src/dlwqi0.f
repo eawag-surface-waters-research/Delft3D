@@ -22,6 +22,13 @@
 !!  rights reserved.
 
       module dlwqi0_mod
+      use m_zoek
+      use m_zero
+      use m_srstop
+      use m_move
+      use m_makpnt
+      use m_dhopnf
+
       contains
       subroutine dlwqi0 ( nlun   , a      , j      , c      , imaxa  ,
      &                    imaxi  , imaxc  , ipage  , lun    , lchar  ,
@@ -56,6 +63,7 @@
 !                           MOVE  , copy's arrays
 !                           ZERO  , zeros an real arrays
 !
+      use m_dhisys
       use grids
       use waqmem
       use delwaq2_data
@@ -80,7 +88,7 @@
       integer              , intent(inout) :: imaxi         !< dimension   J-array
       integer              , intent(inout) :: imaxc         !< dimension   C-array
       integer              , intent(in   ) :: ipage         !< pagelength of the output file
-      integer              , intent(in   ) :: lun    (nlun) !< array with unit numbers
+      integer              , intent(inout) :: lun    (nlun) !< array with unit numbers
       character(*)         , intent(in   ) :: lchar  (nlun) !< filenames
       integer              , intent(in   ) :: filtype(nlun) !< type of file
       type(gridpointercoll), intent(out)   :: gridps        !< collection off all grid definitions
@@ -96,7 +104,7 @@
       INTEGER       SENDBUF(3)
       CHARACTER*4   cext                          ! inital conditions file extention
 
-      INTEGER       IERRIO
+      INTEGER       IERRIO, new_lun
 
 !     Common to define external communications in SOBEK
 !     OLCFWQ             Flag indicating ONLINE running of CF and WQ
@@ -117,7 +125,7 @@
 !     copy common to (possible) shared array to share these values with
 !     other processes (domain decomposition)
 !
-      CALL DHISYS ( J(ISYSI), J(ISYSN) )
+      CALL DHISYS ( J(ISYSI:), J(ISYSN:) )
 !
       J(ILP  ) = IPAGE
       J(ILP+1) =    10
@@ -163,7 +171,8 @@
       IF ( IERRD .EQ. 0 ) THEN
          DO I = 1 , NUFIL
             READ ( LUN(41) , * ) iftyp, FINAM
-            CALL DHOPNF ( 800+I , FINAM , 3 , 2+iftyp , IOERR )
+            new_lun =  800+I
+            CALL DHOPNF ( new_lun , FINAM , 3 , 2+iftyp , IOERR )
             IF ( IOERR .NE. 0 ) THEN
                WRITE ( LUN(19) , '(A,I3,A,A)' )
      *         ' ERROR opening file on unit: ',800+I,' filename: ',FINAM
@@ -242,7 +251,7 @@
             enddo
          endif
          call makpnt( nmax    , mmax    , kmax    , noseg   , nobnd   ,
-     &                noq     , noq1    , noq2    , j(ilgra), j(ixpnt),
+     &                noq     , noq1    , noq2    , j(ilgra:), j(ixpnt:),
      &                cellpnt , flowpnt )
          finam = lchar(8)(1:index(lchar(8),'.',.true.))//'cco'
          call dhopnf ( lun(8), finam, 8, 2+ftype(8), ierrd )
@@ -393,18 +402,18 @@
       ELSE
          NOSUBz = NOSYS
       ENDIF
-      CALL MOVE   ( A(IBSET), A(IBOUN), NOBND*NOSUBz )
-      CALL MOVE   ( A(IBSET), A(IBSAV), NOBND*NOSUBz )
-      CALL ZERO   ( A(IDERV), NOTOT*NOSSS )
-      CALL ZERO   ( A(IMAS2), NOTOT*5     )
-      CALL ZERO   ( A(IWDMP), NOTOT*NOWST*2  )
+      CALL MOVE   ( A(IBSET:), A(IBOUN:), NOBND*NOSUBz )
+      CALL MOVE   ( A(IBSET:), A(IBSAV:), NOBND*NOSUBz )
+      CALL ZERO   ( A(IDERV:), NOTOT*NOSSS )
+      CALL ZERO   ( A(IMAS2:), NOTOT*5     )
+      CALL ZERO   ( A(IWDMP:), NOTOT*NOWST*2  )
       IF ( MOD(INTOPT,16) .GT. 7 ) THEN
-         CALL ZERO( A(IDMPQ), NOSYS*NDMPQ*2  )
-         CALL ZERO( A(IDMPS), NOTOT*NDMPS*3  )
-         CALL ZERO( A(ISMAS), NOTOT*NDMPAR*6 )
-         CALL ZERO( A(IFLXI), NDMPAR*NFLUX   )
-         CALL ZERO( A(IFLXD), NDMPS*NFLUX    )
-         CALL ZERO( A(ITRRA), NOSYS*NORAAI   )
+         CALL ZERO( A(IDMPQ:), NOSYS*NDMPQ*2  )
+         CALL ZERO( A(IDMPS:), NOTOT*NDMPS*3  )
+         CALL ZERO( A(ISMAS:), NOTOT*NDMPAR*6 )
+         CALL ZERO( A(IFLXI:), NDMPAR*NFLUX   )
+         CALL ZERO( A(IFLXD:), NDMPS*NFLUX    )
+         CALL ZERO( A(ITRRA:), NOSYS*NORAAI   )
       ENDIF
 
 !         make start masses for dynamic and iterative computation

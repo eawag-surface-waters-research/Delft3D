@@ -27,7 +27,12 @@
 
       ! global declarations
 
+      use m_zoek
+      use m_monsys
+      use m_julian
+      use m_dhpath
       use hydmod
+      use m_dherrs
       use rd_token                    ! tokenized reading
       use :: m_hyd_keys, only: key, nokey     ! keywords in hydfile
       implicit none
@@ -73,9 +78,8 @@
       integer             :: is                     ! second
       integer             :: idate                  ! date
       integer             :: itime                  ! time
-      real*8              :: julian                 ! julian function
       logical, parameter  :: untileol = .true.      ! read until the end of the line
-      
+
 
       ft_dat = ft_bin
       call getmlu(lunrep)
@@ -145,7 +149,7 @@
          if (itype .ne. 1) then
              goto 900
          end if
-         
+
          call zoek ( ctoken, nokey , key , 30 , ikey )
          if ( ikey .eq. 1 ) then
 
@@ -184,7 +188,7 @@
                   hyd%layer_type = HYD_LAYERS_Z
                else
                   if ( puttoken( ctoken ) .ne. 0 ) goto 900
-               end if         
+               end if
             else
                if ( puttoken( ctoken ) .ne. 0 ) goto 900
             end if
@@ -540,9 +544,9 @@
             ! file-created-by string.
             if (gettoken(line, untileol, ierr) .ne. 0 ) goto 900
             hyd%created_by = line(1:80)
-             
+
          elseif ( ikey .eq. 79) then
-            ! file-creation-date 
+            ! file-creation-date
             if (gettoken(line, untileol, ierr) .ne. 0 ) goto 900
             hyd%creation_date = line(1:40)
 
@@ -550,7 +554,7 @@
             ! sink-sources
             do
                if ( gettoken(ctoken, idummy, rdummy, itype, ierr) .ne. 0 ) goto 900
-                  if(itype==1) then 
+                  if(itype==1) then
                      ! look for end-domains keyword
                      call zoek ( ctoken, nokey , key , 30 , ikey2 )
                      if ( ikey2 .eq. 81 ) exit
@@ -565,7 +569,7 @@
 !               i_domain = domain_coll_add(hyd%domain_coll, domain)
             enddo
 
-         else    
+         else
             ! unknown keyword, ignore until the end of the line
             if (gettoken(line, untileol, ierr) .ne. 0 ) goto 900
 
@@ -581,5 +585,5 @@
       endif
 
       return
- 900  call dherrs('error reading hyd file ('//trim(key(ikey))//')')
+ 900  call dherrs('error reading hyd file ('//trim(key(ikey))//')', 0)
       end subroutine read_hyd

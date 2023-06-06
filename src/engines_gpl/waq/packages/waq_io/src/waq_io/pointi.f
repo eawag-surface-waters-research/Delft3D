@@ -47,6 +47,7 @@
 !     Logical units      : lunut   = unit formatted output file
 !                          lun( 8) = unit intermediate file ('to-from')
 
+      use m_dhopnf
       use grids          ! for the storage of contraction grids
       use rd_token       ! for the reading of tokens
       use timers       !   performance timers
@@ -57,7 +58,7 @@
 
 !     kind           function         name            Descriptipon
 
-      integer  ( 4), intent(in   ) :: lun   (*)     !< array with unit numbers
+      integer  ( 4), intent(inout) :: lun   (*)     !< array with unit numbers
       character( *), intent(inout) :: lchar (*)     !< array with file names of the files
       integer  ( 4), intent(in   ) :: noseg         !< number of computational volumes
       integer  ( 4), intent(in   ) :: noq           !< noq1 + noq2 + noq3

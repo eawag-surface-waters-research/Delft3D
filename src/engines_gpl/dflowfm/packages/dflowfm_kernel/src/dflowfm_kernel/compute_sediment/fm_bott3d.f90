@@ -68,6 +68,7 @@
    use m_fm_update_crosssections
    use m_fm_morstatistics, only: morstats, morstatt0
    use precision_basics
+   use m_mormerge_mpi
    use m_waves
    use unstruc_channel_flow, only: network, t_branch, t_node, nt_LinkNode
    use m_tables, only: interpolate
@@ -151,7 +152,6 @@
    double precision                            :: z
    double precision                            :: timhr
    double precision                            :: Ldir
-   real(hp)                                    :: dim_real
    !!
    !!! executable statements -------------------------------------------------------
    !!
@@ -177,7 +177,6 @@
    error = .false.
    timhr = time1 / 3600.0d0
    nto    = nopenbndsect
-   dim_real = real(ndxi*lsedtot,hp)
    blchg = 0d0
    !
    istat   = 0
@@ -1024,7 +1023,6 @@
       !
       ! Modifications for running parallel conditions (mormerge)
       !
-      !
       if (stmpar%morpar%multi) then
          jamerge = .false.
          if (jamormergedtuser>0) then
@@ -1038,7 +1036,6 @@
             dbodsd = 0d0
             jamerge = .true.
          endif
-
          if (jamerge) then
             ii = 0
             do ll = 1, lsedtot
@@ -1047,9 +1044,9 @@
                   stmpar%morpar%mergebuf(ii) = real(mergebodsed(ll, nm) * kcsmor(nm),hp)
                enddo
             enddo
-            call putarray (stmpar%morpar%mergehandle,dim_real,1)
-            call putarray (stmpar%morpar%mergehandle,stmpar%morpar%mergebuf(1:ndxi*lsedtot),ndxi*lsedtot)
-            call getarray (stmpar%morpar%mergehandle,stmpar%morpar%mergebuf(1:ndxi*lsedtot),ndxi*lsedtot)
+            call update_mergebuffer(stmpar%morpar%mergehandle, ndxi*lsedtot, stmpar%morpar%mergebuf, &
+                jampi, my_rank, DFM_COMM_DFMWORLD)
+
             ii = 0
             do ll = 1, lsedtot
                do nm = 1, ndxi

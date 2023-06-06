@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_cnvper
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE CNVPER ( CHULP  , IHULP  , DTFLG1 , DTFLG3 , IERR   )
 !
@@ -63,7 +69,7 @@
       IMPLICIT NONE
 
       CHARACTER*(*) CHULP
-      REAL*8        OTIM2  , OTIM3  , JULIAN , AFACT
+      REAL*8        OTIM2  , OTIM3  , AFACT
       LOGICAL       DTFLG1 , DTFLG3
       CHARACTER*20  KEY
       INTEGER       IERR, IYEAR, IMONTH, IDAY, IHOUR, IMINUT, ISECND, ISEC, IHULP
@@ -98,3 +104,4 @@
       IERR = 0
       RETURN
       END
+      end module m_cnvper

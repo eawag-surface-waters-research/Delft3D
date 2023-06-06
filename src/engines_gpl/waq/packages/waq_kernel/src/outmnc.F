@@ -22,6 +22,8 @@
 !!  rights reserved.
 
       module m_outmnc
+      use m_srstop
+
       contains
 
       subroutine outmnc ( ncidmap, mncnam , ugridf , timeid , bndtimeid, mncrec, itime , moname ,

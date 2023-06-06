@@ -44,6 +44,7 @@
 !     Name     Type   Library
 !     ------   -----  ------------
 
+      use m_dhkmrk
       USE BottomSet     !  Module with definition of the waterbottom segments
 
       IMPLICIT NONE

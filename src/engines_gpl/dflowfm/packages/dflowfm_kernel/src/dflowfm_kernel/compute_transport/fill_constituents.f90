@@ -160,13 +160,14 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
 
 !        temperature
          if (jatem > 1) then
-            if (tempmin == 0d0) then  ! default behaviour since 2017, positive only  
+            if (Jaallowcoolingbelowzero == 0) then  ! default behaviour since 2017
+                                                    ! no cooling below 0 degrees  
                if (heatsrc(k) > 0d0) then
                   const_sour(ITEMP,k) = heatsrc(k)*dvoli
                else if (heatsrc(k) < 0d0) then
                   const_sink(ITEMP,k) = -heatsrc(k)*dvoli / max(constituents(itemp, k),0.001)
                endif
-            else                      ! allowing negative temperatures
+            else                                    ! allowing cooling below 0 degrees 
                const_sour(ITEMP,k) = heatsrc(k)*dvoli
             endif 
          endif

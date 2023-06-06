@@ -261,9 +261,7 @@ contains
              call vert_swimm_diurnal (   lunrep        , daytime  , k       , nolay   , stick_to_bottom ,    &
                                          dive_at_night , ipart    , wsettl  , kpart   , zpart           ,    &
                                          buoy          , vzact    , v_swim  , d_swim  )
-             
-             ! !Check for depth not to exceed maximum depth             
-             !call intpltd_divelimit ( lunrep, idelt, zlevel, zdepth, vz)             
+                
               
            case ( behaviour_adult )                                                       !Behaviour 2 
 

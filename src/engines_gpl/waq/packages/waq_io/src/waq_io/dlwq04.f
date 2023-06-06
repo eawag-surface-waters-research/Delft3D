@@ -69,6 +69,9 @@
 !                            LUN(12) = unit intermediate file (velocities)
 !                            LUN(13) = unit intermediate file (lengths)
 
+      use m_zoek
+      use m_srstop
+      use m_dhopnf
       use Grids        !   for the storage of contraction grids
       use rd_token     !   for the reading of tokens
       use pointr_mod
@@ -83,7 +86,7 @@
 
 !     kind           function         name                Descriptipon
 
-      integer  ( 4), intent(in   ) :: lun    (*)        !< array with unit numbers
+      integer  ( 4), intent(inout) :: lun    (*)        !< array with unit numbers
       character( *), intent(inout) :: lchar  (*)        !< array with file names of the files
       integer  ( 4), intent(inout) :: filtype(*)        !< type of binary file
       integer  ( 4), intent(inout) :: nrftot (*)        !< number of function items

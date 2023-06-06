@@ -39,6 +39,8 @@
      *                  nosys     ,notot     ,vol0      ,vol1      ,
      *                  intsrt    ,
      *                  difx      ,dify      ,difz      )
+      use m_srstop
+
 !
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT

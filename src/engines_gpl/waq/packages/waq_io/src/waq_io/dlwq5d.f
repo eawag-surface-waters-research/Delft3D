@@ -73,6 +73,7 @@
 !
 !
       use timers       !   performance timers
+      use m_cnvtim
 
       INTEGER       IIMAX  , IRMAX, I
       CHARACTER*(*) LCH(LSTACK) , CHULP
@@ -189,4 +190,3 @@
  1040 FORMAT (/' WARNING ! There are only ',I2,' breakpoints found for this time series' )
 !
       END
-

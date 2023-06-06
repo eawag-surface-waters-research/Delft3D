@@ -555,6 +555,8 @@
       end
 
       subroutine cratab (grp,newtab,initialConfgId,initialConfgName)
+      use m_zoek
+
 
       character*30 grp
       character*10 initialConfgId

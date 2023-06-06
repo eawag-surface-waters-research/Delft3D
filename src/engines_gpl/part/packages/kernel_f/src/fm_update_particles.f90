@@ -59,55 +59,48 @@ subroutine update_particles(q,h0,h1,Dt)
    data ithndl / 0 /
    if ( timon ) call timstrt( "update_particles", ithndl )
 
-   ierror = 1
-
    ! reconstruct velocity field
-   call reconst_vel(q, h0, h1, ierror)
+   call reconst_vel(q, h0, h1)
 
-   if ( ierror == 0 ) then
+   if ( Nopart.gt.0 ) then
+      ! set remaining time to time step
+      dtremaining = Dt
+      numzero = 0
+   end if
 
-      if ( Nopart.gt.0 ) then
-         ! set remaining time to time step
-         dtremaining = Dt
-         numzero = 0
+   do iter=1,MAXITER
+      ! update particles in cells
+      call update_particles_in_cells(numremaining(1), ierror)
+      if ( ierror.ne.0 ) then
+          if ( timon ) call timstop ( ithndl )
+          return
+      endif
+
+      write(*,*) 'iter=', iter, 'numremaining=', numremaining(1)
+      if ( numremaining(1).eq.0 ) then
+         write(*,*) 'iter=', iter
+         exit
       end if
+   end do
 
-      do iter=1,MAXITER
-         ! update particles in cells
-         call update_particles_in_cells(numremaining(1), ierror)
-         if ( ierror.ne.0 ) then
-             if ( timon ) call timstop ( ithndl )
-             return
-         endif
-
-         write(*,*) 'iter=', iter, 'numremaining=', numremaining(1)
-         if ( numremaining(1).eq.0 ) then
-            write(*,*) 'iter=', iter
-            exit
+   ! check for remaining particles
+   if ( numremaining(1).gt.0 ) then
+      ! plot remaining particles
+      do i=1,Nopart
+         if ( dtremaining(i).gt.0d0 .and. mpart(i).gt.0 ) then
+            if ( jsferic.eq.0 ) then
+               xx = xpart(i)
+               yy = ypart(i)
+            else
+               call Cart3Dtospher(xpart(i),ypart(i),zpart(i),xx,yy,ptref)
+            end if
+            write(*,"(I0, ':', 2E25.15, ', ', I0)") i, xx, yy, mpart(i)
          end if
       end do
-
-      ! check for remaining particles
-      if ( numremaining(1).gt.0 ) then
-         ! plot remaining particles
-         do i=1,Nopart
-            if ( dtremaining(i).gt.0d0 .and. mpart(i).gt.0 ) then
-               if ( jsferic.eq.0 ) then
-                  xx = xpart(i)
-                  yy = ypart(i)
-               else
-                  call Cart3Dtospher(xpart(i),ypart(i),zpart(i),xx,yy,ptref)
-               end if
-               write(*,"(I0, ':', 2E25.15, ', ', I0)") i, xx, yy, mpart(i)
-            end if
-         end do
-         call mess(LEVEL_WARN, 'update_particles: iter>MAXITER')
-         if ( timon ) call timstop ( ithndl )
-         return
-      end if
-
-      ierror = 0
-   endif
+      call mess(LEVEL_WARN, 'update_particles: iter>MAXITER')
+      if ( timon ) call timstop ( ithndl )
+      return
+   end if
 
    if ( timon ) call timstop ( ithndl )
 end subroutine update_particles
@@ -116,11 +109,12 @@ end subroutine update_particles
 !> update positions of particles within triangles
 subroutine update_particles_in_cells(numremaining, ierror)
    use partmem, only: nopart, mpart
-   use m_particles
+   use m_particles, laypart => kpart
    use m_partrecons
    use m_partmesh
    use MessageHandling
    use m_sferic, only: jsferic
+   use m_flowgeom, only: lnx
    use timers
 
    implicit none
@@ -129,7 +123,7 @@ subroutine update_particles_in_cells(numremaining, ierror)
    integer,        intent(out) :: ierror       !< error (1) or not (0)
 
    integer                     :: ipart
-   integer                     :: i, k, k1, k2, L
+   integer                     :: i, k, k1, k2, L, kl
    integer                     :: ja
    integer                     :: Lexit
 
@@ -170,6 +164,7 @@ subroutine update_particles_in_cells(numremaining, ierror)
       if ( dtremaining(ipart).eq.0d0 .or. mpart(ipart).lt.1 ) cycle
       ! get cell (flownode) particle in in
       k = mpart(ipart)
+      kl = k + (laypart(ipart) - 1) * numcells
 
       ! compute exit time <= dtremaining
       tex = dtremaining(ipart)
@@ -177,10 +172,10 @@ subroutine update_particles_in_cells(numremaining, ierror)
       Lexit = 0   ! exit edge (flowlink)
 
       ! compute velocity at current position
-      ux0 = u0x(k) + alphafm(k)*(xpart(ipart)-xzwcell(k))
-      uy0 = u0y(k) + alphafm(k)*(ypart(ipart)-yzwcell(k))
+      ux0 = u0x(kl) + alphafm(kl)*(xpart(ipart)-xzwcell(k))
+      uy0 = u0y(kl) + alphafm(kl)*(ypart(ipart)-yzwcell(k))
       if ( jsferic.ne.0 ) then
-         uz0 = u0z(k) + alphafm(k)*(zpart(ipart)-zzwcell(k))
+         uz0 = u0z(kl) + alphafm(kl)*(zpart(ipart)-zzwcell(k))
       end if
 
       ! loop over edges (netlinks) of cells
@@ -248,7 +243,7 @@ subroutine update_particles_in_cells(numremaining, ierror)
 
             if ( un.gt.max(DTOLun_rel*d,DTOLun) ) then   ! normal velocity does not change sign: sufficient to look at u0.n
                ! compute exit time for this edge: ln(1+ d/un alpha) / alpha
-               dvar = alphafm(k)*dis/un
+               dvar = alphafm(kl)*dis/un
                if ( dvar.gt.-1d0) then
                   t = dis/un
                   if ( abs(dvar).ge.DTOL ) then
@@ -278,10 +273,10 @@ subroutine update_particles_in_cells(numremaining, ierror)
       dt = min(dtremaining(ipart), tex)
 
       ! update particle
-      if ( abs(alphafm(k)).lt.DTOL ) then
+      if ( abs(alphafm(kl)).lt.DTOL ) then
          dvar = dt
       else
-         dvar = (exp(alphafm(k)*dt)-1d0)/alphafm(k)
+         dvar = (exp(alphafm(kl)*dt)-1d0)/alphafm(kl)
       end if
 
       xpart(ipart) = xpart(ipart) + dvar * ux0

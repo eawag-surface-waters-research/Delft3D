@@ -51,6 +51,7 @@
 
 !     Routines            : zoek20  - to search the delwaq names
 
+      use m_zoek
       use timers
 !
       implicit none

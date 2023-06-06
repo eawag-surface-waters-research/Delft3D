@@ -42,6 +42,7 @@
 !
       SUBROUTINE CHINP2 (RUNNAM, LUIC  , LUOC  )
 
+      use m_srstop
       use m_charon
 !
 !     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION

@@ -22,6 +22,8 @@
 !!  rights reserved.
 
 subroutine read_hydfile( lunout, hydfile, lchar, noseg, nexch, ierr )
+use m_dhpath
+
 
 !   Deltares Software Centre
 

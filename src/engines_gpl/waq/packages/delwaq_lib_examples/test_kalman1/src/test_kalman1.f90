@@ -26,6 +26,7 @@
 !
 program test_kalman0
 
+    use m_waq_multi_instance
     use m_openda_quantities
     use waq_omi_constants
 

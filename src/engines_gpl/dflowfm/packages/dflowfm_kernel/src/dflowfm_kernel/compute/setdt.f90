@@ -40,11 +40,10 @@ subroutine setdt()
    use unstruc_display,  only: jaGUI
    use m_sediment,       only: jased, stm_included, stmpar, jamorcfl, jamormergedtuser
    use m_fm_erosed,      only: duneavalan
+   use m_mormerge
    implicit none
 
    double precision :: dtsc_loc
-   double precision :: dim_real
-
    integer          :: nsteps
    integer          :: jareduced
 
@@ -71,7 +70,6 @@ subroutine setdt()
    end if
 
    dtsc_loc = dtsc
-   dim_real = 1.0d0
 
    !  globally reduce time step
    if ( jampi.eq.1 ) then
@@ -121,10 +119,8 @@ subroutine setdt()
    endif
 
    if (stm_included .and. jased>0) then
-      if (stmpar%morpar%multi .and. jamormergedtuser==0) then
-         call putarray (stmpar%morpar%mergehandle,dim_real,1)
-         call putarray (stmpar%morpar%mergehandle,dts,1)
-         call getarray (stmpar%morpar%mergehandle,dts,1)
+      if (stmpar%morpar%multi .and. jamormergedtuser==0 .and. my_rank == 0 ) then
+         call put_get_time_step(stmpar%morpar%mergehandle, dts)
       endif
    endif
 

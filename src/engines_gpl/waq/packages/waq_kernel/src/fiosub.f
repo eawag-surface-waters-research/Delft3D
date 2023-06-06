@@ -28,6 +28,8 @@
      +                   bound , noloc , proloc, nodef , defaul,
      +                   ncout , ntdmpq, paname, sfname, funame,
      +                   danam )
+      use m_zoek
+      use m_zero
       use timers
 
       implicit none

@@ -76,6 +76,8 @@
 !                          LUN(14) = unit intermediate file (boundaries)
 !                          LUN(15) = unit intermediate file (wastes)
 
+      use m_zoek
+      use m_dhopnf
       use rd_token
       use timers       !   performance timers
       use dlwq_data
@@ -85,7 +87,7 @@
 
       implicit none
 
-      integer  ( 4), intent(in   ) :: lun  (*)      !< array with unit numbers
+      integer  ( 4), intent(inout) :: lun  (*)      !< array with unit numbers
       character( *), intent(inout) :: lchar(*)      !< filenames
       integer  ( 4), intent(in   ) :: iu            !< index in LUN array of workfile
       integer  ( 4), intent(in   ) :: iwidth        !< width of the output file

@@ -50,7 +50,8 @@ subroutine unc_init_trk()
    ierr = nf90_put_att(itrkfile, id_trk_time,  'units'        , trim(Tudunitstr))
    ierr = nf90_put_att(itrkfile, id_trk_time,  'standard_name', 'time')
 
-   call unc_write_part_header(itrkfile,id_trk_timedim,id_trk_partdim,id_trk_parttime,id_trk_partx,id_trk_party,id_trk_partz)
+   call unc_write_part_header(itrkfile, id_trk_timedim, id_trk_partdim, id_trk_parttime, &
+           id_trk_partx, id_trk_party, id_trk_partz)
    ierr = nf90_enddef(itrkfile)
    it_trk = 0
 end subroutine unc_init_trk
@@ -225,7 +226,6 @@ subroutine unc_write_map()
    implicit none
 
    integer                      :: ierr, time_map, k, isub
-   double precision, pointer    :: pconc(:,:)
 
    integer(4) ithndl              ! handle to time this subroutine
    data ithndl / 0 /
@@ -234,7 +234,7 @@ subroutine unc_write_map()
    ! Increment output counters in m_flowtimes.
    time_map = nint(time1)
    it_map   = it_map + 1
-   ierr = nf90_put_var(imapfile, id_map_time, time_map, (/ it_map /))
+   ierr = nf90_put_var(imapfile, id_map_time, time_map, [it_map])
    if (ierr /= nf90_noerr) then
       call mess(LEVEL_ERROR, 'Could not write time to file map')
       if ( timon ) call timstop( ithndl )
@@ -245,17 +245,15 @@ subroutine unc_write_map()
    !     simply fill the work array directly
    do isub = 1, nosubs
       call comp_concentration(h1,nosubs,isub,constituents)
-      do k=1,Ndx
-         work(k) = constituents(isub,k)
-      end do
 
       ! AM: consider using a 2D pointer p, pointing to the work array as p(nosegl,nolay)
       !     then we can make the structure of the netCDF file nicer
       if ( hyd%nolay == 1 ) then
-         ierr = nf90_put_var(imapfile, id_map_depth_averaged_particle_concentration(isub), work(1:Ndx), start = (/ 1, it_map /))
+         ierr = nf90_put_var(imapfile, id_map_depth_averaged_particle_concentration(isub), &
+                    constituents(isub,:,1), start = [1, it_map])
       else
-         pconc(1:hyd%nosegl,1:hyd%nolay) => work
-         ierr = nf90_put_var(imapfile, id_map_depth_averaged_particle_concentration(isub), pconc, start = (/ 1, 1, it_map /))
+         ierr = nf90_put_var(imapfile, id_map_depth_averaged_particle_concentration(isub), &
+                    constituents(isub,:,:), start = [1, 1, it_map])
       endif
 
       if (ierr /= nf90_noerr) then
@@ -286,7 +284,8 @@ end subroutine unc_close_map
 
 
 !> write particle tracks header to netcdf trk file
-subroutine unc_write_part_header(ifile,id_timedim,id_trk_partdim,id_trk_parttime,id_trk_partx,id_trk_party,id_trk_partz)
+subroutine unc_write_part_header(ifile, id_timedim, id_trk_partdim, id_trk_parttime, &
+              id_trk_partx, id_trk_party, id_trk_partz)
    use m_particles
    use netcdf
    use m_flow, only: kmx
@@ -354,7 +353,7 @@ end subroutine unc_write_part_header
 
 
 !> write particles to netcdf file
-subroutine unc_write_part(ifile,itime,id_trk_parttime,id_trk_partx,id_trk_party,id_trk_partz)
+subroutine unc_write_part(ifile, itime, id_trk_parttime, id_trk_partx, id_trk_party, id_trk_partz)
    use partmem, only: nopart
    use m_particles
    use netcdf
@@ -371,7 +370,7 @@ subroutine unc_write_part(ifile,itime,id_trk_parttime,id_trk_partx,id_trk_party,
    integer,                        intent(in)  :: itime
    integer,                        intent(in)  :: id_trk_parttime, id_trk_partx, id_trk_party, id_trk_partz
 
-   double precision, dimension(:), allocatable :: xx, yy
+   double precision, dimension(:), allocatable :: xx, yy, zz
 
    double precision                            :: dis2
 
@@ -387,6 +386,9 @@ subroutine unc_write_part(ifile,itime,id_trk_parttime,id_trk_partx,id_trk_party,
    !  allocate
    call realloc(xx, NopartTot, keepExisting=.false., fill = dmiss)
    call realloc(yy, NopartTot, keepExisting=.false., fill = dmiss)
+   if ( kmx > 0 ) then
+      call realloc(zz, NopartTot, keepExisting=.false., fill = dmiss)
+   endif
 
    if ( jsferic.eq.1 ) then
       do ii=1,Nopart
@@ -407,9 +409,12 @@ subroutine unc_write_part(ifile,itime,id_trk_parttime,id_trk_partx,id_trk_party,
       endif
    endif
 
-   ! Place holder - we need this for the 2D->3D extension
-   if ( kmx.gt.0 ) then
-      !     particle vertical coordinate
+   !
+   ! Compute the height of the particles in the water from the layer (laypart)
+   ! and the position within the layer. Then write it to the file
+   !
+   if ( kmx > 0 ) then
+      ierr = nf90_put_var(ifile, id_trk_partz, zz, start=(/ 1,itime /), count=(/ NopartTot,1 /) )
    end if
 
    !  error handling
@@ -486,55 +491,55 @@ end subroutine setTUDUnitString
 
 !> compute concentrations of particles (parts per unit volume) in flownodes
 subroutine comp_concentration(h, nconst, iconst, c)
-   use partmem, only: mpart, wpart, oil, nfract, nopart
-   use m_particles
+   use partmem, only: mpart, wpart, oil, nfract, nopart, hyd
+   use m_particles, laypart => kpart
    use m_partmesh
    use m_flowgeom, only : Ndx, ba, bl
    use m_flowparameters, only: epshs
-   use m_flow, only: Ndkx
+   use m_flow, only: Ndkx, kmx
    use timers
 
    implicit none
 
-   double precision, dimension(Ndx),        intent(in)  :: h      !< water depth
-   integer,                                 intent(in)  :: nconst !< number of constituents
-   integer,                                 intent(in)  :: iconst !< particle tracer constituent number
-   double precision, dimension(Nconst,Ndx), intent(out) :: c      !< constituents
+   !! TODO: Make these assumed-shape arrays!
+   double precision, dimension(Ndx/kmx,kmx),        intent(in)  :: h      !< water depth
+   integer,                                         intent(in)  :: nconst !< number of constituents
+   integer,                                         intent(in)  :: iconst !< particle tracer constituent number
+   double precision, dimension(Nconst,Ndx/kmx,kmx), intent(out) :: c      !< constituents
 
-   integer :: i, k, ifract
+   integer :: i, k, kl, ifract, lay
 
    integer(4) ithndl              ! handle to time this subroutine
    data ithndl / 0 /
    if ( timon ) call timstrt( "comp_concentration", ithndl )
 
-   do i=1,Ndx
-      c(iconst,i) = 0d0
-   end do
+   c(iconst,:,:) = 0d0
 
    !  count number of particles per cell
    do i=1,Nopart
       k = mpart(i)
       if ( k.eq.0 ) cycle
 
-      k = iabs(cell2nod(k))
+      k   = iabs(cell2nod(k))
+      lay = laypart(i)
 
-      c(iconst,k) = c(iconst,k) + wpart(iconst, i)
+      c(iconst,k,lay) = c(iconst,k,lay) + wpart(iconst, i)
    end do
 
-   !  compute concentration (parts per unit volume) , but for the oil module shoudl it be per m2 (ie divided by the depth of the segment), for sticky and surface oil
-   do k=1,Ndx
-      if ( h(k) .gt. epshs ) then
-         c(iconst,k) = c(iconst,k) / (ba(k)*(h(k)-bl(k)))
-         if (oil) then
-            do ifract = 1 , nfract
-                c(1 + 3 * (ifract - 1), k) =  c(1 + 3 * (ifract - 1), k) * (h(k)-bl(k))  ! surface floating oil per m2
-                c(3 + 3 * (ifract - 1), k) =  c(3 + 3 * (ifract - 1), k) * (h(k)-bl(k))  ! surface floating oil per m2
-            enddo
+   !  compute concentration (parts per unit volume) , but for the oil module should it be per m2 (ie divided by the depth of the segment), for sticky and surface oil
+   do lay = 1,kmx
+      do k=1,hyd%nosegl
+         if ( h(k,lay) .gt. epshs ) then
+            kl = k + (lay-1) * hyd%nosegl
+            c(iconst,k,lay) = c(iconst,k,lay) / (ba(kl)*(h(k,lay)-bl(kl)))
+            if (oil) then
+               do ifract = 1 , nfract
+                  c(1 + 3 * (ifract - 1), k, lay) =  c(1 + 3 * (ifract - 1), k, lay) * (h(k,lay)-bl(kl))  ! surface floating oil per m2
+                  c(3 + 3 * (ifract - 1), k, lay) =  c(3 + 3 * (ifract - 1), k, lay) * (h(k,lay)-bl(kl))  ! surface floating oil per m2
+               end do
+            endif
          endif
-
-      else
-         c(iconst,k) = 0d0
-      end if
+      end do
    end do
 
    if ( timon ) call timstop ( ithndl )

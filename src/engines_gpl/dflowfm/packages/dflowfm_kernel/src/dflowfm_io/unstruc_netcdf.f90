@@ -46,7 +46,7 @@ module unstruc_netcdf
 use precision
 use netcdf
 use unstruc_messages
-use unstruc_version_module
+use dflowfm_version_module
 use io_ugrid
 use m_sediment
 use string_module
@@ -550,14 +550,14 @@ contains
 
 !> Initializes some global variables needed for writing NetCDF files during a run.
 subroutine init_unstruc_netcdf()
-use unstruc_version_module
+use dflowfm_version_module
 
    integer :: ierr
 
-   ug_meta_fm%institution = trim(unstruc_company)
-   ug_meta_fm%source      = trim(unstruc_program)
-   ug_meta_fm%references  = trim(unstruc_company_url)
-   ug_meta_fm%version     = trim(unstruc_version)
+   ug_meta_fm%institution = trim(company)
+   ug_meta_fm%source      = trim(product_name)
+   ug_meta_fm%references  = trim(company_url)
+   ug_meta_fm%version     = trim(version_full)
    ug_meta_fm%modelname   = ''
    unc_metadatafile = ''
    unc_meta_md_ident = ''
@@ -719,7 +719,7 @@ end function unc_meta_add_from_environment
 !! NOTE: this function is an implementation of the netcdf_utils::ncu_apply_to_att interface.
 function unc_meta_fill_placeholders(attname, valuetext) result(ierr)
    use dfm_error
-   use unstruc_version_module, only: unstruc_program
+   use dflowfm_version_module, only: product_name
 
    character(len=*),              intent(in   ) :: attname   !< attribute name
    character(len=:), allocatable, intent(inout) :: valuetext !< attribute value text, placeholders will be replaced in-place.
@@ -729,7 +729,7 @@ function unc_meta_fill_placeholders(attname, valuetext) result(ierr)
 
    valuetext = replace_string(valuetext, '${dfm_md_ident}', trim(unc_meta_md_ident))
    valuetext = replace_string(valuetext, '${dfm_net_file}', trim(unc_meta_net_file))
-   valuetext = replace_string(valuetext, '${dfm_program_name}', trim(unstruc_program))
+   valuetext = replace_string(valuetext, '${dfm_program_name}', trim(product_name))
 end function unc_meta_fill_placeholders
 
 
@@ -2362,16 +2362,16 @@ subroutine unc_addglobalatts(ncid)
        return
     end if
 
-    ierr = nf90_put_att(ncid, nf90_global,  'institution', trim(unstruc_company))
-    ierr = nf90_put_att(ncid, nf90_global,  'references', trim(unstruc_company_url))
+    ierr = nf90_put_att(ncid, nf90_global,  'institution', trim(company))
+    ierr = nf90_put_att(ncid, nf90_global,  'references', trim(company_url))
     ierr = nf90_put_att(ncid, nf90_global,  'source', &
-            unstruc_version_full//                    &
+            version_full//                    &
             ', model ')!''//trim(md_ident)//'''')
 
     call date_and_time(cdate, ctime, czone)
     ierr = nf90_put_att(ncid, nf90_global,  'history', &
         'Created on '//cdate(1:4)//'-'//cdate(5:6)//'-'//cdate(7:8)//'T'//ctime(1:2)//':'//ctime(3:4)//':'//ctime(5:6)//czone(1:5)// &
-        ', '//trim(unstruc_program))
+        ', '//trim(product_name))
     ierr = nf90_put_att(ncid, nf90_global,  'date_created',  cdate(1:4)//'-'//cdate(5:6)//'-'//cdate(7:8)//'T'//ctime(1:2)//':'//ctime(3:4)//':'//ctime(5:6)//czone(1:5))
     ierr = nf90_put_att(ncid, nf90_global,  'date_modified', cdate(1:4)//'-'//cdate(5:6)//'-'//cdate(7:8)//'T'//ctime(1:2)//':'//ctime(3:4)//':'//ctime(5:6)//czone(1:5))
 

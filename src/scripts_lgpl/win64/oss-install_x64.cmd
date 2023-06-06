@@ -267,13 +267,10 @@ rem ===================
     echo "installing d_hydro . . ."
 
     set dest_bin="!dest_main!\x64\dflow2d3d\bin"
-    set dest_menu="!dest_main!\x64\menu\bin"
 
     call :makeDir !dest_bin!
-    call :makeDir !dest_menu!
 
     call :copyFile engines_gpl\d_hydro\bin\x64\Release\d_hydro.exe      !dest_bin!
-    call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl    !dest_menu!
 goto :endproc
 
 

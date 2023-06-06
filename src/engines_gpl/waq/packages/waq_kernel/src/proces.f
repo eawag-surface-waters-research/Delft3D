@@ -37,7 +37,7 @@
      &                    vartda , vardag , vartag , varagg , arrpoi ,
      &                    arrknd , arrdm1 , arrdm2 , vgrset , grdnos ,
      &                    grdseg , novar  , a      , nogrid , ndmps  ,
-     &                    pronam , intsrt ,  
+     &                    pronam , intsrt ,
      &                    prvpnt , done   , nrref  , proref , nodef  ,
      &                    surfac , lunrep )
 
@@ -67,9 +67,18 @@
 
 !     Files               : Monitoring file if needed for messages
 
+      use m_srstop
+      use m_monsys
+      use m_getcom
+      use m_dhagg2
+      use m_dhgvar
+      use m_dhgpoi
       use timers
       use iso_c_binding
       use process_registration
+      use m_dhaggr
+      use m_dhagkm
+      use m_dhdag2
 
       implicit none
 
@@ -84,7 +93,7 @@
       integer( 4), intent(in   ) :: noseg                       !< Nr. of computational volumes
       integer( 4), intent(in   ) :: nodef                       !< Number of values in the deafult array
       integer( 4), intent(in   ) :: novar                       !<
-      real   ( 4), intent(in   ) :: conc  (notot,noseg,nogrid)  !< Model concentrations
+      real   ( 4), intent(inout) :: conc  (notot,noseg,nogrid)  !< Model concentrations
       real   ( 4), intent(in   ) :: volume(      noseg,nogrid)  !< Segment volumes
       integer( 4), intent(in   ) :: itime                       !< Time in system clock units
       integer( 4), intent(in   ) :: idt                         !< Time step system clock units
@@ -686,7 +695,7 @@
      &                       iknmrk  , noq1         , noq2    , noq3    , noq4    ,
      &                       nproc   , notot        , deriv   , stochi  , volume  ,
      &                       prondt  , ibflag       , isdmp   , flxdmp  , novar   ,
-     &                       vartag  , iiknmr       , pronam  , 
+     &                       vartag  , iiknmr       , pronam  ,
      &                       dspndt  , velndt       , dll_opb )
 
                done(iproc) = 1                           ! this process has resolved its output
@@ -707,7 +716,7 @@
       call twopro ( nproc  , nogrid , noflux , novar  , noseg  ,
      &              notot  , progrd , grdnos , iflux  , vgrset ,
      &              grdseg , volume , deriv  , stochi , flux   ,
-     &              prondt , ibflag , isdmp  , flxdmp , 
+     &              prondt , ibflag , isdmp  , flxdmp ,
      &              ipbloo , ipchar , istep  )
 
 !     Store fluxes and elaborate mass balances set fractional step
@@ -793,12 +802,17 @@
      +                    IKNMRK, NOQ1  , NOQ2  , NOQ3  , NOQ4  ,
      +                    NPROC , NOTOT , DERIV , STOCHI, VOLUME,
      +                    PRONDT, IBFLAG, ISDMP , FLXDMP, NOVAR ,
-     +                    VARTAG, IIKNMR, PRONAM, 
+     +                    VARTAG, IIKNMR, PRONAM,
      +                    DSPNDT, VELNDT, dll_opb)
 !
       use timers
       use iso_c_binding
       use process_registration
+      use m_dhaggr
+      use m_dhdag2
+      use m_dhdagg
+      use m_dhgpoi
+      use m_dhgvar
 !
       INTEGER             IPROC , K     , IDT   , ITFACT, NOGRID,
      +                    NOSEG , NOFLUX, NOQ1  , NOQ2  , NOQ3  ,
@@ -816,7 +830,7 @@
      +                    IFLUX (*)      , PROMNR(*)      ,
      +                    IEXPNT(*)      , IKNMRK(*)      ,
      +                    PRONDT(*)      , ISDMP (*)      ,
-     +                    VARTAG(*)      , 
+     +                    VARTAG(*)      ,
      +                    DSPNDT(*)      , VELNDT(*)
       REAL                A(*)           , FLUX(*)        ,
      +                    DERIV(*)       , STOCHI(*)      ,
@@ -1143,7 +1157,7 @@
       subroutine twopro ( nproc  , nogrid , noflux , novar  , noseg  ,
      &                    notot  , progrd , grdnos , iflux  , vgrset ,
      &                    grdseg , volume , deriv  , stochi , flux   ,
-     &                    prondt , ibflag , isdmp  , flxdmp , 
+     &                    prondt , ibflag , isdmp  , flxdmp ,
      &                    ipbloo , ipchar , istep  )
 
 !     Deltares - Delft Software Department
@@ -1166,6 +1180,9 @@
 !                           profld - fills the dump array for fluxes used in a mass balance
 
       use timers
+      use m_dhaggr
+      use m_dhdag2
+
       implicit none
 
 !     Arguments           :

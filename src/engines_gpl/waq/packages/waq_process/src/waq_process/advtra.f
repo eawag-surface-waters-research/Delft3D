@@ -53,6 +53,7 @@
 !    integer :: topsedsed  ! first within collumn exchange number
 !    integer :: botsedsed  ! last exchange of collumn to deeper bnd
 !
+      use m_dhkmrk
       USE BottomSet     !  Module with derived types and add function
 
 !     type ( BotColmnColl ) :: Coll  <= is defined in the module
@@ -791,6 +792,9 @@
 !    integer :: topsedsed  ! first within collumn exchange number
 !    integer :: botsedsed  ! last exchange of collumn to deeper bnd
 !
+      use m_srstop
+      use m_monsys
+      use m_dhkmrk
       USE BottomSet     !  Module with derived types and add function
 
 !     type ( BotColmnColl ) :: Coll  <= is defined in the module

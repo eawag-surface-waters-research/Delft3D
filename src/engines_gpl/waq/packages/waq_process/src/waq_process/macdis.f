@@ -24,6 +24,10 @@
       SUBROUTINE MACDIS     ( PMSA   , FL     , IPOINT , INCREM, NOSEG ,
      +                        NOFLUX , IEXPNT , IKNMRK , NOQ1  , NOQ2  ,
      +                        NOQ3   , NOQ4   )
+      use m_srstop
+      use m_monsys
+      use m_dhkmrk
+
 !
 !*******************************************************************************
 !

@@ -34,6 +34,7 @@
      j                   flxcon, noutlim, outlim, nunucom, nuecogm,
      j                   con2out,swblsa , totnin, totpin, totsiin )
 
+      use m_srstop
       use bloom_data_dim
       use bloom_data_size
       use bloom_data_caldynam

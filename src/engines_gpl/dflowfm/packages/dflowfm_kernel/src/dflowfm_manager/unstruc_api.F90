@@ -49,7 +49,7 @@ use m_landboundary
 use M_splines
 use m_monitoring_crosssections
 use unstruc_files
-use unstruc_version_module, only : unstruc_basename
+use dflowfm_version_module, only : base_name
 use gridoperations
 use m_samples
 
@@ -62,7 +62,7 @@ use m_samples
     !endif
     !
 
-    call inidia(unstruc_basename)
+    call inidia(base_name)
 
     KMAX = 2
     LMAX = 2

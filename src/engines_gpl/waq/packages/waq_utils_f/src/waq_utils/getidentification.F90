@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module m_getidentification
+
+implicit none
+
+contains
+
 
       subroutine getidentification(idstr)
          !
@@ -33,3 +39,4 @@
          call getfullversionstring_delwaq(idstr)
 
       end subroutine
+end module m_getidentification

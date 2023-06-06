@@ -22,13 +22,15 @@ if(WIN32)
     set(oss_dependencies    deltares_common
                             io_netcdf
                             netcdf4
-                            netcdff)
+                            netcdff
+                            waq_utils_f)
 endif(WIN32)
 
 if(UNIX)
     # Add dependency
     set(oss_dependencies deltares_common
-                         io_netcdf)
+                         io_netcdf
+                         waq_utils_f)
     target_compile_definitions(${library_name} PRIVATE LINUX64)
 
     target_link_libraries(${library_name} ${oss_dependencies} PkgConfig::NETCDF PkgConfig::NETCDF_FTN)
