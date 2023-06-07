@@ -27,5 +27,6 @@ def convert_vfproj_files(file_name):
             file.close()
 
 if sys.argv[1] == "ifx":
+    print("Converting *.vfproj files to use IFX instead of IFORT")
     for file_name in folder_path.rglob("*.vfproj"):
         convert_vfproj_files(file_name)
