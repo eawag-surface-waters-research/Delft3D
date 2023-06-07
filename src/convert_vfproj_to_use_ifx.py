@@ -8,8 +8,8 @@ import sys
 import re
 from pathlib import Path
 
-build_dir = sys.argv[1]
-cmake_build_type = sys.argv[2]
+build_dir = sys.argv[2]
+cmake_build_type = sys.argv[3]
 
 folder_path = Path(build_dir).absolute()
 
@@ -25,6 +25,7 @@ def convert_vfproj_files(file_name):
         with open(file_name, 'w') as file:
             file.write(filedata)
             file.close()
-         
-for file_name in folder_path.rglob("*.vfproj"):
-    convert_vfproj_files(file_name)
+
+if sys.argv[1] == "ifx":
+    for file_name in folder_path.rglob("*.vfproj"):
+        convert_vfproj_files(file_name)
