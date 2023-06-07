@@ -214,6 +214,10 @@
 ! also disabled isolated cells due to cutcells and store masks
   call cutcell_list(6,'dum',3, 1)
 
+ if (strip_mesh .gt. 0) then
+    call remove_unused_nodes_and_links()
+ endif
+ 
  ! if (makeorthocenters .gt. 0 .and. jglobe == 0) then
  if (makeorthocenters .gt. 0) then
     call make_orthocenters(0.5d-2,makeorthocenters)
