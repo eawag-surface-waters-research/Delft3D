@@ -72,7 +72,7 @@ subroutine setdt()
    dtsc_loc = dtsc
 
    !  globally reduce time step
-   if ( jampi.eq.1 ) then
+   if ( jampi.eq.1 .and. jareduced.eq.0 ) then
       !     globally reduce dts (dtsc may now be larger)
       if ( jatimer.eq.1 ) call starttimer(IMPIREDUCE)
       call reduce_double_min(dts)
