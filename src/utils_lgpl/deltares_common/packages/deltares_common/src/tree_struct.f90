@@ -768,19 +768,17 @@ subroutine tree_get_data_string( tree, string, success )
       if ( .not. associated(data_ptr) ) then
          return
       endif
-      if ( data_type /= 'STRING' ) then
+      if ( data_type(1:6) /= 'STRING' ) then
          return
       endif
 
       success = .true.
       length  = size(data_ptr)
       string  = ' '
-      if (length <= len(string)) then
-         length = min(length,len(string))
-         do i=1, length
-            string(i:i) = data_ptr(i)
-         end do
-      endif
+      length = min(length,len(string))
+      do i=1, length
+         string(i:i) = data_ptr(i)
+      end do
    endif
 
 end subroutine tree_get_data_string
@@ -808,7 +806,7 @@ subroutine tree_get_data_alloc_string( tree, string, success )
       if ( .not. associated(data_ptr) ) then
          return
       endif
-      if ( data_type /= 'STRING' ) then
+      if ( data_type(1:6) /= 'STRING' ) then
          return
       endif
 

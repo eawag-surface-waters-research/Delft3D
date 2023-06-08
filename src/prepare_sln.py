@@ -46,12 +46,14 @@ preparationOnly = "unknown"
 
 config = {}
 config[0] = "all"
-config[1] = "dflowfm"
-config[2] = "dflowfm_interacter"
-config[3] = "dimr"
-config[4] = "dwaq"
-config[5] = "swan"
-config[6] = "tests"
+config[1] = "delft3d4"
+config[2] = "delft3dfm"
+config[3] = "dflowfm"
+config[4] = "dflowfm_interacter"
+config[5] = "dimr"
+config[6] = "dwaq"
+config[7] = "swan"
+config[8] = "tests"
 
 #
 # libdir specifies the directory containing the ifort compiler libraries
@@ -641,12 +643,14 @@ def build_gui():
     Label(text="CMake configuration:", relief=RIDGE, width=20).grid(row=1, column=0)
     
     Radiobutton(root, text="all (build full OSS tree)         ", variable=config_gui, value=0).grid(row=2, column=0, sticky=W)
-    Radiobutton(root, text="dflowfm                           ", variable=config_gui, value=1).grid(row=3, column=0, sticky=W)
-    Radiobutton(root, text="dflowfm_interacter (check .../src/engines_gpl/dflowfm/interacter/README)", variable=config_gui, value=2).grid(row=3, column=1, columnspan=3, sticky=W)
-    Radiobutton(root, text="dimr                              ", variable=config_gui, value=3).grid(row=5, column=0, sticky=W)
-    Radiobutton(root, text="dwaq                              ", variable=config_gui, value=4).grid(row=6, column=0, sticky=W)
-    Radiobutton(root, text="swan                              ", variable=config_gui, value=5).grid(row=5, column=1, sticky=W)
-    Radiobutton(root, text="tests                             ", variable=config_gui, value=6).grid(row=6, column=1, sticky=W)
+    Radiobutton(root, text="Delft3D 4                         ", variable=config_gui, value=1).grid(row=3, column=0, sticky=W)
+    Radiobutton(root, text="Delft3D FM / D-HYDRO              ", variable=config_gui, value=2).grid(row=3, column=1, sticky=W)
+    Radiobutton(root, text="dflowfm                           ", variable=config_gui, value=3).grid(row=4, column=0, sticky=W)
+    Radiobutton(root, text="dflowfm_interacter (check .../src/engines_gpl/dflowfm/interacter/README)", variable=config_gui, value=4).grid(row=4, column=1, columnspan=3, sticky=W)
+    Radiobutton(root, text="dimr                              ", variable=config_gui, value=5).grid(row=5, column=0, sticky=W)
+    Radiobutton(root, text="dwaq                              ", variable=config_gui, value=6).grid(row=6, column=0, sticky=W)
+    Radiobutton(root, text="swan                              ", variable=config_gui, value=7).grid(row=5, column=1, sticky=W)
+    Radiobutton(root, text="unit tests                        ", variable=config_gui, value=8).grid(row=6, column=1, sticky=W)
     config_gui.set(0)
     
     Label(text=" ").grid(row=99)
