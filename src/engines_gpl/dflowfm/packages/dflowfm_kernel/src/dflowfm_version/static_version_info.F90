@@ -40,15 +40,15 @@ module static_version_info
 
     character(*),  public, parameter :: version_full = trim(major)//'.'//trim(minor)//'.'//trim(revision)//'.'//trim(build_nr)
     character(*),  public, parameter :: version_prefix      = company
-    character(*),  public, parameter :: version_prefix_id   = '@(#) '// company
+    character(*),  public, parameter :: version_prefix_id   = '@(#)'// company
     character(*),  public, parameter :: version_suffix      = version_full
-    character(*),  public, parameter :: version_suffix_full = ' Version '//version_suffix//', '//__DATE__//', '//__TIME__
+    character(*),  public, parameter :: version_suffix_full = 'Version '//version_suffix//', '//__DATE__//', '//__TIME__
 
     ! While in principle we can use a literal constant, this allows the complier/linker to get rid of the
     ! literal string. Since we want that string to be present in the executable or DLL, we need to use
     ! this trick instead. It fools the compiler into retaining the full string, so that a tool like
     ! "strings" on Linux can extract it.
-    integer, protected, save :: offset = 6
+    integer, protected, save :: offset = 5
 
 end module static_version_info
 

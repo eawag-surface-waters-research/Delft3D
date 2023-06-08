@@ -2,6 +2,8 @@
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
 set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/io_netcdf_version.F90)
 set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
+set(rc_dir ${CMAKE_CURRENT_SOURCE_DIR}/version)
+set(rc_version_file ${rc_dir}/io_netcdf_version_number.rc)
 
 if(UNIX)
     # the `pkg_check_modules` function is created with this call
@@ -27,7 +29,7 @@ add_library(${library_name} ${sources} ${fortran_version_file})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources} ${fortran_version_file})
 set_target_properties (${library_name} PROPERTIES FOLDER utils_lgpl/io_netcdf)
 
-target_include_directories(${library_name}  PRIVATE ${version_include_dir})
+target_include_directories(${library_name}  PRIVATE ${version_include_dir} ${rc_dir})
 
 if(UNIX)
     # Add dependency
@@ -83,8 +85,9 @@ if ( ${configuration_type} STREQUAL "DFLOWFM" OR
     set(library_name io_netcdf_dll)
     set(library_renamed libio_netcdf.so)
     # Add dynamic io_netcdf library
-    add_library(${library_name} SHARED ${src_path}/io_netcdf_api.F90)
-
+    add_library(${library_name} SHARED ${src_path}/io_netcdf_api.F90 ${rc_version_file})
+    include_directories(${version_include_dir})
+	
     set(oss_dependencies io_netcdf)
     oss_include_libraries(${library_name} oss_dependencies)
     target_link_libraries(${library_name} ${oss_dependencies})

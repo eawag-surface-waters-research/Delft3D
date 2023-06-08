@@ -11,4 +11,3 @@ install_*/**
 
 # folders to exclude
 /src/**/obj/**
-
