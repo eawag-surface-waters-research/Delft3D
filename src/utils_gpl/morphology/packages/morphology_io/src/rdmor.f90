@@ -1322,6 +1322,7 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     integer                                , pointer :: nxx
     integer                                , pointer :: nmudfrac
     integer                , dimension(:)  , pointer :: sedtyp
+    integer                , dimension(:)  , pointer :: tratyp
     real(fp)                               , pointer :: morfac
     real(fp)                               , pointer :: thresh
     real(fp)                               , pointer :: aksfac
@@ -1487,6 +1488,7 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     nmudfrac            => sedpar%nmudfrac
     namsed              => sedpar%namsed
     sedtyp              => sedpar%sedtyp
+    tratyp              => sedpar%tratyp
     pangle              => morpar%pangle
     fpco                => morpar%fpco
     factcr              => morpar%factcr
@@ -1870,6 +1872,7 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
        error = .true.
        return
     end if
+    parnames = ' '
     do j = 1, nto
        txtput1 = 'Boundary name'
        write (lundia, '(2a,a20)') txtput1, ':', trim(nambnd(j))
@@ -1959,7 +1962,7 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
                 else
                    i = 0
                    do l = 1, lsedtot
-                      if (sedtyp(l) /= SEDTYP_COHESIVE) then
+                      if (has_bedload(tratyp(l))) then
                          i = i + 1
                          parnames(i) = trim(parname) // ' ' // trim(namsed(l))
                       end if
@@ -1986,7 +1989,7 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
                 else
                    i = 0
                    do l = 1, lsedtot
-                      if (sedtyp(l) /= SEDTYP_COHESIVE) then
+                      if (has_bedload(tratyp(l))) then
                          i = i + 1
                          parnames(i)      = trim(parname) // ' ' // trim(namsed(l)) // ' end A'
                          parnames(nval+i) = trim(parname) // ' ' // trim(namsed(l)) // ' end B'
@@ -2036,7 +2039,6 @@ subroutine rdflufflyr(lundia   ,error    ,filmor   ,lsed     ,mor_ptr ,flufflyr,
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
-    use sediment_basics_module, only: SEDTYP_COHESIVE
     use morphology_data_module
     use message_module, only: write_error !, write_warning, FILE_NOT_FOUND, FILE_READ_ERROR, PREMATURE_EOF
     use grid_dimens_module, only: griddimtype
@@ -2112,7 +2114,7 @@ subroutine rdflufflyr(lundia   ,error    ,filmor   ,lsed     ,mor_ptr ,flufflyr,
     mflfil = ' '
     do l = 1,lsed
         sedblock_ptr => sedpar%sedblock(l)
-        if (sedpar%sedtyp(l) == SEDTYP_COHESIVE) then
+        if (sedpar%sedtyp(l) <= sedpar%max_mud_sedtyp) then
             call prop_get(sedblock_ptr, '*', 'IniFluffMass', mflfil(l))
             !
             ! Intel 7.0 crashes on an inquire statement when file = ' '

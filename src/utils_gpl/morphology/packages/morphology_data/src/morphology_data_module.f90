@@ -34,6 +34,8 @@ module morphology_data_module
 !
 !!--module declarations---------------------------------------------------------
 use precision
+use sediment_basics_module, only: SEDTYP_SILT, SEDTYP_SAND
+use flocculation, only: FLOC_NONE
 use handles, only:handletype
 use properties, only:tree_data
 use m_tables, only:t_table
@@ -142,28 +144,41 @@ integer, parameter, public :: SP_RUNID =  1     ! ID of simulation
 integer, parameter, public :: SP_USRFL =  2     ! name of user specified input file
 integer, parameter, public :: MAX_SP   =  2     ! maximum number of strings
 
-integer, parameter, public :: WS_RP_TIME  =  1
-integer, parameter, public :: WS_RP_ULOC  =  2
-integer, parameter, public :: WS_RP_VLOC  =  3
-integer, parameter, public :: WS_RP_WLOC  =  4
-integer, parameter, public :: WS_RP_SALIN =  5
-integer, parameter, public :: WS_RP_TEMP  =  6
-integer, parameter, public :: WS_RP_RHOWT =  7
-integer, parameter, public :: WS_RP_CFRCB =  8
-integer, parameter, public :: WS_RP_CTOT  =  9
-integer, parameter, public :: WS_RP_KTUR  = 10
-integer, parameter, public :: WS_RP_EPTUR = 11
-integer, parameter, public :: WS_RP_D50   = 12
-integer, parameter, public :: WS_RP_DSS   = 13
-integer, parameter, public :: WS_RP_RHOSL = 14
-integer, parameter, public :: WS_RP_CSOIL = 15
-integer, parameter, public :: WS_RP_GRAV  = 16
-integer, parameter, public :: WS_RP_VICML = 17
-integer, parameter, public :: WS_RP_WDEPT = 18
-integer, parameter, public :: WS_RP_UMEAN = 19
-integer, parameter, public :: WS_RP_VMEAN = 20
-integer, parameter, public :: WS_RP_CHEZY = 21
-integer, parameter, public :: WS_MAX_RP   = 21
+integer, parameter, public :: WS_FORM_FUNCTION_SALTEMCON    = 1
+integer, parameter, public :: WS_FORM_FUNCTION_DSS          = 2
+integer, parameter, public :: WS_FORM_FUNCTION_DSS_2004     = -2
+integer, parameter, public :: WS_FORM_MANNING_DYER_MACRO    = 3
+integer, parameter, public :: WS_FORM_MANNING_DYER_MICRO    = 4
+integer, parameter, public :: WS_FORM_MANNING_DYER          = 5
+integer, parameter, public :: WS_FORM_CHASSAGNE_SAFAR_MACRO = 6
+integer, parameter, public :: WS_FORM_CHASSAGNE_SAFAR_MICRO = 7
+integer, parameter, public :: WS_FORM_CHASSAGNE_SAFAR       = 8
+integer, parameter, public :: WS_FORM_USER_ROUTINE          = 15
+
+integer, parameter, public :: WS_RP_TIME  =  1 ! Time
+integer, parameter, public :: WS_RP_ULOC  =  2 ! Horizontal velocity component 1 [m/s]
+integer, parameter, public :: WS_RP_VLOC  =  3 ! Horizontal velocity component 2 [m/s]
+integer, parameter, public :: WS_RP_WLOC  =  4 ! Vertical velocity [m/s]
+integer, parameter, public :: WS_RP_SALIN =  5 ! Salinity [ppt]
+integer, parameter, public :: WS_RP_TEMP  =  6 ! Water temperature [degC]
+integer, parameter, public :: WS_RP_RHOWT =  7 ! Water density [kg/m3]
+integer, parameter, public :: WS_RP_CFRCB =  8 ! Concentration of fraction [kg/m3]
+integer, parameter, public :: WS_RP_CTOT  =  9 ! Total sediment concentration [kg/m3]
+integer, parameter, public :: WS_RP_KTUR  = 10 ! Turbulent kinetic energy [m2/s2]
+integer, parameter, public :: WS_RP_EPTUR = 11 ! Turbulent dissipation [m2/s3]
+integer, parameter, public :: WS_RP_D50   = 12 ! Median grainsize [m]
+integer, parameter, public :: WS_RP_DSS   = 13 ! Median grainsize in suspension [m]
+integer, parameter, public :: WS_RP_RHOSL = 14 ! Mineral density [kg/m3]
+integer, parameter, public :: WS_RP_CSOIL = 15 ! Hindered settling reference density [kg/m3]
+integer, parameter, public :: WS_RP_GRAV  = 16 ! Gravitational acceleration [m/s2]
+integer, parameter, public :: WS_RP_VICML = 17 ! Molecular viscosity
+integer, parameter, public :: WS_RP_WDEPT = 18 ! Water depth [m]
+integer, parameter, public :: WS_RP_UMEAN = 19 ! Depth-averaged flow velocity component 1 [m/s]
+integer, parameter, public :: WS_RP_VMEAN = 20 ! Depth-averaged flow velocity component 2 [m/s]
+integer, parameter, public :: WS_RP_CHEZY = 21 ! Chezy roughness
+integer, parameter, public :: WS_RP_SHTUR = 22 ! Turbulent shear stress [N/m2]
+integer, parameter, public :: WS_RP_CCLAY = 23 ! Clay concenrtration [kg/m3]
+integer, parameter, public :: WS_MAX_RP   = 23
 !
 integer, parameter, public :: WS_IP_NM    =  1
 integer, parameter, public :: WS_IP_N     =  2
@@ -532,6 +547,8 @@ type sedpar_type
     real(fp) :: sc_cmf1   !  lower critical mud factor for determining bed roughness length for Soulsby & Clarke (2005)
     real(fp) :: sc_cmf2   !  upper critical mud factor for determining bed roughness length for Soulsby & Clarke (2005)
     real(fp) :: sc_flcf   !  fraction of ParFluff0/ParFluff1 when the fluff layer fully covers the bed for Soulsby & Clarke (2005)
+    real(fp) :: tbreakup  !  relaxation time scale for break-up of flocs [s]
+    real(fp) :: tfloc     !  relaxation time scale for flocculation [s]
     real(fp) :: version   !  interpreter version
     !
     ! reals
@@ -539,8 +556,13 @@ type sedpar_type
     !
     ! integers
     !
-    integer  :: nmudfrac  !  number of simulated mud fractions
-    integer  :: sc_mudfac !  formulation used for determining bed roughness length for Soulsby & Clarke (2005): SC_MUDFRAC, or SC_MUDTHC
+    integer  :: flocmod        !  flocculation model applied to clay fractions
+    integer  :: nflocpop       !  number of floc populations (groups of clay fractions that exchange mass)
+    integer  :: nflocsizes     !  number of floc sizes distinguished in the flocculation model
+    integer  :: nmudfrac       !  number of simulated mud fractions
+    integer  :: sc_mudfac      !  formulation used for determining bed roughness length for Soulsby & Clarke (2005): SC_MUDFRAC, or SC_MUDTHC
+    integer  :: max_mud_sedtyp !  largest sediment type associated with mud
+    integer  :: min_dxx_sedtyp !  smallest sediment type included in computation of characteristic sediment diameters
     !
     ! pointers
     !
@@ -576,26 +598,27 @@ type sedpar_type
                                                             !  is not included simulation)
     real(fp)      , dimension(:)    , pointer :: pmcrit     !  Critical mud fraction for non-cohesive behaviour
     integer       , dimension(:)    , pointer :: nseddia    !  Number of characteristic sediment diameters
-    integer       , dimension(:)    , pointer :: sedtyp     !  Sediment type: 0=total/1=noncoh/2=coh
+    integer       , dimension(:)    , pointer :: sedtyp     !  Sediment type: SEDTYP_CLAY, SEDTYP_SILT, SEDTYP_SAND, SEDTYP_GRAVEL
+    integer       , dimension(:)    , pointer :: tratyp     !  Transport method type: TRA_BEDLOAD, TRA_ADVDIFF, TRA_COMBINE
+    integer       , dimension(:)    , pointer :: flocsize   !  Floc size within floc population
+    integer       , dimension(:,:)  , pointer :: floclist   !  Table of groups of clay fractions that belong together (flocculation)
     character(10) , dimension(:)    , pointer :: inisedunit !  'm' or 'kg/m2' : Initial sediment at bed specified as thickness ([m]) or density ([kg/m2])
     character(20) , dimension(:)    , pointer :: namsed     !  Names of all sediment fractions
+    character(20) , dimension(:)    , pointer :: namclay    !  Label of clay floc population to which the sediment fraction belongs
+    character(20) , dimension(:)    , pointer :: namflocpop !  Clay floc population labels
     character(256), dimension(:)    , pointer :: flsdbd     !  File name containing initial sediment mass at bed
     character(256), dimension(:)    , pointer :: flstcg     !  File name calibration factor on critical shear stress in Van Rijn (2004) uniform values
     character(256), dimension(:)    , pointer :: flnrd      !  File names of Node Relation Data (NRD-Files) for bifurcation points in 1D morphology
     ! 
     ! logicals
     !
-    logical :: anymud     ! Flag to indicate whether a mud fraction
-                          ! is included in the simulation.
-    logical :: bsskin     ! Flag to indicate whether a bed stress should be computed
-                          ! according to soulsby 2004
+    logical :: anymud     ! Flag to indicate whether a mud fraction is included in the simulation.
+    logical :: bsskin     ! Flag to indicate whether a bed stress should be computed according to Soulsby 2004
     !
     ! characters
     !
-    character(256) :: flsdia     ! spatial sediment diameter file (in case of one sediment
-                                 ! fraction only)
-    character(256) :: flsmdc     ! mud content / mud fraction file (only if mud is not
-                                 ! included in simulation)
+    character(256) :: flsdia     ! spatial sediment diameter file (in case of one sediment fraction only)
+    character(256) :: flsmdc     ! mud content / mud fraction file (only if mud is not included in simulation)
     character(256) :: flspmc     ! critical mud fraction for non-cohesive behaviour file
 end type sedpar_type
 
@@ -738,8 +761,7 @@ type sedtra_type
     real(fp)         , dimension(:,:)    , pointer :: statqnt  !(nc1:nc2,nstatistics)
 end type sedtra_type
 
-contains
-
+    contains
 
 !> Nullify/initialize a sedtra_type data structure.
 subroutine nullsedtra(sedtra)
@@ -1181,12 +1203,19 @@ subroutine nullsedpar(sedpar)
     sedpar%sc_flcf  = 0.5_fp
     sedpar%kssand   = 0.0_fp
     sedpar%version  = 2.0_fp
+    sedpar%tbreakup = 1e-10_fp
+    sedpar%tfloc    = 1e-10_fp
     !
-    sedpar%nmudfrac = 0
-    sedpar%sc_mudfac= SC_MUDTHC
+    sedpar%flocmod        = FLOC_NONE
+    sedpar%nflocpop       = 1
+    sedpar%nflocsizes     = 1
+    sedpar%nmudfrac       = 0
+    sedpar%sc_mudfac      = SC_MUDTHC
+    sedpar%max_mud_sedtyp = SEDTYP_SILT
+    sedpar%min_dxx_sedtyp = SEDTYP_SAND
     !
-    sedpar%anymud   = .false.
-    sedpar%bsskin   = .false.
+    sedpar%anymud    = .false.
+    sedpar%bsskin    = .false.
     !
     sedpar%flsdia   = ' '
     sedpar%flsmdc   = ' '
@@ -1220,6 +1249,12 @@ subroutine nullsedpar(sedpar)
     !
     nullify(sedpar%nseddia)
     nullify(sedpar%sedtyp)
+    nullify(sedpar%tratyp)
+    !
+    nullify(sedpar%namclay)
+    nullify(sedpar%namflocpop)
+    nullify(sedpar%flocsize)
+    nullify(sedpar%floclist)
     !
     nullify(sedpar%inisedunit)
     nullify(sedpar%namsed)
@@ -1267,6 +1302,12 @@ subroutine clrsedpar(istat     ,sedpar  )
     !
     if (associated(sedpar%nseddia))    deallocate(sedpar%nseddia,    STAT = istat)
     if (associated(sedpar%sedtyp))     deallocate(sedpar%sedtyp,     STAT = istat)
+    if (associated(sedpar%tratyp))     deallocate(sedpar%tratyp,     STAT = istat)
+    !
+    if (associated(sedpar%namclay))    deallocate(sedpar%namclay,    STAT = istat)
+    if (associated(sedpar%namflocpop)) deallocate(sedpar%namflocpop, STAT = istat)
+    if (associated(sedpar%flocsize))   deallocate(sedpar%flocsize,   STAT = istat)
+    if (associated(sedpar%floclist))   deallocate(sedpar%floclist,   STAT = istat)
     !
     if (associated(sedpar%inisedunit)) deallocate(sedpar%inisedunit, STAT = istat)
     if (associated(sedpar%namsed))     deallocate(sedpar%namsed,     STAT = istat)
