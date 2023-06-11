@@ -274,9 +274,12 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
        if (umod > eps) then
           qbcu = qbc*uuu/umod
           qbcv = qbc*vvv/umod
-       elseif (qbc > 1.0e-4_fp) then
-          message = 'umod<eps and qbc>1e-4'
-          error = .true.
+	   !
+       !Following `elseif` should be studied in detail (UNST-7050)
+       !	   
+       !elseif (qbc > 1.0e-4_fp) then
+       !   message = 'umod<eps and qbc>1e-4'
+       !   error = .true.
        else
           qbcu = 0.0_fp
           qbcv = 0.0_fp
