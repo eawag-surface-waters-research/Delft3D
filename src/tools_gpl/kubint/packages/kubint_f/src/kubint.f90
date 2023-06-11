@@ -33,6 +33,7 @@ subroutine main_kubint ()
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use kubint_version_module
     implicit none
 !
 ! Local parameters

@@ -1,8 +1,8 @@
 # Set version file variables
 # Note that the CMAKE_CURRENT_SOURCE_DIR has a path to THIS CMakeLists location
-set(svn_version_path ${CMAKE_CURRENT_SOURCE_DIR}/../../) # Trace back to the DFlowFM path
-set(ini_version_file ${CMAKE_CURRENT_SOURCE_DIR}/../../res/version_number.ini)
-set(fortran_version_file ${CMAKE_CURRENT_SOURCE_DIR}/src/unstruc_version.F90)
+
+# Set the DFlow FM component path 
+set(dflowfm_path "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 
 # Include directories that are required as references
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -10,13 +10,19 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 # Set the directory of where the source code is located
 set(src_path src) 
 
-# Generate the F90 version file
-generate_version_files(${fortran_version_file} ${ini_version_file} TRUE)
-set(svn_version_file ${fortran_version_file}.svn)
-
 # Gather the source files
 set(headers include/blasfm.h)
 
+# Set version file variables
+set(dflowfm_version_header_path ${dflowfm_path}/version)
+set(version_include_dir ${CMAKE_SOURCE_DIR}/../version_includes)
+set(dflowfm_version_path ${src_path}/dflowfm_version)
+set(fortran_version_files ${dflowfm_version_path}/dflowfm_version.F90
+                          ${dflowfm_version_path}/static_version_info.F90)
+						  
+set_source_files_properties(${fortran_version_files}
+                            PROPERTIES COMPILE_OPTIONS "${file_preprocessor_flag}")						  
+						  
 set(dflowfm_data_path ${src_path}/dflowfm_data)
 get_fortran_source_files(${dflowfm_data_path} dflowfm_data)
 
@@ -85,7 +91,7 @@ get_fortran_source_files(${src_path}/to_thirdparty to_thirdparty)
 
 # Define library
 set(library_name dflowfm_kernel)
-set(library_source_list     ${fortran_version_file}
+set(library_source_list     ${fortran_version_files}
                             ${headers}
                             ${dflowfm_data}
                             ${dflowfm_gui}
@@ -112,7 +118,7 @@ set(library_source_list     ${fortran_version_file}
                             ${dflowfm_utils_to_deltares_common}
                             ${to_thirdparty})
 
-add_library(${library_name}  ${svn_version_file} ${ini_version_file} ${library_source_list})
+add_library(${library_name} ${library_source_list})
 
 # Add dependencies
 if (UNIX)
@@ -164,10 +170,6 @@ if (UNIX)
          PkgConfig::PETSC
          uuid)
 
-
-    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include"
-                        ${mpi_include_path}
-                        ${tecplot_path})
 endif(UNIX)
 
 if (WIN32)
@@ -214,22 +216,19 @@ set(oss_dependencies    deltares_common
 oss_include_libraries(${library_name} oss_dependencies)
 target_link_libraries(${library_name} ${oss_dependencies})
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include"
-                    ${mpi_include_path}
-                    ${tecplot_path}
-                    ${petsc_path})
+include_directories(${petsc_path})
 endif(WIN32)
 
-
-# Define prebuild event
-prebuild_version_number(${library_name} ${fortran_version_file} 
-                                        ${checkout_src_root} 
-                                        ${ini_version_file} 
-                                        ON)
-
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include"
+                        ${mpi_include_path}
+                        ${tecplot_path}
+                        ${version_include_dir}
+                        ${dflowfm_version_path}
+                        ${dflowfm_version_header_path})
+						
 # Define additional compilation flags
 
-set_source_files_properties(${fortran_version_file}
+set_source_files_properties(${fortran_version_files}
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_data_path}/partition.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_gui_path}/menuv1.F90
                             ${CMAKE_CURRENT_SOURCE_DIR}/${dflowfm_gui_path}/setwor.F90

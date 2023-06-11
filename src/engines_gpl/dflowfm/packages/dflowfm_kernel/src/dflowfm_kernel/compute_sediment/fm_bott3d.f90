@@ -68,6 +68,7 @@
    use m_fm_update_crosssections
    use m_fm_morstatistics, only: morstats, morstatt0
    use precision_basics
+   use m_mormerge_mpi
    !
    implicit none
    !
@@ -122,7 +123,6 @@
    double precision                            :: r1avg
    double precision                            :: z
    double precision                            :: timhr
-   real(hp)                                    :: dim_real
    !!
    !!! executable statements -------------------------------------------------------
    !!
@@ -147,7 +147,6 @@
    error = .false.
    timhr = time1 / 3600.0d0
    nto    = nopenbndsect
-   dim_real = real(ndxi*lsedtot,hp)
    blchg = 0d0
    !
    !   Calculate suspended sediment transport correction vector (for SAND)
@@ -180,7 +179,7 @@
          !
          do l = 1, lsed
             ll = ISED1-1 + l
-            if (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
+            if (tratyp(l) == TRA_COMBINE) then
                !
                ! Determine aks
                !
@@ -337,7 +336,7 @@
                      e_scrn(Lx,l) = 0.0d0
                   endif
                enddo ! nm
-            endif    ! sedtyp = SEDTYP_NONCOHESIVE_SUSPENDED
+            endif    ! tratyp == TRA_COMBINE
          enddo       ! l
       endif          ! kmx>0; end of correction for bed/total load
       !       !
@@ -408,9 +407,9 @@
             do l = 1, lsedtot
                sbsum = 0d0
                !
-               ! bed load transport always zero for mud fractions
+               ! bed load transport only for fractions with bedload component
                !
-               if (sedtyp(l) == SEDTYP_COHESIVE) cycle
+               if (.not. has_bedload(tratyp(l))) cycle
                li = li + 1
                !
                do ib = 1, morbnd(jb)%npnt
@@ -457,9 +456,9 @@
                lsedbed = lsedtot - nmudfrac
                do l = 1, lsedtot
                   !
-                  ! bed load transport always zero for mud fractions
+                  ! bed load transport only for fractions with bedload component
                   !
-                  if (sedtyp(l) == SEDTYP_COHESIVE) cycle
+                  if (.not. has_bedload(tratyp(l))) cycle
                   li = li + 1
                   !
                   if (morbnd(jb)%ibcmt(3) == lsedbed) then
@@ -509,7 +508,7 @@
       !
       bedchangemesscount = 0
       do l = 1, lsedtot
-         bedload = sedtyp(l)==SEDTYP_NONCOHESIVE_TOTALLOAD
+         bedload = tratyp(l) == TRA_BEDLOAD
          j = lstart + l   ! constituent index
          !
          ! loop over internal (ndxi) nodes - don't update the boundary nodes
@@ -561,7 +560,7 @@
                   !
                   ! mass balance includes entrainment and deposition
                   !
-                  if (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
+                  if (tratyp(l) == TRA_COMBINE) then
                      !
                      ! l runs from 1 to lsedtot, kmxsed is defined for 1:lsed
                      ! The first lsed fractions are the suspended fractions,
@@ -773,7 +772,6 @@
       !
       ! Modifications for running parallel conditions (mormerge)
       !
-      !
       if (stmpar%morpar%multi) then
          jamerge = .false.
          if (jamormergedtuser>0) then
@@ -787,7 +785,6 @@
             dbodsd = 0d0
             jamerge = .true.
          endif
-
          if (jamerge) then
             ii = 0
             do ll = 1, lsedtot
@@ -799,9 +796,9 @@
             !write(msg,'(i3,a,f10.5,a,f10.5,a,f10.3,a,f10.3,a)') stmpar%morpar%mergehandle, ' maxval blchg before merge (time=', time1/dt_user, ' usertimesteps):', maxval(mergebodsed)/cdryb(1), &
             !                                &  ' at (', xz(maxloc(dbodsd,dim=2)), ',', yz(maxloc(dbodsd,dim=2)),')'
             !call mess(LEVEL_INFO, msg)
-            call putarray (stmpar%morpar%mergehandle,dim_real,1)
-            call putarray (stmpar%morpar%mergehandle,stmpar%morpar%mergebuf(1:ndxi*lsedtot),ndxi*lsedtot)
-            call getarray (stmpar%morpar%mergehandle,stmpar%morpar%mergebuf(1:ndxi*lsedtot),ndxi*lsedtot)
+            call update_mergebuffer(stmpar%morpar%mergehandle, ndxi*lsedtot, stmpar%morpar%mergebuf, &
+                jampi, my_rank, DFM_COMM_DFMWORLD)
+
             ii = 0
             do ll = 1, lsedtot
                do nm = 1, ndxi
@@ -809,15 +806,12 @@
                   dbodsd(ll, nm) = real(stmpar%morpar%mergebuf(ii),fp)
                enddo
             enddo
-            !write(msg,'(i3,a,f10.5,a,f10.5,a,f10.3,a,f10.3,a)') stmpar%morpar%mergehandle, ' maxval blchg after merge (time=', time1/dt_user, ' usertimesteps):', maxval(dbodsd)/cdryb(1), &
+            !write(msg,'(i3,a,f10.5,a,f10.5,a,f10.3,a,f10.3,a)') stmpar%morpar%mergehandle, ' maxval blchg after  merge (time=', time1/dt_user, ' usertimesteps):', maxval(dbodsd)/cdryb(1), &
             !                                &  ' at (', xz(maxloc(dbodsd,dim=2)), ',', yz(maxloc(dbodsd,dim=2)),')'
             !call mess(LEVEL_INFO, msg)
             mergebodsed = 0d0
          endif
       else
-         !write(msg,'(i3,a,f10.5,a,f10.5,a,f10.3,a,f10.3,a)') stmpar%morpar%mergehandle, ' maxval blchg (time=', time1/dt_user, ' usertimesteps):', maxval(mergebodsed)/cdryb(1), &
-         !                                &  ' at (', xz(maxloc(dbodsd,dim=2)), ',', yz(maxloc(dbodsd,dim=2)),')'
-         !call mess(LEVEL_INFO, msg)
          do ll = 1, lsedtot
             dbodsd(ll,:) = dbodsd(ll,:)*kcsmor
          end do

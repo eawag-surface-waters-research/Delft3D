@@ -28,6 +28,8 @@
 !  
 
       subroutine readdb ( lu_inp, lu_mes )
+      use m_zoek
+
       integer    lu_inp, lu_mes
       include 'data.inc'
 

@@ -20,9 +20,20 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_errsys
+      use m_srstop
+      use m_monsys
+
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE ERRSYS(STRING,IERR)
 !
+      integer :: IERR
+      integer :: IMLUN
       CHARACTER*(*) STRING
 !
       CALL GETMLU(IMLUN)
@@ -36,3 +47,4 @@
 !
       RETURN
       END
+      end module m_errsys

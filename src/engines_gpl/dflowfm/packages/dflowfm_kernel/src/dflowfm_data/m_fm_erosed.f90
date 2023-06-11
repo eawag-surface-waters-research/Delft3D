@@ -110,12 +110,22 @@
    real(fp)         , dimension(:)      , pointer :: pmcrit
    integer          , dimension(:)      , pointer :: nseddia
    integer          , dimension(:)      , pointer :: sedtyp
+   integer          , dimension(:)      , pointer :: tratyp
    logical                              , pointer :: anymud
    real(fp)         , dimension(:)      , pointer :: sedtrcfac
    logical                              , pointer :: bsskin
    real(fp)         , dimension(:)      , pointer :: thcmud
    real(fp)         , dimension(:)      , pointer :: tpsnumber
    real(fp)         , dimension(:, :)   , pointer :: dss
+
+   integer                              , pointer :: max_mud_sedtyp
+   integer                              , pointer :: min_dxx_sedtyp
+   integer                              , pointer :: flocmod
+   integer                              , pointer :: nflocpop
+   integer                              , pointer :: nflocsizes
+   integer          , dimension(:, :)   , pointer :: floclist
+   real(fp)                             , pointer :: tbreakup
+   real(fp)                             , pointer :: tfloc
 
    ! morpar
    real(fp)                             , pointer :: thresh

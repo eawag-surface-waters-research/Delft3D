@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_rdwrk3
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE RDWRK3 ( LUN   , LCHAR ,ITOTA , ITOTI , ITOTC  )
 !
@@ -44,13 +50,16 @@
 !     ITOTC   INTEGER    1         OUT     Dimension character array
 !
 !     declarations
+      use m_dhopnf
+      use m_dhgnam
       use m_sysn          ! System characteristics
       use m_sysi          ! Timer characteristics
 !
       INTEGER       ITOTA , ITOTI , ITOTC
       INTEGER       LUN(*)
       CHARACTER*(*) LCHAR(*)
-
+      integer :: INDX, IERR, K, LCHMAX
+      
 !     input structure for boot-file
 !
       INTEGER             LUNIN
@@ -75,3 +84,4 @@
 !
       RETURN
       END
+      end module m_rdwrk3

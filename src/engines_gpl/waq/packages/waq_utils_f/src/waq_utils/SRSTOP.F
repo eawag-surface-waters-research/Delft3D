@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_srstop
+
+      implicit none
+
+      contains
+
       
       
       subroutine srstop ( iexit )
@@ -79,3 +85,4 @@
       end select
 
       end
+      end module m_srstop

@@ -24,6 +24,9 @@
       subroutine calwav ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
+      use m_errsys
+      use m_dhkmrk
+
 !>\file
 !>       Wave characteristics
 

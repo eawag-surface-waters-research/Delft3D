@@ -24,6 +24,8 @@
       subroutine calsed ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
+      use m_errsys
+
 !>\file
 !>       Sedimentation velocity IMx, DetC OOC, BODC, all algea = f (Temp SS Sal)
 

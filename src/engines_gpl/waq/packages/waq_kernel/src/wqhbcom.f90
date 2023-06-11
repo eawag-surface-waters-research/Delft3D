@@ -23,6 +23,7 @@
 
 module M_WQHBComm
 
+    use m_monsys
     use waq_Dio_plt_rw
 
     implicit none

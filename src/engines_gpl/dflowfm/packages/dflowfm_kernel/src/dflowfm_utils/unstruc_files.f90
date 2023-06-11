@@ -34,7 +34,7 @@ module unstruc_files
 !! Centralizes unstruc file management (formerly in REST.F90)
 
 use unstruc_messages
-use unstruc_version_module
+use dflowfm_version_module
 use time_module, only : seconds_to_datetimestring
 
 implicit none
@@ -352,8 +352,8 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
         defaultFileName = trim(basename)//trim(dateandtime)//suffix
     elseif (len_trim(md_ident) > 0) then                ! No active, no basename, use md_ident as basename
         defaultFilename = trim(md_ident)//trim(dateandtime)//suffix
-    elseif (len_trim(defaultFilename) == 0) then        ! Not even a md_ident and no hardcoded default filaname, then use unstruc_basename as basename
-        defaultFilename = trim(unstruc_basename)//trim(dateandtime)//suffix
+    elseif (len_trim(defaultFilename) == 0) then        ! Not even a md_ident and no hardcoded default filaname, then use base_name as basename
+        defaultFilename = trim(base_name)//trim(dateandtime)//suffix
     else if(present(allowWildcard)) then                ! Final resort: just a wildcard with proper file extention.
         if (allowWildcard) then
             defaultFilename = '*'//suffix

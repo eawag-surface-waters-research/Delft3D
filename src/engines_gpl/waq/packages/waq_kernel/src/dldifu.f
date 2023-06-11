@@ -72,6 +72,7 @@
 !         6) the whish to include numereous subtimers where DELWAQ only times
 !            the total
 
+      use m_srstop
       use timers
       implicit none
 

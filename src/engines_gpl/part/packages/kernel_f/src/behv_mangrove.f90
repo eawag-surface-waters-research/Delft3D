@@ -30,7 +30,6 @@ use timers
 !
 !  module procedure(s)
 !
-use random_surface_position_mod    ! explicit interface
 use intpltd_diurnal_mod            ! explicit interface
 use intpltd_divelimit_mod          ! explicit interface
 use intpltd_motility_mod           ! explicit interface

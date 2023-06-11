@@ -64,6 +64,9 @@
 !                           dhkmst  - to set features
 !                           dhkmrk  - to get features
 
+      use m_zoek
+      use m_dhkmst
+      use m_dhkmrk
       use timers
       implicit none
 
@@ -272,6 +275,7 @@
 
 !     Routines            : zoek20  - to search the DRY_TRESH constant
 
+      use m_zoek
       use timers
       implicit none
 

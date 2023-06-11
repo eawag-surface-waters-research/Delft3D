@@ -74,6 +74,7 @@
 !
 !     DECLARATIONS        :
 !
+      use m_srstop
       use timers
 
       PARAMETER     ( TWOPI = 6.28319 )

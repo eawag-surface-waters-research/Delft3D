@@ -24,6 +24,8 @@
       subroutine nralgs ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
+      use m_dhkmrk
+
 !>\file
 !>       Nutrient release of algae in S1 and S2
 

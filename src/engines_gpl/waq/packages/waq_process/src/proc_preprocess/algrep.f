@@ -29,6 +29,8 @@
       ! replace the proto names from proces.def with the actual BLOOM names
       ! for the moment not the names and defaults in itemprop, consequence?
 
+      use m_zoek
+      use m_dhslen
       use processet
       use timers       !   performance timers
 

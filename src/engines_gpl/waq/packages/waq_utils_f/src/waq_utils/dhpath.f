@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dhpath
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DHPATH ( FILNAM, FILPATH, PATHLEN)
 !
@@ -81,3 +87,4 @@
 !
       RETURN
       END
+      end module m_dhpath

@@ -22,6 +22,8 @@
 !!  rights reserved.
 
       module dhmmca_mod
+      use m_srstop
+
       contains
       subroutine dhmmca ( lunrep, l_decl, arrpoi, arrtyp, arrbyt,
      &                    arrlen, arrknd, arrdm1, arrdm2, arrdm3,

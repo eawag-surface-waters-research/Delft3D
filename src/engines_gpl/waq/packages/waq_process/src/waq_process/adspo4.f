@@ -24,6 +24,9 @@
       subroutine adspo4 ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
+      use m_monsys
+      use m_errsys
+
 !>\file
 !>       P-ad/desorption to particulate inorganic matter. 3 options for sorption formulation.
 

@@ -298,7 +298,6 @@ rem ===============
     call :ddcouple
     call :agrhyd
     call :maptonetcdf
-    call :waq_run_processes
     call :duprol2delwaq
     call :delpar
     call :wave
@@ -720,6 +719,10 @@ rem ==========================
 
         echo "Debug postbuild"
         set dest_bin="%install_dir%\x64\Debug"
+        set dest_default="!install_dir!\x64\Debug"
+        set dest_scripts="!install_dir!\x64\Debug"
+        set dest_plugins="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
 
         call :makeDir !dest_bin!
         call :copyDflowfmDependentRuntimeLibraries
@@ -735,7 +738,7 @@ rem ==========================
         set dest_csvFiles="!install_dir!\x64\Release\dflowfm\default\csvFiles"
         set dest_subFiles="!install_dir!\x64\Release\dflowfm\default\subFiles"
         set dest_default_backup="!install_dir!\x64\Release\dflowfm\installation_default"
-        set dest_csvFiles_backup="!install_dir!\x64\Release\dflowfm\installation_default\csvFiles
+        set dest_csvFiles_backup="!install_dir!\x64\Release\dflowfm\installation_default\csvFiles"
         set dest_scripts="!install_dir!\x64\Release\dflowfm\scripts"
         set dest_plugins="!install_dir!\x64\Release\plugins\bin"
         set dest_share="!install_dir!\x64\Release\share\bin"
@@ -816,7 +819,11 @@ rem ==========================
     if "%configuration%" == "Debug" (
 
         echo "Debug postbuild"
-        set dest_bin="%install_dir%\x64\Debug"
+        set dest_bin=    "!install_dir!\x64\Debug\"
+        set dest_default="!install_dir!\x64\Debug\"
+        set dest_scripts="!install_dir!\x64\Debug\"
+        set dest_plugins="!install_dir!\x64\Debug\"
+        set dest_share=  "!install_dir!\x64\Debug\"
 
         call :makeDir !dest_bin!
         call :copyDflowfmDependentRuntimeLibraries
@@ -855,6 +862,10 @@ rem ==========================
 
         echo "Debug postbuild"
         set dest_bin="%install_dir%\x64\Debug"
+        set dest_default="!install_dir!\x64\Debug"
+        set dest_scripts="!install_dir!\x64\Debug"
+        set dest_plugins="!install_dir!\x64\Debug"
+        set dest_share="!install_dir!\x64\Debug"
 
         call :makeDir !dest_bin!
         call :copyDflowfmDependentRuntimeLibraries
@@ -954,7 +965,6 @@ rem ==========================
     call :copyDimrDependentRuntimeLibraries                                                                             !dest_share!
     call :copyFile "!build_dir!\dimr\!configuration!\dimr.exe"                                                          !dest_bin!
 
-    call :copyFile "!checkout_src_root!\engines_gpl\d_hydro\scripts\create_config_xml.tcl"                              !dest_menu!
     call :copyFile "!checkout_src_root!\engines_gpl\dimr\scripts\generic\win64\*.*"                                     !dest_scripts!
     call :copyDir  "!checkout_src_root!\engines_gpl\dimr\schemas"                                                       !dest_schema!
     )
@@ -1151,31 +1161,13 @@ goto :endproc
 
 
 
-rem ==========================
-rem === POST_BUILD_waq_run_processes
-rem ==========================
-:waq_run_processes
-
-    echo "postbuild waq_run_processes . . ."
-
-    call :setWaqFolders
-
-    call :makeAllDirs
-    call :copyDwaqDependentRuntimeLibraries                                                         !dest_share!
-
-    rem copy binaries and dll
-    call :copyFile "!build_dir!\waq_run_processes\!configuration!\waq_run_processes.*"              !dest_bin!
-
-goto :endproc
-
-
 
 rem ==========================
 rem === POST_BUILD_duprol2delwaq
 rem ==========================
 :duprol2delwaq
 
-    echo "postbuild waq_run_processes . . ."
+    echo "postbuild duprol2delwaq . . ."
 
     call :setWaqFolders
 
@@ -1208,7 +1200,8 @@ rem ==========================
         call :makeDir !dest_bin!
 
         rem copy binaries and dll
-        call :copyFile "!build_dir!\delpar\!configuration!\delpar.*"                                !dest_bin!
+        call :copyDwaqDependentRuntimeLibraries                                                 !dest_share!
+        call :copyFile "!build_dir!\delpar\!configuration!\delpar.*"                            !dest_bin!
     )
 
     if "%configuration%" == "Release" (
@@ -1224,9 +1217,10 @@ rem ==========================
         call :makeAllDirs
 
         rem copy binaries and dll
-        call :copyFile "!build_dir!\delpar\!configuration!\delpar.exe"                            !dest_bin!
+        call :copyDwaqDependentRuntimeLibraries                                                 !dest_share!
+        call :copyFile "!build_dir!\delpar\!configuration!\delpar.exe"                          !dest_bin!
 
-        call :copyFile "!checkout_src_root!\engines_gpl\part\scripts\run_dpart.bat"                 !dest_scripts!
+        call :copyFile "!checkout_src_root!\engines_gpl\part\scripts\run_dpart.bat"             !dest_scripts!
     )
 
 goto :endproc
@@ -1648,7 +1642,6 @@ rem ==========================
         call :makeAllDirs
         call :copyDHydroDependentRuntimeLibraries                                                             !dest_share!
         call :copyFile "!build_dir!\d_hydro\!configuration!\d_hydro.exe"                                      !dest_bin!
-        call :copyFile "!checkout_src_root!\engines_gpl\d_hydro\scripts\create_config_xml.tcl"                !dest_menu!
     )
 
 goto :endproc

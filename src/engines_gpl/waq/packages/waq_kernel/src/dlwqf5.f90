@@ -37,6 +37,7 @@
 !                                          added iteration report
 !                 July 2009, Leo Postma  : allocation double precission arrays
 
+      use m_zoek
       use timers                         ! WAQ performance timers
 
       implicit none

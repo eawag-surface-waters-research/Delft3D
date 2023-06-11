@@ -28,6 +28,10 @@
      +                    FUNC   , SEGFUN , DISPER , VELO   , ITIME  ,
      +                    IDT    , SYNAME , NOCONS , NOFUN  , CONAME ,
      +                    PANAME , FUNAME , SFNAME , UPDATR , ILFLAG )
+      use m_zoek
+      use m_srstop
+      use m_monsys
+
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
 !

@@ -26,8 +26,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! 
-! 
+!
+!
 
 
 !   module partfmmem
@@ -98,12 +98,12 @@
 
    integer                           :: ndx            !< [-] Number of flow nodes (internal + boundary). {"rank": 0}
    integer                           :: ndxi           !< [-] Number of internal flowcells  (internal = 2D + 1D ). {"rank": 0}
-   double precision, allocatable     :: ba (:)     !< [m2] bottom area, if < 0 use table in node type {"location": "face", "shape": ["ndx"]}
-   double precision, allocatable     :: bl(:)      !< [m] bottom level (m) (positive upward) {"location": "face", "shape": ["ndx"]}
+   double precision, allocatable     :: ba(:)          !< [m2] bottom area, if < 0 use table in node type {"location": "face", "shape": ["ndx*kmx"]}
+   double precision, allocatable     :: bl(:)          !< [m] bottom level (m) (positive upward) {"location": "face", "shape": ["ndx*kmx"]}
    integer                           :: lnxi           !< [-] nr of flow links (internal, 1D+2D    ). {"rank": 0}
    integer                           :: lnx            !< [-] nr of flow links (internal + boundary). First we have 1D links, next 2D links, next boundary links (first 1D, then 2D). {"rank": 0}
    integer,          allocatable     :: ln    (:,:)    !< [-] 1D link (2,*) node   administration, 1=nd1,  2=nd2   linker en rechter celnr {"shape": [2, "lnkx"]}
-   double precision, allocatable     :: wu(:)      !< [m] link initial width (m), if < 0 pointer to convtab {"location": "edge", "shape": ["lnx"]}
+   double precision, allocatable     :: wu(:)          !< [m] link initial width (m), if < 0 pointer to convtab {"location": "edge", "shape": ["lnx"]}
    integer,          allocatable     :: lne2ln(:)      !< netlink to flowlink nr dim = numL
 
    end module m_flowgeom
@@ -127,8 +127,8 @@
 
    module m_transport
    integer, parameter :: NAMLEN = 128
-   integer                                       :: NUMCONST       ! Total number of constituents
-   double precision, dimension(:,:), allocatable :: constituents    ! constituents, dim(NUMCONST,Ndkx)
+   integer                                          :: NUMCONST       ! Total number of constituents
+   double precision, dimension(:,:,:), allocatable  :: constituents    ! constituents, dim(NUMCONST,Ndkx,kmx)
 
    character(len=NAMLEN), dimension(:), allocatable :: const_names    ! constituent names
    character(len=NAMLEN), dimension(:), allocatable :: const_units    ! constituent unitsmodule m_pa                                             rticles
@@ -143,6 +143,10 @@
    double precision,  dimension(:),   allocatable :: xpart_prevt, ypart_prevt !< coordinates of particles, dim(Npart), previous timestep
    double precision,  dimension(:),   allocatable :: zpart        !< z-coordinates of particles, dim(Npart), for spherical models
    double precision,  dimension(:),   allocatable :: zpart_prevt  !< z-coordinates of particles, dim(Npart), for spherical models, previous timestep
+   integer,           dimension(:),   allocatable :: kpart        !< layer containing the particles
+   integer,           dimension(:),   allocatable :: kpart_prevt  !< layer containing the particles, previous time step
+   double precision,  dimension(:),   allocatable :: hpart        !< position of the particles within the layer
+   double precision,  dimension(:),   allocatable :: hpart_prevt  !< position of the particles within the layer, previous timestep
 
 
    double precision,  dimension(:),   allocatable :: dtremaining  !< remaining time, dim(Npart)
@@ -156,6 +160,8 @@
    double precision,  dimension(:),   allocatable :: yrpart       !< y-coordinates of to be released particles, dim(Nrpart)
    double precision,  dimension(:),   allocatable :: zrpart       !< z-coordinates of to be released particles, dim(Nrpart), for spherical models
    integer,           dimension(:),   allocatable :: mrpart       !< cell (flownode) number of to be released particles, dim(Nrpart), for spherical models
+   integer,           dimension(:),   allocatable :: krpart       !< layer of to be released particles, dim(Nrpart)
+   double precision,  dimension(:),   allocatable :: hrpart       !< position within the layer of to be released particles, dim(Nrpart)
 
    integer,           dimension(:),   allocatable :: numzero      !< number of consecutive (sub)times a particle was not displaces within a time-step
 

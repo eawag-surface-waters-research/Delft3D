@@ -77,6 +77,7 @@
  integer                           :: iturbulencemodel  !< 0=no, 1 = constant, 2 = algebraic, 3 = k-eps
  integer                           :: ieps              !< bottom boundary type eps. eqation, 1=dpmorg, 2 = dpmsandpit, 3=D3D, 4=Dirichlethdzb
  integer                           :: jadrhodz = 1
+ double precision                  :: facLaxturb = 0    !< Turkineps0 from : 0.0=links ; 1.0=nodes 
  double precision                  :: sigmagrowthfactor !<layer thickness growth factor from bed up
  double precision                  :: dztopuniabovez  = -999d0     !< bottom level of lowest uniform layer == blmin if not specified
  double precision                  :: Floorlevtoplay  = -999d0     !< floor  level of top zlayer, == sini if not specified
@@ -332,7 +333,6 @@
  double precision, allocatable     :: Windspeedfac(:) !< Wind friction coefficient at u point set by initial fields ( todo mag later ook single real worden)
  double precision, allocatable     :: z0ucur(:)   !< current related roughness, moved from waves, always needed
  double precision, allocatable     :: z0urou(:)   !< current and wave related roughness
- double precision, allocatable, target :: sul(:)  !< water level on flow links (needed in fourier_analysis)
 
  double precision, allocatable     :: frcuroofs(:)!< temp
 

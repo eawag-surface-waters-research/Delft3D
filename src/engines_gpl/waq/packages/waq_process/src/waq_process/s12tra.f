@@ -24,6 +24,8 @@
       subroutine s12tra ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
+      use m_dhkmrk
+
 
 !>\file
 !>       Generic module to process resuspension, burial, digging S1 & S2

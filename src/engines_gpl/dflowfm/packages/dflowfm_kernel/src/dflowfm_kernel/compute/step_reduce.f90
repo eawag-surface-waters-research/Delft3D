@@ -62,10 +62,13 @@
 
 !-----------------------------------------------------------------------------------------------
  numnodneg = 0
- if (wrwaqon.and.allocated(qsrcwaq)) then
-    qsrcwaq0 = qsrcwaq ! store current cumulative qsrc for waq at the beginning of this time step
-    qlatwaq0 = qlatwaq
- end if
+
+ if (numsrc > 0) then 
+   if (wrwaqon.and. size(qsrcwaq) > 0) then 
+     qsrcwaq0 = qsrcwaq ! store current cumulative qsrc for waq at the beginning of this time step
+     qlatwaq0 = qlatwaq
+   endif
+ endif
 
  111 continue
 
@@ -145,10 +148,13 @@
          goto 222
        endif
 
-       if (wrwaqon.and.allocated(qsrcwaq)) then
-          qsrcwaq = qsrcwaq0                            ! restore cumulative qsrc for waq from start of this time step to avoid
-          qlatwaq = qlatwaq0                            ! double accumulation and use of incorrect dts in case of time step reduction
-       end if                                           
+       if (numsrc > 0) then 
+         if (wrwaqon.and. size(qsrcwaq) > 0) then     
+           qsrcwaq = qsrcwaq0                            ! restore cumulative qsrc for waq from start of this time step to avoid
+           qlatwaq = qlatwaq0                            ! double accumulation and use of incorrect dts in case of time step reduction
+         endif 
+       endif
+                                       
        call setkfs()
        if (jposhchk == 2 .or. jposhchk == 4) then       ! redo without timestep reduction, setting hu=0 => 333 s1ini
           if (nonlin >= 2) then
@@ -281,6 +287,7 @@
     if ( jatimer.eq.1 ) call starttimer(IEROSED)
     !
     call setucxucy_mor (u1)
+    call fm_flocculate()               ! fraction transitions due to flocculation
     call fm_fallve()                   ! update fall velocities
     call fm_erosed()                   ! source/sink, bedload/total load
     if ( jatimer.eq.1 ) call stoptimer(IEROSED)

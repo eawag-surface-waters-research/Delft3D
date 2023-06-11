@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_zero
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE ZERO   ( ARRAY  , NOTOT  )
 !
@@ -36,10 +42,12 @@
 !     ARRAY   REAL      NOTOT     OUTPUT  array to be zeroed
 !     NOTOT   INTEGER     1       INPUT   total number of entries
 !
-      DIMENSION   ARRAY(*)
+      real    ARRAY(*)
+      integer I, NOTOT
 !
       DO  10 I = 1,NOTOT
    10 ARRAY(I) = 0.0
 !
       RETURN
       END
+      end module m_zero

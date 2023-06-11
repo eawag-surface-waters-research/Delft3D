@@ -540,11 +540,11 @@ contains
    !> 
    subroutine settimespacerefdat(refda, jul00, tz, timjan)
    use m_itdate
+   use m_julday
    character (len=8) :: refda
    integer           :: jul00
    double precision  :: tz, timjan
    
-   integer, external :: julday
    integer           :: juljan
    
    refdat = refda
@@ -5676,9 +5676,8 @@ contains
                        cycle
                     end if
                  end if
-
                  if (usemask .and. kc(m) .eq. -1 ) then
-                   write(errormessage,'(a,i8.8,a,f12.4,a,f12.4,a)') 'Boundary link ',m,' already claimed [',(x(m)+xyen(1,m))/2.,',',(y(m)+xyen(2,m))/2.,']'
+                    write(errormessage,'(a,i8.8,a,f12.4,a,f12.4,a)') 'Boundary link ',m,' already claimed [',(x(m)+xyen(1,m))/2.,',',(y(m)+xyen(2,m))/2.,']'
                     call mess(LEVEL_WARN, errormessage)
                     cycle
                  else

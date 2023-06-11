@@ -20,6 +20,14 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_rapdef
+      use m_srstop
+
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE RAPDEF ( LUPDEF, LUREP , NBPR  , NBPRM , BPRNAM,
      +                    BPRTXT, MODNAM, NSVAI , VAINAM, VAITXT,
@@ -132,6 +140,10 @@
       CHARACTER*(*)  BPRTXT(*)       , VAITXT(*)       ,
      +               VAOTXT(*)       , BFLTXT(*)       ,
      +               VXITXT(*)       , VXOTXT(*)
+      
+      integer :: IIVAI, IIVXI, IIVAO, IIVXO, IIBFL, IIBST, IIDST, IIVST
+      integer :: IP, IPV, IV, NSV, IVAO, NFL, IFLX, NST, IST
+      
 !
 !     Local
 !
@@ -332,3 +344,4 @@
 !
       RETURN
       END
+      end module m_rapdef

@@ -24,6 +24,8 @@
       SUBROUTINE DAYRAD ( PMSA   , FL     , IPOINT , INCREM , NOSEG  ,
      +                    NOFLUX , IEXPNT , IKNMRK , NOQ1   , NOQ2   ,
      +                    NOQ3   , NOQ4   )
+      use m_dhkmrk
+
 
 !***********************************************************************
 !

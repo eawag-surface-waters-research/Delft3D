@@ -41,6 +41,13 @@
 !>                             .
 !>                          to a consistent set of sequential processes for the simulation part
 
+      use m_zoek
+      use m_startup_screen
+      use m_srstop
+      use m_rdwrk4
+      use m_monsys
+      use m_getcom
+      use m_dhopnf
       use timers       !   performance timers
       use dlwq_data
       use processet
@@ -54,7 +61,7 @@
 
       ! declaration of arguments
 
-      integer             , intent(in   ) :: lun(*)          !< unit numbers
+      integer             , intent(inout) :: lun(*)          !< unit numbers
       character(len=*)    , intent(inout) :: lchar(*)        !< filenames
       type(procespropcoll), intent(in   ) :: statprocesdef   !< the statistical proces definition
       type(itempropcoll)  , intent(in   ) :: allitems        !< all items of the proces system
@@ -519,7 +526,7 @@
      +              novelo , diname , vename , idpnt  , ivpnt  ,
      +              ndmpar , ntdmpq , ntdmps , noqtt  , noraai ,
      +              ntraaq , nobtyp , nowtyp , nogrid , grdref ,
-     +              sysgrd , sysndt , notot  )
+     +              sysgrd , sysndt  )
       write ( lurep   , 2020 ) (modid(i),i=1,2)
       write ( lurep   , 2030 ) (modid(i),i=3,4)
       close ( lun(2) )

@@ -41,7 +41,13 @@
 !                          putget, handles i/o to nefis file for int/real
 !
 
+      use m_srstop
+      use m_putgtc
+      use m_monsys
+      use m_filldm
       use timers
+      use m_dhdelf
+
       implicit none
 
 !     declaration of arguments

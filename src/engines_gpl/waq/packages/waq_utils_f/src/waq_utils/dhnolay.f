@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dhnolay
+
+      implicit none
+
+      contains
+
 
       subroutine dhnolay( pnolay )
 !
@@ -51,3 +57,4 @@
 
       return
       end
+      end module m_dhnolay

@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_zoek
+
+      implicit none
+
+      contains
+
 
 !     MODULE ZOEK
 !
@@ -37,6 +43,7 @@
 !                           BCZOEK, (block data) sets default search mode
 !
       SUBROUTINE ZOEK ( NAAM  , NOTOT , SYNAME, NZOEK , IAINDX)
+      use m_errsys
       USE Timers
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
@@ -119,6 +126,7 @@
       INTEGER       NOTOT , NZOEK , IAINDX
       CHARACTER*(*) NAAM
       CHARACTER*(*) SYNAME(NOTOT)
+      integer :: K, I, I1, I2, ICASEM
 !
       IAINDX = -1
       DO 100 I = 1,NOTOT
@@ -168,6 +176,7 @@
       INTEGER       NOTOT , NZOEK , IAINDX
       CHARACTER*(*) NAAM
       CHARACTER*(*) SYNAME(NOTOT)
+      integer :: I, ICASEM
 !
       IAINDX = -1
 !
@@ -188,6 +197,8 @@
       END
 !
       SUBROUTINE SETZMO (ICASST)
+      use m_errsys
+
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
 !
@@ -227,22 +238,7 @@
       END
 !
 !
-      BLOCK DATA BCZOEK
-!
-!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-!
-!     CREATED: april 1993 by Jan van Beek
-!
-!     FUNCTION            : set default search mode
-!
-!     COMMON's            : CZOEK , search settings
-!
-      INTEGER          ICASEM
-      COMMON / CZOEK / ICASEM
-      SAVE   / CZOEK /
-!
-      DATA   ICASEM / 0 /
-      END
+     
       SUBROUTINE ZOEK20 ( NAAM  , NOTOT , SYNAME, NZOEK , IAINDX)
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
@@ -275,4 +271,22 @@
       CALL ZOEK ( NAAM  , NOTOT , SYNAME, NZOEK , IAINDX)
 !
       RETURN
+      END
+      end module m_zoek
+
+      BLOCK DATA BCZOEK
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: april 1993 by Jan van Beek
+!
+!     FUNCTION            : set default search mode
+!
+!     COMMON's            : CZOEK , search settings
+!
+      INTEGER          ICASEM
+      COMMON / CZOEK / ICASEM
+      SAVE   / CZOEK /
+!
+      DATA   ICASEM / 0 /
       END

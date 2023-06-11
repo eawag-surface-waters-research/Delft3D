@@ -52,6 +52,7 @@
 !
 !     DECLARATIONS        :
 !
+      use m_srstop
       use timers
       INTEGER       LUNIN , LUNOUT, ITIME , NTOTAL, ISFLAG,
      +              IFFLAG

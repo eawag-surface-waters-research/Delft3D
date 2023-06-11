@@ -70,6 +70,8 @@
 !
 !     Declaration of arguments
 !
+      use m_srstop
+      use m_dhopnf
       use timers
       use output
 

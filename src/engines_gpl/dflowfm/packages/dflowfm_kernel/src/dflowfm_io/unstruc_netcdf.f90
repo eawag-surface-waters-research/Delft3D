@@ -46,7 +46,7 @@ module unstruc_netcdf
 use precision
 use netcdf
 use unstruc_messages
-use unstruc_version_module
+use dflowfm_version_module
 use io_ugrid
 use m_sediment
 use string_module
@@ -544,14 +544,14 @@ contains
 
 !> Initializes some global variables needed for writing NetCDF files during a run.
 subroutine init_unstruc_netcdf()
-use unstruc_version_module
+use dflowfm_version_module
 
    integer :: ierr
 
-   ug_meta_fm%institution = trim(unstruc_company)
-   ug_meta_fm%source      = trim(unstruc_program)
-   ug_meta_fm%references  = trim(unstruc_company_url)
-   ug_meta_fm%version     = trim(unstruc_version)
+   ug_meta_fm%institution = trim(company)
+   ug_meta_fm%source      = trim(product_name)
+   ug_meta_fm%references  = trim(company_url)
+   ug_meta_fm%version     = trim(version_full)
    ug_meta_fm%modelname   = ''
    unc_metadatafile = ''
    unc_meta_md_ident = ''
@@ -713,7 +713,7 @@ end function unc_meta_add_from_environment
 !! NOTE: this function is an implementation of the netcdf_utils::ncu_apply_to_att interface.
 function unc_meta_fill_placeholders(attname, valuetext) result(ierr)
    use dfm_error
-   use unstruc_version_module, only: unstruc_program
+   use dflowfm_version_module, only: product_name
 
    character(len=*),              intent(in   ) :: attname   !< attribute name
    character(len=:), allocatable, intent(inout) :: valuetext !< attribute value text, placeholders will be replaced in-place.
@@ -723,7 +723,7 @@ function unc_meta_fill_placeholders(attname, valuetext) result(ierr)
 
    valuetext = replace_string(valuetext, '${dfm_md_ident}', trim(unc_meta_md_ident))
    valuetext = replace_string(valuetext, '${dfm_net_file}', trim(unc_meta_net_file))
-   valuetext = replace_string(valuetext, '${dfm_program_name}', trim(unstruc_program))
+   valuetext = replace_string(valuetext, '${dfm_program_name}', trim(product_name))
 end function unc_meta_fill_placeholders
 
 
@@ -2356,16 +2356,16 @@ subroutine unc_addglobalatts(ncid)
        return
     end if
 
-    ierr = nf90_put_att(ncid, nf90_global,  'institution', trim(unstruc_company))
-    ierr = nf90_put_att(ncid, nf90_global,  'references', trim(unstruc_company_url))
+    ierr = nf90_put_att(ncid, nf90_global,  'institution', trim(company))
+    ierr = nf90_put_att(ncid, nf90_global,  'references', trim(company_url))
     ierr = nf90_put_att(ncid, nf90_global,  'source', &
-            unstruc_version_full//                    &
+            version_full//                    &
             ', model ')!''//trim(md_ident)//'''')
 
     call date_and_time(cdate, ctime, czone)
     ierr = nf90_put_att(ncid, nf90_global,  'history', &
         'Created on '//cdate(1:4)//'-'//cdate(5:6)//'-'//cdate(7:8)//'T'//ctime(1:2)//':'//ctime(3:4)//':'//ctime(5:6)//czone(1:5)// &
-        ', '//trim(unstruc_program))
+        ', '//trim(product_name))
     ierr = nf90_put_att(ncid, nf90_global,  'date_created',  cdate(1:4)//'-'//cdate(5:6)//'-'//cdate(7:8)//'T'//ctime(1:2)//':'//ctime(3:4)//':'//ctime(5:6)//czone(1:5))
     ierr = nf90_put_att(ncid, nf90_global,  'date_modified', cdate(1:4)//'-'//cdate(5:6)//'-'//cdate(7:8)//'T'//ctime(1:2)//':'//ctime(3:4)//':'//ctime(5:6)//czone(1:5))
 
@@ -2906,7 +2906,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     use m_transport, only: NUMCONST, ISALT, ITEMP, ISED1, ISEDN, ITRA1, ITRAN, ITRAN0, constituents, itrac2const, const_names, const_units
     use m_fm_wq_processes, only: wqbot3D_output, numwqbots, wqbotnames, wqbotunits, wqbot
     use m_xbeach_data, only: E, thetamean, sigmwav
-    use m_flowexternalforcings, only: numtracers  !, trbndnames
+    use m_flowexternalforcings, only: numtracers
     use m_partitioninfo
     use m_missing
     use m_turbulence
@@ -2918,6 +2918,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     use m_1d_structures
     use m_GlobalParameters
     use m_longculverts
+    use m_structures_saved_parameters
     
     integer,           intent(in) :: irstfile
     real(kind=hp),     intent(in) :: tim
@@ -3105,6 +3106,8 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
          enddo
       endif
     endif
+        
+    call process_structures_saved_parameters(DEFINE_NCDF_DATA_ID, irstfile)
 
     ! Definition and attributes of size of latest timestep
     ierr = nf90_def_var(irstfile, 'timestep', nf90_double, id_timedim,  id_timestep)
@@ -4429,6 +4432,8 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
          enddo
       endif
     endif
+    
+    call process_structures_saved_parameters(WRITE_DATA_TO_FILE, irstfile)
 
     ! Write 1D cross sections
     if (ndx1d > 0 .and. stm_included) then
@@ -12388,6 +12393,7 @@ subroutine unc_read_map_or_rst(filename, ierr)
     use unstruc_channel_flow, only: network
     use m_GlobalParameters
     use netcdf_utils, only: ncu_get_att
+    use m_structures_saved_parameters
 
     character(len=*),  intent(in)       :: filename   !< Name of NetCDF file.
     integer,           intent(out)      :: ierr       !< Return status (NetCDF operations)
@@ -13463,6 +13469,8 @@ subroutine unc_read_map_or_rst(filename, ierr)
     ! Read structure
     call read_structures_from_rst(imapfile, filename, it_read)
 
+    call process_structures_saved_parameters(READ_DATA_FROM_FILE, imapfile)
+    
     call readyy('Reading map data',0.95d0)
 
     ! Read hysteresis_for_summerdike
@@ -17300,6 +17308,5 @@ do n = 1,ndxndxi
    end do
 end do
 end subroutine linktonode2
-
 
 end module unstruc_netcdf

@@ -206,6 +206,12 @@
     is_is_numndvals = 3
  end if
  
+ if (my_rank == fetch_proc_rank .and. (jawave == 1 .or. jawave == 2) ) then
+    ! All helpers need no further model initialization. 
+     call tauwavefetch(0d0)
+     iresult = DFM_USERINTERRUPT
+     return
+ endif
  ! 3D: flow_allocflow will set kmxn, kmxL and kmxc arrays
  call timstrt('Flow allocate arrays          ', handle_extra(37)) ! alloc flow
  call flow_allocflow()                               ! allocate   flow arrays

@@ -37,11 +37,10 @@ end module m_missing_meteo
 !!
 !! When file does not exist or is already open, program stops with
 !! an error message.
-subroutine oldfil(minp, filename)!, istat)
+subroutine oldfil(minp, filename)
 implicit none
     integer,           intent(out) :: minp     !< New file pointer to opened file.
     character(*),      intent(in)  :: filename !< Name of the file to open.
-!    integer, optional, intent(out) :: istat
 
     integer                        :: istat_
     integer                        :: i
@@ -185,26 +184,6 @@ subroutine zoekja(minp, rec, text, ja)
 end subroutine zoekja
 
 
-!> Searches for a keyword in file and returns the text value.
-!! 'key=text'
-subroutine zoekval(minp, key, val, ja)
-    implicit none
-    integer, intent(out)           :: ja    !< Whether key was found or not.
-    integer, intent(in)            :: minp  !< File pointer
-    character(*), intent(out)      :: val !< 
-    character(*), intent(in)       :: key
-
-    character(len=255) :: rec
-    integer :: l1
-
-    call zoekja(minp,rec,trim(key), ja)
-    if (ja .eq. 1) then
-        l1 = index(rec,'=') + 1
-        read(rec(l1:),*) val
-    else
-        return
-    endif
-end subroutine zoekval
 
 !> Searches for an optional keyword on current line and returns the text value.
 !! 'key=text'. Rewinds the file pointer to the original line.
@@ -218,8 +197,6 @@ subroutine zoekopt(minp, value, key, ja)
     character(len=255) :: rec
     integer :: l1
 
-    !write (msgbuf, '(a,a)') 'looking for optional keyword: ', key
-    !call msg_flush()
 
     ja = 0
 
@@ -235,7 +212,6 @@ subroutine zoekopt(minp, value, key, ja)
     endif
 
 999 continue
-    ! call mess(LEVEL_INFO, 'optional keyword', trim(key), 'NOT found.')
 end subroutine zoekopt
 
 

@@ -36,6 +36,13 @@
 !>                             .
 !>                          to a consistent set of sequential processes for the simulation part
 
+      use m_zoek
+      use m_dattim
+      use m_srstop
+      use m_rd_stt
+      use m_monsys
+      use m_getidentification
+      use m_getcom
       use processes_input
       use processes_pointers
       use process_registration
@@ -54,12 +61,12 @@
 
       ! declaration of arguments
 
-      integer             , intent(in   ) :: lunlsp          !< unit number spe
+      integer             , intent(inout) :: lunlsp          !< unit number spe
       character(len=*)    , intent(in   ) :: pdffil          !< filename proc_def
       character(len=*)    , intent(in   ) :: shared_dll_so      !< name of the open processes library dll/so to be loaded during runtime
       character(len=*)    , intent(inout) :: blmfil          !< filename spe
       character(len=*)    , intent(in   ) :: blmoutfil       !< base name for bloom output files
-      character(len=*)    , intent(in   ) :: sttfil          !< filename stt
+      character(len=*)    , intent(inout) :: sttfil          !< filename stt
 
       type(procespropcoll), intent(inout) :: statprocesdef   !< the statistical proces definition
       type(outputcoll)    , intent(inout) :: outputs         !< output structure

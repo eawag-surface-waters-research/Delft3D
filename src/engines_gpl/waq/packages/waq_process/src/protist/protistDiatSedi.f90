@@ -30,6 +30,7 @@ subroutine PROSED     ( pmsa   , fl     , ipoint , increm, noseg , &
 !*******************************************************************************
 !
 
+use m_dhkmrk
     use protist_constants
     IMPLICIT NONE
 !

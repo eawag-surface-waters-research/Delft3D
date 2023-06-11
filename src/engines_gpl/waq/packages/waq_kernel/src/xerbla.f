@@ -22,6 +22,7 @@
 !!  rights reserved.
 
       SUBROUTINE XERBLA ( SRNAME, INFO )
+      use m_srstop
       use timers
 
 *     ..    Scalar Arguments ..

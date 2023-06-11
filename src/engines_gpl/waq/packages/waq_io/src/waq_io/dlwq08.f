@@ -64,6 +64,8 @@
 !                           lun(29) = unit formatted output file
 !                           lun(18) = unit intermediate file (initials)
 
+      use m_srstop
+      use m_dhopnf
       use grids          ! for the storage of contraction grids
       use dlwq_data      ! for definition and storage of data
       use rd_token
@@ -75,7 +77,7 @@
 
 !     Kind                    Function         Name               Description
 
-      integer           ( 4), intent(in   ) :: lun  (*)      !< array with unit numbers
+      integer           ( 4), intent(inout) :: lun  (*)      !< array with unit numbers
       character         ( *), intent(inout) :: lchar(*)      !< filenames
       integer           ( 4), intent(inout) :: filtype(*)    !< type of binary file
       integer           ( 4), intent(in   ) :: noseg         !< nr of computational volumes

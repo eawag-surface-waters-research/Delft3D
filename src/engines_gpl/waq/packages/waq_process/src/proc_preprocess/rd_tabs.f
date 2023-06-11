@@ -34,6 +34,8 @@
 !     Modified  : Aug   2012 by Jan van Beek : just read the tables
 
       use timers         !< performance timers
+      use m_dhfext
+
       implicit none
 
       ! arguments

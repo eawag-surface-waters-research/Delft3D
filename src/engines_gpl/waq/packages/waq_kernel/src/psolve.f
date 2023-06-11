@@ -38,6 +38,7 @@
 !                 July     2009, Leo Postma  : double precission version
 !                 November 2009, Leo Postma  : streamlined for parallel computing
 
+      use m_srstop
       use timers
       implicit none
 

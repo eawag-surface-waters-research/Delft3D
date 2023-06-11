@@ -66,7 +66,6 @@ rm -rf \
     tools_gpl/vs/packages/vs/src/vs_l.c \
     tools_gpl/vs/packages/vs/src/vs_y.c \
     tools_gpl/vs/packages/vs/src/vs_y.h \
-    tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/include/version_number.h \
     utils_lgpl/d_hydro_lib/packages/d_hydro_lib/include/d_hydro_lib_version.h \
     utils_lgpl/delftio/packages/delftio/src/diof90/delftio_version.F90 \
     utils_lgpl/delftonline/src/delftonline/delftonline_version.h \

@@ -71,6 +71,8 @@
 
 !     Routines            : none
 
+      use m_zoek
+      use m_getcom
       use timers
       implicit none
 
