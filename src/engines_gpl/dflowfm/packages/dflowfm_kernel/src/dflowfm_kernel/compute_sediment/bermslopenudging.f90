@@ -95,7 +95,7 @@ subroutine bermslopenudging(error)
          ! slope magnitude smaller than bermslope leads to transport away from the cell, ie outward
          ! minus sign because e_dzdn is defined as bl1-bl2 in fm_erosed
          if (bermslopeindexbed(L) .and. bed/=0.0) then
-            if (stmpar%sedpar%sedtyp(lsd) == SEDTYP_COHESIVE) cycle
+            if (.not.has_bedload(stmpar%sedpar%tratyp(lsd))) cycle
             trmag_u = hypot(e_sbcn(L,lsd),e_sbct(L,lsd))
             flx = trmag_u*slpfac
             e_sbcn(L,lsd) = e_sbcn(L,lsd) - flx

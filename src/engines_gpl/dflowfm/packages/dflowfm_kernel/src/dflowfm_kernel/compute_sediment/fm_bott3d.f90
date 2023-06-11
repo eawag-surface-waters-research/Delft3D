@@ -610,7 +610,7 @@
    e_sbn = 0d0
    e_sbt = 0d0
    do l = 1,lsedtot
-      if (sedtyp(l)/=SEDTYP_COHESIVE) then
+      if (has_bedload(tratyp(l))) then
          do nm = 1, lnx
             e_sbn(nm, l) = e_sbcn(nm, l) + e_sbwn(nm, l) + e_sswn(nm, l)
             e_sbt(nm, l) = e_sbct(nm, l) + e_sbwt(nm, l) + e_sswt(nm, l)
