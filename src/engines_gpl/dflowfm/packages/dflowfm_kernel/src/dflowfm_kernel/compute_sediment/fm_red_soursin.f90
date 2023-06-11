@@ -76,7 +76,7 @@
       !
       ! Reduction is not applied to mud and not to bedload
       !
-      if (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
+      if (tratyp(l) == TRA_COMBINE) then
          if (kmx > 0) then
             do nm = 1, ndx
                call getkbotktop(nm, kb, kt)
@@ -162,7 +162,7 @@
                endif
             enddo            ! nm
          endif               ! kmx
-      endif                  ! sedtyp
+      endif                  ! tratyp
    enddo                     ! lsedtot
    if (reducmesscount > reducmessmax) then
       write (mdia,'(12x,a,i0,a)') 'Reduction messages skipped (more than ',reducmessmax,')'

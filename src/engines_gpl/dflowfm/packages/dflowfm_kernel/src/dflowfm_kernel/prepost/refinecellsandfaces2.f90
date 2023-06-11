@@ -769,7 +769,12 @@ subroutine refinecellsandfaces2()
                   else if (landsea == 3) then  ! land no refine
                       C  = 9d9
                   else 
-                      k2 = k + 1 ; if (k2 == num) k2 = 1
+                      if (k < N) then
+                         k2 = k + 1
+                      else
+                         k2 = 1
+                      end if
+
                       if (z(k)*z(k2) < 0d0) then 
                           C = 0d0
                       else 

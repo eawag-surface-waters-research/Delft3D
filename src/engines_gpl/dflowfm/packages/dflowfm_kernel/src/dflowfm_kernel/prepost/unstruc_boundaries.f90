@@ -496,7 +496,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
  use m_ship
  use properties
  use m_transport
- use sediment_basics_module, only: SEDTYP_NONCOHESIVE_SUSPENDED, SEDTYP_COHESIVE
  use m_meteo, qid_meteo => qid, filetype_meteo => filetype
  use m_sobekdfm
  use m_flowparameters, only: jawave

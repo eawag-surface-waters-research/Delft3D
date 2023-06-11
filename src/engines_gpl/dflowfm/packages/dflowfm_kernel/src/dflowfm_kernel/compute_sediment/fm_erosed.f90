@@ -121,7 +121,7 @@
    integer                       :: klc
    integer                       :: kmaxlc
    integer                       :: k1, k2
-   logical                       :: suspfrac  ! suspended component sedtyp(l)/=SEDTYP_NONCOHESIVE_TOTALLOAD
+   logical                       :: suspfrac  ! includes suspended transport via advection-diffusion equation
    logical                       :: javegczu
    real(fp)                      :: afluff
    real(fp)                      :: aks_ss3d
@@ -521,8 +521,8 @@
       !
       call compdiam(frac      ,sedd50    ,sedd50    ,sedtyp    ,lsedtot   , &
          & logsedsig ,nseddia   ,logseddia ,ndx       ,1         , &
-         & ndx       ,xx        ,nxx       ,sedd50fld ,dm        , &
-         & dg        ,dxx       ,dgsd      )
+         & ndx       ,xx        ,nxx       ,max_mud_sedtyp, min_dxx_sedtyp, &
+         & sedd50fld ,dm        ,dg        ,dxx       ,dgsd      )
       !
       ! determine hiding & exposure factors
       !
@@ -537,9 +537,9 @@
       !
       ! compute sand fraction
       !
-      call compsandfrac(frac      ,sedd50       ,ndx       ,lsedtot   , &
-                      & sedtyp    ,sandfrac     ,sedd50fld , &
-                      & 1         ,ndx         )   
+      call compsandfrac(frac, sedd50, ndx, lsedtot, sedtyp, &
+                      & max_mud_sedtyp, sandfrac, sedd50fld, &
+                      & 1, ndx)   
    endif   
    !
    ! compute normal component of bed slopes at edges    (e_xxx refers to edges)
@@ -876,17 +876,14 @@
          dll_integers(IP_ISED ) = l
          dll_strings(SP_USRFL)  = dll_usrfil(l)
          !
-         if (sedtyp(l) == SEDTYP_COHESIVE) then
+         if (.not.has_bedload(tratyp(l))) then
             !
-            ! sediment type COHESIVE
+            ! sediment transport governed by erosion and deposition fluxes
             !
             dll_reals(RP_D50  ) = 0.0_hp
             dll_reals(RP_DSS  ) = 0.0_hp
             dll_reals(RP_DSTAR) = 0.0_hp
             dll_reals(RP_SETVL) = real(ws(kb, l)  ,hp)
-            !!             if (flmd2l) then           ! 2 layer fluid mud
-            !!                 par(11,l) = entr(nm)
-            !!             endif
             !
             if (kmx > 0) then
                klc = 0
@@ -962,9 +959,9 @@
             cycle
          endif
          !
-         ! sediment type NONCOHESIVE_SUSPENDED or NONCOHESIVE_TOTALLOAD
+         ! sediment transport governed by bedoad vector and reference concentration
          !
-         suspfrac = sedtyp(l)/=SEDTYP_NONCOHESIVE_TOTALLOAD
+         suspfrac = has_advdiff(tratyp(l))
          !
          tsd  = -999.0_fp
          di50 = sedd50(l)
@@ -1210,7 +1207,7 @@
    call fm_red_soursin()
 
    do l = 1,lsedtot                                   ! this is necessary for next calls to upwbed
-      if (sedtyp(l)/=SEDTYP_COHESIVE) then
+      if (has_bedload(tratyp(l))) then
          do nm = 1, ndx
             sxtot(nm, l) = sbcx(nm, l) + sbwx(nm, l) + sswx(nm, l)
             sytot(nm, l) = sbcy(nm, l) + sbwy(nm, l) + sswy(nm, l)
