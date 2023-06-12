@@ -532,7 +532,7 @@
             do isegl = 1, noseglmesh2d
                if (aggr2d3d(isegl, ilay).gt.0) then
                   dlwq_values_2d3d(isegl,ilay) = volume(aggr2d3d(isegl, ilay))
-                  if ( nolay .gt. 1 .and. btest(iknmrk(aggr2d3d(isegl,ilay)),0) ) then
+                  if ( nolay > 1 .and. btest(iknmrk(aggr2d3d(isegl,ilay)),0) ) then
                      dlwq_volume_2d(isegl) = dlwq_volume_2d(isegl) + volume(aggr2d3d(isegl, ilay))
                   endif
                else
@@ -567,7 +567,7 @@
                do isegl = 1, noseglmesh2d
                   if (aggr2d3d(isegl, ilay).gt.0) then
                      dlwq_values_2d3d(isegl,ilay) = conc1(iout, aggr2d3d(isegl, ilay))
-                     if ( nolay .gt. 1 .and. btest(iknmrk(aggr2d3d(isegl,ilay)),0) ) then
+                     if ( nolay > 1 .and. btest(iknmrk(aggr2d3d(isegl,ilay)),0) ) then
                         if ( .not. sumconc1(iout) ) then
                            dlwq_values_2d(isegl)   = dlwq_values_2d(isegl) +
      &                                               conc1(iout, aggr2d3d(isegl, ilay)) *
@@ -579,7 +579,7 @@
                      endif
                   else
                      dlwq_values_2d3d(isegl,ilay) = -999.0
-                     if ( nolay .gt. 1 ) then
+                     if ( nolay > 1 ) then
                         dlwq_values_2d(isegl)   = -999.0
                      endif
                   endif
@@ -597,7 +597,7 @@
             endif
 
 !           Add 2D output in 3D models
-            if ( nolay .gt. 1 ) then
+            if ( nolay > 1 ) then
                if ( .not. sumconc1(iout) ) then
                   do isegl = 1, noseglmesh2d
                      if(dlwq_volume_2d(isegl).ne.-999.0) then
@@ -616,7 +616,7 @@
 
 !        Second set of output
          do iout = 1, notot2
-            if ( nolay .gt. 1 ) then
+            if ( nolay > 1 ) then
                dlwq_values_2d = 0.0
             endif
 
@@ -624,7 +624,7 @@
                do isegl = 1, noseglmesh2d
                   if (aggr2d3d(isegl, ilay).gt.0) then
                      dlwq_values_2d3d(isegl,ilay) = conc2(iout, aggr2d3d(isegl, ilay))
-                     if ( nolay .gt. 1 .and. btest(iknmrk(aggr2d3d(isegl,ilay)),0) ) then
+                     if ( nolay > 1 .and. btest(iknmrk(aggr2d3d(isegl,ilay)),0) ) then
                         if ( .not. sumconc2(iout) ) then
                            dlwq_values_2d(isegl)   = dlwq_values_2d(isegl) +
      &                                               conc2(iout, aggr2d3d(isegl, ilay)) *
@@ -636,7 +636,7 @@
                      endif
                   else
                      dlwq_values_2d3d(isegl,ilay) = -999.0
-                     if ( nolay .gt. 1 ) then
+                     if ( nolay > 1 ) then
                         dlwq_values_2d(isegl)   = -999.0
                      endif
                   endif
@@ -654,7 +654,7 @@
             endif
 
 !           Add 2D output in 3D models
-            if ( nolay .gt. 1) then
+            if ( nolay > 1) then
                if (.not. sumconc2(iout) ) then
                   do isegl = 1, noseglmesh2d
                      if(dlwq_volume_2d(isegl).ne.-999.0) then
