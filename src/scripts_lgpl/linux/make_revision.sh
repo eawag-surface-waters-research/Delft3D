@@ -37,11 +37,15 @@ VN_DIR=$TOPDIR/third_party_open/version_number/packages/version_number/src
 
 #
 # Be sure that BUILD_NUMBER always has a value
-BUILD_NUMBER="000000"; 
+BUILD_NUMBER="000000"
 cd $MODDIR
 if svnversion . >/dev/null 2>/dev/null ; then 
-   BUILD_NUMBER=`svnversion -n $MODDIR`; \
-fi;
+   BUILD_NUMBER=`svnversion -n $MODDIR`
+   if [[ "$BUILD_NUMBER" =~ ^exported.*$ || "$BUILD_NUMBER" =~ ^Unversioned.*$ ]]; then
+      BUILD_NUMBER="000000"
+   fi
+fi
+
 #   also write it to file
 # echo $BUILD_NUMBER > $MODDIR/BUILD_NUMBER
 

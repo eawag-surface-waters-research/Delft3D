@@ -306,16 +306,18 @@ subroutine flow_sedmorinit()
     isusmud = 0
     isussand = 0
     do ifrac=1, stmpar%lsedtot
-       if (stmpar%sedpar%sedtyp(ifrac) == SEDTYP_COHESIVE .or. &
-           stmpar%sedpar%sedtyp(ifrac) == SEDTYP_NONCOHESIVE_SUSPENDED) then
+       if (stmpar%sedpar%tratyp(ifrac) /= TRA_BEDLOAD) then
+          !
+          ! Count the suspended fractions individually and all together
+          !
           sedtot2sedsus(isus) = ifrac
           isus = isus + 1
+          if (stmpar%sedpar%sedtyp(ifrac) <= stmpar%sedpar%max_mud_sedtyp) then
+             isusmud = isusmud + 1
+          else
+             isussand = isussand + 1
+          endif
        end if
-       !
-       ! Count them
-       !
-       if (stmpar%sedpar%sedtyp(ifrac) == SEDTYP_COHESIVE) isusmud = isusmud + 1
-       if (stmpar%sedpar%sedtyp(ifrac) == SEDTYP_NONCOHESIVE_SUSPENDED) isussand = isussand + 1
     end do
     !
     if (numfracs > 0) then    ! fractions from boundaries
@@ -325,18 +327,12 @@ subroutine flow_sedmorinit()
        have_mudbnd = .false.
        have_sandbnd = .false.
        do isf = 1, stmpar%lsedsus
-          if (stmpar%sedpar%sedtyp(sedtot2sedsus(isf))==SEDTYP_COHESIVE) then
+          if (stmpar%sedpar%sedtyp(sedtot2sedsus(isf)) <= stmpar%sedpar%max_mud_sedtyp) then ! have_mudbnd and have_sandbnd not actually used
              have_mudbnd = .true.
-          end if
-
-          if (stmpar%sedpar%sedtyp(sedtot2sedsus(isf))==SEDTYP_NONCOHESIVE_SUSPENDED) then
+          else
              have_sandbnd = .true.
           end if
        end do
-
-       !if (have_mudbnd)  stmpar%morpar%eqmbcmud = .false.
-       !if (have_sandbnd) stmpar%morpar%eqmbcsand = .false.
-
     end if
     !
     !

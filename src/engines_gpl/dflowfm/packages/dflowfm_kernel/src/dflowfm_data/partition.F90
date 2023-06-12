@@ -45,9 +45,15 @@
 #include "config.h"
 #endif 
 
-!> the parameters and enumeraters are taken from
-!>   ../third_party_open/metis-<version>/include/metis.h
+!> @file partition.f90
+!! Data and parameter modules for partitioning & parallelizing D-Flow FM models.
+!!
+!! Includes FM's own partition data as well as some handling of METIS and PETSc.
+
+!> Interface module to METIS's native error codes.
 module m_metis
+! the parameters and enumerators are taken from
+!   ../third_party_open/metis-<version>/include/metis.h
    integer, parameter :: METIS_NOPTIONS=40
    
    integer, dimension(METIS_NOPTIONS) :: opts
@@ -59,6 +65,7 @@ module m_metis
    integer, parameter :: METIS_ERROR           = -4   !< Some other errors
 end module
 
+!> Administration data for D-Flow FM's partitions and MPI-communication patterns.
 module m_partitioninfo
 
 use m_tpoly
