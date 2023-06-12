@@ -58,8 +58,7 @@
       ELSEIF ( IKNMRK .EQ. 3 ) THEN
          KNMRKI = KENMRK / 100
          KNMRKI = MOD(KNMRKI,10)
-      ELSEIF ( IKNMRK .LE. 0 .OR.
- IKNMRK .GT. 9      ) THEN
+      ELSEIF ( IKNMRK .LE. 0 .OR. IKNMRK .GT. 9      ) THEN
          DHIMIS = -999.
          KNMRKI = DHIMIS
       ELSE

@@ -118,20 +118,16 @@
                case ( 12 )
                   open ( lun, file = finam, err = 910, form='unformatted' , status = 'old' )
                case ( 21 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' ,
- &
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , &
                                                        convert='big_endian' )
                case ( 22 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , status = 'old',
- &
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , status = 'old', &
                                                        convert='big_endian' )
                case ( 31 )
-                  open ( lun, file = finam, err = 910, form   ='unformatted' ,
- &
+                  open ( lun, file = finam, err = 910, form   ='unformatted' , &
                                                        convert='big_endian' )
                case ( 32 )
-                  open ( lun, file = finam, err = 910, form='unformatted' , status = 'old',
- &
+                  open ( lun, file = finam, err = 910, form='unformatted' , status = 'old', &
                                                        convert='big_endian' )
                case default
                   ierr = 3
@@ -176,12 +172,10 @@
                case ( 11, 12 )
                   open ( lun, file = finam, err = 910, form='unformatted' )
                case ( 21, 22 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' ,
- &
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , &
                                                        convert='big_endian' )
                case ( 31, 32 )
-                  open ( lun, file = finam, err = 910, form='unformatted',
- convert='big_endian' )
+                  open ( lun, file = finam, err = 910, form='unformatted', convert='big_endian' )
                case default
                   ierr = 3
             end select
@@ -197,20 +191,16 @@
                case ( 12 )
                   open ( lun, file = finam, err = 910, form='unformatted', status = 'old' )
                case ( 21 )
-                  open ( lun, file = finam, err = 910, form   ='unformatted', access='stream',
- &
+                  open ( lun, file = finam, err = 910, form   ='unformatted', access='stream', &
                                                        convert='big_endian' )
                case ( 22 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream', status = 'old',
- &
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream', status = 'old', &
                                                        convert='big_endian' )
                case ( 31 )
-                  open ( lun, file = finam, err = 910, form   ='unformatted',
- &
+                  open ( lun, file = finam, err = 910, form   ='unformatted', &
                                                        convert='big_endian' )
                case ( 32 )
-                  open ( lun, file = finam, err = 910, form='unformatted', status = 'old',
- &
+                  open ( lun, file = finam, err = 910, form='unformatted', status = 'old', &
                                                        convert='big_endian' )
                case default
                   ierr = 3
@@ -235,12 +225,10 @@
                case ( 11, 12 )
                   open ( lun, file = finam, err = 910, form='unformatted' )
                case ( 21, 22 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' ,
- &
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , &
                                                        convert='big_endian' )
                case ( 31, 32 )
-                  open ( lun, file = finam, err = 910, form='unformatted',
- convert='big_endian' )
+                  open ( lun, file = finam, err = 910, form='unformatted', convert='big_endian' )
                case default
                   ierr = 3
             end select
@@ -254,12 +242,10 @@
                case ( 11, 12 )
                   open ( lun, file = finam, err = 910, form='unformatted' )
                case ( 21, 22 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' ,
- &
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , &
                                                        convert='big_endian' )
                case ( 31, 32 )
-                  open ( lun, file = finam, err = 910, form='unformatted',
- convert='big_endian' )
+                  open ( lun, file = finam, err = 910, form='unformatted', convert='big_endian' )
                case default
                   ierr = 3
             end select
@@ -283,12 +269,10 @@
                case ( 11, 12 )
                   open ( lun, file = finam, err = 910, form='unformatted' )
                case ( 21, 22 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' ,
- &
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , &
                                                        convert='big_endian' )
                case ( 31, 32 )
-                  open ( lun, file = finam, err = 910, form='unformatted',
- convert='big_endian' )
+                  open ( lun, file = finam, err = 910, form='unformatted', convert='big_endian' )
                case default
                   ierr = 3
             end select
@@ -332,12 +316,10 @@
                case ( 11, 12 )
                   open ( lun, file = finam, err = 910, form='unformatted' )
                case ( 21, 22 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' ,
- &
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , &
                                                        convert='big_endian' )
                case ( 31, 32 )
-                  open ( lun, file = finam, err = 910, form='unformatted',
- convert='big_endian' )
+                  open ( lun, file = finam, err = 910, form='unformatted', convert='big_endian' )
                case default
                   ierr = 3
             end select
@@ -534,20 +516,16 @@
                case ( 12 )
                   open ( lun, file = finam, err = 910, form='unformatted', status = 'old' )
                case ( 21 )
-                  open ( lun, file = finam, err = 910, form   ='unformatted', access='stream',
- &
+                  open ( lun, file = finam, err = 910, form   ='unformatted', access='stream', &
                                                                convert='big_endian' )
                case ( 22 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream', status = 'old',
- &
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream', status = 'old', &
                                                                convert='big_endian' )
                case ( 31 )
-                  open ( lun, file = finam, err = 910, form   ='unformatted',
- &
+                  open ( lun, file = finam, err = 910, form   ='unformatted', &
                                                                convert='big_endian' )
                case ( 32 )
-                  open ( lun, file = finam, err = 910, form='unformatted', status = 'old',
- &
+                  open ( lun, file = finam, err = 910, form='unformatted', status = 'old', &
                                                                convert='big_endian' )
                case default
                   ierr = 3
@@ -580,12 +558,10 @@
                case ( 11, 12 )
                   open ( lun, file = finam, err = 910, form='unformatted' )
                case ( 21, 22 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' ,
- &
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , &
                                                        convert='big_endian' )
                case ( 31, 32 )
-                  open ( lun, file = finam, err = 910, form='unformatted',
- convert='big_endian' )
+                  open ( lun, file = finam, err = 910, form='unformatted', convert='big_endian' )
                case default
                   ierr = 3
             end select
@@ -614,11 +590,8 @@
       write ( * , 2000 ) nropen, lun, trim(finam), trim(wd_path)
       call srstop ( 1 )
 
- 2000 format (   ' ERROR opening file number:',I3,' on unit:',I3  ,
- &
-               /,' Filename is: ',A ,
- &
-               /,' Searching in working directory: ',
- /,'  ' A )
+ 2000 format (   ' ERROR opening file number:',I3,' on unit:',I3  , &
+               /,' Filename is: ',A , &
+               /,' Searching in working directory: ', /,'  ' A )
       end
       end module m_dhopnf
