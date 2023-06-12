@@ -14,22 +14,6 @@ install_*/**
 
 # ignore files created by updating process definition files
 src/engines_gpl/waq/default/csvFiles/coefedit.dat
-src/engines_gpl/waq/default/csvFiles/conf_name.pptex
-src/engines_gpl/waq/default/csvFiles/filid.pptex
-src/engines_gpl/waq/default/csvFiles/procesm.asc
-src/engines_gpl/waq/default/csvFiles/tabel301.pptex
-src/engines_gpl/waq/default/csvFiles/tabel302.pptex
-src/engines_gpl/waq/default/csvFiles/tabel303.pptex
-src/engines_gpl/waq/default/csvFiles/tabel304.pptex
-src/engines_gpl/waq/default/csvFiles/tabel305.pptex
-src/engines_gpl/waq/default/csvFiles/tabel306.pptex
-src/engines_gpl/waq/default/csvFiles/tabel307.pptex
-src/engines_gpl/waq/default/csvFiles/tabel308.pptex
-src/engines_gpl/waq/default/csvFiles/tabel309.pptex
-src/engines_gpl/waq/default/csvFiles/tabel310.pptex
-src/engines_gpl/waq/default/csvFiles/tabel311.pptex
-src/engines_gpl/waq/default/csvFiles/tabel312.pptex
-src/engines_gpl/waq/default/csvFiles/tabel313.pptex
-src/engines_gpl/waq/default/csvFiles/tabel314.pptex
-src/engines_gpl/waq/default/csvFiles/tabel315.pptex
-src/engines_gpl/waq/default/csvFiles/waqpb_export.log
+src/engines_gpl/waq/default/csvFiles/*.pptex
+src/engines_gpl/waq/default/csvFiles/*.asc
+src/engines_gpl/waq/default/csvFiles/*.log
