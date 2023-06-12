@@ -312,7 +312,7 @@
  double precision, allocatable     :: advi  (:)   !< advection implicit part (1/s)
  double precision, allocatable     :: adve  (:)   !< advection explicit part (m/s2)
  double precision, allocatable     :: adve0 (:)   !< advection explicit part (m/s2) prevstep
- double precision, allocatable, target     :: hu    (:)   !< [m] upwind waterheight at u-point (m) {"location": "edge", "shape": ["lnx"]}
+ double precision, allocatable, target     :: hu    (:)   !< [m] upwind waterheight at u-point; for 3D layers the distance from the top of layer to the bed (m) {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable     :: huvli (:)   !< inverse alfa weighted waterheight at u-point (m) (volume representative)
  double precision, allocatable     :: v     (:)   !< tangential velocity in u point (m/s)
  double precision, allocatable     :: suu   (:)   !< stress u dir (m/s2)
