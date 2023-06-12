@@ -90,6 +90,8 @@ subroutine morbndfill(kcs       ,guu       ,gvv       ,icx       ,icy       , &
     real(fp) :: width2
     real(fp) :: widthprev
     real(fp) :: totdist
+    !
+    character(120) :: errmsg
 !
 !! executable statements -------------------------------------------------------
 !
@@ -196,12 +198,16 @@ subroutine morbndfill(kcs       ,guu       ,gvv       ,icx       ,icy       , &
              totwidth = sqrt(width**2 + width2**2)
           else
              idir = 2  ! v boundary
-             if (kcs(ndm) == 0) then
+             if (kcs(num) == 1) then
                 nxmx  = num
                 width = gvv(nm)
-             elseif (kcs(num) == 0) then
+             elseif (kcs(ndm) == 1) then
                 nxmx  = ndm
                 width = gvv(ndm)
+             else
+                write(errmsg,'(A,I0,A,I0,A)') 'MORBNDFIL: unable to determine orientation of mor boundary at M=',m,' N=',n,'.'
+                call prterr(lundia, 'U021', errmsg)
+                call d3stop(1, gdp)
              endif
              totwidth = width
           endif

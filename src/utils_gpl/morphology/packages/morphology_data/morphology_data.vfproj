@@ -46,6 +46,7 @@
 	<Files>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath=".\src\dredge_data_module.f90"/>
+		<File RelativePath=".\src\flocculation.f90"/>
 		<File RelativePath=".\src\morphology_data_module.f90"/>
 		<File RelativePath=".\src\sediment_basics_module.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

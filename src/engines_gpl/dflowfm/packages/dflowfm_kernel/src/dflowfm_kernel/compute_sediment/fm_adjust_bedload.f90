@@ -85,7 +85,7 @@
          call getLbotLtop(Lf, Lb, Lt)
          if (Lt<Lb) cycle
          do l = 1, lsedtot
-            if (sedtyp(l) /= SEDTYP_COHESIVE) then
+            if (has_bedload(tratyp(l))) then
                di50 = sedd50(l)
                di50spatial = .false.
                if (di50<0.0_fp .and. lsedtot==1) di50spatial = .true.
@@ -249,7 +249,7 @@
                sbncor(Lf) = sbncor(Lf) * frc * fixf
                sbtcor(Lf) = sbtcor(Lf) * frc * fixf
                !
-            end if         ! SEDTYP
+            end if         ! tratyp
             sbn(Lf, l) = sbncor(Lf)
             sbt(Lf, l) = sbtcor(Lf)
          end do            ! lsedtot
