@@ -62,7 +62,7 @@ double precision function setrho(k,p0)
 use m_physcoef
 use m_flow
 use m_sediment
-use sediment_basics_module, only: SEDTYP_NONCOHESIVE_TOTALLOAD
+use sediment_basics_module, only: has_advdiff
 use m_transport
 use m_turbulence, only: rhowat
 
@@ -95,11 +95,11 @@ if (jased > 0 .and. stm_included) then
    rhom = min(rhom, 1250d0)           ! check overshoots at thin water layers
    rhom = max(rhom,  990d0)           !
    rhowat(k) = rhom
-   if (stmpar%morpar%densin) then     ! sediment effects
+   if (stmpar%morpar%densin) then     ! sediment density effects
       l = ISED1
       rhom = setrho
       do lsed = 1,stmpar%lsedtot
-         if (stmpar%sedpar%sedtyp(lsed) /= SEDTYP_NONCOHESIVE_TOTALLOAD) then  ! suspended sand or mud
+         if (has_advdiff(stmpar%sedpar%tratyp(lsed))) then ! has suspended component
             setrho = setrho + constituents(l,k)*(stmpar%sedpar%rhosol(lsed) - rhom)/stmpar%sedpar%rhosol(lsed)
             l = l+1
          end if
