@@ -74,7 +74,8 @@
 !     get last directory seperator
 !
       DO ICH = LENNAM , 1 , -1
-         IF ( FILNAM(ICH:ICH) .EQ. DIRSEP_DOS .OR. FILNAM(ICH:ICH) .EQ. DIRSEP_UX       ) THEN
+         IF ( FILNAM(ICH:ICH) .EQ. DIRSEP_DOS .OR.
+ FILNAM(ICH:ICH) .EQ. DIRSEP_UX       ) THEN
             PATHLEN = ICH
             EXIT
          ENDIF

@@ -90,7 +90,8 @@
 !
 !     Variables :
 !
-      INTEGER          IYEAR , IMONTH, IDAY  , IHOUR , IMIN  , ISEC  , IDATE , ITIME , MONLEN(12)
+      INTEGER          IYEAR , IMONTH, IDAY  , IHOUR , IMIN  , ISEC  ,
+ IDATE , ITIME , MONLEN(12)
       DOUBLE PRECISION TEMP1 , TEMP2
       CHARACTER*48     LINE
 !
@@ -124,24 +125,35 @@
       IHOUR  = ITIME/10000
       IMIN   = ITIME/100 - IHOUR*100
       ISEC   = ITIME - IHOUR*10000 - IMIN*100
-      IF (( IYEAR  .LT. -4713 ) .OR. ( IMONTH .LT.  1 ) .OR. &
-          ( IMONTH .GT.    12 ) .OR. ( IDAY   .LT.  1 ) .OR. &
-          ( IDAY   .GT. MONLEN(IMONTH) ) .OR. &
-          ( IHOUR  .LT.     0 ) .OR. ( IHOUR  .GT. 24 ) .OR. &
-          ( IMIN   .LT.     0 ) .OR. ( IMIN   .GT. 60 ) .OR. &
+      IF (( IYEAR  .LT. -4713 ) .OR. ( IMONTH .LT.  1 ) .OR.
+ &
+          ( IMONTH .GT.    12 ) .OR. ( IDAY   .LT.  1 ) .OR.
+ &
+          ( IDAY   .GT. MONLEN(IMONTH) ) .OR.
+ &
+          ( IHOUR  .LT.     0 ) .OR. ( IHOUR  .GT. 24 ) .OR.
+ &
+          ( IMIN   .LT.     0 ) .OR. ( IMIN   .GT. 60 ) .OR.
+ &
           ( ISEC   .LT.     0 ) .OR. ( ISEC   .GT. 60 )) THEN
          JULIAN = -1.0
-         WRITE(LINE,'(A33,I8,''-'',I6)') 'ERROR in JULIAN interpeting time:',IDATE,ITIME
+         WRITE(LINE,'(A33,I8,''-'',I6)') 'ERROR in JULIAN interpreting time:',IDATE,ITIME
          CALL MONSYS(LINE,1)
          GOTO 999
       ELSE
          TEMP1  = INT (( IMONTH-14.0) / 12.0 )
-         TEMP2  = IDAY - 32075.0 + &
-                INT ( 1461.0 * ( IYEAR + 4800.0 + TEMP1 ) / 4.0 ) + &
-                INT ( 367.0 * ( IMONTH - 2.0 - TEMP1 * 12.0 ) / 12.0 ) - &
-                INT ( 3.0 * INT ( ( IYEAR + 4900.0 + TEMP1 ) / 100.0 ) / 4.0 )
-         TEMP1  = FLOAT ( IHOUR ) * 3600.0 + &
-                  FLOAT ( IMIN  ) *   60.0 + FLOAT ( ISEC  ) - 43200.0
+         TEMP2  = IDAY - 32075.0 +
+ &
+                INT ( 1461.0 * ( IYEAR + 4800.0 + TEMP1 ) / 4.0 ) +
+ &
+                INT ( 367.0 * ( IMONTH - 2.0 - TEMP1 * 12.0 ) / 12.0 ) -
+ &
+                INT ( 3.0 * INT ( ( IYEAR + 4900.0 + TEMP1 ) / 100.0 ) /
+ 4.0 )
+         TEMP1  = FLOAT ( IHOUR ) * 3600.0 +
+ &
+                  FLOAT ( IMIN  ) *   60.0 +
+ FLOAT ( ISEC  ) - 43200.0
          JULIAN = TEMP2 + ( TEMP1 / 86400.0 )
       ENDIF
   999 RETURN
