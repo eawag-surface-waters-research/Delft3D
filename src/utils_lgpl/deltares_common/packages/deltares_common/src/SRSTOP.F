@@ -49,7 +49,7 @@
       integer  ( 4), intent(in   ) :: iexit             !< return value
       integer  ( 4)                :: lunfil
 
-      if ( iexit /= 0 ) then
+      if ( iexit .ne. 0 ) then
          write (*,*) 'Stopped with error code :',iexit
       else
          write (*,*) 'Normal end'

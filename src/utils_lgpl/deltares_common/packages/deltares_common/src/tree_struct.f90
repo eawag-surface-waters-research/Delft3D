@@ -121,14 +121,14 @@ subroutine tree_create( name, tree, maxlenpar )
 
    allocate( tree, stat = error )
 
-   if ( error /= 0 ) then
+   if ( error .ne. 0 ) then
       nullify( tree )
    else
       newsize = size( transfer( name, node_value ) )
       !GD: memory leak here
       !if(associated(tree%node_name)) deallocate(tree%node_name)
       allocate( tree%node_name(1:newsize), stat = error )
-      if ( error /= 0 ) then
+      if ( error .ne. 0 ) then
          deallocate( tree )
          return
       else
@@ -216,7 +216,7 @@ subroutine tree_remove_child_by_name(tree,name,ierror)
   end if
   
   allocate( children(1:newsize), stat = ierror )
-  if ( ierror /= 0 ) then
+  if ( ierror .ne. 0 ) then
     return
   else
     if ( newsize > 1 ) then
@@ -256,10 +256,10 @@ subroutine tree_add_node(tree, node, ierror)
       endif
 
       allocate( children(1:newsize), stat = ierror )
-      if ( ierror /= 0 ) then
+      if ( ierror .ne. 0 ) then
          return
       else
-         if ( newsize > 1 ) then
+         if ( newsize .gt. 1 ) then
             children(1:newsize-1) = tree%child_nodes
             deallocate( tree%child_nodes )
             children(newsize-1)%node_ptr%bf_next_node => node    ! chain previous node in the breadth-first sense to the new node
@@ -409,13 +409,13 @@ subroutine tree_get_node_by_name( tree, name, node, i_return )
 
    node_name = tree_get_name( tree )
 
-   if ( node_name == low_name ) then
+   if ( node_name .eq. low_name ) then
       node => tree
    elseif ( associated(tree%child_nodes) ) then
       do i = 1,size(tree%child_nodes)
          node_name = str_tolower(tree_get_name( tree%child_nodes(i)%node_ptr ))
 
-         if ( node_name == low_name ) then
+         if ( node_name .eq. low_name ) then
             node => tree%child_nodes(i)%node_ptr
             if (present(i_return)) i_return = i
             exit
@@ -487,17 +487,17 @@ subroutine tree_put_data( tree, data, data_type, success )
 !    GD: memory leak
 !    if(associated(tree%node_data)) deallocate(tree%node_data)
     allocate( tree%node_data(1:size(data)), stat = error )
-    if ( error == 0 ) then
+    if ( error .eq. 0 ) then
        tree%node_data = data
        allocate( tree%node_data_type(1:len_trim(data_type)), &
           stat = error )
-       if ( error == 0 ) then
+       if ( error .eq. 0 ) then
           tree%node_data_type = transfer( data_type, tree%node_data_type )
        endif
     endif
 
     if ( present( success ) ) then
-       success = error == 0
+       success = error .eq. 0
     endif
 
 end subroutine tree_put_data
