@@ -58,6 +58,8 @@ subroutine flow_sedmorinit()
     use MessageHandling
     use dfm_error
     use m_mormerge
+    use m_mormerge_mpi
+    use m_partitioninfo, only: jampi, my_rank, ndomains, DFM_COMM_DFMWORLD
 
     implicit none
 
@@ -76,7 +78,6 @@ subroutine flow_sedmorinit()
     integer, dimension(:), allocatable        :: crossdef_used  !< count number of times a cross section definition is used
     integer, dimension(:), allocatable        :: node_processed !< flag (connection) nodes processed while checking cross sections
     type(t_branch), pointer                   :: pbr
-    double precision                          :: dim_real
     integer                                   :: outmorphopol !opposite of inmorphopol
 
 !! executable statements -------------------------------------------------------
@@ -305,16 +306,18 @@ subroutine flow_sedmorinit()
     isusmud = 0
     isussand = 0
     do ifrac=1, stmpar%lsedtot
-       if (stmpar%sedpar%sedtyp(ifrac) == SEDTYP_COHESIVE .or. &
-           stmpar%sedpar%sedtyp(ifrac) == SEDTYP_NONCOHESIVE_SUSPENDED) then
+       if (stmpar%sedpar%tratyp(ifrac) /= TRA_BEDLOAD) then
+          !
+          ! Count the suspended fractions individually and all together
+          !
           sedtot2sedsus(isus) = ifrac
           isus = isus + 1
+          if (stmpar%sedpar%sedtyp(ifrac) <= stmpar%sedpar%max_mud_sedtyp) then
+             isusmud = isusmud + 1
+          else
+             isussand = isussand + 1
+          endif
        end if
-       !
-       ! Count them
-       !
-       if (stmpar%sedpar%sedtyp(ifrac) == SEDTYP_COHESIVE) isusmud = isusmud + 1
-       if (stmpar%sedpar%sedtyp(ifrac) == SEDTYP_NONCOHESIVE_SUSPENDED) isussand = isussand + 1
     end do
     !
     if (numfracs > 0) then    ! fractions from boundaries
@@ -324,18 +327,12 @@ subroutine flow_sedmorinit()
        have_mudbnd = .false.
        have_sandbnd = .false.
        do isf = 1, stmpar%lsedsus
-          if (stmpar%sedpar%sedtyp(sedtot2sedsus(isf))==SEDTYP_COHESIVE) then
+          if (stmpar%sedpar%sedtyp(sedtot2sedsus(isf)) <= stmpar%sedpar%max_mud_sedtyp) then ! have_mudbnd and have_sandbnd not actually used
              have_mudbnd = .true.
-          end if
-
-          if (stmpar%sedpar%sedtyp(sedtot2sedsus(isf))==SEDTYP_NONCOHESIVE_SUSPENDED) then
+          else
              have_sandbnd = .true.
           end if
        end do
-
-       !if (have_mudbnd)  stmpar%morpar%eqmbcmud = .false.
-       !if (have_sandbnd) stmpar%morpar%eqmbcsand = .false.
-
     end if
     !
     !
@@ -426,22 +423,23 @@ subroutine flow_sedmorinit()
        end do
     end if
 
-    dim_real = 1d0
     if (stmpar%morpar%multi) then
-       !
-       ! Initialize mormerge
-       call initmerge(ierr, ndxi, stmpar%lsedtot, "singledomain", stmpar%morpar)
-       if (ierr /= DFM_NOERR) then
+       if (initialize_mormerge_mpi(stmpar%morpar, stmpar%lsedtot, ndxi, jampi, my_rank, ndomains, DFM_COMM_DFMWORLD) &
+           /= DFM_NOERR) then
           call mess(LEVEL_FATAL, 'unstruc::flow_sedmorinit - Mormerge initialization failed')
           goto 1234
+       end if 
+
+       allocate (stmpar%morpar%mergebuf(ndxi*stmpar%lsedtot), stat = ierr)
+       if (ierr /= 0) then
+          call mess(LEVEL_FATAL, 'unstruc::flow_sedmorinit - allocate buffer array failed')
+          goto 1234
        endif
-       !
+       
        call realloc(mergebodsed,(/stmpar%lsedtot, ndx/), stat=ierr,fill=0d0,keepExisting=.false.)
        !
-       if (jamormergedtuser>0) then    ! safety, set equal dt_user across mormerge processes once
-          call putarray (stmpar%morpar%mergehandle,dim_real,1)
-          call putarray (stmpar%morpar%mergehandle,dt_user,1)
-          call getarray (stmpar%morpar%mergehandle,dt_user,1)
+       if (jamormergedtuser>0 .and. my_rank == 0 ) then    ! safety, set equal dt_user across mormerge processes once
+          call put_get_time_step(stmpar%morpar%mergehandle, dt_user)
        endif
     endif
 

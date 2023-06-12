@@ -307,6 +307,7 @@
  double precision                  :: eps6              !<
  double precision                  :: eps8              !< implicit diffusion
  double precision                  :: eps10             !<
+ double precision                  :: eps20             !< faxlac
  double precision                  :: epshsdif=1d-2     !< hs < epshsdif: no vertical diffusion if hs < epshsdif
  double precision                  :: s01max            !< water level threshold (m) between s0 and s1 in validation routine
  double precision                  :: u01max            !< velocity threshold (m/s) between u0 and u1 in validation routine
@@ -448,6 +449,8 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
 
  integer                           :: jalogsolverconvergence    !< log solver convergence message bloat (default 1, preferable 0)
  integer                           :: jalogtransportsolverlimiting    !< log transport solver limiting message bloat (default 0, preferable 0)
+ 
+ integer                           :: jadpuopt                  !< option for bed level at velocity point in case of tile approach bed level: 1 = max (default). This is equivalent to min in Delft3D 4; 2 = mean. 
 
  ! written to his file yes or no
  integer                           :: jahisbal                  !< Write mass balance/volume totals to his file, 0: no, 1: yes
@@ -844,6 +847,7 @@ subroutine default_flowparameters()
     eps6       = 1d-6    !
     eps8       = 1d-8    ! implicit diffusion
     eps10      = 1d-10   !
+    eps20      = 1d-20   ! facLax
 
     s01max     = 0d0     ! max. water level change: off
     u01max     = 0d0     ! max. velocity change: off
@@ -1043,6 +1047,8 @@ subroutine default_flowparameters()
 
     jatransportautotimestepdiff = 0
     implicitdiffusion2D         = 0
+    
+    jadpuopt = 1
 
     call reset_flowparameters()
 end subroutine default_flowparameters

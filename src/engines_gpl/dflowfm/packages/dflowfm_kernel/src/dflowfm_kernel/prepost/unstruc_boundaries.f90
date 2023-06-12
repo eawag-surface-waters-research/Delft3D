@@ -496,7 +496,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
  use m_ship
  use properties
  use m_transport
- use sediment_basics_module, only: SEDTYP_NONCOHESIVE_SUSPENDED, SEDTYP_COHESIVE
  use m_meteo, qid_meteo => qid, filetype_meteo => filetype
  use m_sobekdfm
  use m_flowparameters, only: jawave
@@ -637,8 +636,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      nbndu = nbndu + numu
 
   else if (qidfm == 'salinitybnd' .and. jasal>0 ) then
-
-     kce   = abs(kce) ! switch kce back on, but only for all net boundaries (some of which may have been set to -1 by a flow boundary)
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, kes(nbnds+1:nx), nums, usemask=.false., rrtolrel=rrtolrel)
      write(msgbuf,'(a,x,a,i8,a)') trim(qid), trim(filename), nums, ' nr of salinity bndcells' ; call msg_flush()
      if (nums>0) then
@@ -647,8 +644,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      end if
 
   else if (qidfm == 'waveenergybnd' ) then
-
-     kce   = abs(kce) ! switch kce back on, but only for all net boundaries (some of which may have been set to -1 by a flow boundary)
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, kew(nbndw+1:nx), numw, usemask=.false., rrtolrel=rrtolrel)
      write(msgbuf,'(a,x,a,i8,a)') trim(qid), trim(filename), numw, ' nr of wave energy bndcells' ; call msg_flush()
 
@@ -662,8 +657,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      fnamwbnd(nwbnd) = trim(filename)
      
   else if (qidfm == 'temperaturebnd' .and. jatem > 0 ) then
-
-     kce   = abs(kce) ! switch kce back on, but only for all net boundaries (some of which may have been set to -1 by a flow boundary)
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, ketm(nbndtm+1:nx), numtm, usemask=.false., rrtolrel=rrtolrel)
      write(msgbuf,'(a,x,a,i8,a)') trim(qid), trim(filename), numtm, ' nr of temperature bndcells' ; call msg_flush()
      if (numtm>0) then
@@ -672,8 +665,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      end if
 
   else if (qidfm == 'sedimentbnd' ) then
-
-     kce   = abs(kce) ! switch kce back on, but only for all net boundaries (some of which may have been set to -1 by a flow boundary)
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, kesd(nbndsd+1:nx), numsd, usemask=.false., rrtolrel=rrtolrel)
      write(msgbuf,'(a,x,a,i8,a)') trim(qid), trim(filename), numsd, ' nr of sediment bndcells' ; call msg_flush()
      if (numsd>0) then
@@ -682,8 +673,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      end if
 
   else if (qidfm(1:9) == 'tracerbnd' ) then
-
-     kce   = abs(kce) ! switch kce back on, but only for all net boundaries (some of which may have been set to -1 by a flow boundary)
      call get_tracername(qidfm, tracnam, qidnam)
      tracunit = " "
      call add_bndtracer(tracnam, tracunit, itrac, janew)
@@ -692,8 +681,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
 !       realloc ketr
         call realloc(ketr, (/ Nx, numtracers /), keepExisting=.true., fill=0 )
      end if
-
-     ! kce   = 1 ! switch kce back on as points to be potentially flagged
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, ketr(nbndtr(itrac)+1:,itrac), numtr, usemask=.false., rrtolrel=rrtolrel)
      write(msgbuf,'(a,x,a,i8,a)') trim(qid), trim(filename) , numtr, ' nr of tracer bndcells' ; call msg_flush()
      if (numtr>0) then
@@ -713,8 +700,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      end if
 
   else if (qidfm(1:10) == 'sedfracbnd' .and. jased > 0) then
-
-     kce = abs(kce)   ! kce=1
      call get_sedfracname(qidfm, sfnam, qidnam)
      isf = findname(numfracs, sfnames, sfnam)
 
@@ -740,33 +725,24 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      endif
 
   else if (qidfm == 'tangentialvelocitybnd' ) then
-
-     ! kce   = 1 ! switch kce back on as points to be potentially flagged
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, ket(nbndt+1:nx), numt, usemask=.false., rrtolrel=rrtolrel)
      write(msgbuf,'(a,x,a,i8,a)') trim(qid), trim(filename) , numt, ' nr of tangentialvelocity bndcells' ; call msg_flush()
 
      nbndt = nbndt + numt
 
   else if (qidfm == 'uxuyadvectionvelocitybnd' ) then
-
-     ! kce   = 1 ! switch kce back on as points to be potentially flagged
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, keuxy(nbnduxy+1:nx), numuxy, usemask=.false., rrtolrel=rrtolrel)
      write(msgbuf,'(a,x,a,i8,a)') trim(qid), trim(filename) , numuxy, ' nr of uxuyadvectionvelocity bndcells' ; call msg_flush()
 
      nbnduxy = nbnduxy + numuxy
 
-
   else if (qidfm == 'normalvelocitybnd' ) then
-
-     ! kce   = 1 ! switch kce back on as points to be potentially flagged
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, ken(nbndn+1:nx), numn, usemask=.false., rrtolrel=rrtolrel)
      write(msgbuf,'(a,x,a,i8,a)') trim(qid), trim(filename) , numn, ' nr of normalvelocity bndcells' ; call msg_flush()
 
      nbndn = nbndn + numn
 
   else if (qidfm == '1d2dbnd' ) then ! SOBEK1D-FM2D
-
-     ! kce   = 1 ! switch kce back on as points to be potentially flagged
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, ke1d2d(nbnd1d2d+1:nx), num1d2d, usemask=.true., rrtolrel=rrtolrel)
      write(msgbuf,'(a,x,a,i8,a)') trim(qid), trim(filename) , num1d2d, ' nr of SOBEK1D-FM2D bndcells' ; call msg_flush()
 

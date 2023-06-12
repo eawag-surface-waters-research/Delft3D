@@ -224,7 +224,7 @@ subroutine merge (inputfile, workdir, runid)
       write(*,'(a)') '   Connection established, continuing...'
    enddo
    !
-   ! Get dimensions from Delft3D-FLOW
+   ! Get dimensions for the arrays
    !
    do icond=1,ncond
       call getarray(handles(icond),rn,2)

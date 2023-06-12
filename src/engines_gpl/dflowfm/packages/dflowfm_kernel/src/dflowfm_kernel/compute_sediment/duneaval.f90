@@ -49,7 +49,7 @@
    avalflux = 0d0
 
    do lsd = 1, lsedtot
-      if (sedtyp(lsd) == SEDTYP_COHESIVE) cycle
+      if (sedtyp(lsd) <= max_mud_sedtyp) cycle ! strange that mud fractions would not avulse if all the other sediment does ...
       do L = 1, lnx
          if (wu_mor(L)==0d0) cycle
          k1 = ln(1,L); k2 = ln(2,L)
