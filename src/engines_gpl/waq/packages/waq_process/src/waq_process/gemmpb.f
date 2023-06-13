@@ -52,7 +52,7 @@ C     311003  Jan van Beek    process two types at once and a lot more
 C***********************************************************************
 
       use m_dhkmrk
-      use m_dherrs
+      use m_write_error_message
 
       IMPLICIT NONE
 
@@ -367,12 +367,12 @@ C     loop over the segments
 
 C           check proces parameters
 
-         IF (ZSED.LT.1E-20)  CALL DHERR2('ZSed'   ,ZSED   ,ISEG,'GEMMPB')
-         IF (SURF.LT.1E-20)  CALL DHERR2('Surf'   ,SURF   ,ISEG,'GEMMPB')
-         IF (RT_MPB1.LE.0.0) CALL DHERR2('RT_MPB1',RT_MPB1,ISEG,'GEMMPB')
-         IF (MT_MPB1.LE.0.0) CALL DHERR2('MT_MPB1',MT_MPB1,ISEG,'GEMMPB')
-         IF (RT_MPB2.LE.0.0) CALL DHERR2('RT_MPB2',RT_MPB2,ISEG,'GEMMPB')
-         IF (MT_MPB2.LE.0.0) CALL DHERR2('MT_MPB2',MT_MPB2,ISEG,'GEMMPB')
+         IF (ZSED.LT.1E-20)  CALL write_error_message_with_values('ZSed'   ,ZSED   ,ISEG,'GEMMPB')
+         IF (SURF.LT.1E-20)  CALL write_error_message_with_values('Surf'   ,SURF   ,ISEG,'GEMMPB')
+         IF (RT_MPB1.LE.0.0) CALL write_error_message_with_values('RT_MPB1',RT_MPB1,ISEG,'GEMMPB')
+         IF (MT_MPB1.LE.0.0) CALL write_error_message_with_values('MT_MPB1',MT_MPB1,ISEG,'GEMMPB')
+         IF (RT_MPB2.LE.0.0) CALL write_error_message_with_values('RT_MPB2',RT_MPB2,ISEG,'GEMMPB')
+         IF (MT_MPB2.LE.0.0) CALL write_error_message_with_values('MT_MPB2',MT_MPB2,ISEG,'GEMMPB')
 
 C        Active water segments and bottom segments
 

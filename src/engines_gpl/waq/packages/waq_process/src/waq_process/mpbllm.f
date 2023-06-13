@@ -53,7 +53,7 @@ C     111103  Jan van Beek    2003 implementation
 C***********************************************************************
 
       use m_dhkmrk
-      use m_dherrs
+      use m_write_error_message
 
       IMPLICIT NONE
 
@@ -169,7 +169,7 @@ C     loop over the segments
 
 C        check proces parameters
 
-         IF (I_NRDZ.LE.0) CALL DHERR2('I_NRDZ'   ,FLOAT(I_NRDZ),ISEG,'MPBLLM')
+         IF (I_NRDZ.LE.0) CALL write_error_message_with_values('I_NRDZ'   ,FLOAT(I_NRDZ),ISEG,'MPBLLM')
 
 C        scale all radiance to PAR, radsurf with enhancement since it is used as top of sediment layer radiation
 

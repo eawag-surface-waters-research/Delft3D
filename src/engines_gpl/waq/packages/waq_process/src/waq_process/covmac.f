@@ -28,7 +28,7 @@
 !*******************************************************************************
 !
       use m_dhkmrk
-      use m_dherrs
+      use m_write_error_message
       IMPLICIT NONE
 !
 !     Type    Name         I/O Description
@@ -143,7 +143,7 @@
                MaxEM05    = PMSA( IPNT( 12) )
                IBotSeg    = nint(PMSA( IPNT( 13) ))
                IF (IBotSeg .le. 0)
-     j            CALL DHERR2('IBotSeg',PMSA( IPNT( 13) ),ISEG,'COVMAC')
+     j            CALL write_error_message_with_values('IBotSeg',PMSA( IPNT( 13) ),ISEG,'COVMAC')
 
                RadIn      = PMSA( IPNT( 14) )
                EM01       = PMSA(IPOINT( 3)+(IBotSeg-1)*INCREM( 3))

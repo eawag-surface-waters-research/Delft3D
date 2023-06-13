@@ -30,21 +30,58 @@
       contains
 
 
-      SUBROUTINE write_error_message(STRING)
+      subroutine write_error_message(string)
 !
 
-      integer :: IMLUN
-      CHARACTER*(*) STRING
+      integer :: LUNREP
+      character*(*) string
 !
-      CALL GETMLU(IMLUN)
-      IF ( IMLUN .NE. 0 ) THEN
-         WRITE(IMLUN,'(A)') STRING
-      ELSE
-         WRITE(*,*) STRING
-      ENDIF
+      call getmlu(LUNREP)
+      if ( LUNREP .ne. 0 ) then
+         write(LUNREP,'(a)') string
+      else
+         write(*,*) string
+      endif
 !
-      CALL SRSTOP(2)
+      call srstop(1)
 !
-      RETURN
-      END
+
+      end subroutine write_error_message
+      
+      
+      
+      subroutine write_error_message_with_values ( name  , value , iseg  , module )
+      character*(*) name
+      real          value
+      integer       iseg
+      character*(*) module
+
+      integer       lunrep
+
+!     message to screen
+
+      write (*,*) ' coefficient value out of range'
+      write (*,*) ' coefficient name:',name
+      write (*,*) ' coefficient value',value
+      write (*,*) ' coefficient value',module
+      if ( iseg .gt. 0 ) write(*,*) ' in segment number:',iseg
+
+!     message to monitor or report file
+
+      call getmlu(lunrep)
+      if ( lunrep .gt. 0 ) then
+         write (lunrep,*) ' coefficient value out of range'
+         write (lunrep,*) ' coefficient name:',name
+         write (lunrep,*) ' coefficient value',value
+         if ( iseg .gt. 0 ) write(lunrep,*) ' in segment number:',iseg
+         write (lunrep,*) ' in subroutine ',module
+      endif
+
+      call srstop(1)
+
+      end subroutine write_error_message_with_values
+        
       end module m_write_error_message
+
+
+ 
