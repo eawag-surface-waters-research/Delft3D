@@ -20,19 +20,17 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
-      module m_dhpath
+      module m_get_filepath_and_pathlen
 
       implicit none
 
       contains
 
 
-      SUBROUTINE DHPATH ( FILNAM, FILPATH, PATHLEN)
+      SUBROUTINE get_filepath_and_pathlen ( FILNAM, FILPATH, PATHLEN)
 !
 !
 !     Deltares
-!
-!     CREATED       : june  2002 BY J.K.L. van Beek
 !
 !     FUNCTION      : get file path and path length including last separator
 !
@@ -86,4 +84,4 @@
 !
       RETURN
       END
-      end module m_dhpath
+      end module m_get_filepath_and_pathlen

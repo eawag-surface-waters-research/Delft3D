@@ -32,7 +32,7 @@
       SUBROUTINE FFFIND ( LUNUT , SGET , AFILE , BFILE , ISTEP ,
      *                    IT2   , IT3  , IT4   , NUMBR , IERR  )
 !
-      use m_dhpath
+      use m_get_filepath_and_pathlen
       use m_open_waq_files
       use m_sysi          ! Timer characteristics
 
@@ -62,7 +62,7 @@
          WRITE ( LUNUT , 1000 ) AFILE
          RETURN
       ENDIF
-      CALL DHPATH(AFILE,FILPATH,PATHLEN)
+      CALL get_filepath_and_pathlen(AFILE,FILPATH,PATHLEN)
 !
 !          Search for the file name of this item
 !

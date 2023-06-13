@@ -36,7 +36,7 @@
       use m_zoek
       use m_monsys
       use m_julian
-      use m_dhpath
+      use m_get_filepath_and_pathlen
       use hydmod
       use m_dherrs
       use rd_token       ! tokenized reading
@@ -188,7 +188,7 @@
       ierr = 0
 
       hyd%description = ' '
-      call dhpath ( hyd%file_hyd%name, filpath, pathlen)
+      call get_filepath_and_pathlen ( hyd%file_hyd%name, filpath, pathlen)
 
       hyd%wasteload_coll%cursize = 0
       hyd%wasteload_coll%maxsize = 0

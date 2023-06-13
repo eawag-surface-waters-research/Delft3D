@@ -45,7 +45,7 @@
       use m_srstop
       use m_monsys
       use m_getcom
-      use m_dhpath
+      use m_get_filepath_and_pathlen
       use m_open_waq_files
       use timers       !   performance timers
       use m_dhdelf
@@ -93,8 +93,8 @@
             write (*,'(A)') 'Found -output switch with the following path:'
             write (*,'(/A)') trim(outputpath)
             write (*,'(/A/)') 'Make sure this path exists, or DELWAQ will not run!'
-            call dhpath ( runid, runidpath, pathlen)
-            call dhpath ( outputpath, outputpath2, outpathlen)
+            call get_filepath_and_pathlen ( runid, runidpath, pathlen)
+            call get_filepath_and_pathlen ( outputpath, outputpath2, outpathlen)
             if (outpathlen == 0 .or. outputpath(1:1) == '.') then
 !          No dir indicators found or it starts with a dot, asume it is a local subdir
                outputpath = trim(runidpath)//trim(outputpath)
