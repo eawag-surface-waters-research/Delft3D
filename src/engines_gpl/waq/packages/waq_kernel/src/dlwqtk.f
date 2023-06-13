@@ -53,7 +53,7 @@
 !     DECLARATIONS        :
 !
       use m_srstop
-      use m_dhopnf
+      use m_open_waq_files
       use m_dhkmrk
       use m_dhimov
       use timers
@@ -81,7 +81,7 @@
 !        (column 2)
 !
          IF ( IFFLAG .EQ. 1 ) THEN
-            CALL DHOPNF ( LUN(IS) , LUNTXT(IS) , IS    , 2     , IERR )
+            CALL open_waq_files ( LUN(IS) , LUNTXT(IS) , IS    , 2     , IERR )
             CALL DHIMOV ( IKNMRK(1,1), IKNMRK(1,2), NOSEG )
          ENDIF
 !

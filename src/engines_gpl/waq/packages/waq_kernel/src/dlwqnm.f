@@ -71,7 +71,7 @@
 !                          dlwql3, sets (scaled) rhs of system of equations
 !                          move,   copies one array to another
 !                          proint, integration of fluxes
-!                          dhopnf, opens files
+!                          open_waq_files, opens files
 !                          sgmres, solves (iteratively) system of equations
 !                          zercum, zero's the cummulative array's
 

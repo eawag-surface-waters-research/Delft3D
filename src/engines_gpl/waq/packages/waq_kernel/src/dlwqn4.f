@@ -56,7 +56,7 @@
 !                          DLWQT0, update other time functions
 !                          DLWQ46, makes mass balance impicit step
 !                          PROINT, integration of fluxes
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !                          SRSTOP, stops execution
 !                          ZERCUM, zero's the cummulative array's
 !

@@ -20,7 +20,7 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
-      module m_dhopnf
+      module m_open_waq_files
       use m_srstop
 
 
@@ -29,7 +29,7 @@
       contains
 
 
-      subroutine dhopnf ( lun    , finam  , nropen , opmode , ierr   )
+      subroutine open_waq_files ( lun    , finam  , nropen , opmode , ierr   )
 
 !     Deltares Software Centre
 
@@ -583,4 +583,4 @@
                /,' Filename is: ',A , &
                /,' Searching in working directory: ', /,'  ' A )
       end
-      end module m_dhopnf
+      end module m_open_waq_files

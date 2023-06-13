@@ -58,7 +58,7 @@
 !                          DLWQ66, makes masses
 !                          DLWQH3, check diagonal on zero's
 !                          SGMRES, fast solver
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !                          MOVE  , copy an array
 !
 !      NOTE             :   " DELWAQ FASTSOLVERS 2 " (R.J.Vos, M.Borsboom and K.

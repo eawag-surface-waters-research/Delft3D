@@ -64,7 +64,7 @@
 !                          DLWQB8, restores conc array
 !                          MOVE,   copies one array to another
 !                          PROINT, integration of fluxes
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !                          ZERCUM, zero's the cummulative array's
 !
 !     PARAMETERS    :

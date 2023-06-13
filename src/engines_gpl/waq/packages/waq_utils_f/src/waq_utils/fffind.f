@@ -33,7 +33,7 @@
      *                    IT2   , IT3  , IT4   , NUMBR , IERR  )
 !
       use m_dhpath
-      use m_dhopnf
+      use m_open_waq_files
       use m_sysi          ! Timer characteristics
 
       integer :: ILUN , IERR , I , K , A, IT2 , IT3 , IT4
@@ -57,7 +57,7 @@
 !          Open the ASCII .hyd file
 !
       ILUN = 148
-      CALL DHOPNF  ( ILUN , AFILE  , 33 , 1   , IERR )
+      CALL open_waq_files  ( ILUN , AFILE  , 33 , 1   , IERR )
       IF ( IERR .GT. 0 ) THEN
          WRITE ( LUNUT , 1000 ) AFILE
          RETURN
@@ -108,7 +108,7 @@
 !
 !          Open the binary file for this item
 !
-      CALL DHOPNF  ( ILUN , BFILE  , 33 , 2   , IERR )
+      CALL open_waq_files  ( ILUN , BFILE  , 33 , 2   , IERR )
       IF ( IERR .GT. 0 ) THEN
          WRITE ( LUNUT , 1020 ) BFILE
          RETURN

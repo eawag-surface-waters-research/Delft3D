@@ -54,7 +54,7 @@
 !                                              function is contained in the grids module
 
       use m_srstop
-      use m_dhopnf
+      use m_open_waq_files
       use grids            !   for the storage of contraction grids
       use rd_token         !   for the reading of tokens
       use timers       !   performance timers
@@ -138,7 +138,7 @@
 
                case ( 'AGGREGATIONFILE' )                      ! it is the filename keyword
                   if ( gettoken( ctoken, ierr2 ) .gt. 0 ) goto 1000
-                  call dhopnf ( lun(33), ctoken, 33, 1, ierr2 )
+                  call open_waq_files ( lun(33), ctoken, 33, 1, ierr2 )
                   if ( ierr2 .ne. 0 ) goto 1000
                   read  ( lun(33) ,   *  ) nmax,mmax,noseg_fil,idummy,idummy
                   write ( lunut   , 2020 ) ctoken, nmax, mmax, noseg_fil

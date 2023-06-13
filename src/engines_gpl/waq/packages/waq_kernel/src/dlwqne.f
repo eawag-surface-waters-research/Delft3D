@@ -55,7 +55,7 @@
 !                          DLWQ44, update arrays
 !                          DLWQT0, update other time functions
 !                          PROINT, integration of fluxes
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !                          ZERCUM, zero's the cummulative array's
 !
 !     PARAMETERS    :
