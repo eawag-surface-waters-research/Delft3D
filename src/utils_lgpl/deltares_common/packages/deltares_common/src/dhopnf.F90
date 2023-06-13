@@ -35,17 +35,6 @@
 
 !>\File
 !>           Opens all Delwaq files
-
-!     Created            : June     1991 by Jan van Beek
-!     Updated              January  2001 by Jos van Gils: some files are opened with 'SHARED'
-!                          February 2011 by Arjen Markus: Binary changed in unformatted + access='stream'
-!                          February 2011 by Leo Postma  : Fortran 90 look and feel
-!                                                          support of unformatted and big-endian files
-
-!*********************************************************************
-!     System dependent routine
-!     configuration
-!     PC - WINDOWS operating system - , CDF compiler (ARCH=w32)
 !
 !*********************************************************************
 !     SHARED is used for those files which are optionally prepared
