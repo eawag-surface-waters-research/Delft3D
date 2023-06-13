@@ -20,14 +20,14 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
-      module m_dhctim
+      module m_convert_seconds_to_date
 
       implicit none
 
       contains
 
 
-      SUBROUTINE DHCTIM ( ITIME , ITIME2, DTFLG , DTFLG3 )
+      SUBROUTINE convert_seconds_to_date ( ITIME , ITIME2, DTFLG , DTFLG3 )
 !
 !
 !     Deltares
@@ -75,4 +75,4 @@
 !
       RETURN
       END
-      end module m_dhctim
+      end module m_convert_seconds_to_date
