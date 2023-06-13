@@ -193,7 +193,7 @@ subroutine remove_unused_nodes_and_links()
      numk = numk_new
      numl = numl_new
  endif
- 
+
  ! clean up the temporary arrays
  deallocate(nod_used, k2knew)
  deallocate(lin_used, l2lnew)
