@@ -66,20 +66,6 @@
             stop 0
          case (  1 )
             stop 1
-         case (  2 )
-            stop 2
-         case (  3 )
-            stop 3
-         case (  4 )
-            stop 4
-         case (  5 )
-            stop 5
-         case (  6 )
-            stop 6
-         case (  7 )
-            stop 7
-         case (  8 )
-            stop 8
          case default
             stop 255
       end select
