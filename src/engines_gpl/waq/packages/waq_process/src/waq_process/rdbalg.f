@@ -104,7 +104,7 @@
 !
       PMSA(IP6) = MAX(MIN(FRAD,1.0),0.0)
 !
-      IF (SATRAD .LT. 1E-20 )  CALL ERRSYS ('SATRAD in RADALG zero', 1 )
+      IF (SATRAD .LT. 1E-20 )  CALL ERRSYS ('SATRAD in RADALG zero')
 
  8900 CONTINUE
 !

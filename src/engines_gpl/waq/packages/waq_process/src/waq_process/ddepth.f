@@ -71,7 +71,7 @@
 
       IF (SURF    .LT. 1E-30) THEN
          write ( message(32:55) , '(i9,1x,e14.6)' ) iseg, surf
-         CALL ERRSYS ( message, 1 )
+         CALL ERRSYS ( message )
       ENDIF
 
 !***********************************************************************

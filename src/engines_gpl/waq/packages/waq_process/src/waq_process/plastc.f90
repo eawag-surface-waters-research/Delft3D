@@ -155,7 +155,7 @@
                 write (*,*) 'loute = ',loute
                 write (*,*) 'npmsa = ',npmsa
                 write (*,*) 'npmsamax = ',npmsamax
-                call errsys ('PMSA admin array too small',1)
+                call errsys ('PMSA admin array too small')
             endif
             offset_vel = lins+line+louts
 

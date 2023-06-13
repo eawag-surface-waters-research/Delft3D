@@ -255,31 +255,31 @@
 !
 !          Errors if certain vars =< 0
 !
-           IF (ANR .LT. 1E-30) CALL ERRSYS ('DECDET: a_dNpr =< 0', 1 )
-           IF (APR .LT. 1E-30) CALL ERRSYS ('DECDET: a_dPpr =< 0', 1 )
-           IF (ASR .LT. 1E-30) CALL ERRSYS ('DECDET: a_dSpr =< 0', 1 )
+           IF (ANR .LT. 1E-30) CALL ERRSYS ('DECDET: a_dNpr =< 0')
+           IF (APR .LT. 1E-30) CALL ERRSYS ('DECDET: a_dPpr =< 0')
+           IF (ASR .LT. 1E-30) CALL ERRSYS ('DECDET: a_dSpr =< 0')
            IF (ALN .LT. 1E-30)
-     &     CALL ERRSYS ('DECDET: al_dN/F/M/S/ =< 0', 1 )
+     &     CALL ERRSYS ('DECDET: al_dN/F/M/S/ =< 0')
            IF (ALP .LT. 1E-30)
-     &     CALL ERRSYS ('DECDET: al_dP/F/M/S/ =< 0', 1 )
+     &     CALL ERRSYS ('DECDET: al_dP/F/M/S/ =< 0')
            IF (AUN .LT. 1E-30)
-     &     CALL ERRSYS ('DECDET: au_dN/F/M/S/ =< 0', 1 )
+     &     CALL ERRSYS ('DECDET: au_dN/F/M/S/ =< 0')
            IF (AUP .LT. 1E-30)
-     &     CALL ERRSYS ('DECDET: au_dP/F/M/S/ =< 0', 1 )
+     &     CALL ERRSYS ('DECDET: au_dP/F/M/S/ =< 0')
 !
 !          Errors if upper limits =< lower limits
 !
            IF (AUN .LT. ALN)
-     &     CALL ERRSYS ('DECDET: au_dN/F/M/S/ < al_dN/F/M/S/ ',1)
+     &     CALL ERRSYS ('DECDET: au_dN/F/M/S/ < al_dN/F/M/S/ ')
            IF (AUP .LT. ALP)
-     &     CALL ERRSYS ('DECDET: au_dP/F/M/S/ < al_dP/F/M/S/ ',1)
+     &     CALL ERRSYS ('DECDET: au_dP/F/M/S/ < al_dP/F/M/S/ ')
 !
            IF (RC20UPC .LT. RC20LOC)
-     &     CALL ERRSYS ('DECDET: ku_d/F/M/S/dec20 < kl_d/F/M/S/dec20 ',1)
+     &     CALL ERRSYS ('DECDET: ku_d/F/M/S/dec20 < kl_d/F/M/S/dec20 ')
            IF (RC20UPN .LT. RC20LON)
-     &     CALL ERRSYS ('DECDET: ku_d/F/M/S/dcN20 < kl_d/F/M/S/dcN20 ',1)
+     &     CALL ERRSYS ('DECDET: ku_d/F/M/S/dcN20 < kl_d/F/M/S/dcN20 ')
            IF (RC20UPP .LT. RC20LOP)
-     &     CALL ERRSYS ('DECDET: ku_d/F/M/S/dcP20 < kl_d/F/M/S/dcP20 ',1)
+     &     CALL ERRSYS ('DECDET: ku_d/F/M/S/dcP20 < kl_d/F/M/S/dcP20 ')
 !
 !          If  detritus = 0 : set fluxes to zero and skip algorithm
 !

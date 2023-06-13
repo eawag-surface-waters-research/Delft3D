@@ -391,7 +391,7 @@
          QUALOPT = .FALSE.
       ENDIF
       DELT = PMSA(IP22)
-      IF (DELT  .LT. 1E-20 )  CALL ERRSYS ('DELT in PARTMP zero', 1 )
+      IF (DELT  .LT. 1E-20 )  CALL ERRSYS ('DELT in PARTMP zero')
 !
 !----------------------------------------------------------------------C
 !     SEGMENT LOOP
@@ -492,7 +492,7 @@
         ENDIF
 !
         IF (.NOT.SEDIME .AND. POR.LT.1E-20 )
-     J        CALL ERRSYS ('POR in PARTMP zero', 1 )
+     J        CALL ERRSYS ('POR in PARTMP zero')
 !
 !***********************************************************************
 !**** Processes connected to the HEAVY METAL PARTITIONING
@@ -754,7 +754,7 @@
         IF (DISS .LE. 1E-20) THEN
         WRITE(*,*) 'SwPoreChWK = ',ISWOX,' 1- oxic, 0 - sulfidic, or'
         WRITE(*,*) 'DisSWK or DisSSx  = ',DISS ,'should not equal zero'
-        CALL ERRSYS ('Fatal error in PARTMP', 1 )
+        CALL ERRSYS ('Fatal error in PARTMP')
         ENDIF
         MOLWT   = PMSA(IP26)
         LKSOL   = PMSA(IP27)

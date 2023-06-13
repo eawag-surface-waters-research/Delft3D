@@ -63,7 +63,7 @@
       DL        = PMSA(IP1 )
       KMDL      = PMSA(IP2 )
 
-      IF (DL .LT. 1E-20 )  CALL ERRSYS ('DL in DLALG zero', 1 )
+      IF (DL .LT. 1E-20 )  CALL ERRSYS ('DL in DLALG zero')
 
 !     Actueel licht / licht voor groei verzadiging
       PMSA(IP3 )   =  MIN ( DL, KMDL) / KMDL

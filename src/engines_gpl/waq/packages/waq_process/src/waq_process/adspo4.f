@@ -194,11 +194,11 @@
 !
 !------ Error messages
 !
-        IF (KD.LT.0.0) CALL ERRSYS ('KD in ADSPO4 lower then zero', 1 )
+        IF (KD.LT.0.0) CALL ERRSYS ('KD in ADSPO4 lower then zero')
         IF (((ABS(KD) .LT. 1E-20) .OR. (ABS(PO4).LT.1E-20))
      &      .AND. (ABS(MAXADS) .LT. 1E-20) )
      &     CALL ERRSYS
-     &              ('(KD or PO4) and MAXADS equal zero in ADSPO4', 1 )
+     &              ('(KD or PO4) and MAXADS equal zero in ADSPO4')
 !
 !------ (1) Instantanaeous equilibrium partitioning
 !           SWAdsP = 0
@@ -319,11 +319,11 @@
 !
 !     Error messages
 !
-        IF (KDADS .LT. 0.0) CALL ERRSYS ('KDADS in ADSPO4 negative', 1 )
+        IF (KDADS .LT. 0.0) CALL ERRSYS ('KDADS in ADSPO4 negative')
         IF (((ABS(KDADS) .LT. 1E-20) .OR. (ABS(PO4) .LT. 1E-20))
      +     .AND. (ABS(FCAP) .LT. 1E-20) )
      +     CALL ERRSYS
-     +     ('(KDADS or PO4) and FCAP equal zero in ADSPO4', 1 )
+     +     ('(KDADS or PO4) and FCAP equal zero in ADSPO4')
 !
 !     Start the calculation of the sorption flux
 !     Use one of three options
@@ -368,7 +368,7 @@
            POROS    = PMSA(IP22)
 
            IF (POROS .LT. 1E-10) CALL ERRSYS
-     +        ('POROS in ADSPO4 equals zero', 1 )
+     +        ('POROS in ADSPO4 equals zero')
            IF ( TFE .LT. 1.E-10 ) THEN
               IF ( NR_MES .LT. 25 ) THEN
                  CALL GETMLU(ILUMON)

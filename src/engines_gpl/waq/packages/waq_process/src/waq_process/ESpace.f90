@@ -193,9 +193,9 @@
             nsrca = nint(pmsa(ipoint(ip_nsrca)))
             nsrcb = nint(pmsa(ipoint(ip_nsrcb)))
             nsubsin  = nint(pmsa(ipoint(ip_nsubs)))
-            if (nsubsin.ne.nsubs) call errsys ('Substances inconsistent',1)
+            if (nsubsin.ne.nsubs) call errsys ('Substances inconsistent')
             nrecin = nint(pmsa(ipoint(ip_nrecin)))
-            if (nrecin.ne.nrec) call errsys ('Receptors inconsistent',1)
+            if (nrecin.ne.nrec) call errsys ('Receptors inconsistent')
             nosegl = nint(pmsa(ipoint(ip_nosegl)))
 
             ! pick up constants
@@ -303,8 +303,8 @@
             write (lu_nod,1002) trim(file_subs)
 
             read (lu_loc,*) nswb
-            if (nsc+nswb.ne.nosegl) call errsys('NSC+NSWB=/NOSEGL',1)
-            if (nswb.gt.0) call errsys('NSWB>0 not implemented',1)
+            if (nsc+nswb.ne.nosegl) call errsys('NSC+NSWB=/NOSEGL')
+            if (nswb.gt.0) call errsys('NSWB>0 not implemented')
 
       endif
 

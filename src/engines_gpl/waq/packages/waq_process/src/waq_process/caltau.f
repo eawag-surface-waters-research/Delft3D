@@ -123,9 +123,9 @@
 !
       CHZ=MAX(1.0,CHZ)
       IF ((ISWTAU .NE. 1) .AND. (ISWTAU .NE. 2) .AND. (ISWTAU .NE. 3))
-     &     CALL ERRSYS ('Invald switch for tau (ISWTAU) in CALTAU', 1 )
+     &     CALL ERRSYS ('Invald switch for tau (ISWTAU) in CALTAU')
       IF ((ISWTAUVELOC .NE. 1) .AND. (ISWTAUVELOC .NE. 2))
-     &     CALL ERRSYS ('Invald switch for tau (ISWTAUVELOC) in CALTAU', 1 )
+     &     CALL ERRSYS ('Invald switch for tau (ISWTAUVELOC) in CALTAU')
 
 !     Initialisation
       TAU     = 0.0

@@ -89,7 +89,7 @@
             ETEMP = MTEMP
             TTEMP = TMPNAT  
          ELSE
-            CALL ERRSYS ('SwitchTemp has no valid value <0,1,2> in TMODE', 1 )             
+            CALL ERRSYS ('SwitchTemp has no valid value <0,1,2> in TMODE')
          ENDIF
        
 !

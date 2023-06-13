@@ -100,7 +100,7 @@
 !     Error messages
 !
       IF ( TEMP .LE. -KELVIN) CALL
-     &                 ERRSYS ('TEMP in NH3FREE < 0 KELVIN', 1 )
+     &                 ERRSYS ('TEMP in NH3FREE < 0 KELVIN')
 !
 !---- Procesformuleringen ---------------------------------------
       NH3   = 0.0
@@ -140,7 +140,7 @@
 
             FRNH3 = NH3 / TNH4
          ELSE
-            CALL ERRSYS ('INH3SW in NH3FRE not 1 or 2', 1 )
+            CALL ERRSYS ('INH3SW in NH3FRE not 1 or 2')
          ENDIF
 
       ENDIF

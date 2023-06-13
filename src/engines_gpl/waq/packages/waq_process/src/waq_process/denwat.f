@@ -171,7 +171,7 @@
             COXDEN = PMSA(IP11)
             DELTOX = (COXDEN - OOXDEN) * POROS
             IF ( DELTOX .LT. 1E-20 )  CALL ERRSYS
-     &         ('(COXDEN - OOXDEN) in DENWAT <= zero', 1 )
+     &         ('(COXDEN - OOXDEN) in DENWAT <= zero')
             IF (OXY .GT. (COXDEN*POROS)) THEN
                O2FUNC = 0.0
             ELSEIF (OXY .LT. (OOXDEN*POROS)) THEN
@@ -275,7 +275,7 @@
                   COXDEN = PMSA(IP11)
                   DELTOX = (COXDEN - OOXDEN) * POROS
                   IF ( DELTOX .LT. 1E-20 )  CALL ERRSYS
-     &               ('(COXDEN - OOXDEN) in DENWAT <= zero', 1 )
+     &               ('(COXDEN - OOXDEN) in DENWAT <= zero')
                   IF (OXY .GT. COXDEN*POROS) THEN
                         O2FUNC = 0.0
                   ELSEIF (OXY .LT. OOXDEN*POROS) THEN

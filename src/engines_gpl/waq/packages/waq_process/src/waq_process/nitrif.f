@@ -242,7 +242,7 @@
 !           Calculate oxygen function
 !
             IF ( (OOX - COX) .LT. 1E-20 )  CALL ERRSYS
-     &            ('OOX - COX in NITRIF zero', 1 )
+     &            ('OOX - COX in NITRIF zero')
             IF ( OXY .GT. (OOX*POROS) ) THEN
                   O2FUNC = 1.0
             ELSEIF (OXY .LT. (COX*POROS) ) THEN

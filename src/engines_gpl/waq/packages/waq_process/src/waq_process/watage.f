@@ -70,7 +70,7 @@
       CONCTR = PMSA(IP2 )
       DECAYR = PMSA(IP3 )
 !
-      IF (DECAYR .LT. 1E-20 ) CALL ERRSYS ('RCDECTR in WATAGE zero', 1 )
+      IF (DECAYR .LT. 1E-20 ) CALL ERRSYS ('RCDECTR in WATAGE zero')
 
 !     Calculate age
 !

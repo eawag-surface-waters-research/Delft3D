@@ -89,7 +89,7 @@
       DEPTH   = PMSA(IP3 )
       INIDEP  = PMSA(IP4 )
 
-      IF (FETCH .LT. 1E-20 )  CALL ERRSYS ('FETCH in CALWAVE zero', 1)
+      IF (FETCH .LT. 1E-20 )  CALL ERRSYS ('FETCH in CALWAVE zero')
 
 !     Initialisation
       H       = 0.0

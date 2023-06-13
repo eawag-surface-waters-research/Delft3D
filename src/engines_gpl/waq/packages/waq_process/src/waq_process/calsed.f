@@ -97,7 +97,7 @@
       MAXSAL  = PMSA( IP8 )
       ENHFAC  = PMSA( IP9 )
 
-      IF (CRSUSP .LT. 1E-20 )  CALL ERRSYS ('CRSUSP in CALSED zero', 1 )
+      IF (CRSUSP .LT. 1E-20 )  CALL ERRSYS ('CRSUSP in CALSED zero')
 
 !*******************************************************************************
 !**** Processes connected to the sedimentation VELOCITY

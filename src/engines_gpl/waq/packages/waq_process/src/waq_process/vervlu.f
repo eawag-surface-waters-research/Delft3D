@@ -115,11 +115,11 @@
 !
 !
 !     Error messages
-      IF (H0TREF .LT. 1E-30)  CALL ERRSYS ('H0TREF in VERVLU =<0', 1 )
+      IF (H0TREF .LT. 1E-30)  CALL ERRSYS ('H0TREF in VERVLU =<0')
       IF ( TEMP .LE. -KELVIN) CALL
-     &                 ERRSYS ('TEMP in VERVLU < 0 DEG KELVIN', 1 )
-      IF (KL .LT. 1E-30) CALL ERRSYS ('KL in VERVLU zero', 1 )
-      IF (KG .LT. 1E-30) CALL ERRSYS ('KG in VERVLU zero', 1 )
+     &                 ERRSYS ('TEMP in VERVLU < 0 DEG KELVIN')
+      IF (KL .LT. 1E-30) CALL ERRSYS ('KL in VERVLU zero')
+      IF (KG .LT. 1E-30) CALL ERRSYS ('KG in VERVLU zero')
 !
 !     Calculation of temperarure dependence of Henry
       H2TREF = H0TREF * NL / P
