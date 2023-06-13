@@ -45,6 +45,7 @@
  use m_observations, only : mxls
  use unstruc_files, only : defaultFilename
  use m_sediment, only: stm_included
+ use m_transport, only: maserrsed
 #ifdef _OPENMP
  use omp_lib
 #endif
@@ -178,7 +179,9 @@
     call msg_flush()
     endif
     if (jased > 0 .and. stm_included) then
-    write(msgbuf,'(a,F25.10)') 'time erosed            (s)  :' , gettimer(1,IEROSED)
+       write(msgbuf,'(a,F25.10)') 'time erosed            (s)  :' , gettimer(1,IEROSED)
+       call msg_flush()
+       write(msgbuf,'(a,F25.3)') 'mass error from ssc limitation (10^6 kg)  :' , maserrsed/1d6
        call msg_flush()
     endif 
  end if
