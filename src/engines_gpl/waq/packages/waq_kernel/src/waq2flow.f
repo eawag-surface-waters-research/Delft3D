@@ -143,14 +143,14 @@
                   paripnt(1) = ipoint(parindx)
                   if ( paripnt(1) .le. 0 ) then
                      call getmlu(lunrep)
-                     write(*,*)      'error waq2flow: parameter 1 not availeble'
-                     write(lunrep,*) 'error waq2flow: parameter 1 not availeble'
+                     write(*,*)      'error waq2flow: parameter 1 not available'
+                     write(lunrep,*) 'error waq2flow: parameter 1 not available'
                      call srstop(3)
                   endif
                else
                   call getmlu(lunrep)
-                  write(*,*)      'error waq2flow: parameter not availeble'
-                  write(lunrep,*) 'error waq2flow: parameter not availeble'
+                  write(*,*)      'error waq2flow: parameter not available'
+                  write(lunrep,*) 'error waq2flow: parameter not available'
                   call srstop(4)
                endif
 
@@ -172,14 +172,14 @@
                   paripnt(2) = ipoint(parindx)
                   if ( paripnt(2) .le. 0 ) then
                      call getmlu(lunrep)
-                     write(*,*)      'error waq2flow: parameter 2 not availeble'
-                     write(lunrep,*) 'error waq2flow: parameter 2 not availeble'
+                     write(*,*)      'error waq2flow: parameter 2 not available'
+                     write(lunrep,*) 'error waq2flow: parameter 2 not available'
                      call srstop(3)
                   endif
                else
                   call getmlu(lunrep)
-                  write(*,*)      'error waq2flow: parameter not availeble'
-                  write(lunrep,*) 'error waq2flow: parameter not availeble'
+                  write(*,*)      'error waq2flow: parameter not available'
+                  write(lunrep,*) 'error waq2flow: parameter not available'
                   call srstop(4)
                endif
 
