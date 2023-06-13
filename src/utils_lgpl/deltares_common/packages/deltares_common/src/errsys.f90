@@ -30,9 +30,9 @@
       contains
 
 
-      SUBROUTINE ERRSYS(STRING,IERR)
+      SUBROUTINE ERRSYS(STRING)
 !
-      integer :: IERR
+
       integer :: IMLUN
       CHARACTER*(*) STRING
 !
