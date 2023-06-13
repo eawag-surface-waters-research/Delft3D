@@ -88,8 +88,8 @@
                kmaxsd = kmxsed (nm,l)
                h0     = max(0.01_fp, s0(nm) - bl(nm))
                h1     = max(0.01_fp, s1(nm) - bl(nm))
-               thick0 = zws0(kb)-zws0(kb-1) ! should be safe for z and sigma, was: thick(kmaxsd)*h0
-               thick1 = zws(kb)-zws(kb-1)   ! thick(kmaxsd)*h1
+               thick0 = zws0(kmaxsd)-zws0(kmaxsd-1) ! should be safe for z and sigma, was: thick(kmaxsd)*h0
+               thick1 = zws(kmaxsd)-zws(kmaxsd-1)   ! thick(kmaxsd)*h1
                dz     = (dts*morfac/cdryb(l)) &
                   & * (sourse(nm, l)*thick0 - (sinkse(nm, l)+sour_im(nm, l))*thick1*constituents(ll, kmaxsd))
                if (abs(dz) > h1*dzmax) then

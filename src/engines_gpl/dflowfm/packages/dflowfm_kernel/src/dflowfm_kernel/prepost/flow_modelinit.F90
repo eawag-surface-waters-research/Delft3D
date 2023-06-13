@@ -34,7 +34,7 @@
  !! @return Error status: error (/=0) or not (0)
  integer function flow_modelinit() result(iresult)                     ! initialise flowmodel
  use timers
- use m_flowgeom,    only: jaFlowNetChanged, ndx
+ use m_flowgeom,    only: jaFlowNetChanged, ndx, lnx
  use waq,           only: reset_waq
  use m_flow,        only: kmx, jasecflow, iperot
  use m_flowtimes
@@ -68,6 +68,8 @@
  use m_sedtrails_netcdf, only: sedtrails_loadNetwork
  use m_sedtrails_stats, only: default_sedtrails_stats, alloc_sedtrails_stats
  use unstruc_display, only : ntek, jaGUI
+ use m_debug
+ 
  !
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
  ! Activate the following line (See also statements below)
@@ -112,7 +114,7 @@
  call reset_unstruc_netcdf_map_class()
 
  call resetflow()
- 
+
  call reset_waq()
 
  call timstop(handle_extra(1)) ! End basic steps
@@ -273,7 +275,7 @@
  call timstop(handle_extra(12)) ! vertical administration
 
 #ifdef _OPENMP
-   ierr = init_openmp(md_numthreads, jampi) 
+ ierr = init_openmp(md_numthreads, jampi)
 #endif
 
  call timstrt('Net link tree 0     ', handle_extra(13)) ! netlink tree 0
@@ -388,12 +390,12 @@
     call timstrt('Surfbeat init         ', handle_extra(27)) ! Surfbeat init
     if (jampi==0) then
        if (nwbnd==0) then
-          call mess(LEVEL_ERROR, 'unstruc::flow_modelinit - No wave boundary defined for surfbeat model')
+          call mess(LEVEL_ERROR, 'unstruc::flow_modelinit - No wave boundary defined for surfbeat model. Do you use the correct ext file?')
              end if
           endif
     call xbeach_wave_init()
     call timstop(handle_extra(27))
-       endif
+ endif
 
  call timstrt('Observations init 2 ', handle_extra(28)) ! observations init 2
  call flow_obsinit()                                 ! initialise stations and cross sections on flow grid + structure his (2nd time required to fill values in observation stations)
@@ -415,6 +417,11 @@
     call set_frcu_mor(2)
  endif
  call timstop(handle_extra(31)) ! end set fcru mor
+
+! Initialise debug array
+ !if (jawritedebug) then
+ !  call init_debugarr(lnx,stmpar%lsedtot)
+ !endif
 
  call flow_initimestep(1, iresult)                   ! 1 also sets zws0
 

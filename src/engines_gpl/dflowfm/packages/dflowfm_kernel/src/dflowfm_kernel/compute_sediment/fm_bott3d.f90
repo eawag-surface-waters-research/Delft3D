@@ -28,7 +28,7 @@
 !-------------------------------------------------------------------------------
 
 ! 
-! 
+!
 
    subroutine fm_bott3d()
    !!--description-----------------------------------------------------------------
@@ -49,11 +49,11 @@
    use precision
    use bedcomposition_module
    use sediment_basics_module
-   use m_flow     , only: vol1, s0, s1, hs, u1, kmx, hu
+   use m_flow     , only: vol1, s0, s1, hs, u1, kmx, hu, qa
    use m_flowgeom , only: ndxi, nd, wu, bl, ba, ln, ndx, lnx, lnxi, acl, xz, yz, wu_mor, bai_mor, bl_ave
    use m_flowexternalforcings, only: nopenbndsect
-   use m_flowparameters, only: epshs, epshu, eps10, jasal, flowWithoutWaves, jawaveswartdelwaq
-   use m_sediment,  only: stmpar, sedtra, mtd, m_sediment_sed=>sed, avalflux, botcrit, kcsmor, jamormergedtuser, mergebodsed
+   use m_flowparameters, only: epshs, eps10, jasal, flowWithoutWaves, jawaveswartdelwaq, jawave
+   use m_sediment, m_sediment_sed=>sed 
    use m_flowtimes, only: dts, tstart_user, time1, dnt, julrefdat, tfac, ti_sed, ti_seds, time_user
    use m_transport, only: fluxhortot, ised1, constituents, sinksetot, sinkftot, itra1, itran, numconst, isalt
    use unstruc_files, only: mdia, close_all_files
@@ -69,12 +69,20 @@
    use m_fm_morstatistics, only: morstats, morstatt0
    use precision_basics
    use m_mormerge_mpi
+   use m_waves
+   use unstruc_channel_flow, only: network, t_branch, t_node, nt_LinkNode
+   use m_tables, only: interpolate
+   use m_debug
    !
    implicit none
    !
    type (handletype)                    , pointer :: bcmfile
    type (bedbndtype)     , dimension(:) , pointer :: morbnd
    logical                              , pointer :: cmpupd
+   !
+   type(t_nodefraction)                 , pointer :: pFrac
+   type(t_noderelation)                 , pointer :: pNodRel
+   type(t_node)                         , pointer :: pnod
    !!
    !! Local parameters
    !!
@@ -85,7 +93,7 @@
    !!
    !! Local variables
    !!
-   logical                                     :: bedload, error, jamerge
+   logical                                     :: bedload, error, jamerge, aval
    integer                                     :: ierror
    integer                                     :: l, nm, ii, ll, Lx, Lf, lstart, j, bedchangemesscount, k, k1, k2, knb, kb, kk, itrac
    integer                                     :: Lb, Lt, ka, kf1, kf2, kt, nto, iL, ac1, ac2
@@ -100,7 +108,24 @@
    double precision, dimension(lsedtot)        :: bc_sed_distribution
    double precision, dimension(:), allocatable :: bl_ave0
 
+   integer                       :: nrd_idx
+   integer                       :: ifrac
+   double precision              :: faccheck
+   double precision              :: expQ
+   double precision              :: expW
+   double precision              :: facQ
+   double precision              :: facW
+   double precision              :: qb1d, wb1d, sb1d
+   double precision              :: sbrratio, qbrratio, Qbr1, Qbr2
+   !
+   real(fp), dimension(:), allocatable :: qb_out          !< sum of outgoing discharge at 1d node
+   real(fp), dimension(:), allocatable :: width_out       !< sum of outgoing main channel widths
+   real(fp), dimension(:,:), allocatable :: sb_in         !< sum of incoming sediment transport at 1d node
+   integer, dimension(:,:,:), allocatable :: sb_dir       !< direction of transport at node (nnod, lsedtot, nbr) (-1 = incoming or no transport, +1 = outgoing)
+   integer, dimension(:), allocatable :: branInIDLn       !< ID of Incoming Branch (If there is only one) (nnod)
+
    integer                                     :: icond
+   integer                                     :: istat
    integer                                     :: jb
    integer                                     :: ib
    integer                                     :: li
@@ -108,6 +133,9 @@
    integer                                     :: nxmx
    integer                                     :: lm
    integer                                     :: jawaveswartdelwaq_local
+   integer                                     :: inod
+   integer                                     :: ised
+   integer                                     :: k3
    double precision                            :: aksu
    double precision                            :: apower
    double precision                            :: cavg
@@ -123,12 +151,14 @@
    double precision                            :: r1avg
    double precision                            :: z
    double precision                            :: timhr
+   double precision                            :: Ldir
    !!
    !!! executable statements -------------------------------------------------------
    !!
    bcmfile             => stmpar%morpar%bcmfile
    morbnd              => stmpar%morpar%morbnd
    cmpupd              => stmpar%morpar%cmpupd
+   bermslopetransport  => stmpar%morpar%bermslopetransport 
 
    if (flowWithoutWaves) then
       jawaveswartdelwaq_local = 0
@@ -148,6 +178,16 @@
    timhr = time1 / 3600.0d0
    nto    = nopenbndsect
    blchg = 0d0
+   !
+   istat   = 0
+   if (istat == 0) allocate(qb_out(network%nds%Count), stat = istat)
+   if (istat == 0) allocate(width_out(network%nds%Count), stat = istat)
+   if (istat == 0) allocate(sb_in(network%nds%Count, lsedtot), stat = istat)
+   if (istat == 0) allocate(sb_dir(network%nds%Count, lsedtot, network%nds%maxnumberofconnections), stat = istat)
+   if (istat == 0) allocate(branInIDLn(network%nds%Count), stat = istat)
+   !
+   qb_out = 0d0; width_out = 0d0; sb_in = 0d0; sb_dir = -1
+   BranInIDLn = 0
    !
    !   Calculate suspended sediment transport correction vector (for SAND)
    !   Note: uses GLM velocities, consistent with DIFU
@@ -186,6 +226,7 @@
                !                call dfexchg( fluxu(:,:,ll) ,1, kmax, dfloat, nm_pos, gdp)
                !                call dfexchg( fluxv(:,:,ll) ,1, kmax, dfloat, nm_pos, gdp)
                do Lx = 1, lnx
+                  if (wu_mor(Lx)==0d0) cycle
                   ac1 = acL(Lx)
                   ac2 = 1d0 - ac1
                   k1 = ln(1,Lx); k2 = ln(2,Lx)
@@ -306,7 +347,7 @@
                            !
                            ! The corresponding effective suspended load flux is
                            !
-                           cflux   = u1(ka)*cavg*wu(Lx)           ! kg/s
+                           cflux   = u1(ka)*cavg*dz*wu_mor(Lx)
                            !
                            ! Increment the correction by the part of the suspended load flux
                            ! that is in excess of the flux computed above, but never opposite.
@@ -320,7 +361,7 @@
                            endif
                         endif
                      endif
-                     e_scrn(Lx,l) = -suscorfac * cumflux / wu(Lx)
+                     e_scrn(Lx,l) = -suscorfac * cumflux / wu_mor(Lx)
                      !
                      ! bedload will be reduced in case of sediment transport
                      ! over a non-erodible layer (no sediment in bed) in such
@@ -355,19 +396,230 @@
          call getLbotLtop(L,Lb,Lt)
          if (Lt<Lb) cycle
          do iL = Lb,Lt
-            e_ssn(L, ll)  = e_ssn(L, ll) + fluxhortot(j,iL)/max(wu_mor(L), epshu)             ! timestep transports per layer [kg/s/m]
+            e_ssn(L, ll)  = e_ssn(L, ll) + fluxhortot(j,iL)/max(wu_mor(L), 1d-3)             ! timestep transports per layer [kg/s/m]
          enddo
          e_ssn(L, ll)  = e_ssn(L, ll) + e_scrn(L, ll)  ! bottom layer correction
       enddo
    enddo
    !
-   !if (jampi>0) then
-   !   call update_ghosts(ITYPE_U, lsedtot, lnx, e_sbn, ierror)
-   !   call update_ghosts(ITYPE_U, NUMCONST,lnx,fluxhortot,ierror)
-   !   if (lsed>0) then
-   !      call update_ghosts(ITYPE_U, lsed, lnx, e_ssn, ierror)
-   !   endif
-   !endif
+   ! Add equilibrium berm slope adjustment
+   if (bermslopetransport) then
+      call bermslopenudging(error)
+      if (error) then
+         write(errmsg,'(a)') 'fm_bott3d::bermslopenudging returned an error. Check your inputs.'
+         call write_error(errmsg, unit=mdia)
+      end if
+   endif
+   !
+   !   Moved parts from fm_erosed() here   --------|
+   !                                              \ /
+   !                                               v
+   !
+   if (bed > 0.0_fp) then
+      aval=.true.
+      call fm_adjust_bedload(e_sbcn, e_sbct, aval)
+   endif
+   !
+   ! Determine incoming discharge and transport at nodes
+   !
+   qb_out = 0d0; width_out = 0d0; sb_in = 0d0; sb_dir = 1
+   BranInIDLn = 0
+   do inod = 1, network%nds%Count
+      pnod => network%nds%node(inod)
+      if (pnod%numberofconnections > 1) then
+         k3 = pnod%gridnumber
+         do j=1,nd(k3)%lnx
+            L = iabs(nd(k3)%ln(j))
+            Ldir = sign(1,nd(k3)%ln(j))
+            !
+            wb1d = wu_mor(L)
+            !
+            if (u1(L)*Ldir < 0d0) then
+               ! Outgoing discharge
+               qb1d = -qa(L)*Ldir  ! replace with junction advection: to do WO
+               width_out(inod) = width_out(inod) + wb1d
+               qb_out(inod)    = qb_out(inod) + qb1d
+               do ised = 1, lsedtot
+                  sb_dir(inod, ised, j) = -1           ! set direction to outgoing
+               enddo
+            else
+               ! Incoming discharge
+               if (branInIDLn(inod) == 0) then
+                  branInIDLn(inod) = L
+               else
+                  branInIDLn(inod) = -444               ! multiple incoming branches
+               endif
+            endif
+         enddo
+      endif
+   enddo
+   !
+   ! Apply nodal relations to transport
+   !
+   do inod = 1, network%nds%Count
+      pnod => network%nds%node(inod)
+      if (pnod%numberofconnections == 1) cycle
+      if (pnod%nodeType == nt_LinkNode) then  ! connection node
+         k1 = pnod%gridnumber
+         do j=1,nd(k1)%lnx
+            L = iabs(nd(k1)%ln(j))
+            Ldir = sign(1,nd(k1)%ln(j))
+            !
+            wb1d = wu_mor(L)
+            do ised = 1, lsedtot
+               sb1d = e_sbcn(L, ised) * Ldir  ! first compute all outgoing sed. transport.
+               ! this works for one incoming branch TO DO: WO
+               if (sb_dir(inod, ised, j) == -1) then
+                  sb_in(inod, ised) = sb_in(inod, ised) + max(-wb1d*sb1d, 0.0_fp)  ! outgoing transport is negative
+               endif
+            enddo
+         enddo
+      endif
+   enddo
+   !
+   ! Determining sediment redistribution
+   !
+   ! loop over sediment fractions
+   do ised = 1, lsedtot
+
+      ! mor%nrd%nFractions = or 1 (One for All Fractions) or lsedtot (One for Every Fraction)
+      iFrac = min(ised, stmpar%nrd%nFractions)
+
+      pFrac => stmpar%nrd%nodefractions(iFrac)
+
+      do inod = 1, network%nds%Count
+         pnod => network%nds%node(inod)
+         if (pnod%nodeType == nt_LinkNode) then  ! connection node
+
+            facCheck = 0.d0
+
+            if (pnod%numberofconnections == 1) cycle
+
+
+            ! loop over branches and determine redistribution of incoming sediment
+            k3 = pnod%gridnumber
+            do j=1,nd(k3)%lnx
+               L = iabs(nd(k3)%ln(j))
+               Ldir = sign(1,nd(k3)%ln(j))
+               qb1d = -qa(L)*Ldir
+               wb1d = wu_mor(L)
+
+               ! Get Nodal Point Relation Data
+               nrd_idx = get_noderel_idx(inod, pFrac, pnod%gridnumber, branInIDLn(inod), pnod%numberofconnections)
+
+               pNodRel => pFrac%noderelations(nrd_idx)
+
+               if (sb_dir(inod, ised, j) == -1) then ! is outgoing
+
+                  if (qb_out(inod) > 0.0_fp) then
+
+                     if (pNodRel%Method == 'function') then
+
+                        expQ = pNodRel%expQ
+                        expW = pNodRel%expW
+
+                        facQ = (qb1d / qb_out(inod))**expQ
+                        facW = (wb1d / width_out(inod))**expW
+
+                        facCheck = facCheck + facQ * facW
+
+                        e_sbcn(L,ised) = -Ldir * facQ * facW * sb_in(inod, ised) / wu_mor(L)
+
+                     elseif (pNodRel%Method == 'table') then
+
+                        facCheck = 1.0d0
+
+                        if (L == pNodRel%BranchOut1Ln) then
+                           Qbr1 = qb1d
+                           Qbr2 = qb_out(inod) - qb1d
+                        elseif (L == pNodRel%BranchOut2Ln) then
+                           Qbr1 = qb_out(inod) - qb1d
+                           Qbr2 = qb1d
+                        else
+                           call SetMessage(LEVEL_FATAL, 'Unknown Branch Out (This should never happen!)')
+                        endif
+
+                        QbrRatio = Qbr1 / Qbr2
+
+                        SbrRatio = interpolate(pNodRel%Table, QbrRatio)
+
+                        if (L == pNodRel%BranchOut1Ln) then
+                           e_sbcn(L,ised) = -Ldir * SbrRatio * sb_in(inod, ised) / (1 + SbrRatio) / wu_mor(L)
+                           e_sbct(L,ised) = 0.0
+                        elseif (L == pNodRel%BranchOut2Ln) then
+                           e_sbcn(L,ised) = -Ldir * sb_in(inod, ised) / (1 + SbrRatio) / wu_mor(L)
+                           e_sbct(L,ised) = 0.0
+                        endif
+
+
+                     else
+                        call SetMessage(LEVEL_FATAL, 'Unknown Nodal Point Relation Method Specified')
+                     endif
+
+                  else
+                     e_sbcn(L,ised) = 0.0_fp
+                     e_sbct(L,ised) = 0.0
+                  endif
+
+               endif
+
+            enddo    ! Branches
+
+            ! Correct Total Outflow
+            if ((facCheck /= 1.0_fp) .and. (facCheck > 0.0_fp)) then
+               ! loop over branches and correct redistribution of incoming sediment
+               do j=1,nd(k3)%lnx
+                  L = iabs(nd(k3)%ln(j))
+                  if (sb_dir(inod, ised, j) == -1) then
+                     e_sbcn(L,ised) = e_sbcn(L,ised)/facCheck
+                  endif
+               enddo    ! Branches
+            endif
+         endif
+      enddo      ! Nodes
+
+   enddo    ! Fractions
+
+   !
+   ! Bed-slope and sediment availability effects for
+   ! wave-related bed load transport
+   !
+   if (bedw>0.0_fp .and. jawave > 0) then
+      aval=.false.
+      call fm_adjust_bedload(e_sbwn, e_sbwt,aval)
+   endif
+   !
+   ! Sediment availability effects for
+   ! wave-related suspended load transport
+   !
+   if (susw>0.0_fp .and. jawave > 0) then
+      aval=.false.
+      call fm_adjust_bedload(e_sswn, e_sswt, aval)
+   endif
+   !!
+   if (duneavalan) then
+      call duneaval(error)
+      if (error) then
+         write(errmsg,'(a)') 'fm_bott3d::duneavalan returned an error. Check your inputs.'
+         call write_error(errmsg, unit=mdia)
+      end if
+   end if
+   !
+   ! Summation of current-related and wave-related transports on links
+   !
+   e_sbn = 0d0
+   e_sbt = 0d0
+   do l = 1,lsedtot
+      if (has_bedload(tratyp(l))) then
+         do nm = 1, lnx
+            e_sbn(nm, l) = e_sbcn(nm, l) + e_sbwn(nm, l) + e_sswn(nm, l)
+            e_sbt(nm, l) = e_sbct(nm, l) + e_sbwt(nm, l) + e_sswt(nm, l)
+         enddo
+      endif
+   enddo
+   !
+   !    EROSED CODE MOVED UNTIL THIS POINT ------------------------------------
+
    !
    ! if bed composition computations have started
    !
@@ -572,7 +824,8 @@
                      k = kb
                   endif
                   thick1 = vol1(k) * bai_mor(nm)
-                  sedflx = sinksetot(j,nm)*bai_mor(nm)
+                  sedflx = sinksetot(j,nm)*bai_mor(nm) + ssccum(l,nm)   ! kg/s/m2
+                  ssccum(l,nm) = 0d0
                   eroflx = sourse(nm,l)*thick1            ! mass conservation, different from D3D
                   !
                   ! Update fluff layer
@@ -672,7 +925,7 @@
          !
          ! If this is a cell in which sediment processes are active then ...
          !
-         if (kfsed(nm) /= 1 .or. (s1(nm)-bl(nm))<epshs) cycle                    ! check whether sufficient as condition
+         if (kfsed(nm) /= 1 .or. (s1(nm)-bl(nm))<epshs .or. thetsd(nm)<=0 ) cycle                    ! check whether sufficient as condition
          !
          totdbodsd = 0d0
          do l = 1, lsedtot
@@ -766,8 +1019,6 @@
 
       if ( jampi.gt.0 ) then
          call update_ghosts(ITYPE_Sall, lsedtot, Ndx, dbodsd, ierror)
-         !call update_ghosts(ITYPE_U, lsedtot, lnx, e_sbn, ierror)
-         !call update_ghosts(ITYPE_U, lsedtot, lnx, e_ssn, ierror)
       end if
       !
       ! Modifications for running parallel conditions (mormerge)
@@ -793,9 +1044,6 @@
                   stmpar%morpar%mergebuf(ii) = real(mergebodsed(ll, nm) * kcsmor(nm),hp)
                enddo
             enddo
-            !write(msg,'(i3,a,f10.5,a,f10.5,a,f10.3,a,f10.3,a)') stmpar%morpar%mergehandle, ' maxval blchg before merge (time=', time1/dt_user, ' usertimesteps):', maxval(mergebodsed)/cdryb(1), &
-            !                                &  ' at (', xz(maxloc(dbodsd,dim=2)), ',', yz(maxloc(dbodsd,dim=2)),')'
-            !call mess(LEVEL_INFO, msg)
             call update_mergebuffer(stmpar%morpar%mergehandle, ndxi*lsedtot, stmpar%morpar%mergebuf, &
                 jampi, my_rank, DFM_COMM_DFMWORLD)
 
@@ -806,9 +1054,6 @@
                   dbodsd(ll, nm) = real(stmpar%morpar%mergebuf(ii),fp)
                enddo
             enddo
-            !write(msg,'(i3,a,f10.5,a,f10.5,a,f10.3,a,f10.3,a)') stmpar%morpar%mergehandle, ' maxval blchg after  merge (time=', time1/dt_user, ' usertimesteps):', maxval(dbodsd)/cdryb(1), &
-            !                                &  ' at (', xz(maxloc(dbodsd,dim=2)), ',', yz(maxloc(dbodsd,dim=2)),')'
-            !call mess(LEVEL_INFO, msg)
             mergebodsed = 0d0
          endif
       else
@@ -1006,10 +1251,6 @@
       enddo
    endif       ! time1<tmor
    !
-   !if (jampi>0) then
-   !   call update_ghosts(ITYPE_SALL, 1, Ndx, blchg, ierror)
-   !endif
-   !
    ! Update bottom elevations
    !
    if (bedupd) then
@@ -1164,6 +1405,18 @@
             bl(nm) = bl(nm) + blchg(nm)          ! update bed level
          enddo
       endif
+   endif
+   !
+   if (istat == 0) deallocate(qb_out, stat = istat)
+   if (istat == 0) deallocate(width_out, stat = istat)
+   if (istat == 0) deallocate(sb_in, stat = istat)
+   if (istat == 0) deallocate(sb_dir, stat = istat)
+   if (istat == 0) deallocate(BranInIDLn, stat = istat)
+   !
+   if (istat /= 0) then
+      error = .true.
+      write(errmsg,'(a)') 'fm_bott3d::error deallocating memory.'
+      call mess(LEVEL_FATAL, errmsg)
    endif
 
    end subroutine fm_bott3d
