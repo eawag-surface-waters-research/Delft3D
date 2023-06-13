@@ -24,7 +24,7 @@
       subroutine calsed ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_errsys
+      use m_write_error_message
 
 !>\file
 !>       Sedimentation velocity IMx, DetC OOC, BODC, all algea = f (Temp SS Sal)
@@ -97,7 +97,7 @@
       MAXSAL  = PMSA( IP8 )
       ENHFAC  = PMSA( IP9 )
 
-      IF (CRSUSP .LT. 1E-20 )  CALL ERRSYS ('CRSUSP in CALSED zero')
+      IF (CRSUSP .LT. 1E-20 )  CALL write_error_message ('CRSUSP in CALSED zero')
 
 !*******************************************************************************
 !**** Processes connected to the sedimentation VELOCITY

@@ -1,7 +1,7 @@
       subroutine PLASTC     ( pmsa   , fl     , ipoint , increm, noseg , &
                               noflux , iexpnt , iknmrk , noq1  , noq2  , &
                               noq3   , noq4   )
-      use m_errsys
+      use m_write_error_message
       use m_dhkmrk
 
 !XXXDEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'PLASTC' :: PLASTC
@@ -155,7 +155,7 @@
                 write (*,*) 'loute = ',loute
                 write (*,*) 'npmsa = ',npmsa
                 write (*,*) 'npmsamax = ',npmsamax
-                call errsys ('PMSA admin array too small')
+                call write_error_message ('PMSA admin array too small')
             endif
             offset_vel = lins+line+louts
 

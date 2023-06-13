@@ -30,7 +30,7 @@
 
       use m_zoek
       use m_monsys
-      use m_errsys
+      use m_write_error_message
       use processet
       use timers       !   performance timers
 
@@ -118,7 +118,7 @@
                      ifl = ifl + 1
                      call zoekio ( proc%fluxstochi(istochi)%ioitem, proc%no_fluxoutput, proc%fluxoutput, 20, iflux)
                      if ( iflux .le. 0 ) then
-                        call errsys('error in primpro: unknown flux pdef')
+                        call write_error_message('error in primpro: unknown flux pdef')
                      endif
                      write (line,'(4a)') ' found flux  [',proc%fluxstochi(istochi)%ioitem(1:20),'] ',
      +                                   proc%fluxoutput(iflux)%item%text
@@ -180,7 +180,7 @@
                      call zoekio ( proc%dispstochi(istochi)%ioitem, proc%no_output, proc%output_item,
      +                             20, ioutput, IOTYPE_EXCHANG_OUTPUT)
                      if ( ioutput .eq. -1 ) then
-                        call errsys('error in primpro: unknown disp pdef')
+                        call write_error_message('error in primpro: unknown disp pdef')
                      endif
                      write (line,'(4a)') ' found dispersion[',proc%dispstochi(istochi)%ioitem,'] ',
      +                                                        proc%output_item(ioutput)%item%text
@@ -258,7 +258,7 @@
                      call zoekio ( proc%velostochi(istochi)%ioitem, proc%no_output, proc%output_item,
      +                             20, ioutput, IOTYPE_EXCHANG_OUTPUT)
                      if ( ioutput .eq. -1 ) then
-                        call errsys('error in primpro: unknown velo pdef')
+                        call write_error_message('error in primpro: unknown velo pdef')
                      endif
                      write (line,'(4a)') ' found velocity [',proc%velostochi(istochi)%ioitem,'] ',
      +                                                       proc%output_item(ioutput)%item%text

@@ -24,7 +24,7 @@
       subroutine tmode  ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_errsys
+      use m_write_error_message
 
 !>\file
 !>       Defnines meaning of two modelled statevars ModTemp and NatTemp
@@ -89,7 +89,7 @@
             ETEMP = MTEMP
             TTEMP = TMPNAT  
          ELSE
-            CALL ERRSYS ('SwitchTemp has no valid value <0,1,2> in TMODE')
+            CALL write_error_message ('SwitchTemp has no valid value <0,1,2> in TMODE')
          ENDIF
        
 !

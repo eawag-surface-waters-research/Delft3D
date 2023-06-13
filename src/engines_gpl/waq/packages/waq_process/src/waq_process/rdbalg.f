@@ -24,7 +24,7 @@
       subroutine rdbalg ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_errsys
+      use m_write_error_message
 
 !>\file
 !>       Light efficiency function DYNAMO algae
@@ -104,7 +104,7 @@
 !
       PMSA(IP6) = MAX(MIN(FRAD,1.0),0.0)
 !
-      IF (SATRAD .LT. 1E-20 )  CALL ERRSYS ('SATRAD in RADALG zero')
+      IF (SATRAD .LT. 1E-20 )  CALL write_error_message ('SATRAD in RADALG zero')
 
  8900 CONTINUE
 !

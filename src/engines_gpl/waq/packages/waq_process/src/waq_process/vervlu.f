@@ -64,7 +64,7 @@
 
 !     Name     Type   Library
 !     ------   -----  ------------
-      use m_errsys
+      use m_write_error_message
       use m_dhkmrk
       USE PHYSICALCONSTS, ONLY: CtoKelvin
       IMPLICIT REAL (A-H,J-Z)
@@ -115,11 +115,11 @@
 !
 !
 !     Error messages
-      IF (H0TREF .LT. 1E-30)  CALL ERRSYS ('H0TREF in VERVLU =<0')
+      IF (H0TREF .LT. 1E-30)  CALL write_error_message ('H0TREF in VERVLU =<0')
       IF ( TEMP .LE. -KELVIN) CALL
-     &                 ERRSYS ('TEMP in VERVLU < 0 DEG KELVIN')
-      IF (KL .LT. 1E-30) CALL ERRSYS ('KL in VERVLU zero')
-      IF (KG .LT. 1E-30) CALL ERRSYS ('KG in VERVLU zero')
+     &                 write_error_message ('TEMP in VERVLU < 0 DEG KELVIN')
+      IF (KL .LT. 1E-30) CALL write_error_message ('KL in VERVLU zero')
+      IF (KG .LT. 1E-30) CALL write_error_message ('KG in VERVLU zero')
 !
 !     Calculation of temperarure dependence of Henry
       H2TREF = H0TREF * NL / P

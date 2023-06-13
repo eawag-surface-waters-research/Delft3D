@@ -24,7 +24,7 @@
       subroutine caltau ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_errsys
+      use m_write_error_message
       use m_dhkmrk
 
 !>\file
@@ -123,9 +123,9 @@
 !
       CHZ=MAX(1.0,CHZ)
       IF ((ISWTAU .NE. 1) .AND. (ISWTAU .NE. 2) .AND. (ISWTAU .NE. 3))
-     &     CALL ERRSYS ('Invald switch for tau (ISWTAU) in CALTAU')
+     &     CALL write_error_message ('Invald switch for tau (ISWTAU) in CALTAU')
       IF ((ISWTAUVELOC .NE. 1) .AND. (ISWTAUVELOC .NE. 2))
-     &     CALL ERRSYS ('Invald switch for tau (ISWTAUVELOC) in CALTAU')
+     &     CALL write_error_message ('Invald switch for tau (ISWTAUVELOC) in CALTAU')
 
 !     Initialisation
       TAU     = 0.0

@@ -24,7 +24,7 @@
       subroutine SEDTYR    ( pmsa  , fl    , ipoint, increm, noseg ,
      &                       noflux, iexpnt, iknmrk, noq1  , noq2  ,
      &                       noq3  , noq4  )
-      use m_errsys
+      use m_write_error_message
       use m_dhkmrk
 
 
@@ -88,7 +88,7 @@
 
       ntrwp = pmsa(ipoint(ip_ntrwp))
       nspm = pmsa(ipoint(ip_nim  ))
-      if (nspm.gt.nspmm) call errsys ('Dimension issue in SEDTYR')
+      if (nspm.gt.nspmm) call write_error_message ('Dimension issue in SEDTYR')
       nitem = ip_lastsingle + 3*ntrwp+nspm+2*ntrwp
       delt           = pmsa(ipoint(ip_Delt))
       safe_factor    = pmsa(ipoint(ip_SafeFactor))

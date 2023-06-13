@@ -43,7 +43,7 @@
 !                           BCZOEK, (block data) sets default search mode
 !
       SUBROUTINE ZOEK ( NAAM  , NOTOT , SYNAME, NZOEK , IAINDX)
-      use m_errsys
+      use m_write_error_message
       USE Timers
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
@@ -54,7 +54,7 @@
 !
 !     SUBROUTINES CALLED  : ZOEKNS, searches not case sensitive
 !                           ZOEKCS, searches case sensitive
-!                           ERRSYS,
+!                           write_error_message,
 !
 !     COMMON's            : CZOEK , search settings
 !
@@ -90,7 +90,7 @@
          CALL ZOEKCS (NAAM,NOTOT,SYNAME,NZOEK,IAINDX)
       ELSE
          IAINDX = -1
-         CALL ERRSYS ( 'ERROR IN ZOEK : ONBEKENDE MODE ' )
+         CALL write_error_message ( 'ERROR IN ZOEK : ONBEKENDE MODE ' )
       ENDIF
 !
       RETURN
@@ -197,7 +197,7 @@
       END
 !
       SUBROUTINE SETZMO (ICASST)
-      use m_errsys
+      use m_write_error_message
 
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
@@ -231,7 +231,7 @@
       IF ( ICASST .GE. 0 .AND. ICASST .LE. 1 ) THEN
          ICASEM = ICASST
       ELSE
-         CALL ERRSYS ( 'ERROR IN SETZMO : ONBEKENDE MODE ' )
+         CALL write_error_message ( 'ERROR IN SETZMO : ONBEKENDE MODE ' )
       ENDIF
 !
       RETURN

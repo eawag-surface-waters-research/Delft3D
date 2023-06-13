@@ -24,7 +24,7 @@
       subroutine denwat ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_errsys
+      use m_write_error_message
 
 !>\file
 !>       Denitrification in water column
@@ -170,7 +170,7 @@
             OOXDEN = PMSA(IP15)
             COXDEN = PMSA(IP11)
             DELTOX = (COXDEN - OOXDEN) * POROS
-            IF ( DELTOX .LT. 1E-20 )  CALL ERRSYS
+            IF ( DELTOX .LT. 1E-20 )  CALL write_error_message
      &         ('(COXDEN - OOXDEN) in DENWAT <= zero')
             IF (OXY .GT. (COXDEN*POROS)) THEN
                O2FUNC = 0.0
@@ -274,7 +274,7 @@
                   OOXDEN = PMSA(IP15)
                   COXDEN = PMSA(IP11)
                   DELTOX = (COXDEN - OOXDEN) * POROS
-                  IF ( DELTOX .LT. 1E-20 )  CALL ERRSYS
+                  IF ( DELTOX .LT. 1E-20 )  CALL write_error_message
      &               ('(COXDEN - OOXDEN) in DENWAT <= zero')
                   IF (OXY .GT. COXDEN*POROS) THEN
                         O2FUNC = 0.0

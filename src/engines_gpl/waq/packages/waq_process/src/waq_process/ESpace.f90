@@ -2,7 +2,7 @@
                               noflux , iexpnt , iknmrk , noq1  , noq2  , &
                               noq3   , noq4   )
       use m_gkwini
-      use m_errsys
+      use m_write_error_message
       use m_dhkmrk
 
 !!!!!!!DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'ESPACE' :: ESPACE
@@ -193,9 +193,9 @@
             nsrca = nint(pmsa(ipoint(ip_nsrca)))
             nsrcb = nint(pmsa(ipoint(ip_nsrcb)))
             nsubsin  = nint(pmsa(ipoint(ip_nsubs)))
-            if (nsubsin.ne.nsubs) call errsys ('Substances inconsistent')
+            if (nsubsin.ne.nsubs) call write_error_message ('Substances inconsistent')
             nrecin = nint(pmsa(ipoint(ip_nrecin)))
-            if (nrecin.ne.nrec) call errsys ('Receptors inconsistent')
+            if (nrecin.ne.nrec) call write_error_message ('Receptors inconsistent')
             nosegl = nint(pmsa(ipoint(ip_nosegl)))
 
             ! pick up constants
@@ -303,8 +303,8 @@
             write (lu_nod,1002) trim(file_subs)
 
             read (lu_loc,*) nswb
-            if (nsc+nswb.ne.nosegl) call errsys('NSC+NSWB=/NOSEGL')
-            if (nswb.gt.0) call errsys('NSWB>0 not implemented')
+            if (nsc+nswb.ne.nosegl) call write_error_message('NSC+NSWB=/NOSEGL')
+            if (nswb.gt.0) call write_error_message('NSWB>0 not implemented')
 
       endif
 

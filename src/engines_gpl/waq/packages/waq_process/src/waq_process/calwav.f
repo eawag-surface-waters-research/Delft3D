@@ -24,7 +24,7 @@
       subroutine calwav ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_errsys
+      use m_write_error_message
       use m_dhkmrk
 
 !>\file
@@ -89,7 +89,7 @@
       DEPTH   = PMSA(IP3 )
       INIDEP  = PMSA(IP4 )
 
-      IF (FETCH .LT. 1E-20 )  CALL ERRSYS ('FETCH in CALWAVE zero')
+      IF (FETCH .LT. 1E-20 )  CALL write_error_message ('FETCH in CALWAVE zero')
 
 !     Initialisation
       H       = 0.0

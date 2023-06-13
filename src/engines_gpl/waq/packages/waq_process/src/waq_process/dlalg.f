@@ -24,7 +24,7 @@
       subroutine dlalg  ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_errsys
+      use m_write_error_message
 
 !>\file
 !>       Daylength function for algae DYNAMO
@@ -63,7 +63,7 @@
       DL        = PMSA(IP1 )
       KMDL      = PMSA(IP2 )
 
-      IF (DL .LT. 1E-20 )  CALL ERRSYS ('DL in DLALG zero')
+      IF (DL .LT. 1E-20 )  CALL write_error_message ('DL in DLALG zero')
 
 !     Actueel licht / licht voor groei verzadiging
       PMSA(IP3 )   =  MIN ( DL, KMDL) / KMDL

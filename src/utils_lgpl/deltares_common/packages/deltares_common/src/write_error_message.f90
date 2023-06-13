@@ -20,7 +20,7 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
-      module m_errsys
+      module m_write_error_message
       use m_srstop
       use m_monsys
 
@@ -30,7 +30,7 @@
       contains
 
 
-      SUBROUTINE ERRSYS(STRING)
+      SUBROUTINE write_error_message(STRING)
 !
 
       integer :: IMLUN
@@ -47,4 +47,4 @@
 !
       RETURN
       END
-      end module m_errsys
+      end module m_write_error_message

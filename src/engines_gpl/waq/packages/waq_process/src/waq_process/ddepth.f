@@ -24,7 +24,7 @@
       subroutine ddepth ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_errsys
+      use m_write_error_message
       use m_dhkmrk
 
 !>\file
@@ -71,7 +71,7 @@
 
       IF (SURF    .LT. 1E-30) THEN
          write ( message(32:55) , '(i9,1x,e14.6)' ) iseg, surf
-         CALL ERRSYS ( message )
+         CALL write_error_message ( message )
       ENDIF
 
 !***********************************************************************
