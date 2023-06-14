@@ -259,7 +259,7 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
              endif
           endif
 
- enddo
+       enddo
 
        if (icorio > 0 .and. Corioadamsbashfordfac > 0d0) then
           fvcoro( Lt+1:Lb+kmxL(LL)-1 ) = 0d0
@@ -367,8 +367,9 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
                 endif
                 if (Smagorinsky > 0) then
                    shearvar = 2d0*(dundn*dundn + dutdt*dutdt + dundt*dutdn) + dundt*dundt + dutdn*dutdn
-
-                   vicL     = vicL + Smagorinsky*Smagorinsky*sqrt(shearvar)/( dxi(L)*wui(L) )
+                   if (shearvar>1d-15) then     ! avoid underflow
+                      vicL     = vicL + Smagorinsky*Smagorinsky*sqrt(shearvar)/( dxi(L)*wui(L) )
+                   endif
                 endif
 
              endif
@@ -380,7 +381,7 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
              endif
 
              ! JRE: add roller induced viscosity
-             if ((jawave .eq. 4) .and. (swave .eq. 1) .and. (roller .eq. 1) .and. (smagorinsky==0d0)) then
+             if ((jawave .eq. 4) .and. (swave .eq. 1) .and. (roller .eq. 1)) then
                 DRL = acL(L) * DR(k1) + (1-acL(L)) * DR(k2)
                 nuhroller = nuhfac*hu(L) * (DRL / rhomean) ** (1d0/3d0)
                 vicL = max(nuhroller, vicL)
