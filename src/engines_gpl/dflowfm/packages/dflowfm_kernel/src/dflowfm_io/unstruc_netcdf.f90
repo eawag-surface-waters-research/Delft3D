@@ -13196,21 +13196,24 @@ subroutine unc_read_map_or_rst(filename, ierr)
 
        ! mfluff
        if (stmpar%morpar%flufflyr%iflufflyr>0 .and. stmpar%lsedsus>0 .and. sedsus_read == stmpar%lsedsus) then
-          if (allocated(tmpvar))     deallocate(tmpvar)
-          if (allocated(rst_mfluff)) deallocate(rst_mfluff)
-          allocate(tmpvar(sedsus_read, ndxi))
-          allocate(rst_mfluff(stmpar%lsedsus, ndxi))
           ierr = nf90_inq_varid(imapfile, 'mfluff', id_mfluff)
-          ierr = nf90_get_var(imapfile, id_mfluff, tmpvar(1:sedsus_read, 1:um%ndxi_own), start = (/ 1, kstart, it_read/), count = (/sedsus_read, ndxi,1/))
-          do kk = 1, ndxi
-             if (um%jamergedmap == 1) then
-                kloc = um%inode_own(kk)
-             else
-                kloc = kk
-             end if
-             rst_mfluff(:, kloc) = tmpvar(:,kk)
-          end do
-          call check_error(ierr, 'mfluff')
+          if (ierr == nf90_noerr) then
+             if (allocated(tmpvar))     deallocate(tmpvar)
+             if (allocated(rst_mfluff)) deallocate(rst_mfluff)
+             allocate(tmpvar(sedsus_read, ndxi))
+             allocate(rst_mfluff(stmpar%lsedsus, ndxi))
+             ierr = nf90_get_var(imapfile, id_mfluff, tmpvar(1:sedsus_read, 1:um%ndxi_own), start = (/ 1, kstart, it_read/), count = (/sedsus_read, ndxi,1/))
+             do kk = 1, ndxi
+                if (um%jamergedmap == 1) then
+                   kloc = um%inode_own(kk)
+                else
+                   kloc = kk
+                end if
+                rst_mfluff(:, kloc) = tmpvar(:,kk)
+             end do
+             call check_error(ierr, 'mfluff')
+             stmpar%morpar%flufflyr%mfluff = rst_mfluff
+          endif
        end if
 
        ! Bed composition
