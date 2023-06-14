@@ -31,10 +31,9 @@
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
 !
-!     CREATED: june  1994 by Jan van Beek
-!
-!     FUNCTION            : utility that evaluates a feature from
-!                           the "feature" integer
+!     FUNCTION            : utility that evaluates an attribute (sometimes referred to as kenmerk)
+!                           from the "feature" integer. Used for D-Waq
+!                           For example: cell is at bottom, surface or in the middle. Cell is active or not
 !
 !     PARAMETERS          :
 !
