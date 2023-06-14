@@ -6083,9 +6083,8 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          call getlayerindicesLmax(LL, nlaybL, nrlayLx)
 
          do L = Lb,Ltx
-            work1d(L) = zwu0 + .5d0*hu(LL)
-            work3d2(1:2,L-Lb+nlaybL,LL) = (/ zwu0, zwu0 + hu(LL) /) ! vertical z-bounds of this cell in this layer
-            zwu0 = zwu0 + hu(LL)
+            work1d(L) = zwu0 + .5d0 * (hu(L) + hu(L-1))
+            work3d2(1:2,L-Lb+nlaybL,LL) = (/ zwu0 + hu(L-1), zwu0 + hu(L) /) ! vertical z-bounds of this cell in this layer
          enddo
       end do
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowlinkzu, UNC_LOC_U3D, work1d, jabndnd=jabndnd_)
