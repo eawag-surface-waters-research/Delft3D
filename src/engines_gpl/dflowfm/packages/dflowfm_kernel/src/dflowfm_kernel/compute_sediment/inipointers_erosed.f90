@@ -50,7 +50,6 @@
    ws                  => mtd%ws
    uau                 => mtd%uau
 
-
    ! stmpar
    lsed                => stmpar%lsedsus
    lsedtot             => stmpar%lsedtot
@@ -155,6 +154,13 @@
    thetsd              => stmpar%morpar%thetsd
    eulerisoglm         => stmpar%morpar%eulerisoglm
    l_suscor            => stmpar%morpar%l_suscor
+   bermslopetransport  => stmpar%morpar%bermslopetransport
+   bermslopebed        => stmpar%morpar%bermslopebed
+   bermslopesus        => stmpar%morpar%bermslopesus
+   bermslope           => stmpar%morpar%bermslope
+   bermslopefac        => stmpar%morpar%bermslopefac
+   bermslopegamma      => stmpar%morpar%bermslopegamma
+   bermslopedepth      => stmpar%morpar%bermslopedepth
 
    ! trapar
    iform               => stmpar%trapar%iform

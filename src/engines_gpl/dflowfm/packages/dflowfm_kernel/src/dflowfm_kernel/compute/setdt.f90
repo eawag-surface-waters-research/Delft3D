@@ -50,16 +50,6 @@ subroutine setdt()
 !  compute CFL-based maximum time step and limiting flownode/time step, per subomdain
    call setdtorg(jareduced) ! 7.1 2031
 
-   dtsc_loc = dtsc
-
-!  globally reduce time step
-   if ( jampi.eq.1 .and. jareduced.eq.0 ) then
-!     globally reduce dts (dtsc may now be larger)
-      if ( jatimer.eq.1 ) call starttimer(IMPIREDUCE)
-      call reduce_double_min(dts)
-      if ( jatimer.eq.1 ) call stoptimer(IMPIREDUCE)
-   end if
-
    ! morphological timestep reduction
    if (stm_included  .and. jamorcfl>0) then
       if (time1 > tstart_user + stmpar%morpar%tmor * tfac) then
@@ -79,8 +69,10 @@ subroutine setdt()
       endif
    end if
 
+   dtsc_loc = dtsc
+
    !  globally reduce time step
-   if ( jampi.eq.1 ) then
+   if ( jampi.eq.1 .and. jareduced.eq.0 ) then
       !     globally reduce dts (dtsc may now be larger)
       if ( jatimer.eq.1 ) call starttimer(IMPIREDUCE)
       call reduce_double_min(dts)
