@@ -1269,7 +1269,7 @@
       !
       ! recompute erosion velocities
       !
-      call sand_mud(lsed, evel, frac(nm,:), mudfrac(nm), sedtyp, pmcrit(nm))
+      call sand_mud(lsed, evel, frac(nm,:), mudfrac(nm), sedtyp, max_mud_sedtyp, pmcrit(nm))
       !
       ! recompute erosion fluxes
       ! only explicit part of erosion flux is changed
