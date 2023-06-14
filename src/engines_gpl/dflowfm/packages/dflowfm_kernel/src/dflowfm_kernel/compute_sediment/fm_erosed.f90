@@ -703,9 +703,15 @@
             afluff = 0d0
          endif
          !
-         call compbsskin(umean, vmean, h1, wave, uorb(nm), twav(nm), &
-                          & phiwav(nm), thcmud(nm), mudfrac(nm), taub(nm), &
-                          & rhowat(kbed), vismol, stmpar%sedpar, afluff)
+         if (wave) then
+            call compbsskin(umean, vmean, h1, wave, uorb(nm), twav(nm), &
+                             & phiwav(nm), thcmud(nm), mudfrac(nm), taub(nm), &
+                             & rhowat(kbed), vismol, stmpar%sedpar, afluff)
+         else
+            call compbsskin(umean, vmean, h1, wave, 0d0, 0d0, &
+                             & phiwav(nm), thcmud(nm), mudfrac(nm), taub(nm), &
+                             & rhowat(kbed), vismol, stmpar%sedpar, afluff)
+         endif
       endif
       !
       ustarc = umod(nm)*vonkar/log(1.0_fp + zumod(nm)/max(z0rou,1d-5))
