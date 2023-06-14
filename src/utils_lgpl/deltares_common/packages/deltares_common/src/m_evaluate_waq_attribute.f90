@@ -20,14 +20,14 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
-      module m_dhkmrk
+      module m_evaluate_waq_attribute
 
       implicit none
 
       contains
 
 
-      SUBROUTINE DHKMRK ( IKNMRK , KENMRK , KNMRKI )
+      SUBROUTINE evaluate_waq_attribute ( IKNMRK , KENMRK , KNMRKI )
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
 !
@@ -68,4 +68,4 @@
 !
       RETURN
       END
-      end module m_dhkmrk
+      end module m_evaluate_waq_attribute

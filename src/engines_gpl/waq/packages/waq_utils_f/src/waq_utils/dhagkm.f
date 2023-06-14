@@ -21,7 +21,7 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
       module m_dhagkm
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 
       implicit none
@@ -38,7 +38,7 @@
 !
 !     Function            : Aggregates kenmerk array
 !
-!     Subroutines called  : DHKMRK, evaluate kenmerk
+!     Subroutines called  : evaluate_waq_attribute, evaluate kenmerk
 !
 !     Arguments           :
 !
@@ -86,8 +86,8 @@
 !
 !           Kenmerk 1 , 0 = inactive , 1 = active , 2 = GEM bottom
 !
-            CALL DHKMRK(1,IKNMRK(ISEG,1,1)     ,K1_G1)
-            CALL DHKMRK(1,IKNMRK(ISEG2,1,IGRID),K1_G2)
+            CALL evaluate_waq_attribute(1,IKNMRK(ISEG,1,1)     ,K1_G1)
+            CALL evaluate_waq_attribute(1,IKNMRK(ISEG2,1,IGRID),K1_G2)
             IF ( K1_G1 .GT. 0 ) THEN
                K1_G2 = K1_G1
             ENDIF
@@ -97,8 +97,8 @@
 !                       2 = middle segment
 !                       3 = bottom
 !
-            CALL DHKMRK(2,IKNMRK(ISEG,1,1)     ,K2_G1)
-            CALL DHKMRK(2,IKNMRK(ISEG2,1,IGRID),K2_G2)
+            CALL evaluate_waq_attribute(2,IKNMRK(ISEG,1,1)     ,K2_G1)
+            CALL evaluate_waq_attribute(2,IKNMRK(ISEG2,1,IGRID),K2_G2)
             IF ( K2_G1 .EQ. 0 ) THEN
                K2_G2 = 0
             ELSEIF ( K2_G1 .EQ. 1 ) THEN

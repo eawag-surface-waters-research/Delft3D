@@ -52,7 +52,7 @@
 !                           opt0    read constant/time-variable block
 !                           opt1    get & open ( include ) file
 !                           open_waq_files  open file
-!                           DHKMRK  get an attribute from an attribute integer
+!                           evaluate_waq_attribute  get an attribute from an attribute integer
 !                           srstop  stop with error code
 !                           check   end of block
 
@@ -63,7 +63,7 @@
 
       use m_srstop
       use m_open_waq_files
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
       use grids        !   for the storage of contraction grids
       use rd_token     !   for the reading of tokens
       use partmem      !   for PARTicle tracking
@@ -479,7 +479,7 @@
             ikmerge(iknm1) = 1
             iknmrk = 10**(iknm1-1)
             do iseg = 1 , noseg
-               call DHKMRK( iknm2, iread(iseg), ivalk )
+               call evaluate_waq_attribute( iknm2, iread(iseg), ivalk )
                iamerge(iseg) = iamerge(iseg) + iknmrk*ivalk
             enddo
    10    continue

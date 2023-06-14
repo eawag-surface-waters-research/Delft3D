@@ -54,7 +54,7 @@
 !
       use m_srstop
       use m_open_waq_files
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
       use m_dhimov
       use timers
       INTEGER       ITIME , NOSEG , IS    , ISFLAG, IFFLAG,
@@ -122,7 +122,7 @@
 !        (column 2)
 !
          DO 100 ISEG = 1 , NOSEG
-            CALL DHKMRK(4,IKNMRK(ISEG,2),IKMRK4)
+            CALL evaluate_waq_attribute(4,IKNMRK(ISEG,2),IKMRK4)
   100    CONTINUE
 !
 !        Change the time-variable kenmerk-array (column 3) such that it

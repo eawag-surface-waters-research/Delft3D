@@ -52,7 +52,7 @@ C     110399  J. vGils        Error in time integration removed
 C     111103  Jan van Beek    2003 implementation
 C***********************************************************************
 
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
       use m_write_error_message
 
       IMPLICIT NONE
@@ -134,8 +134,8 @@ C     loop over the segments
 
       DO 1000 ISEG = 1 , NOSEG
 
-         CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-         CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+         CALL evaluate_waq_attribute(1,IKNMRK(ISEG),IKMRK1)
+         CALL evaluate_waq_attribute(2,IKNMRK(ISEG),IKMRK2)
 
          RADSURF    = PMSA(IP(1))
          RADTOP     = PMSA(IP(2))

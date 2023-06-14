@@ -61,7 +61,7 @@
 !     Name     Type   Library
 !     ------   -----  ------------
       use m_write_error_message
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
       USE PHYSICALCONSTS, ONLY: CtoKelvin
       IMPLICIT REAL (A-H,J-Z)
 
@@ -179,7 +179,7 @@
       DO 9000 ISEG = 1 , NOSEG
 
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-      CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+      CALL evaluate_waq_attribute(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.1)) THEN
 !
 !     Map PMSA on local variables

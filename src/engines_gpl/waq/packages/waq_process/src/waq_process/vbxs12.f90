@@ -26,7 +26,7 @@
                               noq3   , noq4   )
       use m_monsys
       use m_write_error_message
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !XXXDEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'VBXS12' :: VBXS12
 !
@@ -374,8 +374,8 @@
            ! set botseg equal to iseg for the segments which have a bottom
 
           do iseg = 1,noseg
-              call dhkmrk(1,iknmrk(iseg),ikmrk1)
-              call dhkmrk(2,iknmrk(iseg),ikmrk2)
+              call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
+              call evaluate_waq_attribute(2,iknmrk(iseg),ikmrk2)
 
               if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
                   botseg(iseg) = iseg
@@ -468,8 +468,8 @@
       do iseg = 1 , noseg
 
 !         lowest water and 2d segments only, also dry, ikmrk1 = 0
-          call dhkmrk(1,iknmrk(iseg),ikmrk1)
-          call dhkmrk(2,iknmrk(iseg),ikmrk2)
+          call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
+          call evaluate_waq_attribute(2,iknmrk(iseg),ikmrk2)
           if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
 
 !*** VBSTAT ************************
@@ -1065,8 +1065,8 @@
           VegHeVB = pmsa(ipnt(ip_VegHeVB))
           FFacVB = pmsa(ipnt(ip_FFacVB))
 
-          call dhkmrk(1,iknmrk(iseg),ikmrk1)
-          call dhkmrk(2,iknmrk(iseg),ikmrk2)
+          call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
+          call evaluate_waq_attribute(2,iknmrk(iseg),ikmrk2)
           if (ikmrk1.lt.3) then ! also when dry!
               if ( VegHeVB .gt. 0.0 ) then
 
@@ -1137,8 +1137,8 @@
           dS1VBups = 0.0
           dS2VBups = 0.0
 
-          call dhkmrk(1,iknmrk(iseg),ikmrk1)
-          call dhkmrk(2,iknmrk(iseg),ikmrk2)
+          call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
+          call evaluate_waq_attribute(2,iknmrk(iseg),ikmrk2)
 
           depth = pmsa(ipnt(ip_depth))
           totaldepth = pmsa(ipnt(ip_totaldepth))

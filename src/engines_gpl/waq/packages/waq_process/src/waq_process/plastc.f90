@@ -2,7 +2,7 @@
                               noflux , iexpnt , iknmrk , noq1  , noq2  , &
                               noq3   , noq4   )
       use m_write_error_message
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !XXXDEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'PLASTC' :: PLASTC
 !*******************************************************************************
@@ -238,7 +238,7 @@
           ! PAVED SYSTEM -------- ----------------------------------------------
 
           iseg = isegl + (rec_pav-1)*nosegl
-          call dhkmrk(1,iknmrk(iseg),iatt1) ! pick up first attribute
+          call evaluate_waq_attribute(1,iknmrk(iseg),iatt1) ! pick up first attribute
           if (iatt1.gt.0) then
 
           ropaved = max(pmsa(ipnt(ip_ropaved)),0.0)
@@ -276,7 +276,7 @@
          ! UNPAVED SYSTEM ------------------------------------------------------------------------------------
 
           iseg = isegl + (rec_unp-1)*nosegl
-          call dhkmrk(1,iknmrk(iseg),iatt1) ! pick up first attribute
+          call evaluate_waq_attribute(1,iknmrk(iseg),iatt1) ! pick up first attribute
           if (iatt1.gt.0) then
 
           ! rounpaved = max(pmsa(ipnt(ip_rounpaved)),0.0)  THIS IS THE RIGHT STATEMENT AFTER CORRECTION OF BIN FILE
@@ -315,7 +315,7 @@
           ! ENDPOINT SURFACE WATER
 
           iseg = isegl + (rec_sfw-1)*nosegl
-          call dhkmrk(1,iknmrk(iseg),iatt1) ! pick up first attribute
+          call evaluate_waq_attribute(1,iknmrk(iseg),iatt1) ! pick up first attribute
           if (iatt1.gt.0) then
 
           ! fluxes

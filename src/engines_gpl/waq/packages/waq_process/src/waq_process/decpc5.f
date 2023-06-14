@@ -25,7 +25,7 @@
      +                    NOFLUX , IEXPNT , IKNMRK , NOQ1   , NOQ2   ,
      +                    NOQ3   , NOQ4   )
       use m_write_error_message
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 
 !
@@ -171,7 +171,7 @@
 !
 !       In all active dry or wet segments
 !
-        CALL DHKMRK(3,IKNMRK(ISEG),IKMRK3)
+        CALL evaluate_waq_attribute(3,IKNMRK(ISEG),IKMRK3)
 
         IF (IKMRK3.EQ.1 .OR. IKMRK3.EQ.3) THEN
 !

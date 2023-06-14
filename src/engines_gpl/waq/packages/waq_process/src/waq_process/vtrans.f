@@ -41,7 +41,7 @@
       use m_dhnoseg
       use m_dhnolay
       use m_dhltim
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
       use      bloom_data_vtrans
 
       implicit none
@@ -245,7 +245,7 @@
             ifrom = iexpnt(1,iq)
             ito   = iexpnt(2,iq)
             if ( ifrom .gt. 0 .and. ito .gt. 0 ) then
-               call dhkmrk(1,iknmrk(ito),ikmrk1)
+               call evaluate_waq_attribute(1,iknmrk(ito),ikmrk1)
                if (ikmrk1.eq.1) then
                   disp  = pmsa(ip9) + pmsa(ip13)
                else

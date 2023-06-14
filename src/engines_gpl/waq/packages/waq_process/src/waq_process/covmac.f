@@ -27,7 +27,7 @@
 !
 !*******************************************************************************
 !
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
       use m_write_error_message
       IMPLICIT NONE
 !
@@ -89,7 +89,7 @@
       IPNT(21) = IPOINT(21)
       DO ISEG = 1,NOSEG
          PMSA( IPNT( 21) ) = -1
-         CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+         CALL evaluate_waq_attribute(2,IKNMRK(ISEG),IKMRK2)
          IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
             PMSA( IPNT( 21) ) = ISEG
          ENDIF
@@ -127,10 +127,10 @@
 !
       DO 9000 ISEG = 1 , NOSEG
 
-         CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
+         CALL evaluate_waq_attribute(1,IKNMRK(ISEG),IKMRK1)
 
          IF (IKMRK1.EQ.1) THEN
-            CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+            CALL evaluate_waq_attribute(2,IKNMRK(ISEG),IKMRK2)
             IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.1)) THEN
 
 !           Calculation of fcover for top layer only

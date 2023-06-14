@@ -3,7 +3,7 @@
                               noq3   , noq4   )
       use m_gkwini
       use m_write_error_message
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !!!!!!!DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'ESPACE' :: ESPACE
 !
@@ -413,7 +413,7 @@
           ! SEWER SYSTEM ------------------------------------------------------------------------------------
 
           iseg = isegl + (rec_sew-1)*nosegl
-          call dhkmrk(1,iknmrk(iseg),iatt1) ! pick up first attribute
+          call evaluate_waq_attribute(1,iknmrk(iseg),iatt1) ! pick up first attribute
           if (iatt1.gt.0) then
 
           leakage = pmsa(ipnt(ip_leakage))
@@ -437,7 +437,7 @@
           ! PAVED SYSTEM ------------------------------------------------------------------------------------
 
           iseg = isegl + (rec_pav-1)*nosegl
-          call dhkmrk(1,iknmrk(iseg),iatt1) ! pick up first attribute
+          call evaluate_waq_attribute(1,iknmrk(iseg),iatt1) ! pick up first attribute
           if (iatt1.gt.0) then
 
           ropaved = pmsa(ipnt(ip_ropaved))
@@ -468,7 +468,7 @@
           ! UNPAVED SYSTEM ------------------------------------------------------------------------------------
 
           iseg = isegl + (rec_unp-1)*nosegl
-          call dhkmrk(1,iknmrk(iseg),iatt1) ! pick up first attribute
+          call evaluate_waq_attribute(1,iknmrk(iseg),iatt1) ! pick up first attribute
           if (iatt1.gt.0) then
 
           rounpaved = pmsa(ipnt(ip_rounpaved))
@@ -516,7 +516,7 @@
           ! SOIL SYSTEM ------------------------------------------------------------------------------------
 
           iseg = isegl + (rec_soi-1)*nosegl
-          call dhkmrk(1,iknmrk(iseg),iatt1) ! pick up first attribute
+          call evaluate_waq_attribute(1,iknmrk(iseg),iatt1) ! pick up first attribute
           if (iatt1.gt.0) then
 
           gwbaseflow = pmsa(ipnt(ip_gwbflow))
@@ -549,7 +549,7 @@
           ! ENDPOINT STORM WATER
 
           iseg = isegl + (rec_stw-1)*nosegl
-          call dhkmrk(1,iknmrk(iseg),iatt1) ! pick up first attribute
+          call evaluate_waq_attribute(1,iknmrk(iseg),iatt1) ! pick up first attribute
           if (iatt1.gt.0) then
 
           boun = 0.0
@@ -570,7 +570,7 @@
           ! ENDPOINT SURFACE WATER
 
           iseg = isegl + (rec_sfw-1)*nosegl
-          call dhkmrk(1,iknmrk(iseg),iatt1) ! pick up first attribute
+          call evaluate_waq_attribute(1,iknmrk(iseg),iatt1) ! pick up first attribute
           if (iatt1.gt.0) then
 
           do isubs = 1,nsubs

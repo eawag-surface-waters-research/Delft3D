@@ -32,7 +32,7 @@
 
       use m_srstop
       use m_monsys
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
       USE BottomSet     !  Module with definition of the waterbottom segments
 
       IMPLICIT NONE
@@ -130,7 +130,7 @@
 
       DO 1000 ISEG=1,NOSEG
 
-         CALL DHKMRK( 1, IKNMRK(ISEG ), IKMRK1 )
+         CALL evaluate_waq_attribute( 1, IKNMRK(ISEG ), IKMRK1 )
 
 !........Segment is inactief
          IF      (IKMRK1 .EQ. 0) THEN
@@ -193,10 +193,10 @@
          INAAR = IEXPNT(2,IQ)
 
          IF ( IVAN .GT. 0 .AND. INAAR .GT. 0 ) THEN
-            CALL DHKMRK( 1, IKNMRK(IVAN ), IK1VN )
-            CALL DHKMRK( 1, IKNMRK(INAAR), IK1NR )
-            CALL DHKMRK( 2, IKNMRK(IVAN ), IK2VN )
-            CALL DHKMRK( 2, IKNMRK(INAAR), IK2NR )
+            CALL evaluate_waq_attribute( 1, IKNMRK(IVAN ), IK1VN )
+            CALL evaluate_waq_attribute( 1, IKNMRK(INAAR), IK1NR )
+            CALL evaluate_waq_attribute( 2, IKNMRK(IVAN ), IK2VN )
+            CALL evaluate_waq_attribute( 2, IKNMRK(INAAR), IK2NR )
 
 !...........Van segment = inactief
             IF ( IK1VN .EQ. 0 ) THEN

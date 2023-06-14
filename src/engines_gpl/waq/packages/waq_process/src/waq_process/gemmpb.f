@@ -51,7 +51,7 @@ C     150399  A. Blauw        MPB can't consume more than the min.flux
 C     311003  Jan van Beek    process two types at once and a lot more
 C***********************************************************************
 
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
       use m_write_error_message
 
       IMPLICIT NONE
@@ -282,8 +282,8 @@ C     loop over the segments
 
       DO 1000 ISEG = 1 , NOSEG
 
-         CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-         CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+         CALL evaluate_waq_attribute(1,IKNMRK(ISEG),IKMRK1)
+         CALL evaluate_waq_attribute(2,IKNMRK(ISEG),IKMRK2)
 
          TEMP           = PMSA(IP(1))
          BIOMAS_MPB1    = MAX(0.0,PMSA(IP(2)))
