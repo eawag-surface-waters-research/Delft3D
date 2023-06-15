@@ -4,66 +4,74 @@ Description: Comparer Factory
 Copyright (C)  Stichting Deltares, 2013
 """
 
-import logging
+from abc import ABC
+from typing import List
 
 from src.config.file_check import FileCheck
 from src.config.types.file_type import FileType
+from src.suite.program import Program
 from src.utils.comparers.ascii_comparer import AsciiComparer
 from src.utils.comparers.content_comparer import ContentComparer
 from src.utils.comparers.csv_time_series_comparer import CSVTimeseriesComparer
-from src.utils.comparers.d_series_benchmark_comparer import \
-    DSeriesBenchmarkComparer
+from src.utils.comparers.d_series_benchmark_comparer import DSeriesBenchmarkComparer
 from src.utils.comparers.d_series_comparer import DSeriesComparer
 from src.utils.comparers.his_comparer import HisComparer
+from src.utils.comparers.i_comparer import IComparer
 from src.utils.comparers.nefis_comparer import NefisComparer
 from src.utils.comparers.netcdf_comparer import NetcdfComparer
 from src.utils.comparers.number_text_comparer import NumberTextComparer
 from src.utils.comparers.pi_time_series_comparer import PiTimeseriesComparer
+from src.utils.logging.i_logger import ILogger
 
 
-# Chooses which comparer should be used for the cases
-class ComparerFactory(object):
-    # return valid comparers for given FileChecks
-    # input: test case config
-    # output: dictionary [Key:FileCheck] (Value:Comparer)
-    def selectComparers(self, config):
-        result = {}
-        for fc in config.getChecks():
-            if not fc.ignore():
-                result[fc] = self.selectComparer(fc)
-        return result
+class ComparerFactory(ABC):
+    """Chooses which comparer should be used for the cases"""
 
-    def selectComparer(self, file_check: FileCheck):
-        if file_check.type == FileType.ASCII:
-            logging.debug("comparer selected for ASCII")
+    @classmethod
+    def select_comparer(
+        cls, file_check: FileCheck, programs: List[Program], logger: ILogger
+    ) -> IComparer:
+        """Creates a comparer instance based on file_check type
+
+        Args:
+            file_check (FileCheck): file check used
+            programs (List[Program]): list of all registered programs
+
+        Returns:
+            IComparer: comparer to use for the provided file check
+        """
+        file_type = file_check.type
+
+        if file_type == FileType.ASCII:
+            logger.debug("comparer selected for ASCII")
             return AsciiComparer()
-        if file_check.type == FileType.NEFIS:
-            logging.debug("comparer selected for NEFIS")
-            return NefisComparer()
-        if file_check.type == FileType.NETCDF:
-            logging.debug("comparer selected for NetCDF")
+        if file_type == FileType.NEFIS:
+            logger.debug("comparer selected for NEFIS")
+            vs_program = next(p for p in programs if p.name == "vs")
+            return NefisComparer(vs_program)
+        if file_type == FileType.NETCDF:
+            logger.debug("comparer selected for NetCDF")
             return NetcdfComparer()
-        if file_check.type == FileType.HIS:
-            logging.debug("comparer selected for HIS")
+        if file_type == FileType.HIS:
+            logger.debug("comparer selected for HIS")
             return HisComparer()
-        if file_check.type == FileType.NUMBERTEXT:
-            logging.debug("comparer selected for numbers and text")
+        if file_type == FileType.NUMBERTEXT:
+            logger.debug("comparer selected for numbers and text")
             return NumberTextComparer()
-        if file_check.type == FileType.DSERIESREGRESSION:
-            logging.debug("comparer selected for DSERIES REGRESSION")
+        if file_type == FileType.DSERIESREGRESSION:
+            logger.debug("comparer selected for DSERIES REGRESSION")
             return DSeriesComparer()
-        if file_check.type == FileType.DSERIESVERIFICATION:
-            logging.debug("comparer selected for DSERIES VERIFICATION")
+        if file_type == FileType.DSERIESVERIFICATION:
+            logger.debug("comparer selected for DSERIES VERIFICATION")
             return DSeriesBenchmarkComparer()
-        if file_check.type == FileType.PITIMESERIES:
-            logging.debug("comparer selected for Pi XML Timeseries set")
+        if file_type == FileType.PITIMESERIES:
+            logger.debug("comparer selected for Pi XML Timeseries set")
             return PiTimeseriesComparer()
-        if file_check.type == FileType.CSVTIMESERIES:
-            logging.debug("comparer selected for CSV Timeseries set")
+        if file_type == FileType.CSVTIMESERIES:
+            logger.debug("comparer selected for CSV Timeseries set")
             return CSVTimeseriesComparer()
 
-        logging.warning(
-            "Unknown comparer specified for file: %s; raw content comparer selected",
-            file_check.name,
+        logger.warning(
+            f"Unknown comparer specified for file: {file_check.name}; raw content comparer selected"
         )
         return ContentComparer()

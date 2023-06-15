@@ -1,31 +1,40 @@
 """
 Description: Handler Factory
 -----------------------------------------------------
-Copyright (C)  Stichting Deltares, 2013
+Copyright (C)  Stichting Deltares, 2023
 """
 
-import logging
+import copy
 import os
+from abc import ABC
 from distutils import dir_util
-from typing import Optional
+from typing import List, Optional
 
 from src.config.credentials import Credentials
 from src.config.types.handler_type import HandlerType
+from src.suite.program import Program
 from src.utils.handlers.ftp_handler import FTPHandler
 from src.utils.handlers.http_handler import HTTPHandler
 from src.utils.handlers.i_handler import IHandler
 from src.utils.handlers.local_net_handler import LocalNetHandler
 from src.utils.handlers.resolve_handler import ResolveHandler
 from src.utils.handlers.svn_handler import SvnHandler
+from src.utils.logging.i_logger import ILogger
 from src.utils.paths import Paths
 from src.utils.unzipper import Unzipper
 
 
-# Chooses which type of handler is used for upload and download actions
-class HandlerFactory(object):
+class HandlerFactory(ABC):
+    """Chooses which type of handler is used for upload and download actions"""
+
     @classmethod
-    def get_handler(
-        self, to_path: str, credentials: Credentials = None, autocommit: bool = False
+    def __get_handler(
+        cls,
+        to_path: str,
+        programs: List[Program],
+        logger: ILogger,
+        credentials: Optional[Credentials] = None,
+        autocommit: bool = False,
     ) -> IHandler:
         """Creates handler based on destination path
 
@@ -41,62 +50,98 @@ class HandlerFactory(object):
         Returns:
             IHandler: Specific handler
         """
-        handler_type = ResolveHandler().detect(to_path, credentials)
-        handler: Optional[IHandler] = None
+        handler_type = ResolveHandler.detect(to_path, logger, credentials)
+        handler: IHandler
 
         if handler_type == HandlerType.WEB:
-            logging.debug("using HTTP handler for %s", to_path)
+            logger.debug(f"using HTTP handler for {to_path}")
             handler = HTTPHandler()
         if handler_type == HandlerType.SVN:
-            logging.debug("using SVN handler for %s", to_path)
-            handler = SvnHandler(autocommit)
+            logger.debug(f"using SVN handler for {to_path}")
+            svn_program = copy.deepcopy(next(p for p in programs if p.name == "svn"))
+            handler = SvnHandler(svn_program, autocommit)
         if handler_type == HandlerType.FTP:
-            logging.debug("using FTP handler for %s", to_path)
+            logger.debug(f"using FTP handler for {to_path}")
             handler = FTPHandler()
         if handler_type == HandlerType.NET or handler_type == HandlerType.PATH:
-            logging.debug("using LocalNet handler for %s", to_path)
+            logger.debug(f"using LocalNet handler for {to_path}")
             handler = LocalNetHandler()
         if handler_type == HandlerType.NONE:
             raise AttributeError("upload :: no type specified")
 
         return handler
 
+    @classmethod
     def prepare_upload(
-        self, from_path: str, to_path: str, credentials: Credentials = None
+        cls,
+        from_path: str,
+        to_path: str,
+        programs: List[Program],
+        credentials: Optional[Credentials],
+        logger: ILogger,
     ):
         rfp = Paths().rebuildToLocalPath(from_path)
 
-        handler = self.get_handler(to_path, credentials)
-        handler.prepare_upload(rfp, to_path, credentials)
+        handler = cls.__get_handler(to_path, programs, logger, credentials)
+        handler.prepare_upload(rfp, to_path, credentials, logger)
 
-    # Upload data to location
-    # input: from, to (assumes this is network) and optional credentials
-    def upload(self, from_path, to_path, credentials=None, autocommit=False):
+    @classmethod
+    def upload(
+        cls,
+        from_path: str,
+        to_path: str,
+        programs: List[Program],
+        logger: ILogger,
+        credentials: Optional[Credentials] = None,
+        autocommit: bool = False,
+    ):
+        """Upload data to location
+
+        Args:
+            from_path (str): source path
+            to_path (str): target path
+            credentials (Optional[Credentials], optional): Credentials to use.
+            Defaults to None.
+            autocommit (bool, optional): Automatically commit. Defaults to False.
+        """
         rfp = Paths().rebuildToLocalPath(from_path)
-        handler = self.get_handler(to_path, credentials, autocommit)
-        handler.upload(rfp, to_path, credentials)
+        handler = cls.__get_handler(to_path, programs, logger, credentials, autocommit)
+        handler.upload(rfp, to_path, credentials, logger)
 
-    # Download data from location
-    # input: from, to and optional credentials
+    @classmethod
     def download(
-        self,
-        from_path,
-        to_path,
-        credentials=None,
-        version=None,
-        unzip=False,
-        autocommit=False,
+        cls,
+        from_path: str,
+        to_path: str,
+        programs: List[Program],
+        logger: ILogger,
+        credentials: Optional[Credentials] = None,
+        version: Optional[str] = None,
+        unzip: bool = False,
+        autocommit: bool = False,
     ):
+        """Download data from location
+
+        Args:
+            from_path (str): source path
+            to_path (str): target path
+            credentials (Optional[Credentials], optional): Credentials to use.
+            Defaults to None.
+            version (Optional[str], optional): version. Defaults to None.
+            unzip (bool, optional): try to unzip file. Defaults to False.
+            autocommit (bool, optional): Automatically commit. Defaults to False.
+
+        Raises:
+            e: _description_
+        """
         rtp = Paths().rebuildToLocalPath(to_path)
         if os.path.exists(rtp):
             dir_util.remove_tree(rtp)
         os.makedirs(rtp)
 
-        handler = self.get_handler(from_path, credentials, autocommit)
-        try:
-            handler.download(from_path, rtp, credentials, version)
-        except Exception as e:
-            raise e
-
+        handler = cls.__get_handler(
+            from_path, programs, logger, credentials, autocommit
+        )
+        handler.download(from_path, rtp, credentials, version, logger)
         if unzip:
-            Unzipper().recursive(rtp)
+            Unzipper().recursive(rtp, logger)

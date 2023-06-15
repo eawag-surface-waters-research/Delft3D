@@ -4,27 +4,32 @@ Description: HIS file comparer
 Copyright (C)  Stichting Deltares, 2013
 """
 
-import logging
 import os
 import struct
 import sys
 from datetime import datetime, timedelta
+from typing import List, Tuple
 
 import numpy as np
 
 import src.utils.plot_differences as plot
+from src.config.file_check import FileCheck
+from src.config.parameter import Parameter
 from src.config.test_case_failure import TestCaseFailure
 from src.utils.comparers.comparison_result import ComparisonResult
+from src.utils.comparers.i_comparer import IComparer
+from src.utils.logging.i_logger import ILogger
 
 
 class Dataset:
     def __init__(self):
         self.data = []
-        self.parameters = None
-        self.locations = None
+        self.parameters: List[str] = []
+        self.locations: List[str] = []
         self.results = None
-        self.start_date = None
-        self.times = None
+        self.start_date: str = ""
+        self.times: List[int] = []
+        self.title: List[str] = []
 
 
 def files_iterator(file_a, file_b, ignore_blank=True, skip=0):
@@ -45,10 +50,17 @@ def files_iterator(file_a, file_b, ignore_blank=True, skip=0):
                 yield line_a, line_b
 
 
-class HisComparer(object):
+class HisComparer(IComparer):
     """Compare HIS files."""
 
-    def compare(self, left_path, right_path, file_check, testcase_name):
+    def compare(
+        self,
+        left_path: str,
+        right_path: str,
+        file_check: FileCheck,
+        testcase_name: str,
+        logger: ILogger,
+    ) -> List[Tuple[str, FileCheck, Parameter, ComparisonResult]]:
         """
         compare left and right file
         input: left path, right path, FileCheck instance, name ot the test case
@@ -58,14 +70,14 @@ class HisComparer(object):
         results = []
         local_error = False
         # For each parameter for this file:
-        for parameters in file_check.getParameters().values():
+        for parameters in file_check.parameters.values():
             for parameter in parameters:
-                parameter_name = parameter.getName()
-                logging.debug("Checking parameter: " + str(parameter.getName()))
+                parameter_name = parameter.name
+                logger.debug("Checking parameter: " + str(parameter.name))
                 result = ComparisonResult(error=local_error)
 
                 try:
-                    filename = file_check.getName()
+                    filename = file_check.name
                     left_root = self.read_his_file(os.path.join(left_path, filename))
                     right_root = self.read_his_file(os.path.join(right_path, filename))
 
@@ -93,18 +105,18 @@ class HisComparer(object):
 
                     locations_in_his = left_root.locations
                     nr_locs = len(locations_in_his)
-                    if parameter.getLocation() is not None:
+                    if parameter.location is not None:
                         loc_id = -1
                         iloc = -1
                         for loc in locations_in_his:
                             iloc += 1
-                            if str(loc).find(parameter.getLocation()) != -1:
+                            if str(loc).find(parameter.location) != -1:
                                 loc_id = iloc
                                 break
                         if loc_id == -1:
                             raise ValueError(
                                 "Location '"
-                                + parameter.getLocation()
+                                + parameter.location
                                 + "' not found in HIS-file: "
                                 + os.path.join(left_path, filename)
                             )
@@ -174,14 +186,14 @@ class HisComparer(object):
                         )
 
                     result.isToleranceExceeded(
-                        parameter.getToleranceAbsolute(),
-                        parameter.getToleranceRelative(),
+                        parameter.tolerance_absolute,
+                        parameter.tolerance_relative,
                     )
 
                     if result.result == "NOK":
                         try:
                             start_datetime, delta = interpret_time_unit(
-                                left_root.start_date
+                                left_root.start_date, logger
                             )
                             datetime_series = [
                                 start_datetime + int(t_i) * delta
@@ -198,17 +210,17 @@ class HisComparer(object):
                                 "his",
                             )
                         except Exception as e:
-                            logging.error(
+                            logger.error(
                                 "Time History plot of parameter "
-                                + str(parameter.getName())
+                                + str(parameter.name)
                                 + " failed"
                             )
-                            logging.exception(e)
+                            logger.error(e)
                             local_error = True
                             result.error = True
 
                 except Exception as e:
-                    logging.exception(e)
+                    logger.error(e)
                     local_error = True
                     result.error = True
 
@@ -216,7 +228,7 @@ class HisComparer(object):
 
         return results
 
-    def read_his_file(self, fname):
+    def read_his_file(self, path: str) -> Dataset:
         """
         Read 'his' file format
         :param fname: input filename
@@ -224,7 +236,7 @@ class HisComparer(object):
         """
         dataset = Dataset()
 
-        with open(fname, "rb") as f:
+        with open(path, "rb") as f:
             title = []
             txt = f.read(40).decode("utf-8").strip()
             title.append(txt)
@@ -240,7 +252,7 @@ class HisComparer(object):
             nr_params = struct.unpack("i", f.read(4))[0]
             nr_locs = struct.unpack("i", f.read(4))[0]
 
-            parameters = []
+            parameters: List[str] = []
             for i in range(nr_params):
                 par = f.read(20).decode("utf-8").strip()
                 parameters.append(par)
@@ -280,10 +292,10 @@ class HisComparer(object):
             dataset.results = data1
             dataset.times = time
 
-        b_name, ext = os.path.splitext(fname)
-        fname = b_name + ".hia"
-        if os.path.exists(fname):
-            with open(fname, "r") as f:
+        b_name, ext = os.path.splitext(path)
+        path = b_name + ".hia"
+        if os.path.exists(path):
+            with open(path, "r") as f:
                 while True:
                     rec = f.readline()
                     if not rec:
@@ -308,7 +320,7 @@ class HisComparer(object):
                             if j > 3:
                                 raise ValueError(
                                     "Block [General] does not match definition, file: "
-                                    + fname
+                                    + path
                                 )
                     if rec.find("[DioCheck]") != -1:
                         i = 0
@@ -336,7 +348,7 @@ class HisComparer(object):
                             if j > 5:
                                 raise ValueError(
                                     "Block [DioCheck] does not match definition, file: "
-                                    + fname
+                                    + path
                                 )
                     if rec.find("[Location Descriptions]") != -1:
                         nr = []
@@ -381,7 +393,7 @@ class HisComparer(object):
         return dataset
 
 
-def interpret_time_unit(time_description):
+def interpret_time_unit(time_description, logger: ILogger):
     """
     Returns a (start_datetime, timedelta) tuple. For instance, 'T0: 2014.01.01 00:00:00  (scu=      60s)' yields the
     following tuple: (datetime(1998, 8, 1, 0, 0, 0), timedelta(seconds=1)).
@@ -425,7 +437,7 @@ def interpret_time_unit(time_description):
         )
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
         raise ValueError(
             "Can not interpret the following unit: "
             + str(time_description)

@@ -4,12 +4,11 @@ Description: Ascii file comparer, compares numbers (with tolerance) and text
 Copyright (C)  Stichting Deltares, 2013
 """
 
-import logging
 import os
 import re
 import sys
 from sys import float_info
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import numpy as np
 
@@ -18,10 +17,12 @@ from src.config.parameter import Parameter
 from src.config.skip_line import SkipLine
 from src.config.test_case_failure import TestCaseFailure
 from src.utils.comparers.comparison_result import ComparisonResult
+from src.utils.comparers.i_comparer import IComparer
+from src.utils.logging.i_logger import ILogger
 
 
 # Compares files on all floats that it contains.
-class NumberTextComparer:
+class NumberTextComparer(IComparer):
     __left = 0
     __right = 1
     __lineNumber = [0, 0]
@@ -46,18 +47,20 @@ class NumberTextComparer:
     # compare left and right file
     # input: left path, right path, FileCheck instance, logfilename (optional), startTag (optional)
     # output: boolean
+
     def compare(
         self,
-        leftpath: str,
-        rightpath: str,
+        left_path: str,
+        right_path: str,
         file_check: FileCheck,
         testcase_name: str,
-        startTag=None,
-    ):
+        logger: ILogger,
+        start_tag=None,
+    ) -> List[Tuple[str, FileCheck, Parameter, ComparisonResult]]:
         self.__lineNumber = [0, 0]
         self.__columnNumber = [0, 0]
         self.__words = [[], []]
-        self.__startTag = [startTag, startTag]
+        self.__startTag = [start_tag, start_tag]
 
         min_ref_value = sys.float_info.max
         max_ref_value = -1.0 * min_ref_value
@@ -68,8 +71,8 @@ class NumberTextComparer:
 
         try:
             filename = file_check.name
-            with open(os.path.join(leftpath, filename), "r") as leftFile:
-                with open(os.path.join(rightpath, filename), "r") as rightFile:
+            with open(os.path.join(left_path, filename), "r") as leftFile:
+                with open(os.path.join(right_path, filename), "r") as rightFile:
                     while True:
                         skip_lines = file_check.skip_lines
                         leftData = self.__parseText__(
@@ -81,15 +84,15 @@ class NumberTextComparer:
 
                         if leftData is None and rightData is None:
                             # Finished comparing the files
-                            logging.debug(
+                            logger.debug(
                                 "Absolute Tolerance: "
                                 + str(parameter.tolerance_absolute)
                             )
-                            logging.debug(
+                            logger.debug(
                                 "Relative Tolerance: "
                                 + str(parameter.tolerance_relative)
                             )
-                            logging.debug("Compared %d floats", nCompared)
+                            logger.debug(f"Compared {nCompared} floats")
                             break
                         elif leftData is None and rightData is not None:
                             raise TestCaseFailure(
@@ -161,7 +164,7 @@ class NumberTextComparer:
                 )
 
         except Exception as e:
-            logging.exception(e)
+            logger.error(e)
             result.error = True
         finally:
             result.isToleranceExceeded(

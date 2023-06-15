@@ -1,12 +1,13 @@
 import os
 import sys
 from os.path import abspath, dirname, join
+from test.Utils.test_logger import TestLogger
 
 import pytest
 
-from settings import TestRunSettings
 from src.config.credentials import Credentials
 from src.config.parameter import Parameter
+from src.suite.test_bench_settings import TestBenchSettings
 from src.utils.comparers.d_series_comparer import DSeriesComparer
 from src.utils.comparers.tree_comparer import TreeComparer
 from src.utils.xml_config_parser import XmlConfigParser
@@ -56,8 +57,10 @@ class TestTreeComparer:
 
         table2branch = {"block_start": [3], "block_end": [4]}
 
+        logger = TestLogger()
+
         resultlist = TreeComparer.compareTableWithMissingColumn(
-            self, resultlist, table1, table2, table1branch, table2branch
+            self, resultlist, table1, table2, table1branch, table2branch, logger
         )
         assert resultlist[0].path[0] == "Column2"
         assert resultlist[0].maxAbsDiffCoordinates == (3, 4)
@@ -65,7 +68,7 @@ class TestTreeComparer:
 
         # Column was added to the table
         resultlist = TreeComparer.compareTableWithMissingColumn(
-            self, resultlist, table2, table1, table2branch, table1branch
+            self, resultlist, table2, table1, table2branch, table1branch, logger
         )
         assert resultlist[0].path[0] == "Column2"
         assert resultlist[0].maxAbsDiffCoordinates == (3, 4)
@@ -175,7 +178,7 @@ class TestTreeComparer:
         c.name = "commandline"
         # Parse the xml file.
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test.xml"), "", c
         )
@@ -186,8 +189,16 @@ class TestTreeComparer:
         pathstr = ">DUMPFILE"
 
         # Run the function
+        logger = TestLogger()
         results = TreeComparer.compareTreePaths(
-            self.comp, self.testbranch, self.refbranch, parameter, pathstr, [], []
+            self.comp,
+            self.testbranch,
+            self.refbranch,
+            parameter,
+            pathstr,
+            [],
+            [],
+            logger,
         )
         # Set default value to True
         output = True
@@ -214,7 +225,7 @@ class TestTreeComparer:
         c.name = "commandline"
         # Parse the xml file.
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test.xml"), "", c
         )
@@ -227,6 +238,7 @@ class TestTreeComparer:
 
         # Run with 'with' so that exceptions are catch in the process
         with pytest.raises(Exception) as context:
+            logger = TestLogger()
             TreeComparer.compareTreePaths(
                 self.comp,
                 section_missing_branch,
@@ -235,6 +247,7 @@ class TestTreeComparer:
                 pathstr,
                 [],
                 [],
+                logger,
             )
 
         # Check if the correct exception is raised
@@ -247,7 +260,7 @@ class TestTreeComparer:
         c.name = "commandline"
         # Parse the xml file.
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test.xml"), "", c
         )
@@ -255,8 +268,9 @@ class TestTreeComparer:
         file_check = file[0].checks[0]
 
         # Run the function to be tested
+        logger = TestLogger()
         paramResults = TreeComparer.compare(
-            self.comp, self.lp, self.rp, file_check, testcase_name
+            self.comp, self.lp, self.rp, file_check, testcase_name, logger
         )
 
         # Check if the correct outputs are produced
@@ -274,7 +288,7 @@ class TestTreeComparer:
 
         # Parse the xml file.
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test_wrong_name.xml"), "", c
         )
@@ -287,7 +301,10 @@ class TestTreeComparer:
 
         # Run function with 'with' so that exceptions are raised
         with pytest.raises(Exception) as context:
-            TreeComparer.compare(self.comp, self.lp, self.rp, file_check, testcase_name)
+            logger = TestLogger()
+            TreeComparer.compare(
+                self.comp, self.lp, self.rp, file_check, testcase_name, logger
+            )
 
         # Check if the correct exceptions are raised
         if self.python_version < 3:
@@ -314,7 +331,7 @@ class TestTreeComparer:
         c.name = "commandline"
         # Parse the xml file.
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test_wrong_name.xml"), "", c
         )
@@ -323,7 +340,10 @@ class TestTreeComparer:
 
         # Run function with 'with' so that exceptions are raised
         with pytest.raises(Exception) as context:
-            TreeComparer.compare(self.comp, self.lp, self.rp, file_check, testcase_name)
+            logger = TestLogger()
+            TreeComparer.compare(
+                self.comp, self.lp, self.rp, file_check, testcase_name, logger
+            )
 
         # Check if the correct exception is raised
         if self.python_version < 3:
@@ -345,7 +365,7 @@ class TestTreeComparer:
         c.name = "commandline"
         # Parse the xml file.
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test_NOK_values.xml"), "", c
         )
@@ -353,8 +373,9 @@ class TestTreeComparer:
         file_check = file[0].checks[0]
 
         # Run the function
+        logger = TestLogger()
         paramResults = TreeComparer.compare(
-            self.comp, self.lp, self.rp, file_check, testcase_name
+            self.comp, self.lp, self.rp, file_check, testcase_name, logger
         )
 
         # Check if the desired results were produced
@@ -368,7 +389,7 @@ class TestTreeComparer:
         c.name = "commandline"
         # Parse the xml file.
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test.xml"), "", c
         )
@@ -387,7 +408,7 @@ class TestTreeComparer:
         c.name = "commandline"
         # Parse the xml file.
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test_Ignored.xml"), "", c
         )
@@ -410,7 +431,7 @@ class TestTreeComparer:
         c.name = "commandline"
         # Parse the xml file.
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test_compare_this_node.xml"), "", c
         )
@@ -421,6 +442,7 @@ class TestTreeComparer:
         pathstr = ">DUMPFILE>INPUT DATA>SOIL COLLECTION>SOIL"
 
         # Running the function to be tested
+        logger = TestLogger()
         resultslist = TreeComparer.compareThisNode(
             self.comp,
             self.testbranch["INPUT DATA"][0]["SOIL COLLECTION"][0]["SOIL"][0],
@@ -429,6 +451,7 @@ class TestTreeComparer:
             parameter,
             [],
             [],
+            logger,
         )
 
         # the keys to be checked
@@ -468,7 +491,7 @@ class TestTreeComparer:
         c.name = "commandline"
         # Parse the xml file.
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test_compare_this_node.xml"), "", c
         )
@@ -487,8 +510,9 @@ class TestTreeComparer:
         ][0]["TABLE"][0]
 
         # Function to be tested
+        logger = TestLogger()
         resultslist = TreeComparer.compareThisNode(
-            self.comp, testbranch, refbranch, pathstr, parameter, [], []
+            self.comp, testbranch, refbranch, pathstr, parameter, [], [], logger
         )
 
         # Check if the paths produced from the functions are correct
@@ -527,7 +551,7 @@ class TestTreeComparer:
         c.name = "commandline"
         # Parse the xml file.
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test_compare_this_node_1.xml"), "", c
         )
@@ -536,8 +560,9 @@ class TestTreeComparer:
 
         # Check if the correct exception is raised
         with pytest.raises(Exception) as context:
+            logger = TestLogger()
             TreeComparer.compareThisNode(
-                self.comp, testbranch, refbranch, pathstr, parameter, [], []
+                self.comp, testbranch, refbranch, pathstr, parameter, [], [], logger
             )
         assert (
             "Could not compare values in path\n >DUMPFILE>INPUT DATA>SOIL COLLECTION>SOIL."
@@ -680,7 +705,7 @@ class TestTreeComparer:
         c.name = "commandline"
         # Parse the xml file.
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test_compare_this_node.xml"), "", c
         )
@@ -724,8 +749,9 @@ class TestTreeComparer:
         ]
 
         # function to be tested
+        logger = TestLogger()
         results = TreeComparer.compareDictionary(
-            self.comp, testdictionary, refdictionary, pathstr, parameter
+            self.comp, testdictionary, refdictionary, pathstr, parameter, logger
         )
         lists = [pathstr + ">" + thing1 for thing1 in lists]
         # Are all the paths existing in the dictionary?
@@ -743,7 +769,7 @@ class TestTreeComparer:
         c.name = "commandline"
         # Parse the xml file.
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test_compare_this_node.xml"), "", c
         )
@@ -754,8 +780,9 @@ class TestTreeComparer:
         testdictionary["block_start"][0] = 12
         refdictionary = self.refbranch["INPUT DATA"][0]
         self.refbranch["INPUT DATA"][0]["block_end"] = [2000]
+        logger = TestLogger()
         results = TreeComparer.compareDictionary(
-            self.comp, testdictionary, refdictionary, pathstr, parameter
+            self.comp, testdictionary, refdictionary, pathstr, parameter, logger
         )
         if self.python_version < 3:
             assert results[15].result == "NOK"
@@ -770,7 +797,7 @@ class TestTreeComparer:
         c.name = "commandline"
         # Parse the xml file.
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test_compare_this_node.xml"), "", c
         )
@@ -789,8 +816,9 @@ class TestTreeComparer:
         # Defined input to the tables
         pathstr = ">DUMPFILE>INPUT DATA>CPT LIST>NUMBER OF CPTS>MEASURED DATA>TABLE"
 
+        logger = TestLogger()
         results = TreeComparer.compareDataTables(
-            self.comp, reftable, testtable, pathstr, parameter
+            self.comp, reftable, testtable, pathstr, parameter, logger
         )
         # Check if the value OK is outputted which means that they are equal
         output = True
@@ -807,7 +835,7 @@ class TestTreeComparer:
         c.name = "commandline"
         # Parse the xml file.
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test_compare_this_node.xml"), "", c
         )
@@ -826,8 +854,9 @@ class TestTreeComparer:
         # Defined input to the tables
         pathstr = ">DUMPFILE>INPUT DATA>CPT LIST>NUMBER OF CPTS>MEASURED DATA>TABLE"
 
+        logger = TestLogger()
         results = TreeComparer.compareDataTables(
-            self.comp, reftable, testtable, pathstr, parameter
+            self.comp, reftable, testtable, pathstr, parameter, logger
         )
         # Check if the value NOK is outputted which means that they are equal
         output = True
@@ -844,7 +873,7 @@ class TestTreeComparer:
         c.name = "commandline"
         # Parse the xml file.
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test_compare_this_node.xml"), "", c
         )
@@ -867,8 +896,9 @@ class TestTreeComparer:
         # Setting a very high tolerance
         parameter.set_tolerance(100)
         # Test the function
+        logger = TestLogger()
         results = TreeComparer.compareDataTables(
-            self.comp, reftable, testtable, pathstr, parameter
+            self.comp, reftable, testtable, pathstr, parameter, logger
         )
         # Check if the value OK is outputted which means that they are equal
         output = True

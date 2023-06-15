@@ -4,16 +4,20 @@
 
 
 import copy
-import logging
 import os
 import re
 import sys
+from abc import ABC
+from typing import List, Tuple
 
 import numpy as np
 
 import src.utils.plot_differences as plot
 from src.config.file_check import FileCheck
+from src.config.parameter import Parameter
 from src.utils.comparers.comparison_result import ComparisonResult
+from src.utils.comparers.i_comparer import IComparer
+from src.utils.logging.i_logger import ILogger
 
 
 def branch(xmltree):
@@ -37,14 +41,21 @@ def branch(xmltree):
     return newbranch
 
 
-class TimeseriesSetComparer:
+class TimeseriesSetComparer(IComparer, ABC):
     """
     Compare two Timeseries files, according to the configuration in file_check.
     input: left path (reference), right path (compare), file_check
     output: list of (file_check, parameter, file_check, ResultComparison) tuples
     """
 
-    def compare(self, left_path, right_path, file_check: FileCheck, testcase_name):
+    def compare(
+        self,
+        left_path: str,
+        right_path: str,
+        file_check: FileCheck,
+        testcase_name: str,
+        logger: ILogger,
+    ) -> List[Tuple[str, FileCheck, Parameter, ComparisonResult]]:
         results = []
         local_error = False
 
@@ -73,7 +84,7 @@ class TimeseriesSetComparer:
                         try:
                             paramnew = copy.deepcopy(parameter)
                             paramnew.name = variable_name
-                            logging.debug("Checking parameter: " + str(variable_name))
+                            logger.debug("Checking parameter: " + str(variable_name))
                             matchnumber = matchnumber + 1
 
                             parameter_location = paramnew.location
@@ -138,15 +149,9 @@ class TimeseriesSetComparer:
                                     plot_cmp_val = right_timeseries["values"][:]
 
                         except RuntimeError as e:
-                            logging.exception(e)
+                            logger.error(e)
                             local_error = True
                             result.error = True
-
-                        #                except Exception as e:
-                        #                    logging.error("Could not find parameter: " + str(paramnew.getName()) + ", in file: " + filename)
-                        #                    logging.exception(e)
-                        #                    local_error = True
-                        #                    result.error = True
 
                         result.maxAbsDiff = abs(
                             result.maxAbsDiff

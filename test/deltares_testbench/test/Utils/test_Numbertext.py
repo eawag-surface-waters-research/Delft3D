@@ -4,6 +4,7 @@
 
 
 import os
+from test.Utils.test_logger import TestLogger
 
 import pytest
 
@@ -32,7 +33,8 @@ class TestNumberTextComparer:
         pm.tolerance_relative = 0.01
         fc.name = "Unit_test.fod"
         fc.type = FileType.NUMBERTEXT
-        results = NumberTextComparer().compare(self.lp, self.rp, fc, "test")
+        logger = TestLogger()
+        results = NumberTextComparer().compare(self.lp, self.rp, fc, "test", logger)
         result_structure = results[0][3]
 
         # perform a set of asserts on the result structure
@@ -50,7 +52,8 @@ class TestNumberTextComparer:
         pm.tolerance_relative = 0.01
         fc.name = "ComplexProjects01.txt"
         fc.type = FileType.NUMBERTEXT
-        results = NumberTextComparer().compare(self.lp, self.rp, fc, "test")
+        logger = TestLogger()
+        results = NumberTextComparer().compare(self.lp, self.rp, fc, "test", logger)
         result_structure = results[0][3]
 
         # perform a set of asserts on the result structure
@@ -68,7 +71,8 @@ class TestNumberTextComparer:
         pm.tolerance_relative = 0.01
         fc.name = "Tutorial-1c.log"
         fc.type = FileType.NUMBERTEXT
-        results = NumberTextComparer().compare(self.lp, self.rp, fc, "test")
+        logger = TestLogger()
+        results = NumberTextComparer().compare(self.lp, self.rp, fc, "test", logger)
         result_structure = results[0][3]
 
         # perform a set of asserts on the result structure
