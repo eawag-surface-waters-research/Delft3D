@@ -3,73 +3,42 @@ Description: Common static functions
 -----------------------------------------------------
 Copyright (C)  Stichting Deltares, 2013
 """
-
-import logging
-import logging.handlers as handlers
 import os
 import platform
 import string
 import subprocess
 import tempfile
-from os import path as p
+from typing import Dict, List, Tuple
 
 from src.config.credentials import Credentials
+from src.utils.dict_table import DictTable
+from src.utils.logging.i_logger import ILogger
+from src.utils.logging.log_level import LogLevel
 from src.utils.paths import Paths
 
 if platform.system() == "Windows":
     try:
         from ctypes import windll
     except:
-        logging.warning("Unable to import windll")
-
-# initialize the root logger and set default logging level
-root_logger = logging.getLogger("")
-root_logger.setLevel(logging.DEBUG)
-
-
-# Formatter around the default logging.Formatter,
-# especially for TeamCity messages
-# It mainly uses the default logging.Formatter,
-# and additional performs a stripEscapeCharacters call on the msg string and all string arguments
-class LogFormatter(logging.Formatter):
-    __defaultFormatter = None  # Referencing the default logging.Formatter
-
-    def __init__(self, formatString):
-        # Call the default logging.Formatter constructor and store the instance in self.__defaultFormatter
-        self.__defaultFormatter = logging.Formatter(formatString)
-
-    def format(self, record):
-        # Replace msg by stripEscapeCharacters(msg)
-        record.msg = stripEscapeCharacters(record.msg).strip()
-        # args is a tuple and can not be changed element by element
-        # So, create a list, newArgs, containing all elements of args,
-        # where all string elements are modified by stripEscapeCharacters
-        # The replace args by the list newArgs, converted to tuple
-        newArgs = []
-        for i in range(0, len(record.args)):
-            if isinstance(record.args[i], str):
-                newArgs.append(stripEscapeCharacters(record.args[i]))
-            else:
-                newArgs.append(record.args[i])
-        record.args = tuple(newArgs)
-        # Finally, call the defaultFormatter.format with the changed record
-        return self.__defaultFormatter.format(record)
+        print("Unable to import windll")
 
 
 # add search path to environment
 # input: environment to add search path to, path
-def addSearchPath(environment, sp):
+def add_search_path(environment, sp, logger: ILogger):
     # Return immediately when ".svn" is in the path
     if str(sp).find(".svn") != -1:
         return
-    spth = Paths().rebuildToLocalPath(sp)
+    search_path = Paths().rebuildToLocalPath(sp)
     if platform.system() == "Windows":
-        logging.debug("Adding windows search path %s", spth)
-        environment["PATH"] = spth + ";" + environment["PATH"]
+        logger.debug(f"Adding windows search path {search_path}")
+        environment["PATH"] = search_path + ";" + environment["PATH"]
     else:
-        logging.debug("Adding linux search path %s", spth)
-        environment["LD_LIBRARY_PATH"] = spth + ":" + environment["LD_LIBRARY_PATH"]
-        environment["PATH"] = spth + ":" + environment["PATH"]
+        logger.debug(f"Adding linux search path {search_path}")
+        environment["LD_LIBRARY_PATH"] = (
+            search_path + ":" + environment["LD_LIBRARY_PATH"]
+        )
+        environment["PATH"] = search_path + ":" + environment["PATH"]
 
 
 # strip all characters from a string that need to be escaped for TeamCity
@@ -82,7 +51,7 @@ def stripEscapeCharacters(cstr):
         .replace("\n", "")
         .replace("'", "")
         .replace('"', "")
-        .replace("|", "")
+        .replace("|", "||")
         .replace("[", "")
         .replace("]", "")
     )
@@ -109,105 +78,61 @@ def stripPassword(cstr):
     return vstr
 
 
-# parse log level string to enum
-def getLogLevel(level):
+def get_default_logging_folder_path() -> str:
+    current_folder = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "..", ".."
+    )
+
+    return os.path.join(current_folder, "logs")
+
+
+def get_log_level(level):
+    """parse log level string to enum"""
     if not level or str(level) == "":
-        return logging.DEBUG
+        return LogLevel.DEBUG
     if "info" in str(level).lower():
-        return logging.INFO
+        return LogLevel.INFO
     if "warn" in str(level).lower():
-        return logging.WARNING
+        return LogLevel.WARNING
     if "err" in str(level).lower():
-        return logging.ERROR
-    return logging.DEBUG
+        return LogLevel.ERROR
+    return LogLevel.DEBUG
 
 
-# create a system logger (log to file)
-def setLogFileHandler():
-    testbench_folder = p.join(p.dirname(p.realpath(__file__)), "..", "..")
-    log_folder = p.join(testbench_folder, "logs")
-
-    if not p.exists(log_folder):
-        os.mkdir(log_folder)
-
-    handler = handlers.RotatingFileHandler(
-        p.join(log_folder, "testbench.log"), backupCount=10
-    )
-    handler.doRollover()
-    handler.setLevel(logging.DEBUG)
-    formatter = LogFormatter(
-        "%(asctime)s [%(levelname)-7s] %(module)s.%(funcName)s : %(message)s"
-    )
-    handler.setFormatter(formatter)
-    root_logger.addHandler(handler)
-
-
-# set default logging output to TeamCity logging
-def setTcLogHandler(level):
-    handlers = root_logger.handlers
-    for handler in handlers:
-        root_logger.removeHandler(handler)
-    ch = logging.StreamHandler()
-    ch.setLevel(level)
-    formatter = LogFormatter(
-        "##teamcity[message text='%(levelname)s - %(module)s.%(funcName)s : %(message)s']"
-    )
-    ch.setFormatter(formatter)
-    root_logger.addHandler(ch)
-    root_logger.isEnabledFor(level)
-    setLogFileHandler()
-
-
-# set default logging output to raw message logging
-def setRawLogHandler(level):
-    handlers = root_logger.handlers
-    for handler in handlers:
-        root_logger.removeHandler(handler)
-    ch = logging.StreamHandler()
-    ch.setLevel(level)
-    formatter = LogFormatter(
-        "%(asctime)s [%(levelname)-7s] %(module)s.%(funcName)s : %(message)s"
-    )
-    ch.setFormatter(formatter)
-    root_logger.addHandler(ch)
-    setLogFileHandler()
-
-
-# attach a logger that appends output to a log file, specified by path
-def attachFileLogger(name, path, level=logging.DEBUG, propagate=False):
-    instance_logger = logging.getLogger(name)
-    instance_logger.propagate = propagate
-    file_handler = logging.FileHandler(path)
-    file_handler.setLevel(level)
-    formatter = LogFormatter("%(message)s")
-    file_handler.setFormatter(formatter)
-    instance_logger.addHandler(file_handler)
-
-
-# detach a file logger that has been attached
-def detachFileLogger(name):
-    for handler in logging.getLogger(name).handlers:
-        logging.getLogger(name).removeHandler(handler)
-
-
-# mount a network drive in linux or windows
+#
 # input: server name, folder name, optional credentials
 # output: mount point, boolean specifying if we created it or if it already exists
-def mountNetworkDrive(server, folder, credentials: Credentials):
+def mount_network_drive(
+    server: str, folder: str, credentials: Credentials, logger: ILogger
+) -> Tuple[str, bool]:
+    """mount a network drive in linux or windows
+
+    Args:
+        server (str): server name
+        folder (str): folder name
+        credentials (Credentials): credentials to use
+        logger (ILogger): logger to use
+
+    Raises:
+        OSError: if no drive letters available
+
+    Returns:
+        Tuple[str, bool]: mount point, mounted (true/false)
+    """
     if platform.system() == "Windows":
-        pmp = checkIfAlreadyMounted(server, folder)
+        pmp = check_if_already_mounted(server, folder, logger)
         if pmp != "":
             return pmp, False
         dl = getAvailableWindowsDriveLetter()
         if not dl:
             raise OSError("no drive letters available")
-        mountpoint = dl + ":"
-        cmd = "net use " + mountpoint + " \\\\" + server + "\\" + folder
+        mount_point = dl + ":"
+        cmd = "net use " + mount_point + " \\\\" + server + "\\" + folder
         if credentials:
             cmd = cmd + " /user:" + credentials.username + " " + credentials.password
     else:
-        mountpoint = tempfile.mkdtemp()
-        cmd = "mount -t smbfs //" + server + "/" + folder + " " + mountpoint
+        mount_point = tempfile.mkdtemp()
+        cmd = "mount -t smbfs //" + server + "/" + folder + " " + mount_point
         if credentials:
             cmd = (
                 cmd
@@ -217,15 +142,19 @@ def mountNetworkDrive(server, folder, credentials: Credentials):
                 + credentials.password
             )
     subprocess.check_call(cmd, shell=True)
-    return mountpoint, True
+    return mount_point, True
 
 
-# unmount a network drive in linux or windows
-def unmountNetworkDrive(mountpoint):
+def unmount_network_drive(mount_point: str):
+    """unmount a network drive in linux or windows
+
+    Args:
+        mount_point (str): mountpoint to unmount
+    """
     if platform.system() == "Windows":
-        cmd = "net use " + mountpoint + " /DELETE /YES"
+        cmd = "net use " + mount_point + " /DELETE /YES"
     else:
-        cmd = "umount -l " + mountpoint
+        cmd = "umount -l " + mount_point
     subprocess.check_call(cmd, shell=True)
 
 
@@ -245,7 +174,7 @@ def getAvailableWindowsDriveLetter():
 
 
 # check if a drive with folder is already mounted
-def checkIfAlreadyMounted(server, folder):
+def check_if_already_mounted(server, folder, logger: ILogger):
     if platform.system() == "Windows":
         process = subprocess.Popen(["net", "use"], stdout=subprocess.PIPE)
         while True:
@@ -256,9 +185,150 @@ def checkIfAlreadyMounted(server, folder):
                 return line[line.find(":") - 1 : line.find(":") + 1]
         (_, stderr) = process.communicate()
         if stderr:
-            logging.error(stderr)
+            logger.error(stderr)
         process.stdout.close()
     return ""
+
+
+def log_header(
+    header: str,
+    logger: ILogger,
+    log_level: LogLevel = LogLevel.INFO,
+    width: int = 150,
+    char: str = "=",
+):
+    """Logs a header like:
+    ==============
+    header
+    ==============
+
+    Args:
+        header (str): header to log
+        logger (ILogger): logger to use
+        log_level (LogLevel, optional): level to log for. Defaults to LogLevel.INFO.
+        width (int, optional): width of the header. Defaults to 150.
+        char (str, optional): char to use for begin/end of header. Defaults to "=".
+    """
+    log_separator(logger, log_level, width, char)
+    logger.log(header, log_level)
+    log_separator(logger, log_level, width, char)
+
+
+def log_sub_header(
+    header: str,
+    logger: ILogger,
+    log_level: LogLevel = LogLevel.INFO,
+    width: int = 150,
+    char: str = "-",
+):
+    """Logs a sub header like
+    -- header ---------
+
+    Args:
+        header (str): header to log
+        logger (ILogger): logger to use
+        log_level (LogLevel, optional): level to log for. Defaults to LogLevel.INFO.
+        width (int, optional): width of the header. Defaults to 150.
+        char (str, optional): char to use for the header. Defaults to "=".
+    """
+    log_separator_with_name(header, logger, log_level, width, char)
+
+
+def log_separator(
+    logger: ILogger,
+    log_level: LogLevel = LogLevel.INFO,
+    width: int = 150,
+    char: str = "=",
+    with_new_line: bool = False,
+):
+    """Logs a separator like
+    ===============
+
+    Args:
+        logger (ILogger): logger to use
+        log_level (LogLevel, optional): level to log for. Defaults to LogLevel.INFO.
+        width (int, optional): width of the separator. Defaults to 150.
+        char (str, optional): char to use for separator. Defaults to "-".
+    """
+    logger.log((char * width), log_level)
+    if with_new_line:
+        logger.log("", log_level)
+
+
+def log_separator_with_name(
+    name: str,
+    logger: ILogger,
+    log_level: LogLevel = LogLevel.INFO,
+    width: int = 150,
+    char: str = "=",
+):
+    """Logs a separator with a name like
+    == name ========
+
+    Args:
+        name (str): name to log
+        logger (ILogger): logger to use
+        log_level (LogLevel, optional): level to log for. Defaults to LogLevel.INFO.
+        width (int, optional): width of the separator. Defaults to 150.
+        char (str, optional): char to use for separator. Defaults to "=".
+    """
+    name_to_print = f" {name} "
+    name_length = len(name_to_print)
+
+    text = (char * 2) + name_to_print + (char * (width - name_length - 2))
+
+    logger.log(text, log_level)
+
+
+def log_table(
+    table: Dict[str, List[str]],
+    logger: ILogger,
+    log_level: LogLevel = LogLevel.INFO,
+    char: str = "-",
+):
+    """Logs a dictionary as a table like:
+    -------------------------------
+    |header 1|header 2   |header 3|
+    -------------------------------
+    |       2|test string|     3.9|
+    |       5|test 2     |     2.6|
+    -------------------------------
+    Args:
+        table (Dict[str, List[str]]): table (keys as headers)
+        logger (ILogger): logger to use
+        log_level (LogLevel, optional): level to log for. Defaults to LogLevel.INFO.
+        char (str, optional): char to use for header. Defaults to "-".
+    """
+    dict_table = DictTable(table)
+
+    max_lengths = [dict_table.max_column_width(k) for k in table.keys()]
+    total_length = sum(max_lengths) + len(dict_table.headers) + 1
+    number_of_rows = dict_table.number_of_rows()
+
+    header_str = __create_table_row(list(table.keys()), max_lengths)
+    log_header(header_str, logger, log_level, total_length, char)
+
+    for row_index in range(0, number_of_rows):
+        row = dict_table.row_values(row_index)
+        row_str = __create_table_row(
+            row,
+            max_lengths,
+        )
+        logger.log(row_str, log_level)
+
+    log_separator(logger, log_level, total_length, char)
+
+
+def __create_table_row(row: List, max_lengths: List[int]) -> str:
+    row_str = ""
+    for column_index, row_value in enumerate(row):
+        if isinstance(row_value, float):
+            value_to_print = f"{row_value:.3e}"
+        else:
+            value_to_print = row_value
+        row_str += f"|{value_to_print:{max_lengths[column_index]}}"
+
+    return f"{row_str}|"
 
 
 # meta class for singleton type

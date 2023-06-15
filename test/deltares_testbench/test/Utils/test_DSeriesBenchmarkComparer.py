@@ -2,11 +2,12 @@ import os
 import shutil
 import sys
 from os.path import abspath, dirname, isfile, join
+from test.Utils.test_logger import TestLogger
 
 import pytest
 
-from settings import TestRunSettings
 from src.config.credentials import Credentials
+from src.suite.test_bench_settings import TestBenchSettings
 from src.utils.comparers.d_series_benchmark_comparer import DSeriesBenchmarkComparer
 from src.utils.xml_config_parser import XmlConfigParser
 
@@ -32,14 +33,14 @@ class TestDSeriesBenchmarkComparer:
         # Parse the xml file.
         # This is done to point to a specific file
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test.xml"), "", c
         )
         file = settings.configs
 
         # The first file that is going to be checked passed as attribute
-        self.file_check = file[0]._TestCaseConfig__checks[0]
+        self.file_check = file[0].checks[0]
         pass
 
     def test_compare_No_csv_file(self):
@@ -80,9 +81,10 @@ class TestDSeriesBenchmarkComparer:
             join(self.testdata, "Unit_test.csv"), join(self.rp, "Unit_test.csv")
         )
 
+        logger = TestLogger()
         # Run the function to be tested
         param_results = DSeriesBenchmarkComparer.compare(
-            self.comp, self.lp, self.rp, self.file_check, testcase_name
+            self.comp, self.lp, self.rp, self.file_check, testcase_name, logger
         )
 
         # Delete the files so that they don't interfere with the
@@ -495,7 +497,7 @@ class TestDSeriesBenchmarkComparer:
         c.name = "commandline"
         # Parse the xml file.
         xmlcp = XmlConfigParser()
-        settings = TestRunSettings()
+        settings = TestBenchSettings()
         settings.local_paths, settings.programs, settings.configs = xmlcp.load(
             join(self.testdata, "Unit_test_empty_file.xml"), "", c
         )
@@ -516,10 +518,12 @@ class TestDSeriesBenchmarkComparer:
             join(self.rp, "Unit_test_empty.csv"),
         )
 
+        logger = TestLogger()
+
         # Run the file for catching the exceptions
         with pytest.raises(Exception) as context:
             DSeriesBenchmarkComparer.compare(
-                self.comp, self.lp, self.rp, file_check, testcase_name
+                self.comp, self.lp, self.rp, file_check, testcase_name, logger
             )
 
         # Check if the correct exception is raised

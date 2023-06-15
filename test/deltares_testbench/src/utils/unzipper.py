@@ -5,9 +5,10 @@ Copyright (C)  Stichting Deltares, 2013
 """
 
 import fnmatch
-import logging
 import os
 import zipfile
+
+from src.utils.logging.i_logger import ILogger
 
 
 class Unzipper(object):
@@ -28,7 +29,7 @@ class Unzipper(object):
         z.extractall(os.path.dirname(zip_file_path))
         fh.close()
 
-    def recursive(self, path: str):
+    def recursive(self, path: str, logger: ILogger):
         """unzip all zip files in directory (recursive)
 
         Args:
@@ -39,5 +40,5 @@ class Unzipper(object):
             for f in fnmatch.filter(filenames, "*.zip"):
                 matches.append(os.path.abspath(os.path.join(dirpath, f)))
         for m in matches:
-            logging.debug("unzipping %s", m)
+            logger.debug(f"unzipping {m}")
             self.__unzip__(m)

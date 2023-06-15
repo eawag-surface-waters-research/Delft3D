@@ -4,28 +4,28 @@ Description: Executes SVN commands
 Copyright (C)  Stichting Deltares, 2013
 """
 
-import logging
-
 from src.config.credentials import Credentials
 from src.config.program_config import ProgramConfig
-from src.suite.program import Programs
+from src.suite.program import Program
 from src.utils.handlers.i_handler import IHandler
+from src.utils.logging.i_logger import ILogger
 
 
 # SVN wrapper, has handler interface
 class SvnHandler(IHandler):
-    def __init__(self, autocommit=False):
+    def __init__(self, svn_program: Program, autocommit=False):
         self.autocommit = autocommit
+        self.svn_program = svn_program
 
     def prepare_upload(
-        self, from_path: str, to_path: str, credentials: Credentials
+        self, from_path: str, to_path: str, credentials: Credentials, logger: ILogger
     ) -> None:
-        logging.debug("Preparing svn upload from %s to %s", from_path, to_path)
+        logger.debug(f"Preparing svn upload from {from_path} to {to_path}")
 
         # Prepare svn and its configuration.
         pcnf = ProgramConfig()
         pcnf.working_directory = from_path
-        prg = Programs().get("svn")
+        prg = self.svn_program
 
         # Use the mkdir command to make sure that the reference directory exists.
         arguments = self.__buildInitialArguments__(["mkdir", "--parents"], credentials)
@@ -35,51 +35,58 @@ class SvnHandler(IHandler):
         pcnf.ignore_return_value = True  # In case the folder already exists in SVN, a reference run has already been executed. Suppress warnings and error return value.
         pcnf.ignore_standard_error = True
         prg.overwriteConfiguration(pcnf)
-        prg.run()
+        prg.run(logger)
 
-        self.download(to_path, from_path, credentials, "HEAD")
+        self.download(to_path, from_path, credentials, "HEAD", logger)
 
     # upload to svn
     # input: local path, svn path, credentials
-    def upload(self, from_path: str, to_path: str, credentials: Credentials) -> None:
-        logging.debug("Uploading from  %s to %s", from_path, to_path)
+    def upload(
+        self, from_path: str, to_path: str, credentials: Credentials, logger: ILogger
+    ) -> None:
+        logger.debug(f"Uploading from  {from_path} to {to_path}")
 
         # Prepare svn and its configuration.
         pcnf = ProgramConfig()
         pcnf.working_directory = from_path
-        prg = Programs().get("svn")
+        prg = self.svn_program
 
         # Add the new files
-        logging.debug("Adding files...")
+        logger.debug("Adding files...")
         arguments = self.__buildInitialArguments__(["add", "--force"], credentials)
         arguments.extend(["."])
         pcnf.arguments = arguments
         prg.overwriteConfiguration(pcnf)
-        prg.run()
+        prg.run(logger)
 
         if self.autocommit:
-            logging.debug("Auto-committing changes...")
+            logger.debug("Auto-committing changes...")
             arguments = self.__buildInitialArguments__(["commit"], credentials)
             arguments.extend(["."])
             arguments.extend(['-m"Automated_commit_from_TestBench"'])
             pcnf.arguments = arguments
             prg.overwriteConfiguration(pcnf)
-            prg.run()
+            prg.run(logger)
         else:
-            logging.info("Autocommit not selected; user needs to commit manually.")
+            logger.info("Autocommit not selected; user needs to commit manually.")
 
     # download from svn
     # input: svn path, local path, credentials, version
     def download(
-        self, from_path: str, to_path: str, credentials: Credentials, version: str
+        self,
+        from_path: str,
+        to_path: str,
+        credentials: Credentials,
+        version: str,
+        logger: ILogger,
     ):
-        logging.debug("downloading from svn: %s", from_path)
-        logging.debug("-                 to: %s", to_path)
+        logger.debug(f"downloading from svn: {from_path}")
+        logger.debug(f"-                 to: {to_path}")
         arguments = None
         revision = "-r HEAD"
         if version and version != "":
             revision = "-r " + version
-            logging.debug(f"-                 revison: {version}")
+            logger.debug(f"-                 revison: {version}")
 
         svn_io = "export"
         if self.autocommit:
@@ -90,12 +97,12 @@ class SvnHandler(IHandler):
             [svn_io, "--force", revision], credentials
         )
         arguments.extend([from_path, "."])
-        prg = Programs().get("svn")
+        prg = self.svn_program
         pcnf = ProgramConfig()
         pcnf.working_directory = to_path
         pcnf.arguments = arguments
         prg.overwriteConfiguration(pcnf)
-        prg.run()
+        prg.run(logger)
         if prg.getError():
             raise RuntimeError("Errors during svn download: " + str(prg.getError()))
 
