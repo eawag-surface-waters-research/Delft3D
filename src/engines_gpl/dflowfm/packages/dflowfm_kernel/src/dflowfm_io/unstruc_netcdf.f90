@@ -3512,7 +3512,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
 
     ! Fluff layers
     if (stmpar%morpar%flufflyr%iflufflyr>0 .and. stmpar%lsedsus>0) then
-       ierr = nf90_def_var(irstfile, 'mfluff' , nf90_double, (/ id_flowelemdim , id_sedsusdim, id_timedim /) , id_mfluff)
+       ierr = nf90_def_var(irstfile, 'mfluff' , nf90_double, (/id_sedsusdim, id_flowelemdim, id_timedim /) , id_mfluff)
        ierr = nf90_put_att(irstfile, id_mfluff ,  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
        ierr = nf90_put_att(irstfile, id_mfluff ,  'long_name'    , 'Sediment mass in fluff layer')
        ierr = nf90_put_att(irstfile, id_mfluff ,  'units'        , 'kg m-2 ')
@@ -4403,7 +4403,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     !mfluff
     if (stmpar%morpar%flufflyr%iflufflyr>0 .and. stmpar%lsedsus>0) then
          do l = 1, stmpar%lsedsus
-            ierr = nf90_put_var(irstfile, id_mfluff, stmpar%morpar%flufflyr%mfluff(l,1:ndxi), (/ 1, l, itim /), (/ ndxi, 1, 1 /))
+            ierr = nf90_put_var(irstfile, id_mfluff, stmpar%morpar%flufflyr%mfluff(l,1:ndxi), (/ l, 1, itim /), (/ 1, ndxi, 1 /))
          end do   
     end if 
 
