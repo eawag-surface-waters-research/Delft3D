@@ -5,7 +5,6 @@ Copyright (C)  Stichting Deltares, 2013
 """
 
 import copy
-import logging
 import re
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
@@ -141,8 +140,8 @@ class XmlConfigParser(object):
                 try:
                     self.__default_cases.append(self.__fillCase__(case))
                     result.append(self.__fillCase__(case))
-                except:
-                    logging.warning(
+                except Exception:
+                    print(
                         "Something is wrong with test case: "
                         + str(cases["testCase"][caseNr]["path"][0]["txt"])
                         + ", test case will be ignored"
@@ -303,7 +302,6 @@ class XmlConfigParser(object):
                 p.path = str(element["path"][0]["txt"])
         if "workingDirectory" in element:
             p.working_directory = str(element["workingDirectory"][0]["txt"])
-            # logging.debug (p.getWorkingDirectory())
         for e in loop(element, "location"):
             nwp = self.__fillLocation__(e)
             if nwp:

@@ -4,10 +4,10 @@ Description: Run time input and output resolver
 Copyright (C)  Stichting Deltares, 2013
 """
 
-import logging
 import threading
 
 from src.utils.common import Singleton
+from src.utils.logging.i_logger import ILogger
 
 
 # Test runner that runs a (part of) references or comparisons
@@ -55,19 +55,19 @@ class RunTimeData(object):
             self.__lock.release()
         return rtn
 
-    def dump(self):
+    def dump(self, logger: ILogger):
         rtn = None
         self.__lock.acquire()
         try:
             for program in self.__outputs:
-                logging.debug(
+                logger.debug(
                     "\n\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n"
                 )
-                logging.debug(
+                logger.debug(
                     "RunTimeData Dump of program " + str(program.getName()) + " :\n"
                 )
-                logging.debug(str(self.__outputs[program]))
-                logging.debug(
+                logger.debug(str(self.__outputs[program]))
+                logger.debug(
                     "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\n\n"
                 )
         finally:

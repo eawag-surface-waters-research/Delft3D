@@ -4,30 +4,34 @@
 
 
 import copy
-import logging
 import os
 import re
 import sys
 from datetime import datetime, timedelta
+from typing import List, Tuple
 
 import netCDF4 as nc
 import numpy as np
 
 import src.utils.plot_differences as plot
 from src.config.file_check import FileCheck
+from src.config.parameter import Parameter
 from src.utils.comparers.comparison_result import ComparisonResult
+from src.utils.comparers.i_comparer import IComparer
+from src.utils.logging.i_logger import ILogger
 
 
-class NetcdfComparer:
-    """
-    Compare two netCDF files, according to the configuration in file_check.
-    input: left path (reference), right path (compare), file_check
-    output: list of (file_check, parameter, file_check, ResultComparison) tuples
-    """
+class NetcdfComparer(IComparer):
+    """Compare two netCDF files, according to the configuration in file_check."""
 
     def compare(
-        self, left_path: str, right_path: str, file_check: FileCheck, testcase_name: str
-    ):
+        self,
+        left_path: str,
+        right_path: str,
+        file_check: FileCheck,
+        testcase_name: str,
+        logger: ILogger,
+    ) -> List[Tuple[str, FileCheck, Parameter, ComparisonResult]]:
         results = []
         local_error = False
         # For each parameter for this file:
@@ -69,9 +73,9 @@ class NetcdfComparer:
                 for variable_name in left_nc_root.variables.keys():
                     if re.match("^" + parameter_name + "$", variable_name) is not None:
                         try:
-                            paramnew = copy.deepcopy(parameter)
-                            paramnew.name = variable_name
-                            logging.debug("Checking parameter: " + str(variable_name))
+                            param_new: Parameter = copy.deepcopy(parameter)
+                            param_new.name = variable_name
+                            logger.debug("Checking parameter: " + str(variable_name))
                             matchnumber = matchnumber + 1
                             left_nc_var = left_nc_root.variables[variable_name]
                             right_nc_var = right_nc_root.variables[variable_name]
@@ -110,7 +114,7 @@ class NetcdfComparer:
                                 # 2D array
                                 diff_arr = np.abs(left_nc_var[:] - right_nc_var[:])
 
-                                parameter_location = paramnew.location
+                                parameter_location = param_new.location
                                 # Search for the variable name which has cf_role 'timeseries_id'.
                                 # - If it can be found: it is more like a history file, with stations. Plot the time series for the station with the largest deviation.
                                 # - If it cannot be found: it is more like a map-file. Create a 2D plot of the point in time with
@@ -237,18 +241,18 @@ class NetcdfComparer:
                                 )
 
                         except RuntimeError as e:
-                            logging.exception(e)
+                            logger.error(e)
                             local_error = True
                             result.error = True
 
                         except Exception as e:
-                            logging.error(
+                            logger.error(
                                 "Could not find parameter: "
                                 + variable_name
                                 + ", in file: "
                                 + filename
                             )
-                            logging.exception(e)
+                            logger.error(e)
                             local_error = True
                             result.error = True
 
@@ -274,13 +278,13 @@ class NetcdfComparer:
 
                         # Now we know the absolute and relative error, we can see whether the tolerance is exceeded (or test is in error).
                         result.isToleranceExceeded(
-                            paramnew.tolerance_absolute,
-                            paramnew.tolerance_relative,
+                            param_new.tolerance_absolute,
+                            param_new.tolerance_relative,
                         )
 
                         if result.result == "NOK":
                             if left_nc_var.ndim == 1:
-                                logging.info(
+                                logger.info(
                                     "Plotting of 1d-array not yet supported, variable name: "
                                     + variable_name
                                 )
@@ -361,22 +365,22 @@ class NetcdfComparer:
                                             y_coords,
                                             plot_ref_val,
                                             plot_cmp_val,
-                                            paramnew.tolerance_absolute,
+                                            param_new.tolerance_absolute,
                                             testcase_name,
                                             variable_name,
                                             subtitle,
                                             "netcdf",
                                         )
                                 except Exception as e:
-                                    logging.error(
+                                    logger.error(
                                         "Plotting of parameter "
                                         + str(variable_name)
                                         + " failed"
                                     )
-                                    logging.exception(e)
+                                    logger.error(e)
                                     local_error = True
                                     result.error = True
-                        results.append((testcase_name, file_check, paramnew, result))
+                        results.append((testcase_name, file_check, param_new, result))
                 if matchnumber == 0:
                     error_msg = (
                         "No match for parameter name "

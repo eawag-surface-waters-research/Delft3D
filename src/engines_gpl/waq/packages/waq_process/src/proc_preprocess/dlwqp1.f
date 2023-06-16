@@ -857,6 +857,12 @@
             subunit(isys) = allitems%itemproppnts(iindx)%pnt%stdu
             subdescr(isys) = trim(allitems%itemproppnts(iindx)%pnt%text)//' '//
      &                            allitems%itemproppnts(iindx)%pnt%unit
+            if ( substdname(isys) == ' ' ) then
+                substdname(isys) = allitems%itemproppnts(iindx)%pnt%text
+            endif
+            if ( subunit(isys) == ' ' ) then
+                subunit(isys) = allitems%itemproppnts(iindx)%pnt%unit
+            endif
          else
             ! Is it an algae?
             call zoek( subname(1:10), maxtyp, algtyp, 10 , ialg )
