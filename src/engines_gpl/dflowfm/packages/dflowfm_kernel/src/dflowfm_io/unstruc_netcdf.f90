@@ -13179,9 +13179,9 @@ subroutine unc_read_map_or_rst(filename, ierr)
                       kloc = kk
                    end if
                    call getkbotktop(kloc, kb, kt)
-                   ! TODO: UNST-976, incorrect for Z-layers:
+                   ! generally constituents get filled in the transport() loop. For initial restart file this has not happened yet so the value gets assigned twice
                    constituents(iconst,kb:kt) = tmpvar(1:kt-kb+1,kk)
-                   !sed(i,kb:kt) = tmpvar(1:kt-kb+1,kk)
+                   sed(i,kb:kt) = tmpvar(1:kt-kb+1,kk)
                 enddo
              else
                 ierr = nf90_get_var(imapfile, id_sf1(i), tmpvar(1,1:um%ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
@@ -13191,8 +13191,9 @@ subroutine unc_read_map_or_rst(filename, ierr)
                    else
                       kloc = kk
                    end if
-                   constituents(iconst, kloc) = tmpvar(1,kk)
-                   !sed(i, kloc) = tmpvar(1,kk)
+                   ! generally constituents get filled in the transport() loop. For initial restart file this has not happened yet so the value gets assigned twice
+                   constituents(iconst, kloc) = tmpvar(1,kk)   
+                   sed(i, kloc) = tmpvar(1,kk)
                 end do
              endif
              call check_error(ierr, const_names(iconst))
