@@ -13228,7 +13228,7 @@ subroutine unc_read_map_or_rst(filename, ierr)
                 rst_mfluff(:, kloc) = tmpvar(:,kk)
              end do
              call check_error(ierr, 'mfluff')
-             stmpar%morpar%flufflyr%mfluff = rst_mfluff
+             stmpar%morpar%flufflyr%mfluff(:,1:ndxi) = rst_mfluff(:,1:ndxi)
           endif
        end if
 
