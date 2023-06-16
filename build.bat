@@ -20,8 +20,6 @@ call :GetArguments %*
 if !ERRORLEVEL! NEQ 0 exit /B %~1
 call :GetEnvironmentVars
 if !ERRORLEVEL! NEQ 0 exit /B %~1
-call :PrepareSln
-if !ERRORLEVEL! NEQ 0 exit /B %~1
 call :SetGenerator
 if !ERRORLEVEL! NEQ 0 exit /B %~1
 
@@ -289,34 +287,6 @@ rem ================================
         echo        Download page: https://cmake.org/download/
         echo        Be sure that the cmake directory is added to environment parameter PATH
         goto :end
-    )
-    goto :endproc
-
-
-
-rem =======================
-rem === Prepare_sln    ====
-rem =======================
-:PrepareSln
-    if "!mode!" == "quiet" (
-        echo "Mode is 'quiet': Calling prepare_sln.py is not needed ..."
-    ) else (
-        echo.
-        echo "Calling prepare_sln.py in interactive mode ..."
-        cd /d "%root%\src\"
-        rem # Catch stdout, each line in parameter var1, var2 etc.
-        for /f "tokens=* usebackq" %%f in (`python prepare_sln.py`) do (
-            set var=%%f
-            if "!var:~0,19!" == "CMake configuration"    (
-                set config=!var:~25,20!
-            )
-            if "!var:~0,22!" == "Visual Studio  Version" (
-                set vs=!var:~25,4!
-            )
-            if "!var:~0,16!" == "Preparation only"       (
-                set prepareonly=!var:~25,1!
-            )
-        )
     )
     goto :endproc
 
