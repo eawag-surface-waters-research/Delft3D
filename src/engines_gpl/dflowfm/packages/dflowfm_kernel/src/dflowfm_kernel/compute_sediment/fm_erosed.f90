@@ -83,6 +83,7 @@
    use m_partitioninfo
    use compbsskin_module, only: compbsskin, get_alpha_fluff
    use m_debug
+   use m_sand_mud
    !
    implicit none
    !
