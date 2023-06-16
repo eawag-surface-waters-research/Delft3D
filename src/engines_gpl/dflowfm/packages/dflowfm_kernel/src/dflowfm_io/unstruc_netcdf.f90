@@ -2961,7 +2961,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_czs, id_E, id_thetamean, &
         id_sigmwav,  &
         id_tsalbnd, id_zsalbnd, id_ttembnd, id_ztembnd, id_tsedbnd, id_zsedbnd, &
-        id_morbl, id_bodsed, id_msed, id_thlyr, id_lyrfrac, id_sedtotdim, id_sedsusdim, id_nlyrdim, &
+        id_morbl, id_bodsed, id_msed, id_thlyr, id_lyrfrac, id_mfluff, id_sedtotdim, id_sedsusdim, id_nlyrdim, &
         id_netelemmaxnodedim, id_netnodedim, id_flowlinkptsdim, id_netelemdim, id_netlinkdim, id_netlinkptsdim, &
         id_flowelemdomain, id_flowelemglobalnr, id_flowlink, id_netelemnode, id_netlink,&
         id_flowelemxzw, id_flowelemyzw, id_flowlinkxu, id_flowlinkyu,&
@@ -3510,6 +3510,15 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        end select
     end if
 
+    ! Fluff layers
+    if (stmpar%morpar%flufflyr%iflufflyr>0 .and. stmpar%lsedsus>0) then
+       ierr = nf90_def_var(irstfile, 'mfluff' , nf90_double, (/ id_flowelemdim , id_sedsusdim, id_timedim /) , id_mfluff)
+       ierr = nf90_put_att(irstfile, id_mfluff ,  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+       ierr = nf90_put_att(irstfile, id_mfluff ,  'long_name'    , 'Sediment mass in fluff layer')
+       ierr = nf90_put_att(irstfile, id_mfluff ,  'units'        , 'kg m-2 ')
+    end if
+    
+    
     ! Old morphology
     ! Definition and attributes of flow data on centres: sediment concentation and erodable layer thickness
     if (jased > 0 .and. .not.stm_included) then
@@ -4390,6 +4399,13 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
           ierr = nf90_put_var(irstfile, id_lyrfrac, frac(1:ndxi, :, :), (/ 1, 1, 1, itim /), (/ ndxi, stmpar%morlyr%settings%nlyr, stmpar%lsedtot, 1 /))
        end select
     end if
+    
+    !mfluff
+    if (stmpar%morpar%flufflyr%iflufflyr>0 .and. stmpar%lsedsus>0) then
+         do l = 1, stmpar%lsedsus
+            ierr = nf90_put_var(irstfile, id_mfluff, stmpar%morpar%flufflyr%mfluff(l,1:ndxi), (/ 1, l, itim /), (/ ndxi, 1, 1 /))
+         end do   
+    end if 
 
     ! Write the data: sediment Herman
     if (jased > 0 .and. jased < 4) then ! Write the data: sediment
