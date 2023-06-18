@@ -83,6 +83,7 @@
    use m_partitioninfo
    use compbsskin_module, only: compbsskin, get_alpha_fluff
    use m_debug
+   use m_sand_mud
    !
    implicit none
    !
@@ -703,9 +704,15 @@
             afluff = 0d0
          endif
          !
-         call compbsskin(umean, vmean, h1, wave, uorb(nm), twav(nm), &
-                          & phiwav(nm), thcmud(nm), mudfrac(nm), taub(nm), &
-                          & rhowat(kbed), vismol, stmpar%sedpar, afluff)
+         if (wave) then
+            call compbsskin(umean, vmean, h1, wave, uorb(nm), twav(nm), &
+                             & phiwav(nm), thcmud(nm), mudfrac(nm), taub(nm), &
+                             & rhowat(kbed), vismol, stmpar%sedpar, afluff)
+         else
+            call compbsskin(umean, vmean, h1, wave, 0d0, 0d0, &
+                             & phiwav(nm), thcmud(nm), mudfrac(nm), taub(nm), &
+                             & rhowat(kbed), vismol, stmpar%sedpar, afluff)
+         endif
       endif
       !
       ustarc = umod(nm)*vonkar/log(1.0_fp + zumod(nm)/max(z0rou,1d-5))
@@ -1263,7 +1270,7 @@
       !
       ! recompute erosion velocities
       !
-      call sand_mud(lsed, evel, frac(nm,:), mudfrac(nm), sedtyp, pmcrit(nm))
+      call sand_mud(lsed, evel, frac(nm,:), mudfrac(nm), sedtyp, max_mud_sedtyp, pmcrit(nm))
       !
       ! recompute erosion fluxes
       ! only explicit part of erosion flux is changed
