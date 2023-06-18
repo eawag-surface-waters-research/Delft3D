@@ -3508,16 +3508,16 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
          ierr = nf90_put_att(irstfile, id_thlyr ,  'long_name'    , 'Thickness of a layer of the bed in flow cell center')
          ierr = nf90_put_att(irstfile, id_thlyr ,  'units'        , 'm')
        end select
-    end if
 
-    ! Fluff layers
-    if (stmpar%morpar%flufflyr%iflufflyr>0 .and. stmpar%lsedsus>0) then
-       ierr = nf90_def_var(irstfile, 'mfluff' , nf90_double, (/id_sedsusdim, id_flowelemdim, id_timedim /) , id_mfluff)
-       ierr = nf90_put_att(irstfile, id_mfluff ,  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
-       ierr = nf90_put_att(irstfile, id_mfluff ,  'long_name'    , 'Sediment mass in fluff layer')
-       ierr = nf90_put_att(irstfile, id_mfluff ,  'units'        , 'kg m-2 ')
-    end if
-    
+       ! Fluff layers
+       if (stmpar%morpar%flufflyr%iflufflyr>0 .and. stmpar%lsedsus>0) then
+          ierr = nf90_def_var(irstfile, 'mfluff' , nf90_double, (/id_sedsusdim, id_flowelemdim, id_timedim /) , id_mfluff)
+          ierr = nf90_put_att(irstfile, id_mfluff ,  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+          ierr = nf90_put_att(irstfile, id_mfluff ,  'long_name'    , 'Sediment mass in fluff layer')
+          ierr = nf90_put_att(irstfile, id_mfluff ,  'units'        , 'kg m-2 ')
+       end if
+
+    end if    
     
     ! Old morphology
     ! Definition and attributes of flow data on centres: sediment concentation and erodable layer thickness
@@ -4398,14 +4398,14 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
           ierr = nf90_put_var(irstfile, id_thlyr, stmpar%morlyr%state%thlyr(:,1:ndxi), (/ 1, 1, itim /), (/ stmpar%morlyr%settings%nlyr, ndxi, 1 /))
           ierr = nf90_put_var(irstfile, id_lyrfrac, frac(1:ndxi, :, :), (/ 1, 1, 1, itim /), (/ ndxi, stmpar%morlyr%settings%nlyr, stmpar%lsedtot, 1 /))
        end select
+       
+       !mfluff
+       if (stmpar%morpar%flufflyr%iflufflyr>0 .and. stmpar%lsedsus>0) then
+            do l = 1, stmpar%lsedsus
+               ierr = nf90_put_var(irstfile, id_mfluff, stmpar%morpar%flufflyr%mfluff(l,1:ndxi), (/ l, 1, itim /), (/ 1, ndxi, 1 /))
+            end do   
+       end if 
     end if
-    
-    !mfluff
-    if (stmpar%morpar%flufflyr%iflufflyr>0 .and. stmpar%lsedsus>0) then
-         do l = 1, stmpar%lsedsus
-            ierr = nf90_put_var(irstfile, id_mfluff, stmpar%morpar%flufflyr%mfluff(l,1:ndxi), (/ l, 1, itim /), (/ 1, ndxi, 1 /))
-         end do   
-    end if 
 
     ! Write the data: sediment Herman
     if (jased > 0 .and. jased < 4) then ! Write the data: sediment
