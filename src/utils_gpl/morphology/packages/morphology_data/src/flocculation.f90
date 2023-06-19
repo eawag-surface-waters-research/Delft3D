@@ -272,8 +272,8 @@ subroutine macro_floc_settling_chassagne( spm, tshear, tdiss, grav, viscosity, r
     !
     factor1  = (tdiss * d_micro ** 4 / viscosity ** 3) ** 0.166_fp
     factor2  = (spm / rho_water) ** 0.22044_fp
-    factor3  = sqrt(viscosity / tdiss)
-    factor4  = sqrt(rho_water * ustar_macro ** 2 / tshear)
+    factor3  = sqrt(viscosity / max(tdiss, 1.0e-12_fp))
+    factor4  = sqrt(rho_water * ustar_macro ** 2 / max(tshear, 1.0e-12_fp))
 
     !
     ! Settling velocity of macro flocs [m/s]
@@ -318,8 +318,8 @@ subroutine micro_floc_settling_chassagne( tshear, tdiss, grav, viscosity, rho_wa
     ! Compute dimensionless terms
     !
     factor1  = (tdiss * d_1 ** 4 / viscosity ** 3) ** 0.166_fp
-    factor3  = sqrt(viscosity / tdiss)
-    factor4  = sqrt(rho_water * ustar_micro ** 2 / tshear)
+    factor3  = sqrt(viscosity / max(tdiss, 1.0e-12_fp))
+    factor4  = sqrt(rho_water * ustar_micro ** 2 / max(tshear, 1.0e-12_fp))
 
     !
     ! Settling velocity of macro flocs [m/s]
@@ -496,7 +496,7 @@ subroutine flocculate(cfloc, flocdt, breakdt, flocmod)
 end subroutine flocculate
 
 
-subroutine get_tshear_tdiss( tshear, tdiss, tke, tlength, timtur, taub, rho_water, waterdepth, localdepth, vonkar )
+subroutine get_tshear_tdiss( tshear, tdiss, rho_water, tke, tlength, timtur, taub, waterdepth, localdepth, vonkar )
 
 !!--description-----------------------------------------------------------------
 !
@@ -508,11 +508,11 @@ subroutine get_tshear_tdiss( tshear, tdiss, tke, tlength, timtur, taub, rho_wate
 !
     real(fp), intent(out)           :: tshear     !< Turbulent shear stress [N/m2)
     real(fp), intent(inout)         :: tdiss      !< Turbulent dissipation epsilon [m2/s3]
+    real(fp), intent(in)            :: rho_water  !< Water density [kg/m3]
     real(fp), optional, intent(in)  :: tke        !< Turbulent kinetic energy lk [N/m2]
     real(fp), optional, intent(in)  :: tlength    !< Turbulent length scale L [m]
     real(fp), optional, intent(in)  :: timtur     !< Turbulent time scale tau [s]
     real(fp), optional, intent(in)  :: taub       !< Bed shear stress [N/m2]
-    real(fp), optional, intent(in)  :: rho_water  !< Water density [kg/m3]
     real(fp), optional, intent(in)  :: waterdepth !< Total water depth [m]
     real(fp), optional, intent(in)  :: localdepth !< Depth below water surface [m]
     real(fp), optional, intent(in)  :: vonkar     !< Von Karman constant [-]
@@ -520,7 +520,7 @@ subroutine get_tshear_tdiss( tshear, tdiss, tke, tlength, timtur, taub, rho_wate
 !
 ! Local variables 
 !
-    real(fp), parameter :: cd = 0.1925   ! turbulence constant [-]
+    real(fp), parameter :: cd = 0.09_fp ** 0.75_fp   ! turbulence constant [-] cmu^(3/4)
     
     real(fp) :: ustar         ! shear velocity [m/s]
     real(fp) :: z             ! height above the bed [m]
@@ -528,16 +528,16 @@ subroutine get_tshear_tdiss( tshear, tdiss, tke, tlength, timtur, taub, rho_wate
 
     if (present(tke)) then
        if (present(timtur)) then ! k-tau
-          tshear = PARAM_SOULSBY * tke
+          tshear = PARAM_SOULSBY * rho_water * tke
           tdiss = tke * timtur
        elseif (present(tlength)) then ! k-L
-          tshear = PARAM_SOULSBY * tke
+          tshear = PARAM_SOULSBY * rho_water * tke
           tdiss = cd * tke ** 1.5_fp / tlength
        else ! k-eps
-          tshear = PARAM_SOULSBY * tke
+          tshear = PARAM_SOULSBY * rho_water * tke
           ! tdiss already set
        endif
-    elseif (present(waterdepth) .and. present(rho_water) .and. present(taub) .and. present(vonkar)) then
+    elseif (present(waterdepth) .and. present(taub) .and. present(vonkar)) then
        if (present(localdepth)) then ! algebraic
           z = waterdepth - localdepth
           xi = localdepth/waterdepth
