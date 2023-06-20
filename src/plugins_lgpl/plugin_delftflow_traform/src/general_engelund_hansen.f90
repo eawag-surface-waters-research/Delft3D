@@ -201,17 +201,24 @@ error_message = ' '
 !if (write_count < 100) then
 !write(*,*) 'I am here 1'
 !endif 
+filenm = 'gen_eh.par'
 
 if (acal < 0.0_hp) then
     open (newunit=lun, file = filenm, form = 'formatted', iostat = iocond, status = 'old')
     if (iocond/=0) then
        error_message = 'Unable to open parameter file: ' // filenm
+       do i=1,256
+          error_message_c(i) = error_message(i:i)
+       enddo
        return
     endif
     !
     read(lun,*, iostat = iocond) acal
     if (iocond/=0) then
        error_message = 'Problem reading acal from file: ' // filenm
+       do i=1,256
+          error_message_c(i) = error_message(i:i)
+       enddo
        return
     else 
         !if (write_count < 100) then
@@ -222,6 +229,9 @@ if (acal < 0.0_hp) then
     read(lun,*, iostat = iocond) suspfac
     if (iocond/=0) then
        error_message = 'Problem reading suspfac from file: ' // filenm
+       do i=1,256
+          error_message_c(i) = error_message(i:i)
+       enddo
        return
     else 
         !if (write_count < 100) then
@@ -231,6 +241,9 @@ if (acal < 0.0_hp) then
     read(lun,*, iostat = iocond) power
     if (iocond/=0) then
        error_message = 'Problem reading power from file: ' // filenm
+       do i=1,256
+          error_message_c(i) = error_message(i:i)
+       enddo
        return
     else 
         !if (write_count < 100) then
