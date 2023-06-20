@@ -1,3 +1,7 @@
+module m_sand_mud
+implicit none
+
+contains
 subroutine sand_mud(nfrac, E, frac, mudfrac, sedtyp, max_mud_sedtyp, pmcrit)
 !
 !----- GPL ---------------------------------------------------------------------
@@ -115,3 +119,4 @@ subroutine sand_mud(nfrac, E, frac, mudfrac, sedtyp, max_mud_sedtyp, pmcrit)
         enddo
     endif
 end subroutine sand_mud
+end module m_sand_mud
