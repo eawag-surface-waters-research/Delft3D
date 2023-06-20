@@ -88,7 +88,7 @@ subroutine macro_floc_settling_manning( spm, tshear, ws_macro )
     ! Settling velocity of macro flocs
     !
     if ( tshear < 0.65_fp ) then
-        ws_macro = 0.644_fp - 0.000471_fp * spm + 9.36_fp * tshear - 13.1_fp * tshear ** 2
+        ws_macro = 0.644_fp + 0.000471_fp * spm + 9.36_fp * tshear - 13.1_fp * tshear ** 2
     elseif ( tshear < 1.45_fp ) then
         ws_macro = 3.96_fp  + 0.000346_fp * spm - 4.38_fp * tshear + 1.33_fp * tshear ** 2
     else
@@ -177,7 +177,7 @@ subroutine macro_floc_frac_manning( spm, macro_frac )
     !
     ! Distribution of macro and micro flocs
     !
-    floc_ratio = 0.815_fp + 0.00318_fp * spm - 1.4e-7_fp * spm ** 2
+    floc_ratio = max(0.815_fp + 0.00318_fp * spm - 1.4e-7_fp * spm ** 2, 0.01_fp)
     macro_frac = floc_ratio / (1.0_fp + floc_ratio)
 
 end subroutine macro_floc_frac_manning
