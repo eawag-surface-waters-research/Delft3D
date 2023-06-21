@@ -218,6 +218,20 @@ if (acal < 0.0_hp) then
        do i=1,256
           error_message_c(i) = error_message(i:i)
        enddo
+       close(lun)
+       open(newunit=lun, file="gen_sed_c.par.example", status="new", action="write")
+       write(lun,*) "acal (8.0)"
+       write(lun,*) "b (0.0)"
+       write(lun,*) "cc (1.5)"
+       write(lun,*) "rmu (1.0)"
+       write(lun,*) "thcr (0.047)"
+       write(lun,*) "chezy (35, negative means model chezy is used)"
+       write(lun,*) "acals (0.0)"
+       write(lun,*) "bs (0.0)"
+       write(lun,*) "ccs (0.0)"
+       write(lun,*) "rmus (0.0)"
+       write(lun,*) "thcrs (0.0)"
+       close(lun)
        return
     endif
     !
