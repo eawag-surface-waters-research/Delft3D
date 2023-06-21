@@ -173,11 +173,13 @@ subroutine macro_floc_frac_manning( spm, macro_frac )
 ! Local variables
 !
     real(fp)              :: floc_ratio           !< Mass ratio of macro flocs versus micro flocs [-]
+    real(fp)              :: spm1                 !< Concentration clipped to value below 10000 [mg/l]
 
     !
     ! Distribution of macro and micro flocs
     !
-    floc_ratio = max(0.815_fp + 0.00318_fp * spm - 1.4e-7_fp * spm ** 2, 0.01_fp)
+    spm1 = min(spm, 100000.0_fp)
+    floc_ratio = 0.815_fp + 0.00318_fp * spm1 - 1.4e-7_fp * spm1 ** 2
     macro_frac = floc_ratio / (1.0_fp + floc_ratio)
 
 end subroutine macro_floc_frac_manning
