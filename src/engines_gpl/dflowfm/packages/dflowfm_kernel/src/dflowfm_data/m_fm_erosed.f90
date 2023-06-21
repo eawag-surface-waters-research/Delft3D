@@ -75,12 +75,12 @@
    integer, dimension(:),                 pointer :: link1sign => NULL()
    logical                                        :: link1_initialized = .false.
 
-   real(fp), dimension(:,:),              pointer :: seddif
-   real(fp), dimension(:,:),              pointer :: sed
+   real(fp), dimension(:,:),              pointer :: seddif        !< Sediment diffusion
+   real(fp), dimension(:,:),              pointer :: sed           !< Sediment concentration work array
    real(fp), dimension(:),                pointer :: blchg         !< Bed level change (> 0 = sedimentation, < 0 = erosion)
    real(fp), dimension(:),                pointer :: dzbdt         !< Bed level change time rate
-   real(fp), dimension(:),                pointer :: uau
-   real(fp), dimension(:,:),              pointer :: ws
+   real(fp), dimension(:),                pointer :: uau           !< velocity asymmetry
+   real(fp), dimension(:,:),              pointer :: ws            !< settling velocity
 
    real(fp), dimension(:)               , pointer :: ucxq_mor
    real(fp), dimension(:)               , pointer :: ucyq_mor
@@ -110,12 +110,22 @@
    real(fp)         , dimension(:)      , pointer :: pmcrit
    integer          , dimension(:)      , pointer :: nseddia
    integer          , dimension(:)      , pointer :: sedtyp
+   integer          , dimension(:)      , pointer :: tratyp
    logical                              , pointer :: anymud
    real(fp)         , dimension(:)      , pointer :: sedtrcfac
    logical                              , pointer :: bsskin
    real(fp)         , dimension(:)      , pointer :: thcmud
    real(fp)         , dimension(:)      , pointer :: tpsnumber
    real(fp)         , dimension(:, :)   , pointer :: dss
+
+   integer                              , pointer :: max_mud_sedtyp
+   integer                              , pointer :: min_dxx_sedtyp
+   integer                              , pointer :: flocmod
+   integer                              , pointer :: nflocpop
+   integer                              , pointer :: nflocsizes
+   integer          , dimension(:, :)   , pointer :: floclist
+   real(fp)                             , pointer :: tbreakup
+   real(fp)                             , pointer :: tfloc
 
    ! morpar
    real(fp)                             , pointer :: thresh
@@ -166,6 +176,13 @@
    logical                              , pointer :: eqmbcmud
    logical                              , pointer :: eulerisoglm
    logical                              , pointer :: l_suscor
+   logical                              , pointer :: bermslopetransport     !< switch on bermslope transport or not
+   logical                              , pointer :: bermslopebed           !< include bermslope nudging on bedload
+   logical                              , pointer :: bermslopesus           !< include bermslope nudging on suspended load
+   real(fp)                             , pointer :: bermslope              !< slope to be nudged toward
+   real(fp)                             , pointer :: bermslopefac           !< calibration factor
+   real(fp)                             , pointer :: bermslopegamma         !< bermslope nudging applied for region where Hrms/h>bermslopegamma
+   real(fp)                             , pointer :: bermslopedepth         !< minimum depth to apply nudging
 
    ! trapar
    integer          , dimension(:)      , pointer :: iform

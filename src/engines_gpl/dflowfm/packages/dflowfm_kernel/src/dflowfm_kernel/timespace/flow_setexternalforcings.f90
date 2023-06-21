@@ -183,7 +183,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
          enddo
       endif
 
-      if (jawave == 1 .or. jawave == 2) then
+      if (jawave == 1 .or. jawave == 2 .and. .not. flowWithoutWaves) then
          call tauwavefetch(tim)
       endif
    endif

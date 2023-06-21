@@ -5,29 +5,39 @@ Copyright (C)  Stichting Deltares, 2013
 """
 
 import filecmp
-import logging
 import os
+from typing import List, Tuple
 
+from src.config.file_check import FileCheck
 from src.config.parameter import Parameter
 from src.utils.comparers.comparison_result import ComparisonResult
+from src.utils.comparers.i_comparer import IComparer
+from src.utils.logging.i_logger import ILogger
 
 
 # compare files on content equality
-class ContentComparer(object):
+class ContentComparer(IComparer):
     # compare left and right file
     # input: left path, right path, FileCheck instance
     # output: list of (file_check, parameter, ResultComparison) tuples
-    def compare(self, leftpath, rightpath, file_check, testcase_name):
-        logging.debug("Checking: " + file_check.getName())
+    def compare(
+        self,
+        left_path: str,
+        right_path: str,
+        file_check: FileCheck,
+        testcase_name: str,
+        logger: ILogger,
+    ) -> List[Tuple[str, FileCheck, Parameter, ComparisonResult]]:
+        logger.debug("Checking: " + file_check.name)
 
         parameter = Parameter()
         comparison_result = ComparisonResult()
 
-        filename = file_check.getName()
-        leftfilename = os.path.join(leftpath, filename)
-        rightfilename = os.path.join(rightpath, filename)
+        filename = file_check.name
+        left_file_name = os.path.join(left_path, filename)
+        right_file_name = os.path.join(right_path, filename)
         try:
-            equal = filecmp.cmp(leftfilename, rightfilename)
+            equal = filecmp.cmp(left_file_name, right_file_name)
             if equal:
                 comparison_result.passed = True
                 comparison_result.result = "OK"

@@ -1,6 +1,6 @@
 @echo off
-set version=6.0
-set serial=20230315
+set version=6.1
+set serial=20230609
 set toolFound=false
 set cmakeConfiguration=build_dwaq
 

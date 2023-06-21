@@ -2249,7 +2249,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                      else if (var_types(iv,itopo) == nf90_char) then
                            ierr = nf90_get_var(ncids(ii), varids(ii,iv,itopo), ctmpvar2D(:,nitemglob0+1:), count=count_read(is:ie), start=start_idx(is:ie))
                      end if
-                   else if (var_kxdimpos(iv,itopo) /= -1 .neqv. var_wdimpos(iv,itopo) /= -1) then ! Either a vectormax OR a wdim
+                  else if (var_kxdimpos(iv,itopo) /= -1 .neqv. (var_laydimpos(iv,itopo) /= -1 .or. var_wdimpos(iv,itopo) /= -1)) then
+                  ! Either a vectormax OR a wdim/laydim
                      if (var_types(iv,itopo) == nf90_double) then
                         ierr = nf90_get_var(ncids(ii), varids(ii,iv,itopo),  tmpvar2D(  :,nitemglob0+1:), count=count_read(is:ie), start=start_idx(is:ie))
                      else if (var_types(iv,itopo) == nf90_int .or. var_types(iv,itopo) == nf90_short) then
@@ -2548,7 +2549,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                   else if (var_types(iv,itopo) == nf90_char) then
                      ierr = nf90_put_var(ncids(noutfile), varids_out(iv,itopo), ctmpvar2D, count = count_write(is:ie), start = start_idx(is:ie))
                   end if
-               else if (var_kxdimpos(iv,itopo) /= -1 .neqv. var_wdimpos(iv,itopo) /= -1) then ! Either a vectormax OR a laydim
+               else if (var_kxdimpos(iv,itopo) /= -1 .neqv. (var_laydimpos(iv,itopo) /= -1 .or. var_wdimpos(iv,itopo) /= -1)) then
+                  ! Either a vectormax OR a wdim/laydim
                   if (var_types(iv,itopo) == nf90_double) then
                      ierr = nf90_put_var(ncids(noutfile), varids_out(iv,itopo), tmpvar2D, count = count_write(is:ie), start = start_idx(is:ie))
                   else if (var_types(iv,itopo) == nf90_int .or. var_types(iv,itopo) == nf90_short) then
