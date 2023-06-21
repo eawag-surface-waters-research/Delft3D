@@ -5,7 +5,7 @@
 !
 !*******************************************************************************
 !
-     use m_dhkmrk
+     use m_evaluate_waq_attribute
       use layered_sediment
 
       IMPLICIT NONE
@@ -415,8 +415,8 @@
           ! initialize storage term
           balterm = 0d0
           do iseg = 1,noseg
-              CALL DHKMRK(1,IKNMRK(iseg),iatt1) ! pick up first attribute
-              CALL DHKMRK(2,IKNMRK(iseg),iatt2) ! pick up second attribute
+              CALL evaluate_waq_attribute(1,IKNMRK(iseg),iatt1) ! pick up first attribute
+              CALL evaluate_waq_attribute(2,IKNMRK(iseg),iatt2) ! pick up second attribute
               if (iatt1.gt.0.and. (iatt2.eq.0.or.iatt2.eq.3) ) then
                   do isys = 1,nototsed
                       ip = last + isys
@@ -444,8 +444,8 @@
             balterm(isys,0) = 0d0
           enddo
           do iseg = 1,noseg
-              CALL DHKMRK(1,IKNMRK(iseg),iatt1) ! pick up first attribute
-              CALL DHKMRK(2,IKNMRK(iseg),iatt2) ! pick up second attribute
+              CALL evaluate_waq_attribute(1,IKNMRK(iseg),iatt1) ! pick up first attribute
+              CALL evaluate_waq_attribute(2,IKNMRK(iseg),iatt2) ! pick up second attribute
               if (iatt1.gt.0.and. (iatt2.eq.0.or.iatt2.eq.3) ) then
                   do isys = 1,nototsed
 
@@ -498,8 +498,8 @@
       ! accumulate fluxes
 
       do iseg = 1,noseg
-          CALL DHKMRK(1,IKNMRK(iseg),iatt1) ! pick up first attribute
-          CALL DHKMRK(2,IKNMRK(iseg),iatt2) ! pick up second attribute
+          CALL evaluate_waq_attribute(1,IKNMRK(iseg),iatt1) ! pick up first attribute
+          CALL evaluate_waq_attribute(2,IKNMRK(iseg),iatt2) ! pick up second attribute
           if (iatt1.gt.0.and. (iatt2.eq.0.or.iatt2.eq.3) ) then
               do ifl=1,nofl
                   ip = last + 2*nototsed + ifl

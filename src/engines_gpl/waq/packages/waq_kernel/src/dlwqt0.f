@@ -51,9 +51,9 @@
 !     SUBROUTINES CALLED  : DLWQT1, makes one time function
 !                           DLWQTA, make values for const,param,func,sfunc
 !                           DLWQTK, make values for kenmerk array
-!                           DHOPNF, opens files
+!                           open_waq_files, opens files
       use m_srstop
-      use m_dhopnf
+      use m_open_waq_files
       use timers
       use delwaq2_data
       use grids
@@ -129,8 +129,8 @@
          wstset = .false.
          funset = .false.
          othset = .false.
-         call dhopnf ( lun(3), luntxt(3), 3    , 2     , ierr  )
-         call dhopnf ( lun(4), luntxt(4), 4    , 2     , ierr  )
+         call open_waq_files ( lun(3), luntxt(3), 3    , 2     , ierr  )
+         call open_waq_files ( lun(4), luntxt(4), 4    , 2     , ierr  )
       endif
 
 !         initialisation

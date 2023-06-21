@@ -95,7 +95,7 @@
       use m_monsys
       use m_gkwini
       use m_getcom
-      use m_dhopnf
+      use m_open_waq_files
       use timers
       INTEGER       NOTOT , ITIME , NOSYS ,
      j              NOFLUX, NDMPAR, NDMPQ , NTDMPQ,
@@ -531,7 +531,7 @@
           JDUMP(NDMPAR_OUT+1) = NDMPAR_OUT+1
 
           IF ( .NOT. SUPPFT )
-     J    CALL DHOPNF ( LUNOUT, LCHOUT, 21    , 1     , IDUM  )
+     J    CALL open_waq_files ( LUNOUT, LCHOUT, 21    , 1     , IDUM  )
 
 !         Zero output matrices
           DO IOUT  = 1,NOOUT

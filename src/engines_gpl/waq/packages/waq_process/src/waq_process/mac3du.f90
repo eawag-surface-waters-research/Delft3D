@@ -24,7 +24,7 @@
       subroutine mac3du     ( pmsa   , fl     , ipoint , increm, noseg , &
                               noflux , iexpnt , iknmrk , noq1  , noq2  , &
                               noq3   , noq4   )
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !
 !*******************************************************************************
@@ -178,7 +178,7 @@
          dco2upsm01 = 0.0
          doxyprsm01 = 0.0
 
-         call dhkmrk(1,iknmrk(iseg),ikmrk1)
+         call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
          if (ikmrk1.eq.1) then
 
             ! active water segment
@@ -210,7 +210,7 @@
 
             ! S12 sediment uptake
 
-            call dhkmrk(2,iknmrk(iseg),ikmrk2)
+            call evaluate_waq_attribute(2,iknmrk(iseg),ikmrk2)
             if ((ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
               if (nh4s12.gt.0.0) dnh4upsm01 = dnh4upsm01 + frootnsm01 * dnupsm01
               if (po4s12.gt.0.0) dpo4upsm01 = dpo4upsm01 + frootpsm01 * dpupsm01

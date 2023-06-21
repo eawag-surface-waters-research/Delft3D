@@ -59,7 +59,7 @@
 !
 !
       use m_dhucas
-      use m_dhopnf
+      use m_open_waq_files
       use m_dhfext
 
       CHARACTER*256 FNAME(3) , OPTION
@@ -75,7 +75,7 @@
 !         Open the DELWAQ .HIS file
 !
       lun = 10
-      CALL DHOPNF ( lun , FNAME(1) , 24 , 2 , IERROR )
+      CALL open_waq_files ( lun , FNAME(1) , 24 , 2 , IERROR )
       IF ( IERROR .NE. 0 ) RETURN
 
       ! map or his

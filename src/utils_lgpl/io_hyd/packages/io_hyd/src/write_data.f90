@@ -32,7 +32,7 @@
                               ardata, funtyp)
 
       use filmod
-      use m_dhctim
+      use m_convert_seconds_to_date
 
       implicit none
 !
@@ -42,7 +42,7 @@
 !
 !     function            : writes data to delwaq auxiliary input file.
 !
-!     subroutines called  : dhctim, conversion of an integer variable in seconds to dd:hh:mm:ss or yy:ddd:hh format.
+!     subroutines called  : convert_seconds_to_date, conversion of an integer variable in seconds to dd:hh:mm:ss or yy:ddd:hh format.
 !                           jbputa, puts a real array to a dos binary file.
 !                           jbputi, puts an integer value to a dos binary file.
 !
@@ -148,7 +148,7 @@
    40          continue
             endif
          else
-            call dhctim(itime,itime2,.true.,.false.)
+            call convert_seconds_to_date(itime,itime2,.true.,.false.)
             write ( lun , 2060 ) itime2
             do 50 il = 1 , noloc
                write ( lun , 2070 ) (ardata(i+(il-1)*noval),i=1,noval)

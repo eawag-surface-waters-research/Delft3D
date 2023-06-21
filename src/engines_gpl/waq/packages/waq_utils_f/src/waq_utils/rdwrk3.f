@@ -37,7 +37,7 @@
 !
 !     LOGICAL UNITNUMBERS : LUN(1)   - DELWAQ boot file
 !
-!     SUBROUTINES CALLED  : DHOPNF, opens files
+!     SUBROUTINES CALLED  : open_waq_files, opens files
 !
 !     PARAMETERS          :
 !
@@ -50,7 +50,7 @@
 !     ITOTC   INTEGER    1         OUT     Dimension character array
 !
 !     declarations
-      use m_dhopnf
+      use m_open_waq_files
       use m_dhgnam
       use m_sysn          ! System characteristics
       use m_sysi          ! Timer characteristics
@@ -72,7 +72,7 @@
       IF ( INDX .EQ. 0 ) INDX = LCHMAX + 1
       LCHAR(1) = LCHAR(1)(1:INDX-1)//'-delwaq03.wrk'
       LUNIN    = 14
-      CALL DHOPNF ( LUNIN , LCHAR(1), 1     , 2     , IERR  )
+      CALL open_waq_files ( LUNIN , LCHAR(1), 1     , 2     , IERR  )
 !
       READ  ( LUNIN )   IN
       READ  ( LUNIN )   II

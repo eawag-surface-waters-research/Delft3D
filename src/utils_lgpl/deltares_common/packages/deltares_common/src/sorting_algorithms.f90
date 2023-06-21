@@ -188,11 +188,11 @@
 
    last=size(indices)
 
-   if (last.lt.40) then ! use insertion sort on small arrays
+   if (last < 40) then ! use insertion sort on small arrays
       do i=2,last
          itemp=indices(i)
          do j=i-1,1,-1
-            if (array(indices(j)).le.array(itemp)) exit
+            if (array(indices(j)) <= array(itemp)) exit
             indices(j+1)=indices(j)
          enddo
          indices(j+1)=itemp
@@ -202,7 +202,7 @@
    ip1 = indices(last/3)   !pivot 1
    ip2 = indices(2*last/3) !pivot 2
 
-   if (array(ip2).lt.array(ip1)) then !swap pivots if necessary
+   if (array(ip2) < array(ip1)) then !swap pivots if necessary
       itemp=ip1
       ip1=ip2
       ip2=itemp
@@ -214,24 +214,24 @@
 
    g=last
    l=2
-   do while (array(indices(l)).lt.array(ip1)) ! check for values smaller than pivot 1
+   do while (array(indices(l)) < array(ip1)) ! check for values smaller than pivot 1
       l=l+1
    enddo
    k=l
 
-   do while(k.lt.g)
+   do while(k < g)
       itemp=indices(k)
-      if (array(itemp).lt.array(ip1)) then
+      if (array(itemp) < array(ip1)) then
          indices(k)=indices(l)
          indices(l)=itemp
          l=l+1
-      else if (array(itemp).gt.array(ip2)) then
-         do while(array(indices(g-1)).gt.array(ip2))
+      else if (array(itemp) > array(ip2)) then
+         do while(array(indices(g-1)) > array(ip2))
             g=g-1
          enddo
-         if (k.ge.g) exit
+         if (k >= g) exit
          g=g-1
-         if (array(indices(g)).lt.array(ip1)) then !swap k and g
+         if (array(indices(g)) < array(ip1)) then !swap k and g
             indices(k)=indices(l)
             indices(l)=indices(g)
             indices(g)=itemp
@@ -243,13 +243,13 @@
       endif
       k=k+1
    enddo
-   if (l.gt.2) then
+   if (l > 2) then
       indices(1)=indices(l-1)
       indices(l-1)=ip1
       call dpquicksort(array,indices(1:l-2))
    endif
    call dpquicksort(array,indices(l:g-1))
-   if (g.lt.last) then
+   if (g < last) then
       indices(last)=indices(g)
       indices(g)=ip2
       call dpquicksort(array,indices(g+1:last))

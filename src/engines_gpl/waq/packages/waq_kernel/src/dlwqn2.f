@@ -54,7 +54,7 @@
 !                          DLWQ17, boundary routine
 !                          DLWQ18, integration step
 !                          PROINT, integration of fluxes
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !                          ZERCUM, zero's the cummulative array's
 !
 !     PARAMETERS    :

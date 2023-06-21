@@ -25,7 +25,7 @@
       use m_zoek
       use m_srstop
       use m_monsys
-      use m_dhopnf
+      use m_open_waq_files
 
 !
 !          module contains everything for model data input and storage
@@ -892,7 +892,7 @@
          ftype = 2
          if ( mod(dlwqdata%filetype,10) .eq. FILE_UNFORMATTED ) ftype = ftype + 10
          if ( dlwqdata%filetype/10 .eq. 1 ) ftype = ftype + 20       ! I am in for a better solution (lp)
-         call dhopnf( lun, dlwqdata%filename, 3  , ftype , ierror )
+         call open_waq_files( lun, dlwqdata%filename, 3  , ftype , ierror )
          if ( ierror .ne. 0 ) then
             write(lunrep,1000) trim(dlwqdata%filename)
             write(lunrep,1010) ierror

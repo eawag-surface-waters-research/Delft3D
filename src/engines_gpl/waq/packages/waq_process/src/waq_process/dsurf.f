@@ -24,7 +24,7 @@
       subroutine dsurf  ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_errsys
+      use m_write_error_message
 
 !>\file
 !>       Dynamic calculation of the horizontal surface area from volume and depth
@@ -65,7 +65,7 @@
       VOLUME = PMSA(IP1 )
       DEPTH  = PMSA(IP2 )
 
-      IF (DEPTH .LT. 1E-30) CALL ERRSYS ('DEPTH in DSURF zero', 1 )
+      IF (DEPTH .LT. 1E-30) CALL write_error_message ('DEPTH in DSURF zero')
 
 !***********************************************************************
 !**** Calculate SURF

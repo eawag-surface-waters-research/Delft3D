@@ -25,7 +25,7 @@
        use m_srstop
        use m_monsys
        use m_dhucas
-       use m_dhopnf
+       use m_open_waq_files
        use m_dhnlun
 
 !
@@ -777,7 +777,7 @@
          integer                                 :: itime                ! time from file
 
          call dhnlun(701,lun)
-         call dhopnf( lun, dlwqdata%filename, 3  , 2    , ierror )
+         call open_waq_files( lun, dlwqdata%filename, 3  , 2    , ierror )
          if ( ierror .ne. 0 ) then
             write(lunrep,1000) trim(dlwqdata%filename)
             write(lunrep,1010) ierror

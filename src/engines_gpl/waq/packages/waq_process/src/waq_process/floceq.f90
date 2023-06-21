@@ -24,7 +24,7 @@
       subroutine floceq     ( pmsa   , fl     , ipoint , increm, noseg , &
                               noflux , iexpnt , iknmrk , noq1  , noq2  , &
                               noq3   , noq4   )
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !
 !*******************************************************************************
@@ -97,7 +97,7 @@
          ! only for active water segments
 
          active = btest(iknmrk(iseg),0)
-         call dhkmrk(1,iknmrk(iseg),ikmrk1)
+         call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
          bodem  = ikmrk1.eq.3
          if ( active .and. .not. bodem ) then
 

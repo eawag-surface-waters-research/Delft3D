@@ -25,7 +25,7 @@
                               noflux , iexpnt , iknmrk , noq1  , noq2  , &
                               noq3   , noq4   )
       use m_monsys
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !
 !*******************************************************************************
@@ -102,9 +102,9 @@
          ! set botseg equal to iseg for the segments which have a bottom
 
          do iseg = 1,noseg
-            call dhkmrk(1,iknmrk(iseg),ikmrk1)
+            call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
             if (ikmrk1.lt.3) then
-               call dhkmrk(2,iknmrk(iseg),ikmrk2)
+               call evaluate_waq_attribute(2,iknmrk(iseg),ikmrk2)
                if ((ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
                   pmsa(ip + inc * (iseg - 1)) = real(iseg)
                endif
@@ -145,8 +145,8 @@
 !   *****     Insert your code here  *****
 !
 !        lowest water and 2d segments only
-         call dhkmrk(1,iknmrk(iseg),ikmrk1)
-         call dhkmrk(2,iknmrk(iseg),ikmrk2)
+         call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
+         call evaluate_waq_attribute(2,iknmrk(iseg),ikmrk2)
          if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
 
             SwEmersion = pmsa( ipnt(  1) )
