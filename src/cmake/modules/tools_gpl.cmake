@@ -59,3 +59,6 @@ set(agrhyd_module ${tools_gpl_path}/agrhyd/packages/agrhyd)
 
 # Maptonetcdf
 set(maptonetcdf_module ${tools_gpl_path}/maptonetcdf/packages/maptonetcdf)
+
+# cosumo_bmi
+set(cosumo_bmi_module "${tools_gpl_path}/cosumo_bmi")

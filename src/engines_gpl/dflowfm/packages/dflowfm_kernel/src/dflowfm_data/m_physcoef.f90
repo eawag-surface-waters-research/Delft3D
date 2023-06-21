@@ -172,6 +172,8 @@
  double precision                  :: tetavmom                   !< vertical teta momentum
 
  double precision                  :: locsaltlev, locsaltmin, locsaltmax
+ 
+ integer                           :: NFEntrainmentMomentum = 0  !< 1: switched on: Momentum transfer in NearField related entrainment
  contains
 !> Sets ALL (scalar) variables in this module to their default values.
 subroutine default_physcoef()
@@ -243,6 +245,8 @@ tetavmom                    = 0.55d0        !< vertical teta momentum
 locsaltlev                  = 1d0           !< salinity level for case of lock exchange
 locsaltmin                  = 5d0           !< minimum salinity for case of lock exchange
 locsaltmax                  = 10d0          !< maximum salinity for case of lock exchange
+
+NFEntrainmentMomentum       = 0
 
 end subroutine default_physcoef
 end module m_physcoef
