@@ -328,7 +328,7 @@ endif
 
 sbc  = 0.0_hp
 ssus  = 0.0_hp
-sbc_total = .false.    ! set flag to indicate that bed load magnitude is given
+sbc_total = .true.    ! set flag to indicate that bed load magnitude is given
     
 !
 if ((chezy<1.0e-6) .or. (utot<1.0e-6)) then
