@@ -209,7 +209,6 @@ error_message = ' '
 !
 ! Set some parameters and compute derivative quantities.
 !
-filenm = 'gen_sed_c.par'
 
 if (acal < 0.0_hp) then
     open (newunit=lun, file = filenm, form = 'formatted', iostat = iocond, status = 'old')
