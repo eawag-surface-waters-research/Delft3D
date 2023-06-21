@@ -201,7 +201,6 @@ error_message = ' '
 !if (write_count < 100) then
 !write(*,*) 'I am here 1'
 !endif 
-filenm = 'gen_eh.par'
 
 if (acal < 0.0_hp) then
     open (newunit=lun, file = filenm, form = 'formatted', iostat = iocond, status = 'old')
