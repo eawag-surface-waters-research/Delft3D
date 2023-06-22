@@ -123,9 +123,9 @@ real(hp)   :: th      ! Shields number
 !
 integer            :: iocond
 integer            :: lun
-real(hp)   :: acal = -1.0_hp
-real(hp)   :: suspfac = 0.0_hp! user-specified suspended sediment factor
-real(hp)   :: power = 2.5_hp !power of the velocity
+real(hp), save     :: acal = -1.0_hp
+real(hp), save     :: suspfac ! user-specified suspended sediment factor
+real(hp), save     :: power   !power of the velocity
 !
 !! extract array variables -----------------------------------------------------
 !

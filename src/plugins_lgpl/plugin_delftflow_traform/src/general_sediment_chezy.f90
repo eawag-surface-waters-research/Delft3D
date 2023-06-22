@@ -124,19 +124,19 @@ real(hp)   :: f     ! help variable for excess Shields number
 !
 integer            :: iocond
 integer            :: lun
-real(hp)   :: acal  = -1.0_hp
-real(hp)   :: b     = -1.0_hp ! exponent of Shields number for bedload
-real(hp)   :: cc    = -1.0_hp ! exponent of excess Shields number for bedload
-real(hp)   :: rmu   = -1.0_hp ! ripple factor for bedload
-real(hp)   :: thcr  = -1.0_hp ! critical Shields number for bedload
-real(hp)   :: chezy_read = -1.0_hp ! Chezy roughness coefficient
-real(hp)   :: chezy = -1.0_hp ! Chezy roughness coefficient
+real(hp), save     :: acal  = -1.0_hp
+real(hp), save     :: b           ! exponent of Shields number for bedload
+real(hp), save     :: cc          ! exponent of excess Shields number for bedload
+real(hp), save     :: rmu         ! ripple factor for bedload
+real(hp), save     :: thcr        ! critical Shields number for bedload
+real(hp), save     :: chezy_read  ! Chezy roughness coefficient
+real(hp)           :: chezy       ! Chezy roughness coefficient
                     
-real(hp)   :: acals =  0.0_hp ! calibration factor for suspended load
-real(hp)   :: bs    = -1.0_hp ! exponent of Shields number for suspended load
-real(hp)   :: ccs   = -1.0_hp ! exponent of excess Shields number for suspended load
-real(hp)   :: rmus  = -1.0_hp ! ripple factor for suspended load
-real(hp)   :: thcrs = -1.0_hp ! critical Shields number for suspended load
+real(hp), save     :: acals       ! calibration factor for suspended load
+real(hp), save     :: bs          ! exponent of Shields number for suspended load
+real(hp), save     :: ccs         ! exponent of excess Shields number for suspended load
+real(hp), save     :: rmus        ! ripple factor for suspended load
+real(hp), save     :: thcrs       ! critical Shields number for suspended load
 !
 !! extract array variables -----------------------------------------------------
 !
@@ -271,9 +271,6 @@ if (acal < 0.0_hp) then
        error_message = 'Problem reading chezy from file: ' // filenm
        return
     endif
-    if (chezy_read > 0d0) then
-        chezy = chezy_read
-    endif
     !
     read(lun,*, iostat = iocond) acals
     if (iocond/=0) then
@@ -311,7 +308,11 @@ endif
 sbc  = 0.0_hp
 ssus  = 0.0_hp
 sbc_total = .true.    ! set flag to indicate that bed load magnitude is given
-    
+
+if (chezy_read > 0d0) then
+    chezy = chezy_read
+endif
+
 !
 if ((chezy<1.0e-6) .or. (utot<1.0e-6)) then
    return
