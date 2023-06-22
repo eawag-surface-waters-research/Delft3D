@@ -24,7 +24,7 @@
       subroutine nlalg  ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_errsys
+      use m_write_error_message
 
 !>\file
 !>       Nutrient limiation function for DYNAMO algae
@@ -86,7 +86,7 @@
       PO4       = PMSA( IP7)
       SI        = PMSA( IP8)
 
-      IF (AMOPRF .LT. 1E-20 )  CALL ERRSYS ('AMOPRF in NLALG zero', 1 )
+      IF (AMOPRF .LT. 1E-20 )  CALL write_error_message ('AMOPRF in NLALG zero' )
 
 !     Calculation of available dissolved N (NO3 corrected with AMOPRF)
       DIN = NO3 / AMOPRF + NH4

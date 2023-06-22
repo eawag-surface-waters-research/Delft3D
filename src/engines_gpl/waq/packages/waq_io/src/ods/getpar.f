@@ -24,7 +24,7 @@
       SUBROUTINE GETPAR ( FNAME  , ITYPE  , PARDEF , MAXDEF , ITMDEP ,
      *                    LOCDEP , MAXLST , LANG   , PARLST , PARUNI ,
      *                    IPRTYP , IPRCOD , NRLST  , IERROR , OPTION )
-      use m_dhopnf
+      use m_open_waq_files
 
 !
 !
@@ -70,7 +70,7 @@
 !         Open the DELWAQ .HIS file
 !
       lun = 10
-      CALL DHOPNF ( lun , FNAME(1) , 24 , 2 , IERROR )
+      CALL open_waq_files ( lun , FNAME(1) , 24 , 2 , IERROR )
       IF ( IERROR .NE. 0 ) RETURN
 !
 !         Read primary system characteristics

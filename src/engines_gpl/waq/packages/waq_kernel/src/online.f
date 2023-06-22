@@ -467,7 +467,7 @@
      +                   funame, IOUTPS, IOPOIN, OUNAM )
       use m_gkwini
       use m_getcom
-      use m_dhopnf
+      use m_open_waq_files
       use timers
 
 
@@ -554,7 +554,7 @@
      +                   danam )
 
       if ( first .or. rewine ) then
-          CALL DHOPNF ( IO_RTC, FILNAM, 21    , 1     , IDUM  )
+          CALL open_waq_files ( IO_RTC, FILNAM, 21    , 1     , IDUM  )
 
           write ( io_rtc ) moname
           write ( io_rtc ) notot+nrvar2, ndmpar

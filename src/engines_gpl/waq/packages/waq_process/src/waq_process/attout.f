@@ -24,7 +24,7 @@
       subroutine attout ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !>\file
 !>       Returns the selected attribute
@@ -61,7 +61,7 @@
          if (idx.eq.0) then
              attrib = iknmrk(iseg)
          else
-             call dhkmrk(idx,iknmrk(iseg),attrib)
+             call evaluate_waq_attribute(idx,iknmrk(iseg),attrib)
          endif
          ! Store the value
          pmsa(ip(2)) = attrib

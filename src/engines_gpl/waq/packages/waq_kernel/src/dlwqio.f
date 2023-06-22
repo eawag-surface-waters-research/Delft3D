@@ -33,7 +33,7 @@
 !     FUNCTION            : Initialisation of OUTPUT system.
 !                           Reads output work file.
 !
-!     SUBROUTINES CALLED  : DHOPNF, Opens files
+!     SUBROUTINES CALLED  : open_waq_files, Opens files
 !
 !     FILES               : LUNWRO, Proces work file
 !                           LUREP , Monitoring file
@@ -71,7 +71,7 @@
 !     Declaration of arguments
 !
       use m_srstop
-      use m_dhopnf
+      use m_open_waq_files
       use timers
       use output
 
@@ -168,17 +168,17 @@
 !              Do not open the normal monitor file
 !
                IF ( K .NE. 1 ) THEN
-                  CALL DHOPNF ( LUN(IFI), LCHAR(IFI), 19   , 1    , IDUM )
+                  CALL open_waq_files ( LUN(IFI), LCHAR(IFI), 19   , 1    , IDUM )
                ENDIF
             ELSEIF ( ISRTOU .EQ. IDMP .OR. ISRTOU .EQ. IDM2 ) THEN
-               CALL DHOPNF ( LUN(IFI), LCHAR(IFI), 20    , 1     , IDUM  )
+               CALL open_waq_files ( LUN(IFI), LCHAR(IFI), 20    , 1     , IDUM  )
             ELSEIF ( ISRTOU .EQ. IHIS .OR. ISRTOU .EQ. IHI2 .OR.
      +               ISRTOU .EQ. IHI3 .OR. ISRTOU .EQ. IHI4 ) THEN
-               CALL DHOPNF ( LUN(IFI), LCHAR(IFI), 21    , 1     , IDUM  )
+               CALL open_waq_files ( LUN(IFI), LCHAR(IFI), 21    , 1     , IDUM  )
             ELSEIF ( ISRTOU .EQ. IMAP .OR. ISRTOU .EQ. IMA2 ) THEN
-               CALL DHOPNF ( LUN(IFI), LCHAR(IFI), 22    , 1     , IDUM  )
+               CALL open_waq_files ( LUN(IFI), LCHAR(IFI), 22    , 1     , IDUM  )
             ELSEIF ( ISRTOU .EQ. IBAL .OR. ISRTOU .EQ. IBA2 ) THEN
-               CALL DHOPNF ( LUN(IFI), LCHAR(IFI), 37    , 1     , IDUM  )
+               CALL open_waq_files ( LUN(IFI), LCHAR(IFI), 37    , 1     , IDUM  )
             ENDIF
    10    CONTINUE
 !

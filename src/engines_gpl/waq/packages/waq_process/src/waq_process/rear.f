@@ -26,7 +26,7 @@
      &                    noq3   , noq4   )
       use m_srstop
       use m_monsys
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !>\file
 !>       Reaeration of carbon dioxide and oxygen
@@ -164,7 +164,7 @@
 !
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
-      CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
+      CALL evaluate_waq_attribute(1,IKNMRK(ISEG),IKMRK1)
       IF (IKMRK1.EQ.1) THEN
 
 !         Compute saturation percentage for all layers
@@ -174,7 +174,7 @@
       SATPERC = O2 / OXSAT * 100
       PMSA (IP27) = SATPERC
 
-      CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+      CALL evaluate_waq_attribute(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.1)) THEN
 !
       DEPTH  = PMSA(IP2 )

@@ -47,7 +47,7 @@
 !     Logical units      : lunut   = unit formatted output file
 !                          lun( 8) = unit intermediate file ('to-from')
 
-      use m_dhopnf
+      use m_open_waq_files
       use grids          ! for the storage of contraction grids
       use rd_token       ! for the reading of tokens
       use timers       !   performance timers
@@ -95,7 +95,7 @@
 
       noq12 = noq1 + noq2
       if ( ipopt1 .eq. 0 )  then
-         call dhopnf  ( lun(44) , lchar(44) , 44      , 2+ftype, ierr2 )
+         call open_waq_files  ( lun(44) , lchar(44) , 44      , 2+ftype, ierr2 )
          if ( ierr2 .ne. 0 ) goto 100
          do iq = 1, noq
             read ( lun(44), iostat = ierr1 ) ipnt(:,iq)
@@ -139,7 +139,7 @@
 !        No problems found, so continue
 
          close ( lun(44) )
-         call dhopnf  ( lun(8) , lchar(8) , 8     , 1     , ierr2 )
+         call open_waq_files  ( lun(8) , lchar(8) , 8     , 1     , ierr2 )
          if ( ierr2 .ne. 0 ) goto 100
          if ( noq1 .gt. 0 ) write( lun(8) )( ipnt(:,iq), iq =       1, noq1  )
          if ( noq2 .gt. 0 ) write( lun(8) )( ipnt(:,iq), iq = noq1 +1, noq12 )
@@ -150,7 +150,7 @@
                if ( gettoken( ipnt(ip,iq), ierr2 ) .gt. 0 ) goto 100
             enddo
          enddo
-         call dhopnf  ( lun(8) , lchar(8) , 8     , 1     , ierr2 )
+         call open_waq_files  ( lun(8) , lchar(8) , 8     , 1     , ierr2 )
          if ( ierr2 .ne. 0 ) goto 100
          if ( noq1 .gt. 0 ) write( lun(8) )( ipnt(:,iq), iq =       1, noq1  )
          if ( noq2 .gt. 0 ) write( lun(8) )( ipnt(:,iq), iq = noq1 +1, noq12 )

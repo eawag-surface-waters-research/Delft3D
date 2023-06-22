@@ -27,7 +27,7 @@
       use m_srstop
       use m_move
       use m_makpnt
-      use m_dhopnf
+      use m_open_waq_files
 
       contains
       subroutine dlwqi0 ( nlun   , a      , j      , c      , imaxa  ,
@@ -59,7 +59,7 @@
 !                           DLWQIP, initialises proces system
 !                           DLWQIO, initialises output system
 !                           DLWQT0, sets time functions
-!                           DHOPNF, opens files
+!                           open_waq_files, opens files
 !                           MOVE  , copy's arrays
 !                           ZERO  , zeros an real arrays
 !
@@ -139,7 +139,7 @@
 !
 !         initialisation of info from the system file
 !
-      CALL DHOPNF ( LUN(2) , LCHAR(2) , 2    , 2    , IERRD  )
+      CALL open_waq_files ( LUN(2) , LCHAR(2) , 2    , 2    , IERRD  )
       CALL DLWQI2 ( LUN     , C(IMNAM), C(ISNAM), J(IDUMP), C(IDNAM),
      *              J(IDPNT), J(IVPNT), A(IDISP), J(IBPNT), C(IBNID),
      *              C(IBNAM), C(IBTYP), J(INTYP), J(IWAST), iwstkind,
@@ -167,12 +167,12 @@
 !
 !     open binary system files for new input processing, if any
 !
-      CALL DHOPNF ( LUN(41) , LCHAR(41) , 41   ,  1   , IERRD  )
+      CALL open_waq_files ( LUN(41) , LCHAR(41) , 41   ,  1   , IERRD  )
       IF ( IERRD .EQ. 0 ) THEN
          DO I = 1 , NUFIL
             READ ( LUN(41) , * ) iftyp, FINAM
             new_lun =  800+I
-            CALL DHOPNF ( new_lun , FINAM , 3 , 2+iftyp , IOERR )
+            CALL open_waq_files ( new_lun , FINAM , 3 , 2+iftyp , IOERR )
             IF ( IOERR .NE. 0 ) THEN
                WRITE ( LUN(19) , '(A,I3,A,A)' )
      *         ' ERROR opening file on unit: ',800+I,' filename: ',FINAM
@@ -189,7 +189,7 @@
 !     initialisation of PROCES subsytem
 !
       IF ( NPROC .GT. 0 ) THEN
-         CALL DHOPNF (LUN(24) , LCHAR(24), 24      , 2        , IERRD   )
+         CALL open_waq_files (LUN(24) , LCHAR(24), 24      , 2        , IERRD   )
          CALL DLWQIP (LUN(24) , LCHAR(24), LUN(19) , NOTOT    , NIPMSA  ,
      +                NPROC   , NOLOC    , NFLUX   , NODEF    , J(INSVA),
      +                J(IIFLU), J(IPVAR) , J(IPTYP), A(IDEFA) , A(ISTOC),
@@ -214,7 +214,7 @@
 !
 
       IF ( NOUTP .GT. 0 ) THEN
-         CALL DHOPNF ( LUN(25) , LCHAR(25), 25      , 2      , IERRD   )
+         CALL open_waq_files ( LUN(25) , LCHAR(25), 25      , 2      , IERRD   )
          CALL DLWQIO ( LUN(25) , LCHAR(25), LUN(19) , NOUTP   , NRVART  ,
      +                 NBUFMX  , J(IIOUT) , J(IIOPO), C(IONAM), C(IOSNM),
      +                 C(IOUNI), C(IODSC) , NOTOT   , C(ISSNM), C(ISUNI),
@@ -225,14 +225,14 @@
 !         initialisation of the grid layout
 !
       IF ( NX*NY .GT. 0 ) THEN
-         CALL DHOPNF ( LUN(6) , LCHAR(6) , 6    , 2    , IERRD  )
+         CALL open_waq_files ( LUN(6) , LCHAR(6) , 6    , 2    , IERRD  )
          READ  ( LUN( 6) ) (J(K),K=IGRID,IGRID+NX*NY-1)
          CLOSE ( LUN( 6) )
       ENDIF
 !
 !         initialisation of exchange pointers
 !
-      CALL DHOPNF ( LUN(8) , LCHAR(8) , 8    , 2+ftype(8), IERRD  )
+      CALL open_waq_files ( LUN(8) , LCHAR(8) , 8    , 2+ftype(8), IERRD  )
 
       if ( intsrt .eq. 19 .or. intsrt .eq. 20 .or. nmax*mmax .gt. 0 ) then
 
@@ -254,7 +254,7 @@
      &                noq     , noq1    , noq2    , j(ilgra:), j(ixpnt:),
      &                cellpnt , flowpnt )
          finam = lchar(8)(1:index(lchar(8),'.',.true.))//'cco'
-         call dhopnf ( lun(8), finam, 8, 2+ftype(8), ierrd )
+         call open_waq_files ( lun(8), finam, 8, 2+ftype(8), ierrd )
          read ( lun(8) )
          read ( lun(8) ) mmax2, nmax2, x0, y0, beta, np2, nlay
          do i = 1, 2*np2 + 9
@@ -295,7 +295,7 @@
 !         initial conditions
 
       propor = .false.
-      call dhopnf ( lun(18) , lchar(18) , 18    , 2    , ierrd  )
+      call open_waq_files ( lun(18) , lchar(18) , 18    , 2    , ierrd  )
       ig = scan ( lchar(18), '.', back = .true. )                ! look for the file type
       cext = lchar(18)(ig:ig+3)
       call str_lower(cext)

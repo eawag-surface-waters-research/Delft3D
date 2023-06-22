@@ -60,7 +60,7 @@
 !                               Introduction DLWQ5G.F for column headers
 
 !     SUBROUTINES CALLED : RDTOK1 - tokenized input
-!                          DHOPNF - opens a file
+!                          open_waq_files - opens a file
 !                          DLWQ5B - gets names of items/concentrations
 !                          DLWQ5C - gets ODS data
 !                          DLWQ5D - gets block of breakpoint data
@@ -77,7 +77,7 @@
 !                          LUN(15) = unit intermediate file (wastes)
 
       use m_zoek
-      use m_dhopnf
+      use m_open_waq_files
       use rd_token
       use timers       !   performance timers
       use dlwq_data
@@ -191,7 +191,7 @@
 !
 !     Open the binary work file and privide a zero overall default
 !
-      call dhopnf ( lun(iu) , lchar(iu) , iu    , 1     , ioerr )
+      call open_waq_files ( lun(iu) , lchar(iu) , iu    , 1     , ioerr )
       if ( iu .eq. 14 ) then
          write ( lunwr2 ) ' 4.900BOUND '
          calit  = 'BOUNDARIES'

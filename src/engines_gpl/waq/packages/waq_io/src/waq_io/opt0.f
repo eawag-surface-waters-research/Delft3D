@@ -58,7 +58,7 @@
 !     Subroutines called : opt1    get & open include file
 !                          opt2    read constants ( << (include) file)
 !                          opt3    read time dep  ( << (include) file)
-!                          dhopnf  open file
+!                          open_waq_files  open file
 
 !     Functions called   : gettok  tokenized data file reading
 
@@ -70,7 +70,7 @@
 !                          lun( 4) = unit intermediate file (pointers)
 !                          lun(is) = unit intermediate file (items)
 
-      use m_dhopnf
+      use m_open_waq_files
       use timers       !   performance timers
       use rd_token
       use m_sysn          ! System characteristics
@@ -229,7 +229,7 @@
       select case ( iopt2 )
          case ( 1, 2 )              !   Constants with and without defaults in three directions
             allocate ( values( ndim2, max(noql1,noql2,noql3) ) )
-            call dhopnf ( lun(is) , lchar(is) , is    , 1     , ierr2 )
+            call open_waq_files ( lun(is) , lchar(is) , is    , 1     , ierr2 )
             write ( lun(is) ) idummy
             if ( noql1 .gt. 0 ) write ( lunut , 2030 )
             call opt2 ( iopt2  , values , noql1  , ndim2  , ndim3  ,

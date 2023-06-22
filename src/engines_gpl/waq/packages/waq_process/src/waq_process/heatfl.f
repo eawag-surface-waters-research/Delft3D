@@ -87,7 +87,7 @@
 
       use m_srstop
       use m_monsys
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
       USE PHYSICALCONSTS, ONLY : CtoKelvin
       IMPLICIT NONE
       REAL     PMSA  ( * ) , FL  (*)
@@ -160,7 +160,7 @@
 !
 !     Heat exchange only for top layer segments
 !
-         CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+         CALL evaluate_waq_attribute(2,IKNMRK(ISEG),IKMRK2)
          IF (IKMRK2.EQ.0 .OR. IKMRK2.EQ.1) THEN
 !
             Qsw     = PMSA(IP1 )

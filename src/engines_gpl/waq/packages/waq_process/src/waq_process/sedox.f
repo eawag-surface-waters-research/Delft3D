@@ -24,7 +24,7 @@
       subroutine sedox  ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !>\file
 !>       Sediment Oxygen Demand (SOD)
@@ -205,7 +205,7 @@
          PMSA (IP33)  = 0.0
 
          IF (BTEST(IKNMRK(ISEG),0)) THEN
-            CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+            CALL evaluate_waq_attribute(2,IKNMRK(ISEG),IKMRK2)
 
 !           Alleen bij vaktype met een bodem...
             BODEM = .FALSE.

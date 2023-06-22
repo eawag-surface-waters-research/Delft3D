@@ -59,7 +59,7 @@
 !                          DLWQ66, makes masses
 !                          DLWQ67, zeros the matrix
 !                          DELMAT, inverts the matrix
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !
 !     PARAMETERS    :
 !

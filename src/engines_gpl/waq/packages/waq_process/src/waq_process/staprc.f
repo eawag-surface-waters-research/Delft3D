@@ -24,7 +24,7 @@
       subroutine staprc ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !>\file
 !>       Exceedence frequency, its complement and the mean
@@ -190,7 +190,7 @@
                PMSA(IP9) = 0.0
 
                IF ( NOWARN < MAXWARN ) THEN
-                  CALL DHKMRK(IKNMRK(ISEG), 3, ATTRIB )
+                  CALL evaluate_waq_attribute(IKNMRK(ISEG), 3, ATTRIB )
                   IF ( ATTRIB .NE. 0 ) THEN
                      NOWARN = NOWARN + 1
                      WRITE(*,'(a,i0)')      'Exceedance could not be determined for segment ', ISEG

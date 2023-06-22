@@ -24,7 +24,7 @@
       subroutine ssedph ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !>\file
 !>       Sum of sedimentation flux of algae Dynamo - Bloom - GEM
@@ -64,9 +64,9 @@
       IP2   = IPOINT(  2 )
 
       DO 9000 ISEG = 1 , NOSEG
-      CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
+      CALL evaluate_waq_attribute(1,IKNMRK(ISEG),IKMRK1)
       IF (IKMRK1.EQ.1) THEN
-      CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+      CALL evaluate_waq_attribute(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
 !
           DEPTH   = PMSA(IP2)
@@ -144,8 +144,8 @@
 !        Zoek eerste kenmerk van- en naar-segmenten
 
          IF ( IVAN.GT.0 .AND. INAAR.GT.0 ) THEN
-         CALL DHKMRK(1,IKNMRK(IVAN ),IKMRKV)
-         CALL DHKMRK(1,IKNMRK(INAAR),IKMRKN)
+         CALL evaluate_waq_attribute(1,IKNMRK(IVAN ),IKMRKV)
+         CALL evaluate_waq_attribute(1,IKNMRK(INAAR),IKMRKN)
          IF (IKMRKV.EQ.1.AND.IKMRKN.EQ.1 .OR.
      +       IKMRKV.EQ.1.AND.IKMRKN.EQ.3) THEN
 

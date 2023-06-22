@@ -287,9 +287,9 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
           endif
           !
           if (kmax == 0) then ! 2D
-             call get_tshear_tdiss( tshear, tur_eps, taub = taubmx(nm), rho_water = rhoint, waterdepth = h0, vonkar = vonkar )
+             call get_tshear_tdiss( tshear, tur_eps, rhoint, taub = taubmx(nm), waterdepth = h0, vonkar = vonkar )
           elseif (ltur == 0) then ! algebraic or constant
-             call get_tshear_tdiss( tshear, tur_eps, taub = taubmx(nm), rho_water = rhoint, waterdepth = h0, localdepth = ldepth)
+             call get_tshear_tdiss( tshear, tur_eps, rhoint, taub = taubmx(nm), waterdepth = h0, localdepth = ldepth)
           elseif (ltur == 1) then ! k-L
              ! compute mixing length analogous to rl in turclo
              if (rich(nm, k)>=0.0) then
@@ -298,9 +298,9 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                 fl = (1.0_fp - 14.0_fp*rich(nm, k))**0.25_fp
              endif
              tur_l = vonkar * (h0 - ldepth) * sqrt(ldepth/h0) * fl
-             call get_tshear_tdiss( tshear, tur_eps, tke = tur_k, tlength = tur_l, vonkar = vonkar)
+             call get_tshear_tdiss( tshear, tur_eps, rhoint, tke = tur_k, tlength = tur_l, vonkar = vonkar)
           else ! k-eps
-             call get_tshear_tdiss( tshear, tur_eps, tke = tur_k )
+             call get_tshear_tdiss( tshear, tur_eps, rhoint, tke = tur_k )
           endif
           !
           ctot = 0.0_fp

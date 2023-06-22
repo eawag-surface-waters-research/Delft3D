@@ -26,7 +26,7 @@
 !>                    delwaq1_write_messages
 
 subroutine delwaq1_write_messages(errorcode)
-    use m_dhopnf
+    use m_open_waq_files
     use m_delwaq1_data
     use m_dattim
 
@@ -49,7 +49,7 @@ subroutine delwaq1_write_messages(errorcode)
         call space  ( lunrep, .false., abuf   , ibuf   , chbuf  , &
                       itota , itoti  , itotc  )
 
-        call dhopnf  ( lun(1) , lchar(1) , 1     , 1     , ioerr )
+        call open_waq_files  ( lun(1) , lchar(1) , 1     , 1     , ioerr )
         write ( lun(1) )   in
         write ( lun(1) )   ii
         write ( lun(1) )   itota , itoti , itotc
@@ -58,7 +58,7 @@ subroutine delwaq1_write_messages(errorcode)
         write ( lun(1) ) ( filtype(k) , k = 1,nolun  )
     else
         write ( lunrep , '(  '' SIMULATION PROHIBITED !!!!!!!!'')' )
-        call dhopnf  ( lun(1) , lchar(1) , 1     , 3     , ioerr )
+        call open_waq_files  ( lun(1) , lchar(1) , 1     , 3     , ioerr )
         errorcode = 1
     endif
 

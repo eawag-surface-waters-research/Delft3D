@@ -49,7 +49,7 @@
 !                           DLWQT3, makes values for harmonic function
 !                           DLWQT4, makes values for block / linear
 !                                   interpolated functions
-!                           DHOPNF, opens files
+!                           open_waq_files, opens files
 !
 !     PARAMETERS          :
 !
@@ -92,7 +92,7 @@
 !     DECLARATIONS        :
 !
       use m_srstop
-      use m_dhopnf
+      use m_open_waq_files
       use timers
       use delwaq2_data
 
@@ -135,7 +135,7 @@
       IF ( NTOTAL .GT. 0 ) THEN
          IF ( IFFLAG .EQ. 1 ) THEN
             IF ( .NOT. NEWSET ) THEN
-               CALL DHOPNF ( LUN(IS) , LUNTXT(IS) , IS , 2+ftype(is), IERR )
+               CALL open_waq_files ( LUN(IS) , LUNTXT(IS) , IS , 2+ftype(is), IERR )
                IF ( IERR .NE. 0 ) THEN
                   WRITE(LUN(19),*) 'ERROR in DLWQT1, opening file'
                   WRITE(LUN(19),*) 'number  :',IS
@@ -149,7 +149,7 @@
                   goto 9999        !  RETURN
                ELSE
                   CLOSE ( LUN(IS) )
-                  CALL DHOPNF ( LUN(IS) , LUNTXT(IS) , IS , 2+ftype(is), IERR )
+                  CALL open_waq_files ( LUN(IS) , LUNTXT(IS) , IS , 2+ftype(is), IERR )
                ENDIF
             ELSE
                IPSI = IPA

@@ -29,7 +29,7 @@ subroutine PROGRE     ( pmsa   , fl     , ipoint , increm, noseg , &
 !
 !*******************************************************************************
 !
-use m_dhkmrk
+use m_evaluate_waq_attribute
 use protist_math_functions
 use protist_cell_functions
 use protist_uptake_functions
@@ -141,7 +141,7 @@ use ieee_arithmetic
 
     ! segment loop
     segmentLoop: do iseg = 1 , noseg
-        call dhkmrk(1,iknmrk(iseg),ikmrk1)
+        call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
         if (ikmrk1.eq.1) then
 
         ! species independent items

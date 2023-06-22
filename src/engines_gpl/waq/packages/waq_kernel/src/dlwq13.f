@@ -49,7 +49,7 @@
 !     NOSEG   INTEGER  1           INPUT   total number of segments
 !
 !
-      use m_dhopnf
+      use m_open_waq_files
       use timers
 
       DIMENSION     CONC  ( NOTOT, NOSEG ) , LUN(*)
@@ -97,7 +97,7 @@
       write (lun(19),*) ' Restart file written to restart_temporary.map !'
       lcharmap = 'restart_temporary.map'
 
-   20 CALL DHOPNF ( LUN(23), LCHARMAP, 23    , 1     , IERR  )
+   20 CALL open_waq_files ( LUN(23), LCHARMAP, 23    , 1     , IERR  )
       WRITE ( LUN(23) ) ( MNAME(K) , K=1,4 )
       WRITE ( LUN(23) )   NOTOT    , NOSEG
       WRITE ( LUN(23) ) ( SNAME(K) , K=1,NOTOT )
