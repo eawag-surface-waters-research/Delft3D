@@ -24,7 +24,7 @@
       subroutine dmvol  ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !>\file
 !>       Volume of dry matter in a segment
@@ -66,7 +66,7 @@
 !
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
-         CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
+         CALL evaluate_waq_attribute(1,IKNMRK(ISEG),IKMRK1)
 
          IF (BTEST(IKNMRK(ISEG),0)) THEN
 

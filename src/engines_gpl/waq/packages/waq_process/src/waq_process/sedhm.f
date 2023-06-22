@@ -24,7 +24,7 @@
       subroutine sedhm  ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !>\file
 !>       Sedimentation flux and velocity of adsorbed heavy metals
@@ -62,7 +62,7 @@
 
       do 9000 iseg = 1 , noseg
       if (btest(iknmrk(iseg),0)) then
-      call dhkmrk(2,iknmrk(iseg),ikmrk2)
+      call evaluate_waq_attribute(2,iknmrk(iseg),ikmrk2)
       if ((ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
 
       fl1    = pmsa( ipnt(1 ) )

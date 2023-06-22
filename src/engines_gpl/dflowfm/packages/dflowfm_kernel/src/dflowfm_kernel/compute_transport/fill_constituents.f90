@@ -77,6 +77,18 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
       end if
    end do
 
+   if ( ISED1.ne.0 ) then
+      do k=1,ndx
+         if (hs(k)<stmpar%morpar%sedthr) then
+            do i=1,mxgr
+               iconst = ISED1+i-1
+               call getkbotktop(k,kb,kt)
+               constituents(iconst,kb:kt) = 0d0
+            end do
+         endif
+      end do
+   end if
+
    difsedu = 0d0 ; difsedw = 0d0 ; sigdifi = 0d0
 
 !  diffusion coefficients

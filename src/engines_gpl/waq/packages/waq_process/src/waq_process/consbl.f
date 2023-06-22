@@ -26,7 +26,7 @@
      &                    noq3   , noq4   )
       use m_srstop
       use m_monsys
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !>\file
 !>       Grazing module
@@ -253,7 +253,7 @@
       DO 9000 ISEG = 1 , NOSEG
       IF (BTEST(IKNMRK(ISEG),0)) THEN
 
-      CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+      CALL evaluate_waq_attribute(2,IKNMRK(ISEG),IKMRK2)
 
 !     RESET FLUXES
       DO 31 I=1,5*NTONUT+NTOALG
@@ -279,7 +279,7 @@
           GRZNEW(IFILSP) = GRZNEW(IFILSP)/DEPTH
           GRZOLD(IFILSP) = GRZOLD(IFILSP)/DEPTH
 !         FRDBOT(IFILSP) = FRDBOT_SAVE(IFILSP)
-          CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+          CALL evaluate_waq_attribute(2,IKNMRK(ISEG),IKMRK2)
           IF ((IKMRK2.EQ.1).OR.(IKMRK2.EQ.2)) THEN
              GRZNEW(IFILSP) = 0.0
              FRDBOT(IFILSP) = 0.0

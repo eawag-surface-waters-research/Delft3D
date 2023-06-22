@@ -63,7 +63,8 @@
  use m_sobekdfm
  use m_waves, only: default_waves
  use m_save_ugrid_state
- use  m_xbeach_avgoutput, only: default_xbeach_avgoutput
+ use m_xbeach_avgoutput, only: default_xbeach_avgoutput
+ use m_nearfield, only: default_nearfieldData
  use m_ship
  use unstruc_caching
  use m_subsidence
@@ -134,6 +135,8 @@
     call default_xbeach_avgoutput()
 
     call default_save_ugrid_state()
+
+    call default_nearfieldData()
 
     !Reset samples:
     ns = 0

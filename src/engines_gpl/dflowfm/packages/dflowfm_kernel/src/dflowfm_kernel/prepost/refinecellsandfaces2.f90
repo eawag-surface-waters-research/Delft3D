@@ -616,6 +616,7 @@ subroutine refinecellsandfaces2()
 
       jarefine = 0
       jarefinelink = 0
+      landsea = 0
 
       nnn(1) = N
 
@@ -709,7 +710,7 @@ subroutine refinecellsandfaces2()
                call averaging2(1,NS,xs,ys,zs,ipsam,xc,yc,zc,1,x,y,N,nnn,jakdtree, &
                dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, errorInfo)
             else if (interpolationtype == 4) then
-               landsea = 0
+               !landsea = 0
                
                zmx = -1d9; zmn = 1d9
                do m = 1,N

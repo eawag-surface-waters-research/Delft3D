@@ -57,7 +57,7 @@
 !                          DLWQ41, update volumes
 !                          DLWQT0, update other time functions
 !                          PROINT, integration of fluxes
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !                          SRSTOP, stops execution
 !
 ! ROUTINES MBT TRISULA-TRANSPORTSCHEMA:

@@ -125,13 +125,14 @@ integer, parameter, public :: RP_USTAR = 45     ! effective shear velocity [m/s]
 integer, parameter, public :: RP_KWTUR = 46     ! wave breaking induced turbulence
 integer, parameter, public :: RP_UAU   = 47     ! U component of velocity asymmetry due to short waves [m/s]
 integer, parameter, public :: RP_VAU   = 48     ! V component of velocity asymmetry due to short waves [m/s]
-integer, parameter, public :: RP_BLCHG = 49     ! bed level change rate (needed for dilatancy calculation in van Thiel formulation0)[m/s]
+integer, parameter, public :: RP_BLCHG = 49     ! bed level change rate (needed for dilatancy calculation in van Thiel formulation) [m/s]
 integer, parameter, public :: RP_D15MX = 50     ! D15 of particle size mix of the part of the bed exposed to transport [m]
 integer, parameter, public :: RP_POROS = 51     ! porosity of particle size mix of the part of the bed exposed to transport [-]
 integer, parameter, public :: RP_DZDX  = 52     ! U component of bed slope [-]
 integer, parameter, public :: RP_DZDY  = 53     ! V component of bed slope [-]
 integer, parameter, public :: RP_DM    = 54     ! median sediment diameter of particle size mix of the part of the bed exposed to transport [m]
-integer, parameter, public :: MAX_RP   = 54     ! mmaximum number of real parameters
+integer, parameter, public :: RP_DBG   = 55     ! debug array value from eqtran [-]
+integer, parameter, public :: MAX_RP   = 55     ! mmaximum number of real parameters
 !
 integer, parameter, public :: IP_NM    =  1     ! local (i.e. within partition) cell index
 integer, parameter, public :: IP_N     =  2     ! local (i.e. within partition) fastest dimension index -- only for structured mesh models
@@ -421,6 +422,10 @@ type morpar_type
     real(fp):: avaltime   !  time scale in seconds (used for avalanching)
     real(fp):: hswitch    !  depth to switch dryslope and wetslope
     real(fp):: dzmaxdune  !  Maximum bed level change per hydrodynamic time step
+    real(fp):: bermslope       !  Swash zone slope for (semi-) reflective beaches
+    real(fp):: bermslopefac    !  Bed slope transport factor for bermslope model
+    real(fp):: bermslopegamma  !  Wave height - water depth ratio to turn on bermslope swash transport
+    real(fp):: bermslopedepth  !  Depth to turm on berm slope swash transport
     !
     !  (sp)
     !
@@ -492,6 +497,10 @@ type morpar_type
     logical :: multi               !  Flag for merging bottoms of different parallel runs
     logical :: duneavalan          !  Flag for avalanching using wetslope and dryslope
     logical :: l_suscor            !  Flag for applying correction to doublecounting of sus/bed transport in 3d
+    logical :: bermslopetransport  !  Flag to turn on bermslope swash transport model
+    logical :: bermslopebed        !  Flag to turn on bermslope swash transport model for bedload
+    logical :: bermslopesus        !  Flag to turn on bermslope swash transport model for suspended load
+    
     !
     ! characters
     !
@@ -1359,6 +1368,7 @@ subroutine nullmorpar(morpar)
     real(fp)                             , pointer :: bed
     real(fp)                             , pointer :: tmor
     real(fp)                             , pointer :: tcmp
+    real(fp)              , dimension(:) , pointer :: thetsd
     real(fp)                             , pointer :: thetsduni
     real(fp)                             , pointer :: susw
     real(fp)                             , pointer :: sedthr
@@ -1389,7 +1399,16 @@ subroutine nullmorpar(morpar)
     logical                              , pointer :: duneavalan
     real(fp)                             , pointer :: hswitch
     real(fp)                             , pointer :: dzmaxdune
+    logical                              , pointer :: bermslopetransport
+    logical                              , pointer :: bermslopebed
+    logical                              , pointer :: bermslopesus
+    real(fp)                             , pointer :: bermslope
+    real(fp)                             , pointer :: bermslopefac
+    real(fp)                             , pointer :: bermslopegamma
+    real(fp)                             , pointer :: bermslopedepth
+    real(fp)              , dimension(:) , pointer :: xx
     !
+    real(hp)              , dimension(:) , pointer :: mergebuf
     logical                              , pointer :: bedupd
     logical                              , pointer :: cmpupd
     logical                              , pointer :: eqmbcsand
@@ -1411,6 +1430,8 @@ subroutine nullmorpar(morpar)
     character(256)                       , pointer :: ttlfil
     character(256)                       , pointer :: telfil
     character(256)                       , pointer :: flsthetsd
+    type (bedbndtype)     , dimension(:) , pointer :: morbnd
+    type (cmpbndtype)     , dimension(:) , pointer :: cmpbnd
     !
     real(fp) :: rmissval
     integer  :: imissval
@@ -1435,6 +1456,7 @@ subroutine nullmorpar(morpar)
     bed                 => morpar%bed
     tmor                => morpar%tmor
     tcmp                => morpar%tcmp
+    thetsd              => morpar%thetsd
     thetsduni           => morpar%thetsduni
     susw                => morpar%susw
     sedthr              => morpar%sedthr
@@ -1462,6 +1484,13 @@ subroutine nullmorpar(morpar)
     duneavalan          => morpar%duneavalan
     hswitch             => morpar%hswitch
     dzmaxdune           => morpar%dzmaxdune
+    bermslopetransport  => morpar%bermslopetransport
+    bermslopebed        => morpar%bermslopebed
+    bermslopesus        => morpar%bermslopesus
+    bermslope           => morpar%bermslope
+    bermslopefac        => morpar%bermslopefac
+    bermslopegamma      => morpar%bermslopegamma
+    bermslopedepth      => morpar%bermslopedepth
     !
     ihidexp             => morpar%ihidexp
     itmor               => morpar%itmor
@@ -1473,6 +1502,10 @@ subroutine nullmorpar(morpar)
     morfacrec           => morpar%morfacrec
     morfactable         => morpar%morfactable
     nxx                 => morpar%nxx
+    morbnd              => morpar%morbnd
+    cmpbnd              => morpar%cmpbnd
+    mergebuf            => morpar%mergebuf
+    xx                  => morpar%xx
     ttlform             => morpar%ttlform
     telform             => morpar%telform
     !
@@ -1574,6 +1607,13 @@ subroutine nullmorpar(morpar)
     duneavalan         = .false.
     hswitch            = 0.1_fp
     dzmaxdune          = 100.0_fp           ! with Marlies, 20180417
+    bermslopetransport = .false.
+    bermslopebed       = .true.
+    bermslopesus       = .true.
+    bermslope          = 1d-1
+    bermslopefac       = 1d0
+    bermslopegamma     = 1d0
+    bermslopedepth     = 1d0
     !
     ihidexp            = 1
     itmor              = 0

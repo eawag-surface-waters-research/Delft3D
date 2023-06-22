@@ -71,7 +71,7 @@
 !                          DLWQF6, checks matrix
 !                          MOVE,   copies one array to another
 !                          PROINT, integration of fluxes
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !                          SGMRES, solves (iteratively) system of equations
 !                          ZERCUM, zero's the cummulative array's
 !

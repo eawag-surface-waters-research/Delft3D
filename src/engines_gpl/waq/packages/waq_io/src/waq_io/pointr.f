@@ -23,7 +23,7 @@
 
       module pointr_mod
       use m_makpnt
-      use m_dhopnf
+      use m_open_waq_files
 
       contains
       subroutine pointr ( lun    , lchar  , noseg  , nmax   , mmax   ,
@@ -55,7 +55,7 @@
 
 !     SUBROUTINES CALLED : makpnt
 !                          bound
-!                          dhopnf
+!                          open_waq_files
 
 !     LOGICAL UNITS      : lunut   = unit formatted output file
 !                          lun( 8) = unit intermediate file ('to-from')
@@ -117,7 +117,7 @@
 !        Read and check first line of matrix
 
       if ( ipopt1 .eq. 0 )  then         ! binary file
-         call dhopnf  ( lun(8) , lchar(8) , 8      , 2     , ierr2 )
+         call open_waq_files  ( lun(8) , lchar(8) , 8      , 2     , ierr2 )
          if ( ierr2 .ne. 0 ) goto 100
          read  ( lun( 8) ) nmax2, mmax2, nm, nlay, noq1, noq2, noq3
       else
@@ -167,7 +167,7 @@
          do i1 = 1 , ntot
             if ( gettoken( imat(i1), ierr2 ) .gt. 0 ) goto 100
          enddo
-         call dhopnf  ( lun(8) , lchar(8) , 8      , 1     , ierr2 )
+         call open_waq_files  ( lun(8) , lchar(8) , 8      , 1     , ierr2 )
          if ( ierr2 .ne. 0 ) goto 100
          write ( lun( 8) ) nmax,mmax,noseg,kmax,noq1,noq2,noq3
          write ( lun( 8) ) imat
@@ -205,7 +205,7 @@
 !     open cco-file
 
       filename = lchar(8)(1:index(lchar(8),'.',.true.))//'cco'
-      call dhopnf ( lun(8), filename, 8, 2, ierr2 )
+      call open_waq_files ( lun(8), filename, 8, 2, ierr2 )
       if ( ierr2 .ne. 0 ) then
          write ( lunut, 2060 ) filename
          goto 100

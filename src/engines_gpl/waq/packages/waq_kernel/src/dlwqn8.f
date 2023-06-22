@@ -50,7 +50,7 @@
 !                          DLWQ81, add waste loads
 !                          DLWQ82, do the transport
 !                          DLWQ83, set iteration step and check
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !
 !     PARAMETERS    :
 !

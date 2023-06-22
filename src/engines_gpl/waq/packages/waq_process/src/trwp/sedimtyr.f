@@ -24,8 +24,8 @@
       subroutine SEDTYR    ( pmsa  , fl    , ipoint, increm, noseg ,
      &                       noflux, iexpnt, iknmrk, noq1  , noq2  ,
      &                       noq3  , noq4  )
-      use m_errsys
-      use m_dhkmrk
+      use m_write_error_message
+      use m_evaluate_waq_attribute
 
 
 !>\file
@@ -88,7 +88,7 @@
 
       ntrwp = pmsa(ipoint(ip_ntrwp))
       nspm = pmsa(ipoint(ip_nim  ))
-      if (nspm.gt.nspmm) call errsys ('Dimension issue in SEDTYR',1)
+      if (nspm.gt.nspmm) call write_error_message ('Dimension issue in SEDTYR')
       nitem = ip_lastsingle + 3*ntrwp+nspm+2*ntrwp
       delt           = pmsa(ipoint(ip_Delt))
       safe_factor    = pmsa(ipoint(ip_SafeFactor))
@@ -98,9 +98,9 @@
 
       iflux = 0
       do iseg = 1 , noseg
-          call dhkmrk(1,iknmrk(iseg),ikmrk1)
+          call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
           if (ikmrk1.eq.1) then
-          call dhkmrk(2,iknmrk(iseg),ikmrk2)
+          call evaluate_waq_attribute(2,iknmrk(iseg),ikmrk2)
           if (ikmrk2.eq.0.or.ikmrk2.eq.3) then   ! surface water
 
               ! input independentt of fractions

@@ -356,8 +356,9 @@ void Dimr::runParallelInit(dimr_control_block* cb) {
     if (masterComponent->onThisRank) {
         chdir(masterComponent->workingDir);
         log->Write(INFO, my_rank, "%s.Initialize(%s)", masterComponent->name, masterComponent->inputFile);
+		// SetKeyVals for settings (before initialize)
+		int nSettingsSet = masterComponent->dllSetKeyVals(masterComponent->settings);
         timerStart(masterComponent);
-        nSettingsSet = masterComponent->dllSetKeyVals(masterComponent->settings);
         masterComponent->result = (masterComponent->dllInitialize) (masterComponent->inputFile);
         if (masterComponent->result != 0)
         {
@@ -370,6 +371,8 @@ void Dimr::runParallelInit(dimr_control_block* cb) {
             throw Exception(true, Exception::ERR_UNKNOWN, message.c_str());
         }
         timerEnd(masterComponent);
+		// SetKeyVals for parameters (after initialize)
+		int nParamsSet = masterComponent->dllSetKeyVals(masterComponent->parameters);
         (masterComponent->dllGetStartTime) (&cb->subBlocks[cb->masterSubBlockId].tStart);
         (masterComponent->dllGetEndTime) (&cb->subBlocks[cb->masterSubBlockId].tEnd);
         (masterComponent->dllGetTimeStep) (&cb->subBlocks[cb->masterSubBlockId].tStep);
@@ -442,8 +445,9 @@ void Dimr::runParallelInit(dimr_control_block* cb) {
 
                         chdir(thisComponent->workingDir);
                         log->Write(INFO, my_rank, "%s.Initialize(%s)", thisComponent->name, thisComponent->inputFile);
+						// SetKeyVals for settings (before initialize)
+						int nSettingsSet = thisComponent->dllSetKeyVals(thisComponent->settings);
                         timerStart(thisComponent);
-                        nSettingsSet = thisComponent->dllSetKeyVals(thisComponent->settings);
                         thisComponent->result = (thisComponent->dllInitialize) (thisComponent->inputFile);
                         if (thisComponent->result != 0)
                         {
@@ -457,6 +461,8 @@ void Dimr::runParallelInit(dimr_control_block* cb) {
                             throw Exception(true, Exception::ERR_UNKNOWN, message.c_str());
                         }
                         timerEnd(thisComponent);
+						// SetKeyVals for parameters (after initialize)
+						int nParamsSet = thisComponent->dllSetKeyVals(thisComponent->parameters);
                     }
                 }
             }
@@ -464,124 +470,6 @@ void Dimr::runParallelInit(dimr_control_block* cb) {
             for (int j = 0; j < cb->subBlocks[i].numSubBlocks; j++) {
                 if (cb->subBlocks[i].subBlocks[j].type != CT_START) {
                     dimr_coupler* thisCoupler = cb->subBlocks[i].subBlocks[j].unit.coupler;
-                    for (int k = 0; k < thisCoupler->numItems; k++) {
-                        if (thisCoupler->sourceComponent->type == COMP_TYPE_RTC ||
-                            thisCoupler->sourceComponent->type == COMP_TYPE_WANDA ||
-                            thisCoupler->sourceComponent->type == COMP_TYPE_FLOW1D2D) {
-                            // RTCTools/Wanda: impossible to autodetect which partition will deliver this source var
-                            // Assumption: there is only one RTC-partition
-                            thisCoupler->items[k].sourceProcess = thisCoupler->sourceComponent->processes[0];
-                        }
-                        else {
-                            // For each item: get the pointers to the variables inside the dlls to be exchanged
-                            // Currently this does not work for RTC-Tools
-                            //
-                            // Source variable
-                            // autodetect which (single!) partition will deliver this source var
-                            int* sources = (int*)malloc(thisCoupler->sourceComponent->numProcesses * sizeof(int));
-                            int* gsources = (int*)malloc(thisCoupler->sourceComponent->numProcesses * sizeof(int));
-                            for (int m = 0; m < thisCoupler->sourceComponent->numProcesses; m++) {
-                                sources[m] = 0;
-                                if (my_rank == thisCoupler->sourceComponent->processes[m]) {
-                                    // Also for RTCTools_BMI: this is a dummy getvar call, just to check whether it works for this partition
-                                    log->Write(DEBUG, my_rank, "%s.getVar(%s)", thisCoupler->sourceComponentName, thisCoupler->items[k].sourceName);
-                                    (thisCoupler->sourceComponent->dllGetVar) (thisCoupler->items[k].sourceName, (void**)(&thisCoupler->items[k].sourceVarPtr));
-                                    if (thisCoupler->items[k].sourceVarPtr != NULL) {
-                                        // Yes, this partition can deliver the source var
-                                        sources[m] = 1;
-                                    }
-                                }
-                            }
-                            // Do not call MPI_Allreduce when the number of partitions is 1. It will cause a crash on free(gsources)
-                            if (numranks > 1) {
-                                int ierr = MPI_Allreduce(sources, gsources, thisCoupler->sourceComponent->numProcesses, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-                            }
-                            else {
-                                for (int m = 0; m < thisCoupler->sourceComponent->numProcesses; m++) {
-                                    gsources[m] = sources[m];
-                                }
-                            }
-                            thisCoupler->items[k].sourceProcess = -1;
-                            for (int m = 0; m < thisCoupler->sourceComponent->numProcesses; m++) {
-                                if (gsources[m] == 1) {
-                                    if (thisCoupler->items[k].sourceProcess == -1) {
-                                        // First partition that can deliver the source var
-                                        thisCoupler->items[k].sourceProcess = m;
-                                    }
-                                    else {
-                                        // Second/Third/... partition that can deliver the source var
-                                        // Produce a warning
-                                        // The "if (my_rank == m)" avoids multiple identical messages
-                                        if (my_rank == m) {
-                                            log->Write(WARNING, my_rank, "WARNING: coupler %s: item %d: \"%s\" will be delivered by partition %d. Ignoring deliverance by partition %d",
-                                                thisCoupler->name, k, thisCoupler->items[k].sourceName, thisCoupler->items[k].sourceProcess, m);
-                                        }
-                                    }
-                                }
-                            }
-                            free(sources);
-                            free(gsources);
-                        }
-
-                        // Target variable
-
-                        if (thisCoupler->targetComponent->type == COMP_TYPE_RTC ||
-                            thisCoupler->targetComponent->type == COMP_TYPE_WANDA ||
-                            thisCoupler->targetComponent->type == COMP_TYPE_FLOW1D2D) {
-                            // nothing
-                        }
-                        else {
-                            // Target variable
-                            // autodetect which (possibly multiple!) partition(s) will accept this target var
-                            int* targets = (int*)malloc(thisCoupler->targetComponent->numProcesses * sizeof(int));
-                            int* gtargets = (int*)malloc(thisCoupler->targetComponent->numProcesses * sizeof(int));
-                            for (int m = 0; m < thisCoupler->targetComponent->numProcesses; m++) {
-                                targets[m] = 0;
-                                if (my_rank == thisCoupler->targetComponent->processes[m]) {
-                                    log->Write(DEBUG, my_rank, "%s.getVar(%s)", thisCoupler->targetComponentName, thisCoupler->items[k].targetName);
-                                    (thisCoupler->targetComponent->dllGetVar) (thisCoupler->items[k].targetName, (void**)(&thisCoupler->items[k].targetVarPtr));
-                                    if (thisCoupler->items[k].targetVarPtr != NULL) {
-                                        // Yes, this partition can accept the target var
-                                        targets[m] = 1;
-                                    }
-                                }
-                            }
-                            // Do not call MPI_Allreduce when the number of partitions is 1. It will cause a crash on free(gtargets)
-                            if (numranks > 1) {
-                                int ierr = MPI_Allreduce(targets, gtargets, thisCoupler->targetComponent->numProcesses, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-                            }
-                            else {
-                                for (int m = 0; m < thisCoupler->targetComponent->numProcesses; m++) {
-                                    gtargets[m] = targets[m];
-                                }
-                            }
-                            thisCoupler->items[k].targetProcess = -1;
-                            for (int m = 0; m < thisCoupler->targetComponent->numProcesses; m++) {
-                                if (gtargets[m] == 1) {
-                                    if (thisCoupler->items[k].targetProcess == -1) {
-                                        // First partition that can accept the target var
-                                        thisCoupler->items[k].targetProcess = m;
-                                    }
-                                    else {
-                                        // Second/Third/... partition that can accept the target var
-                                        // Produce a warning
-                                        // The "if (my_rank == m)" avoids multiple identical messages
-                                        if (my_rank == m) {
-                                            log->Write(WARNING, my_rank, "WARNING: coupler %s: item %d: \"%s\" will be delivered to multiple partitions: %d and %d.",
-                                                thisCoupler->name, k, thisCoupler->items[k].targetName, thisCoupler->items[k].targetProcess, m);
-                                        }
-                                    }
-                                }
-                            }
-                            if (thisCoupler->items[k].targetProcess == -1) {
-                                throw Exception(true, Exception::ERR_MPI, "Coupler %s: item %d: \"%s\" is not accepted by any of the partitions.",
-                                    thisCoupler->name, k, thisCoupler->items[k].targetName);
-                            }
-                            free(targets);
-                            free(gtargets);
-                        }
-                    }
-
                     // create netcdf logfiles
                     if (thisCoupler->logger != NULL && my_rank == 0)
                     {
@@ -964,15 +852,30 @@ void Dimr::runParallelUpdate(dimr_control_block* cb, double tStep) {
                                 //        choose the target partition to act as source partition
                                 //        no MPI_Bcast needed
                                 //
-                                receive(thisCoupler->items[k].targetName,
-                                    thisCoupler->targetComponent->type,
-                                    thisCoupler->targetComponent->dllSetVar,
-                                    thisCoupler->targetComponent->dllGetVar,
-                                    thisCoupler->items[k].targetVarPtr,
-                                    thisCoupler->targetComponent->processes,
-                                    thisCoupler->targetComponent->numProcesses,
-                                    thisCoupler->items[k].targetProcess,
-                                    transferValuePtr);
+                                if (thisCoupler->itemTypes[k] == ITEM_TYPE_SCALAR)
+                                {
+                                    receive(thisCoupler->items[k].targetName,
+                                         thisCoupler->targetComponent->type,
+                                         thisCoupler->targetComponent->dllSetVar,
+                                         thisCoupler->targetComponent->dllGetVar,
+                                         thisCoupler->items[k].targetVarPtr,
+                                         thisCoupler->targetComponent->processes,
+                                         thisCoupler->targetComponent->numProcesses,
+                                         thisCoupler->items[k].targetProcess,
+                                         transferValuePtr);
+                                } else {
+                                    receive_ptr (thisCoupler->items[k].targetName,
+                                         thisCoupler->items[k].sourceName,
+                                         thisCoupler->targetComponent->type,
+                                         thisCoupler->targetComponent->dllSetVar,
+                                         thisCoupler->targetComponent->dllGetVar,
+                                         thisCoupler->sourceComponent->dllGetVarShape,
+                                         thisCoupler->items[k].targetVarPtr,
+                                         thisCoupler->targetComponent->processes,
+                                         thisCoupler->targetComponent->numProcesses,
+                                         thisCoupler->items[k].targetProcess,
+                                         thisCoupler->items[k].sourceVarPtr);
+                                }
 
                                 if (thisCoupler->logger != NULL && my_rank == 0)
                                 {
@@ -983,6 +886,14 @@ void Dimr::runParallelUpdate(dimr_control_block* cb, double tStep) {
                                     int status = nc_put_var1_double(ncid, thisCoupler->logger->netcdfReferences->item_variables[k], indices, transferValuePtr);
                                     if (status != NC_NOERR)
                                         throw Exception(true, Exception::ERR_OS, "Could not write value at index (%i, 0).", timeIndexCounter);
+                                }
+
+                                // Force update of the pointers for ITEM_TYPE_PTR
+                                // Needed because of the multi realloc calls
+                                if (thisCoupler->itemTypes[k] == ITEM_TYPE_PTR)
+                                {
+                                    thisCoupler->items[k].targetVarPtr = NULL;
+                                    thisCoupler->items[k].sourceVarPtr = NULL;
                                 }
                             }
                         }
@@ -1089,6 +1000,54 @@ void Dimr::receive(const char* name,
             }
         }
     }
+}
+
+//------------------------------------------------------------------------------
+// set "value" in the component target location
+void Dimr::receive_ptr(const char * name,
+	const char * sourceName,
+	int          compType,
+	BMI_SETVAR   dllSetVar,
+	BMI_GETVAR   dllGetVar,
+	BMI_GETVARSHAPE dllGetVarShape,
+	double     * targetVarPtr,
+	int        * processes,
+	int          nProc,
+	int          targetProcess,
+	double     * sourceVarPtr) {
+
+	// First: call GetVarShape("",shapeArr)
+	int shape[6];
+	(dllGetVarShape)(sourceName, shape);
+	// Second: call setvar(name_shape, shape)
+	char nameShape[100];
+	strcpy(nameShape, name);
+	strcat(nameShape, "_shape");
+	(dllSetVar)(nameShape, shape);
+	// Finally: call setvar(name, pointer)
+	(dllSetVar)(name, (void*)sourceVarPtr);
+	
+	// target is a component that uses direct pointer access to the actual variable
+	// When doing a dllSetVar, targetVarPtr is not defined yet. First do a "getAddress" to get it defined
+
+	if (targetVarPtr == NULL)
+	{
+		double * transfer = new double[nProc];
+		//here we get the address (e.g. weir levels)
+		getAddress(name, compType, dllGetVar, &targetVarPtr, processes, nProc, transfer);
+		delete[] transfer;
+	}
+
+	// Now targetVarPtr must be defined
+	if (targetVarPtr == NULL)
+	{
+		if (targetProcess == -1 || targetProcess == my_rank)
+		{
+			// targetProcess=-1: no process can accept this item
+			// targetProcess=my_rank: this process is registered to be able to accept this item but something goes wrong
+			throw Exception(true, Exception::ERR_METHOD_NOT_IMPLEMENTED, "ABORT: Dimr::receive: get_var function not defined while processing %s", name);
+		}
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -1424,6 +1383,9 @@ void Dimr::scanComponent(XmlTree* xmlComponent, dimr_component* newComp) {
     else if (strstr(libNameLowercase, "delwaq") != NULL) {
         newComp->type = COMP_TYPE_DELWAQ;
     }
+    else if (strstr(libNameLowercase, "cosumo_bmi") != NULL) {
+        newComp->type = COMP_TYPE_COSUMO_BMI;
+    }
     else if (strstr(libNameLowercase, "dimr_testcomponent") != NULL) {
         newComp->type = COMP_TYPE_TEST;
     }
@@ -1552,15 +1514,23 @@ void Dimr::scanCoupler(XmlTree* xmlCoupler, dimr_coupler* newCoup) {
             if (newCoup->items == NULL)
             {
                 newCoup->items = (dimr_couple_item*)malloc(newCoup->numItems * sizeof(dimr_couple_item));
+                newCoup->itemTypes = (unsigned int*)malloc(newCoup->numItems * sizeof(unsigned int));
             }
             else
             {
                 newCoup->items = (dimr_couple_item*)realloc(newCoup->items, newCoup->numItems * sizeof(dimr_couple_item));
-                if (newCoup->items == NULL)
+                newCoup->itemTypes = (unsigned int*)realloc(newCoup->itemTypes, newCoup->numItems * sizeof(unsigned int));
+                if (newCoup->items == NULL || newCoup->itemTypes == NULL)
                 {
                     throw Exception(true, Exception::ERR_INVALID_INPUT, "Allocation error in scanUnits (couple unit)");
                 }
             }
+            if (xmlCoupler->children[j]->GetAttrib("type") == NULL || strcmp(xmlCoupler->children[j]->GetAttrib("type"), "pointer") != 0) {
+                newCoup->itemTypes[newCoup->numItems - 1] = ITEM_TYPE_SCALAR;
+            } else {
+                newCoup->itemTypes[newCoup->numItems - 1] = ITEM_TYPE_PTR;
+            }
+
             dimr_couple_item* newItem = &(newCoup->items[newCoup->numItems - 1]);
 
             // Read sourceName
@@ -1803,6 +1773,7 @@ void Dimr::connectLibs(void) {
             componentsList.components[i].type == COMP_TYPE_FLOW1D ||
             componentsList.components[i].type == COMP_TYPE_FLOW1D2D ||
             componentsList.components[i].type == COMP_TYPE_DELWAQ ||
+            componentsList.components[i].type == COMP_TYPE_COSUMO_BMI ||
             componentsList.components[i].type == COMP_TYPE_TEST ||
             componentsList.components[i].type == COMP_TYPE_WANDA) {
             // RTC-Tools: setVar is used
@@ -1813,6 +1784,18 @@ void Dimr::connectLibs(void) {
         }
         else {
             componentsList.components[i].dllSetVar = NULL;
+        }
+
+        if (componentsList.components[i].type == COMP_TYPE_DEFAULT_BMI ||
+            componentsList.components[i].type == COMP_TYPE_FM ||
+            componentsList.components[i].type == COMP_TYPE_COSUMO_BMI) {
+            componentsList.components[i].dllGetVarShape = (BMI_GETVARSHAPE)GETPROCADDRESS(dllhandle, BmiGetVarShapeEntryPoint);
+            if (componentsList.components[i].dllGetVarShape == NULL) {
+                throw Exception(true, Exception::ERR_METHOD_NOT_IMPLEMENTED, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetVarShapeEntryPoint, lib, GetLastError());
+            }
+        }
+        else {
+            componentsList.components[i].dllGetVarShape = NULL;
         }
 
         // BMILogger callback: FLOW1D uses BmiSetLogger
@@ -1826,7 +1809,7 @@ void Dimr::connectLibs(void) {
             componentsList.components[i].dllSetVar("debugLevel", (const void*)&level);
         }
         // BMILogger callback: FLOWFM uses BmiSetLogger2
-        if (componentsList.components[i].type == COMP_TYPE_FM) {
+      if (componentsList.components[i].type == COMP_TYPE_FM || componentsList.components[i].type == COMP_TYPE_COSUMO_BMI) {
             componentsList.components[i].setLogger = (BMI_SET_LOGGER)GETPROCADDRESS(dllhandle, BmiSetLogger);
             if (componentsList.components[i].setLogger == NULL) {
                 throw Exception(true, Exception::ERR_METHOD_NOT_IMPLEMENTED, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiSetLogger, lib, GetLastError());

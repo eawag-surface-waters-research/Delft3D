@@ -55,7 +55,7 @@
 !                          DLWQ51, flux correction
 !                          DLWQ52, makes masses and concentrations
 !                          PROINT, integration of fluxes
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !                          ZERCUM, zero's the cummulative array's
 !
       use m_move

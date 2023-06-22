@@ -64,8 +64,8 @@
 
 !     Name     Type   Library
 !     ------   -----  ------------
-      use m_errsys
-      use m_dhkmrk
+      use m_write_error_message
+      use m_evaluate_waq_attribute
       USE PHYSICALCONSTS, ONLY: CtoKelvin
       IMPLICIT REAL (A-H,J-Z)
 
@@ -97,7 +97,7 @@
       DO 9000 ISEG = 1 , NOSEG
 
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-      CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+      CALL evaluate_waq_attribute(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.1)) THEN
 !
 !
@@ -115,11 +115,11 @@
 !
 !
 !     Error messages
-      IF (H0TREF .LT. 1E-30)  CALL ERRSYS ('H0TREF in VERVLU =<0', 1 )
+      IF (H0TREF .LT. 1E-30)  CALL write_error_message ('H0TREF in VERVLU =<0')
       IF ( TEMP .LE. -KELVIN) CALL
-     &                 ERRSYS ('TEMP in VERVLU < 0 DEG KELVIN', 1 )
-      IF (KL .LT. 1E-30) CALL ERRSYS ('KL in VERVLU zero', 1 )
-      IF (KG .LT. 1E-30) CALL ERRSYS ('KG in VERVLU zero', 1 )
+     &                 write_error_message ('TEMP in VERVLU < 0 DEG KELVIN')
+      IF (KL .LT. 1E-30) CALL write_error_message ('KL in VERVLU zero')
+      IF (KG .LT. 1E-30) CALL write_error_message ('KG in VERVLU zero')
 !
 !     Calculation of temperarure dependence of Henry
       H2TREF = H0TREF * NL / P

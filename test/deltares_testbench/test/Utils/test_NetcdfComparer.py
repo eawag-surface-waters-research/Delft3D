@@ -5,6 +5,7 @@
 
 import datetime
 import os
+from test.Utils.test_logger import TestLogger
 
 import netCDF4 as nc
 import pytest
@@ -36,7 +37,8 @@ class TestNetcdfComparer:
         fc.type = FileType.NETCDF
         fc.parameters = {"par1": [pm]}
         comparer = nccmp.NetcdfComparer()
-        results = comparer.compare(self.lp, self.rp, fc, "test")
+        logger = TestLogger()
+        results = comparer.compare(self.lp, self.rp, fc, "test", logger)
         resultstruc = results[0][3]
 
         # perform a set of asserts on the result structure
@@ -57,7 +59,8 @@ class TestNetcdfComparer:
         fc.type = FileType.NETCDF
         fc.parameters = {"par1": [pm]}
         comparer = nccmp.NetcdfComparer()
-        results = comparer.compare(self.lp, self.rp, fc, "test")
+        logger = TestLogger()
+        results = comparer.compare(self.lp, self.rp, fc, "test", logger)
         resultstruc = results[0][3]
         print(resultstruc.result)
 

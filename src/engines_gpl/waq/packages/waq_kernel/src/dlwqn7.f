@@ -54,7 +54,7 @@
 !                          DLWQ70, fills the matrix
 !                          DLWQ71, performs mass balance computation
 !                          DELMAT, inverts the matrix
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !
 !     PARAMETERS    :
 !

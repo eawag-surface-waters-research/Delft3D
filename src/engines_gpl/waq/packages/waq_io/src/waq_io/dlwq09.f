@@ -39,7 +39,7 @@
 !                         RDODEF, reads output definition block
 !                         OPT1  , handles file options
 !                         OUTBOO, calculates boot variables output system
-!                         DHOPNF, opens files
+!                         open_waq_files, opens files
 !                         RDWRK4, read part of DELWAQ system file
 !                         GETOPO, sets pointer to the arrays for output
 !                         WRIOUT, write OUTPUT system work file
@@ -48,7 +48,7 @@
 !     Logical units     : -
 
       use m_rdwrk4
-      use m_dhopnf
+      use m_open_waq_files
       use rd_token     !   for the reading of tokens
       use Output
       use timers       !   performance timers
@@ -214,7 +214,7 @@
 
 !           Read part of delwaq file
 
-            call dhopnf( lun(2)  , lchar(2), 2       , 2       , ierr2   )
+            call open_waq_files( lun(2)  , lchar(2), 2       , 2       , ierr2   )
             call rdwrk4( lun(2)  , lunut   , modid   , sysid   , notot   ,
      &                   nodump  , nosys   , nobnd   , nowst   , nocons  ,
      &                   nopa    , noseg   , nseg2   , coname  , paname  ,

@@ -25,7 +25,7 @@
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
       use m_monsys
-      use m_errsys
+      use m_write_error_message
 
 !>\file
 !>       P-ad/desorption to particulate inorganic matter. 3 options for sorption formulation.
@@ -194,11 +194,11 @@
 !
 !------ Error messages
 !
-        IF (KD.LT.0.0) CALL ERRSYS ('KD in ADSPO4 lower then zero', 1 )
+        IF (KD.LT.0.0) CALL write_error_message ('KD in ADSPO4 lower then zero')
         IF (((ABS(KD) .LT. 1E-20) .OR. (ABS(PO4).LT.1E-20))
      &      .AND. (ABS(MAXADS) .LT. 1E-20) )
-     &     CALL ERRSYS
-     &              ('(KD or PO4) and MAXADS equal zero in ADSPO4', 1 )
+     &     CALL write_error_message
+     &              ('(KD or PO4) and MAXADS equal zero in ADSPO4')
 !
 !------ (1) Instantanaeous equilibrium partitioning
 !           SWAdsP = 0
@@ -319,11 +319,11 @@
 !
 !     Error messages
 !
-        IF (KDADS .LT. 0.0) CALL ERRSYS ('KDADS in ADSPO4 negative', 1 )
+        IF (KDADS .LT. 0.0) CALL write_error_message ('KDADS in ADSPO4 negative')
         IF (((ABS(KDADS) .LT. 1E-20) .OR. (ABS(PO4) .LT. 1E-20))
      +     .AND. (ABS(FCAP) .LT. 1E-20) )
-     +     CALL ERRSYS
-     +     ('(KDADS or PO4) and FCAP equal zero in ADSPO4', 1 )
+     +     CALL write_error_message
+     +     ('(KDADS or PO4) and FCAP equal zero in ADSPO4')
 !
 !     Start the calculation of the sorption flux
 !     Use one of three options
@@ -367,8 +367,8 @@
            TEMP     = PMSA(IP21)
            POROS    = PMSA(IP22)
 
-           IF (POROS .LT. 1E-10) CALL ERRSYS
-     +        ('POROS in ADSPO4 equals zero', 1 )
+           IF (POROS .LT. 1E-10) CALL write_error_message
+     +        ('POROS in ADSPO4 equals zero')
            IF ( TFE .LT. 1.E-10 ) THEN
               IF ( NR_MES .LT. 25 ) THEN
                  CALL GETMLU(ILUMON)

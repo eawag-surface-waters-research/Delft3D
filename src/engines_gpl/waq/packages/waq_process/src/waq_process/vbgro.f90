@@ -25,8 +25,8 @@
                               noflux , iexpnt , iknmrk , noq1  , noq2  , &
                               noq3   , noq4   )
       use m_monsys
-      use m_errsys
-      use m_dhkmrk
+      use m_write_error_message
+      use m_evaluate_waq_attribute
 
 !
 !*******************************************************************************
@@ -146,8 +146,8 @@
       do  iseg = 1 , noseg
 
 !        lowest water and 2d segments only (also when dry!)
-         call dhkmrk(1,iknmrk(iseg),ikmrk1)
-         call dhkmrk(2,iknmrk(iseg),ikmrk2)
+         call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
+         call evaluate_waq_attribute(2,iknmrk(iseg),ikmrk2)
          if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
 !
 
@@ -218,11 +218,11 @@
             IF (  (SWiniVB1 .EQ. 1) .or. (SWiniVB1 .eq. 0 ) ) THEN
                 iniCovVB1 = iniCovVB1 / 100
             ELSE
-                CALL ERRSYS ('(no valid value for SWiniVB <0,1>', 1 )
+                CALL write_error_message ('(no valid value for SWiniVB <0,1>' )
             ENDIF
 
             IF (  (SWregro .NE. 1) .and. (SWregro .ne. 0 ) ) THEN
-                CALL ERRSYS ('(no valid value for SWregro <0,1>', 1 )
+                CALL write_error_message ('(no valid value for SWregro <0,1>' )
             ENDIF
 
 ! ---        if the volume is zero, then the calculations below should be avoided altogether
@@ -253,18 +253,18 @@
 
 !                 Check values growth limitation (only 0 or 1)
                   IF ( (NINT(SWgrowth) .NE. 1) .and. (NINT(SwGrowth) .NE. 0) ) THEN
-                     CALL ERRSYS ('(no valid value for SwGrowthVB <0,1>', 1 )
+                     CALL write_error_message ('(no valid value for SwGrowthVB <0,1>')
                   ENDIF
 
 !                 Check values mort limitation (only 0 or 1)
                   IF ( (NINT(SWmrt) .NE. 1) .and. (NINT(SwMrt) .NE. 0) ) THEN
-                     CALL ERRSYS ('(no valid value for SWMrtVB <0,1>', 1 )
+                     CALL write_error_message ('(no valid value for SWMrtVB <0,1>')
                   ENDIF
 
 !                 Checking for nut availabilithy
 
                   if ( (F4VB + F5VB) - 1.E-10 .lt. 0.0 ) then
-                     CALL ERRSYS ('(no valid values for F4VB and F5VB (allocation factors vegetation  roots)', 1 )
+                     CALL write_error_message ('(no valid values for F4VB and F5VB (allocation factors vegetation  roots)')
                   else
 !                    average Nutrient content of cohort
                      weighCN = F1VB*CNf1VB + F2VB*CNf2VB + F3VB*CNf3VB + F4VB*CNf4VB + F5VB*CNf5VB

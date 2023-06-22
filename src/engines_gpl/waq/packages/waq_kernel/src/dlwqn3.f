@@ -54,7 +54,7 @@
 !                          DLWQ18, integration step
 !                          DLWQ30, transport routine
 !                          PROINT, integration of fluxes
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !                          ZERCUM, zero's the cummulative array's
 !
 !     PARAMETERS    :

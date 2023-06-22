@@ -24,7 +24,7 @@
       subroutine atmdep ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !>\file
 !>       Atmosferic deposition and diffuse input of IMx, N, P, Org_us and Metals
@@ -61,7 +61,7 @@
 !
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
-      CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
+      CALL evaluate_waq_attribute(1,IKNMRK(ISEG),IKMRK1)
       IF (IKMRK1.EQ.1) THEN
 
       ZFL   = PMSA( IP1 )
@@ -71,7 +71,7 @@
       ISW2  = NINT(PMSA( IP5 ))
       DELT  = PMSA( IP6 )
 
-      CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+      CALL evaluate_waq_attribute(2,IKNMRK(ISEG),IKMRK2)
       IF ( ( ISW1   .EQ. 0                   ) .OR.    ! option load in all segments
      +     ( IKMRK2 .EQ. 0                   ) .OR.    ! segment with surface and bottom always a load
      +     ( IKMRK2 .EQ. 1 .AND. ISW1 .EQ. 1 ) .OR.    ! top segment and option top segment

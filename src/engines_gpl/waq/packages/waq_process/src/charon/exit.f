@@ -30,5 +30,5 @@
       subroutine chexit
       write(*,100)
 100   format(' CHARON stops execution')
-      call srstop(7)
+      call srstop(1)
       end

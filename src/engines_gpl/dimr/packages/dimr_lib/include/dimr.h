@@ -120,6 +120,7 @@ class Dimr {
         void           timersFinish(void);
 		void           timerFinish(void);
         void           receive(const char *, int, BMI_SETVAR, BMI_GETVAR, double *, int *, int, int, const void *);
+        void           receive_ptr(const char *, const char *, int, BMI_SETVAR, BMI_GETVAR, BMI_GETVARSHAPE , double *, int *, int, int, double *);
         void           getAddress(const char * name, int compType, BMI_GETVAR dllGetVar, double ** sourceVarPtr, int * processes, int nProc, double * transfer);
         double *       send(const char * name, int compType, double* sourceVarPtr, int* processes, int nProc, double* transfer);
 		

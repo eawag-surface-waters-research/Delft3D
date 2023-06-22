@@ -51,6 +51,7 @@
  use m_alloc
  use m_1d_structures, only: initialize_structures_actual_params, t_structure
  use m_oned_functions, only: set_max_volume_for_1d_nodes
+ use m_waves 
  use m_structures
  use m_longculverts
  use unstruc_channel_flow, only: useVolumeTables
@@ -62,8 +63,8 @@
  implicit none
 
  ! locals
- integer          :: k, L, k1, k2, n, jw, msam
- integer          :: kb, kt, ki, LL
+ integer :: k, L, k1, k2, n, jw, msam
+ integer :: kb, kt, ki, LL
 
  double precision :: ss
  double precision :: zz, slope
@@ -72,15 +73,15 @@
  double precision, allocatable:: u1_tmp(:)
 
  integer              :: ierr, mrst, kk, j, nq, ierror, N1, N2, Lb, Lt, nat, ntmp
- integer              :: ihandle
+ integer :: ihandle
  double precision     :: rr
- character(len=255)   :: rstfile
+ character(len=255) :: rstfile
  character(len=Idlen) :: fileName
- character(len=4)     :: EXT
- logical              :: jawel, jawelrestart
- integer              :: nstrucsg, L0, istru
+ character(len=4)   :: EXT
+ logical :: jawel, jawelrestart
+ integer :: nstrucsg, L0, istru
  type(t_structure), pointer :: pstru
- integer, external    :: flow_initexternalforcings
+ integer, external :: flow_initexternalforcings
  double precision, external :: setrho
 
  double precision  :: trshcorioi
@@ -768,6 +769,15 @@ end if
 
  endif
 
+ if (kmx > 0 .and. initem2D > 0 ) then
+    do kk = 1,ndx
+       call getkbotktop(kk,kb,kt)
+       do k = kb, kt
+           tem1(k) = tem1(kk)
+       enddo
+    enddo
+ endif
+
  if (kmx > 0 .and. inised2D > 0 ) then
     do kk = 1,ndx
        if (sedh(kk) .ne. dmiss) then
@@ -896,7 +906,7 @@ end if
  endif
 
 end function flow_flowinit
-    
+
 !> apply hradcoded specific input    
 subroutine apply_hardcoded_specific_input()
  use m_netw

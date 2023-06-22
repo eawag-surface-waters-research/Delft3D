@@ -26,7 +26,7 @@
 subroutine PROPFD     ( pmsa   , fl     , ipoint , increm, noseg , &
                             noflux , iexpnt , iknmrk , noq1  , noq2  , &
                             noq3   , noq4   )
-use m_dhkmrk
+use m_evaluate_waq_attribute
 
 !
 !*******************************************************************************
@@ -75,7 +75,7 @@ use m_dhkmrk
 
     ! segment loop
     do iseg = 1 , noseg
-        call dhkmrk(1,iknmrk(iseg),ikmrk1)
+        call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
         if (ikmrk1.eq.1) then
 
         Rad          = PMSA(ipnt(  1 ))  !    irradiation at the segment upper-boundary              (W/m2)

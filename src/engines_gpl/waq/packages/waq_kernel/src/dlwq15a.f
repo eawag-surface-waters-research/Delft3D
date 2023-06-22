@@ -72,7 +72,7 @@
 
       use m_zoek
       use m_srstop
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
       use timers
       implicit none
 
@@ -363,12 +363,12 @@
                     if ( btest( iknmrk(i1), 0 ) ) then
                        select case ( iwst )
                           case ( -1 )               ! surface processing
-                             call dhkmrk( 2, iknmrk(i1), ikmrk2 )
+                             call evaluate_waq_attribute( 2, iknmrk(i1), ikmrk2 )
                              if ( ikmrk2 .eq. 0 .or. ikmrk2 .eq. 1 ) wflow(i1) = surf(i1)
                           case ( -2 )               ! bank processing
                              wflow(i1) = length(i1)
                           case ( -3 )               ! bed processing
-                             call dhkmrk( 2, iknmrk(i1), ikmrk2 )
+                             call evaluate_waq_attribute( 2, iknmrk(i1), ikmrk2 )
                              if ( ikmrk2 .eq. 3 .or. ikmrk2 .eq. 0 ) wflow(i1) = surf(i1)
                        end select
                     endif
@@ -410,12 +410,12 @@
                     if ( btest( iknmrk(i1), 0 ) ) then
                        select case ( iwst )
                           case ( -1 )
-                             call dhkmrk( 2, iknmrk(i1), ikmrk2 )
+                             call evaluate_waq_attribute( 2, iknmrk(i1), ikmrk2 )
                              if ( ikmrk2 .eq. 0 .or. ikmrk2 .eq. 1 ) wflow(i1) = waste(0,i)*surf(i1)
                           case ( -2 )
                              wflow(i1) = waste(0,i)*length(i1)
                           case ( -3 )
-                             call dhkmrk( 2, iknmrk(i1), ikmrk2 )
+                             call evaluate_waq_attribute( 2, iknmrk(i1), ikmrk2 )
                              if ( ikmrk2 .eq. 3 .or. ikmrk2 .eq. 0 ) wflow(i1) = waste(0,i)*surf(i1)
                        end select
                     endif
@@ -457,12 +457,12 @@
                     if ( btest( iknmrk(i1), 0 ) ) then
                        select case ( iwst )
                           case ( -1 )
-                             call dhkmrk( 2, iknmrk(i1), ikmrk2 )
+                             call evaluate_waq_attribute( 2, iknmrk(i1), ikmrk2 )
                              if ( ikmrk2 .eq. 0 .or. ikmrk2 .eq. 1 ) wflow(i1) = waste(0,i)*surf(i1)
                           case ( -2 )
                              wflow(i1) = waste(0,i)*length(i1)
                           case ( -3 )
-                             call dhkmrk( 2, iknmrk(i1), ikmrk2 )
+                             call evaluate_waq_attribute( 2, iknmrk(i1), ikmrk2 )
                              if ( ikmrk2 .eq. 3 .or. ikmrk2 .eq. 0 ) wflow(i1) = waste(0,i)*surf(i1)
                        end select
                     endif
@@ -495,12 +495,12 @@
                     if ( btest( iknmrk(i1), 0 ) ) then
                        select case ( iwst )
                           case ( -1 )
-                             call dhkmrk( 2, iknmrk(i1), ikmrk2 )
+                             call evaluate_waq_attribute( 2, iknmrk(i1), ikmrk2 )
                              if ( ikmrk2 .eq. 0 .or. ikmrk2 .eq. 1 ) wflow(i1) = waste(0,i)*surf(i1)
                           case ( -2 )
                              wflow(i1) = waste(0,i)*length(i1)
                           case ( -3 )
-                             call dhkmrk( 2, iknmrk(i1), ikmrk2 )
+                             call evaluate_waq_attribute( 2, iknmrk(i1), ikmrk2 )
                              if ( ikmrk2 .eq. 3 .or. ikmrk2 .eq. 0 ) wflow(i1) = waste(0,i)*surf(i1)
                        end select
                     endif

@@ -47,7 +47,7 @@ subroutine flow_sedmorinit()
     use m_rdmorlyr, only: rdinimorlyr
     use m_flowexternalforcings, only: sfnames, numfracs, nopenbndsect, openbndname, openbndlin, nopenbndlin
     use m_transport, only: ISED1, ISEDN, ifrac2const, const_names, constituents
-    use m_flowparameters, only: jatransportmodule, jasecflow, ibedlevtyp, jasal, jatem
+    use m_flowparameters, only: jatransportmodule, jasecflow, ibedlevtyp, jasal, jatem, eps4
     use m_bedform, only: bfmpar, bfm_included
     use unstruc_channel_flow
     use m_branch
@@ -60,6 +60,8 @@ subroutine flow_sedmorinit()
     use m_mormerge
     use m_mormerge_mpi
     use m_partitioninfo, only: jampi, my_rank, ndomains, DFM_COMM_DFMWORLD
+    use m_xbeach_data, only: gammaxxb
+    use m_waves, only: gammax
 
     implicit none
 
@@ -131,12 +133,16 @@ subroutine flow_sedmorinit()
        end if
     end do
 
-    ! Set transport velocity definitions according to morfile settings, replaces Transportvelocity keyword in MDU, repeat functionality
+    ! Set transport velocity definitions according to morfile settings
     !
     jatranspvel = 1                              ! default eul bedload, lag susp load
-    if (stmpar%morpar%eulerisoglm) then
+    if (stmpar%morpar%eulerisoglm .and. jawave > 0) then
         jatranspvel = 2                          ! everything euler
     end if
+
+    if (stmpar%morpar%eulerisoglm .and. jawave == 0) then
+        call mess(LEVEL_WARN, 'unstruc::flow_sedmorinit - EulerISOGLM set to .false., as waves are not modeled.')
+    endif
 
     if (stmpar%morpar%glmisoeuler) then
         jatranspvel = 0                          ! everything lagrangian
@@ -263,7 +269,7 @@ subroutine flow_sedmorinit()
 
     ! ad hoc allocation of dummy variables
     allocate(mtd%dzbdt(ndx))
-    allocate(mtd%uau(lnkx))
+    allocate(mtd%uau(lnx))
     allocate(mtd%seddif(stmpar%lsedsus,ndkx))
     allocate(mtd%sed(stmpar%lsedsus,ndkx))
     allocate(mtd%ws(ndkx,stmpar%lsedsus))
@@ -281,9 +287,12 @@ subroutine flow_sedmorinit()
     ! Array for transport.f90
     mxgr = stmpar%lsedsus
     if ( allocated(sed) ) deallocate(sed)
+    if ( allocated(ssccum) ) deallocate(ssccum)
     if (stmpar%lsedsus .gt. 0) then
        allocate(sed(stmpar%lsedsus,Ndkx))
-       sed = 0d0
+       allocate(ssccum(stmpar%lsedsus,Ndkx))
+       sed    = 0d0
+       ssccum = 0d0
     end if
     !
     call rdinimorlyr(stmpar%lsedtot, stmpar%lsedsus, mdia, error, &
@@ -390,13 +399,48 @@ subroutine flow_sedmorinit()
        call realloc(sswx_raw,(/ndx, stmpar%lsedtot/),stat=ierr,fill=0d0, keepExisting=.false.)
        call realloc(sswy_raw,(/ndx, stmpar%lsedtot/),stat=ierr,fill=0d0, keepExisting=.false.)
     endif
+    !
+    ! Allocate berm slope index array if wanted
+    if (stmpar%morpar%bermslopetransport) then
+       if (allocated(bermslopeindex)) then
+          deallocate(bermslopeindex, bermslopeindexbed, bermslopeindexsus, bermslopecontrib, stat=ierr)
+       endif
+       call realloc(bermslopeindex,   lnx,stat=ierr,fill=.false., keepExisting=.false.)
+       call realloc(bermslopeindexbed,lnx,stat=ierr,fill=.false., keepExisting=.false.)
+       call realloc(bermslopeindexsus,lnx,stat=ierr,fill=.false., keepExisting=.false.)
+       call realloc(bermslopecontrib, (/lnx, stmpar%lsedtot/),stat=ierr, fill=0d0, keepExisting=.false.)
+       if (.not.(ierr==0)) then
+          call mess(LEVEL_WARN, 'unstruc::flow_sedmorinit - Could not allocate bermslope arrays. Bermslope transport switched off.')
+          stmpar%morpar%bermslopetransport=.false.
+       endif
+       if (jawave>0 .and. jawave.ne.4) then
+          if (comparereal(gammax, stmpar%morpar%bermslopegamma)== 0) then
+             stmpar%morpar%bermslopegamma=stmpar%morpar%bermslopegamma+eps4               ! if they are exactly the same, rounding errors set index to false wrongly
+          endif
+       endif
+       if (jawave==4) then
+          if (comparereal(gammaxxb, stmpar%morpar%bermslopegamma)== 0) then
+             stmpar%morpar%bermslopegamma=stmpar%morpar%bermslopegamma+eps4
+          endif
+       endif
+    endif
 
     if (stmpar%morpar%duneavalan) then
        if (allocated(avalflux)) then
           deallocate(avalflux)
        endif
        call realloc(avalflux,(/lnx,stmpar%lsedtot/),stat=ierr,fill=0d0, keepExisting=.false.)
-       botcrit = max(botcrit, 1d-4)   ! mass balance with avalanching
+       !
+       ! Warn user if default wetslope is still 10.0 when using dune avalanching. Reset default to reasonable 1.0 in that case.
+       if (comparereal(stmpar%morpar%wetslope, 10d0)== 0) then
+          call mess(LEVEL_WARN, 'unstruc::flow_sedmorinit - Dune avalanching is switched on. Default wetslope reset to 0.1 from 10.0')
+          stmpar%morpar%wetslope = 1d-1
+       endif
+       !
+       ! Warn user if upperlimitssc is set icm with avalanching. This effectively removes sedimentation of the avalanching flux if set too strictly.
+       if (comparereal(upperlimitssc,1d6)/=0) then
+          call mess(LEVEL_WARN, 'unstruc::flow_sedmorinit - Upper limit imposed on ssc. This will cause large mass errors icm avalanching. Check the mass error at the end of the run.')
+       endif
     endif
 
     ! morphological polygon additions

@@ -47,7 +47,7 @@
       use m_rdwrk4
       use m_monsys
       use m_getcom
-      use m_dhopnf
+      use m_open_waq_files
       use timers       !   performance timers
       use dlwq_data
       use processet
@@ -267,7 +267,7 @@
 
       ! open report file
 
-      call dhopnf ( lun(35) , lchar(35), 35    , 1     , ierr2 )
+      call open_waq_files ( lun(35) , lchar(35), 35    , 1     , ierr2 )
       lurep = lun(35)
       line = ' '
       call setmlu ( lurep )
@@ -518,7 +518,7 @@
 
       ! read ( rest ) of relevant delwaq files
 
-      call dhopnf ( lun(2) , lchar(2), 2     , 2     , ierr2 )
+      call open_waq_files ( lun(2) , lchar(2), 2     , 2     , ierr2 )
       call rdwrk4 ( lun(2) , lurep  , modid  , syname , notot  ,
      +              nodump , nosys  , nobnd  , nowst  , nocons ,
      +              nopa   , noseg  , nseg2  , coname , paname ,
@@ -793,7 +793,7 @@
       ! if not all input present , stop with exit code
 
       if ( nmis .gt. 0 ) then
-         call dhopnf ( lun(24) , lchar(24), 24    , 1     , ierr2 )
+         call open_waq_files ( lun(24) , lchar(24), 24    , 1     , ierr2 )
          close ( lun(24) )
          write(lurep,*) ' not all input available.'
          write(lurep,*) ' number off missing variables :',nmis
@@ -857,6 +857,12 @@
             subunit(isys) = allitems%itemproppnts(iindx)%pnt%stdu
             subdescr(isys) = trim(allitems%itemproppnts(iindx)%pnt%text)//' '//
      &                            allitems%itemproppnts(iindx)%pnt%unit
+            if ( substdname(isys) == ' ' ) then
+                substdname(isys) = allitems%itemproppnts(iindx)%pnt%text
+            endif
+            if ( subunit(isys) == ' ' ) then
+                subunit(isys) = allitems%itemproppnts(iindx)%pnt%unit
+            endif
          else
             ! Is it an algae?
             call zoek( subname(1:10), maxtyp, algtyp, 10 , ialg )
@@ -913,7 +919,7 @@
       enddo
       ! write updated output work file ( output.wrk )
 
-      call dhopnf ( lun(25), lchar(25), 25    , 1     , ierr2 )
+      call open_waq_files ( lun(25), lchar(25), 25    , 1     , ierr2 )
       call wrwrko ( lun(25), noutp , nbufmx , ioutps, outputs,
      &              notot,  substdname, subunit, subdescr )
       close ( lun(25) )

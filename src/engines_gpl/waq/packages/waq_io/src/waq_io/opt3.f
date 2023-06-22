@@ -74,7 +74,7 @@
 !                          fmread   - read of a breakpoint series of matrices
 !                          dmatrix  - merge of 2 matrices
 !                          rwfunc   - read of a block of harmonics or Fourier series
-!                          dhopnf   - open a file
+!                          open_waq_files   - open a file
 
 !     Functions called   : gettok   - tokenized input data file reading
 
@@ -83,7 +83,7 @@
 !                          lun( 4) = unit binary intermediate file for pointers
 !                          lun(is) = unit binary intermediate file for function
 
-      use m_dhopnf
+      use m_open_waq_files
       use timers       !   performance timers
       use rd_token
       use m_sysn          ! System characteristics
@@ -177,7 +177,7 @@
 !        write nr of items and nr of substances
 !        write default values ( IORDER = 1 , NPNT = 0 )
       lunuit  = lun( 3)
-      if ( .not. funcs ) call dhopnf ( lun(is) , lchar(is) , is    , 1     , ierr2 )
+      if ( .not. funcs ) call open_waq_files ( lun(is) , lchar(is) , is    , 1     , ierr2 )
       if ( bound ) then
          write ( lun(is) ) ' 4.900BOUND '
          write ( lun(is) ) nitem, nval1

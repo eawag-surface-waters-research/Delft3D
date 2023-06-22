@@ -53,7 +53,7 @@
 !                            OPT2
 !                            SCALE
 !                            CHECK
-!                            DHOPNF
+!                            open_waq_files
 !                            RDTOK1 tokenized data reading
 
 !       Logical units      : LUN(27) = unit stripped DELWAQ input file
@@ -71,7 +71,7 @@
 
       use m_zoek
       use m_srstop
-      use m_dhopnf
+      use m_open_waq_files
       use Grids        !   for the storage of contraction grids
       use rd_token     !   for the reading of tokens
       use pointr_mod
@@ -587,36 +587,36 @@
       write ( lun(2) ) idummy , ( adummy , k = 1,3 )
       write ( lun(2) ) idummy , ( adummy , k = 1,3 )
 
-      call dhopnf  ( lun(8) , lchar(8) , 8      , 1     , ierr2 )
+      call open_waq_files  ( lun(8) , lchar(8) , 8      , 1     , ierr2 )
       if ( ierr2 .ne. 0 ) goto 100
       if ( noq1 .gt. 0 ) write( lun(8) )( ipnt(:,i) , i =       1, noq1  )
       if ( noq2 .gt. 0 ) write( lun(8) )( ipnt(:,i) , i = noq1 +1, noq12 )
       if ( noq3 .gt. 0 ) write( lun(8) )( ipnt(:,i) , i = noq12+1, noq   )
       close ( lun(8) )
 
-      call dhopnf  ( lun( 9) , lchar( 9) , 9      , 1     , ierr2 )
+      call open_waq_files  ( lun( 9) , lchar( 9) , 9      , 1     , ierr2 )
       if ( ierr2 .ne. 0 ) goto 100
       write ( lun( 9) ) idummy, ( rwork(1,i), ( adummy, k=1,nodisp-1 ) , i=1,noq )
       close ( lun( 9) )
 
-      call dhopnf  ( lun(10) , lchar(10) , 10     , 1     , ierr2 )
+      call open_waq_files  ( lun(10) , lchar(10) , 10     , 1     , ierr2 )
       if ( ierr2 .ne. 0 ) goto 100
       write ( lun(10) ) idummy, ( rwork(2,i) , i=1,noq )
       close ( lun(10) )
 
-      call dhopnf  ( lun(11) , lchar(11) , 11     , 1     , ierr2 )
+      call open_waq_files  ( lun(11) , lchar(11) , 11     , 1     , ierr2 )
       if ( ierr2 .ne. 0 ) goto 100
       write ( lun(11) ) idummy, ( rwork(3,i) , i=1,noq )
       close ( lun(11) )
 
       if ( novelo .gt. 0 ) then
-         call dhopnf  ( lun(12) , lchar(12) , 12     , 1     , ierr2 )
+         call open_waq_files  ( lun(12) , lchar(12) , 12     , 1     , ierr2 )
          if ( ierr2 .ne. 0 ) goto 100
          write ( lun(12) ) idummy,( (adummy,k=1,novelo) , i=1,noq)
          close ( lun(12) )
       endif
 
-      call dhopnf  ( lun(13) , lchar(13) , 13     , 1     , ierr2 )
+      call open_waq_files  ( lun(13) , lchar(13) , 13     , 1     , ierr2 )
       if ( ierr2 .ne. 0 ) goto 100
       write ( lun(13) ) idummy,(rwork(4,i),rwork(5,i), i=1,noq )
       close ( lun(13) )

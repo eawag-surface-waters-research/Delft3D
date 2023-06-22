@@ -41,7 +41,7 @@
 !     global declarations
 
       use m_srstop
-      use m_dhopnf
+      use m_open_waq_files
       use m_dhnlun
       use timers
       use delwaq2_data
@@ -95,7 +95,7 @@
       ntotal = nocons+nopa+nofun+nosfun
       if ( ntotal .gt. 0 ) then
          if ( ifflag .eq. 1 ) then
-            call dhopnf ( lun , lch , 16 , 2 , ierr2 )
+            call open_waq_files ( lun , lch , 16 , 2 , ierr2 )
             if ( ierr2 .ne. 0 ) then
                write(lunrep,*) 'error in dlwqta, opening file'
                write(lunrep,*) 'file    :',lch
@@ -143,7 +143,7 @@
                   ftype = 2
                   if ( mod(proc_par%filetype,10) .eq. FILE_UNFORMATTED ) ftype = ftype + 10
                   if ( proc_par%filetype/10 .eq. 1 ) ftype = ftype + 20       ! I am in for a better solution (lp)
-                  call dhopnf ( proc_par%lun , proc_par%filename , 40 , ftype , ierr2 )
+                  call open_waq_files ( proc_par%lun , proc_par%filename , 40 , ftype , ierr2 )
                endif
             enddo
 
