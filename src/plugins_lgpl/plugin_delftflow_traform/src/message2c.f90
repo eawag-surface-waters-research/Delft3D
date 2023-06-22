@@ -27,14 +27,18 @@
 !  
 ! 
 subroutine message2c(error_message, error_message_c)
-   use iso_c_binding, only: c_char
+   use iso_c_binding, only: c_char, c_int, C_NULL_CHAR
    implicit none
-   character(len=256), intent(in) :: error_message
-   character(kind=c_char), intent(out) :: error_message_c(*) 
+   integer(c_int), parameter :: MAXSTRINGLEN = 257
+   
+   character(len=*), intent(in) :: error_message
+   character(kind=c_char), intent(out) :: error_message_c(MAXSTRINGLEN) 
    !
    integer :: i
    !
-   do i=1,256
+   do i=1,len(error_message)
       error_message_c(i) = error_message(i:i)
    enddo
+   error_message_c(len(error_message)+1) = C_NULL_CHAR
+   !
 end subroutine message2c
