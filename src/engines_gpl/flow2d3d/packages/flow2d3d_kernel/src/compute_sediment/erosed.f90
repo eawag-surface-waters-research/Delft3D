@@ -68,6 +68,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     use morphology_data_module
     use sediment_basics_module
     use compbsskin_module, only: compbsskin, get_alpha_fluff
+    use m_sand_mud
     use globaldata
     use dfparall
     !
@@ -1423,7 +1424,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
         !
         ! Recompute erosion velocities
         !
-        call sand_mud(lsed, E, frac(nm,:), mudfrac(nm), sedtyp, pmcrit(nm))
+        call sand_mud(lsed, E, frac(nm,:), mudfrac(nm), sedtyp, max_mud_sedtyp, pmcrit(nm))
         !
         ! Recompute erosion fluxes
         ! only explicit part of erosion flux is changed 
