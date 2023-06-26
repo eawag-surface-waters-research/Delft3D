@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlflux
+
+      implicit none
+
+      contains
+
 
       subroutine dlflux ( jstart , nmmaxj , nmmax  , kmax   , nosys  ,
      &                    notot  , icx    , icy    , intsrt , icreep ,
@@ -290,3 +296,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_dlflux

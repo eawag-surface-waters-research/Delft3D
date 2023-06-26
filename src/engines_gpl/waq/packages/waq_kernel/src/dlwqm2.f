@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqm2
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqm2( idt    , noseg  , volnew , nobnd  , noq    ,
      &                   ipoint , flowtot, disptot, theta  , diag   ,
@@ -140,3 +146,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end subroutine dlwqm2
+
+      end module m_dlwqm2

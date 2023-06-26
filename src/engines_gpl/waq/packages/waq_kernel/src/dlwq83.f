@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq83
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQ83 ( CONC   , AMASS  , DERIV  , VOLUME , VOLUM2 ,
      *                    TIMER  , NOSYS  , NOTOT  , NOSEG  , ISTEP  ,
@@ -55,8 +61,14 @@
 !
       use timers
 
-      DIMENSION  CONC (*) , AMASS (*) , DERIV(*) , VOLUME(*) ,
-     *           TIMER(*) , VOLUM2(*)
+      real       CONC (*) , AMASS (*) , DERIV(*) , VOLUME(*) ,
+     *           TIMER(*) , VOLUM2(*) , ASTOP
+
+      integer    NOSYS, NOTOT, NOSEG, ISTEP, IOUT
+
+      integer    ismax, icmax, itel, iseg, i
+      real       dcmax, v1, v2, dt, a, csave, cnew, dc
+
       LOGICAL    CONVER
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq83", ithandl )
@@ -136,3 +148,5 @@
  2010 FORMAT(' ALL DERIVATIVES ARE ZERO, NO IMPROVEMENTS POSSIBLE')
 !
       END
+
+      end module m_dlwq83

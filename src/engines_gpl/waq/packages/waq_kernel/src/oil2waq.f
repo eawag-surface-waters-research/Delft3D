@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_oil2waq
+
+      implicit none
+
+      contains
+
 
       subroutine oil2waq ( nopart  , nosys   , notot   , nosubs  , noseg   ,
      &                     nolay   , volume  , surface , nmax    , mmax    ,
@@ -149,3 +155,5 @@
 
       return
       end
+
+      end module m_oil2waq

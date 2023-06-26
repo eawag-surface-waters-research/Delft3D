@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_flxbal
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE FLXBAL (NOTOT , NOFLUX, NDMPAR, NOBALT, STOCHI,
      +                   FLXINT, ASMASS, BALINT)
@@ -58,6 +64,10 @@
       INTEGER NOTOT , NOFLUX, NDMPAR, NOBALT
       REAL    STOCHI(NOTOT,NOFLUX)  , FLXINT(NOFLUX,NDMPAR),
      +        ASMASS(NOTOT,NDMPAR,6), BALINT(NOBALT,NDMPAR)
+
+!     local
+      integer ibalt, isys, i, idmp, iflx, lurep
+      real    st
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "flxbal", ithandl )
 !
@@ -98,3 +108,5 @@
       RETURN
 !
       END
+
+      end module m_flxbal

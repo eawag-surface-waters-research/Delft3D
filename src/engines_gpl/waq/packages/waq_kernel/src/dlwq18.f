@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq18
+
+      implicit none
+
+      contains
+
 
       subroutine dlwq18 ( nosys  , notot  , nototp , noseg  , volume ,
      &                    surface, amass  , conc   , deriv  , idt    ,
@@ -133,3 +139,5 @@
  1001 format ('25 or more zero volumes , further messages surpressed')
 
       end
+
+      end module m_dlwq18

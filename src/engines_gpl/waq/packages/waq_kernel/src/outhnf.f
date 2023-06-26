@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_outhnf
+
+      implicit none
+
+      contains
+
 
       subroutine outhnf ( iout  , lchout, itime , moname, noseg ,
      +                    notot1, conc1 , syname, notot2, conc2 ,
@@ -358,3 +364,5 @@
  2000 format ( 'ERROR writing NEFIS history file errno:', I7 )
 
       end
+
+      end module m_outhnf

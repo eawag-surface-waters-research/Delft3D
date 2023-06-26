@@ -20,6 +20,21 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqnp
+      use m_zercum
+      use m_setset
+      use m_proint
+      use m_proces
+      use m_hsurf
+      use m_dlwq_boundio
+      use m_dlwqtr
+      use m_dlwqt0
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqnp ( a     , j     , c     , lun   , lchar  ,
      &                    action, dlwqd , gridps)
@@ -35,6 +50,17 @@
 !>                         Method has the option to treat additional velocities, like
 !>                         settling of suspended matter, upwind to avoid wiggles.\n
 
+      use m_dlwqo2
+      use m_dlwqf8
+      use m_dlwqce
+      use m_dlwqb3
+      use m_dlwq41
+      use m_dlwq19
+      use m_dlwq17
+      use m_dlwq15a
+      use m_dlwq14
+      use m_dlwq13
+      use m_delpar01
       use m_move
       use m_fileutils
       use grids
@@ -50,7 +76,7 @@
       use m_sysj          ! Pointers in integer array workspace
       use m_sysc          ! Pointers in character array workspace
       use m_dlwqdata_save_restore
-      
+
       implicit none
 
 
@@ -419,3 +445,5 @@ C
 
       RETURN
       END
+
+      end module m_dlwqnp

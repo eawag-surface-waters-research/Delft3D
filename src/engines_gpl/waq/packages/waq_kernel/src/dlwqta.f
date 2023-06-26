@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqta
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqta ( lun    , lch    , lunrep , noseg  , nocons ,
      &                    nopa   , nofun  , nosfun , const  , param  ,
@@ -40,6 +46,7 @@
 
 !     global declarations
 
+      use m_dlwqt4
       use m_srstop
       use m_open_waq_files
       use m_dhnlun
@@ -83,9 +90,9 @@
       integer                              :: i, i2
       integer                              :: ntt, ndim1, ndim2, nobrk
       integer, allocatable                 :: ipntloc(:)
-      integer                              :: idummy
+      integer                              :: ia_dummy(1)
       logical                              :: ldummy, ldumm2
-      real                                 :: rdummy
+      real, allocatable                    :: ra_dummy(:)
       integer(4) ithandl /0/
 
       if ( timon ) call timstrt ( "dlwqta", ithandl )
@@ -170,10 +177,10 @@
                ntt = ndim1*ndim2
                allocate(ipntloc(ntt))
                do i2 = 1 , ntt; ipntloc(i2)=-i2; enddo
-               call dlwqt4( idummy, proc_par%filename, idummy , lunrep, proc_par%lun,
+               call dlwqt4( ia_dummy, proc_par%filename, ia_dummy , lunrep, proc_par%lun,
      +                      itime , proc_par%values  , ipntloc, ndim1 , ntt         ,
      +                      isflag, ifflag           , ldummy , 0     ,.false.      ,
-     +                      ldumm2, rdummy           , dlwqd  )
+     +                      ldumm2, ra_dummy           , dlwqd  )
                deallocate(ipntloc)
             endif
 
@@ -211,3 +218,5 @@
  1000 format (/' ERROR: reading process parameters system file:',A)
  1010 format (/' ERROR: evaluating process parameters')
       end
+
+      end module m_dlwqta

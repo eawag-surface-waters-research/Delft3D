@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_segcol
+
+      implicit none
+
+      contains
+
 
       subroutine segcol(nosss , noq1  , noq2   , noq3  , noq4  ,
      &                  ipoint, iknmrk, isegcol)
@@ -78,3 +84,5 @@
       enddo
 
       end
+
+      end module m_segcol

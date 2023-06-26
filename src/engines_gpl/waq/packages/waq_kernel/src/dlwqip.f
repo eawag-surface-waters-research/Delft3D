@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqip
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQIP ( LUNWRP, LCH   , LUREP , NOTOT , NIPMSA,
      +                    NPROC , NOLOC , NFLUX , NODEF , PRVNIO,
@@ -105,10 +111,12 @@
       CHARACTER*10  PRONAM(*)
 !
 !     Local declarations
-      PARAMETER   ( VERSI1 = 5.10  , VERSI2 = 5.10 )
       INTEGER       NIPMSD, NPROCD, NOLOCD, NFLUXD, NODEFD,
-     +              NOTOTD, IOFF
+     +              NOTOTD, IOFF, NOSYSD, NDSPXD, NVELXD,
+     +              NLOCXD, NDSPND, NVELND, NOVARD, nrrefD
       REAL          VERSIO
+
+      integer       k, ierr, nlocx, iproc, ifracs, ipdgrd
 !
 !jvb  Store fractional step flag in common CFRACS
 !
@@ -120,18 +128,6 @@
 !     read and check version number
 !
       READ (LUNWRP, ERR=900, END=900) VERSIO
-!
-!     less than lowest supported version, ERROR
-!
-      IF ( VERSIO .LT. VERSI1 ) THEN
-         WRITE ( LUREP, 2000 ) VERSIO , VERSI1
-      ENDIF
-!
-!     greater than this version, WARNING
-!
-      IF ( VERSIO .GT. VERSI2 ) THEN
-         WRITE ( LUREP, 2010 ) VERSIO , VERSI2
-      ENDIF
 !
 !     read and check dimensions
 !
@@ -349,3 +345,5 @@
  3020 FORMAT (/' Process decomposition active')
 !
       END
+
+      end module m_dlwqip

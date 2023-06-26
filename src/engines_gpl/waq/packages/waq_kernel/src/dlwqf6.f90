@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module m_dlwqf6
+
+implicit none
+
+contains
+
 
       subroutine dlwqf6 ( noseg  , notot  , isys   , nsys   , rhs    ,         &
      &                    conc   , iknmrk )
@@ -73,3 +79,5 @@
 
       return
       end
+
+end module m_dlwqf6

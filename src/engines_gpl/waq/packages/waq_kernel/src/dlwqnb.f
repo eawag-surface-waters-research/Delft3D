@@ -20,6 +20,26 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqnb
+      use m_zercum
+      use m_setset
+      use m_putper
+      use m_proint
+      use m_proces
+      use m_online
+      use m_hsurf
+      use m_getper
+      use m_dlwq_mt3d
+      use m_dlwq_boundio
+      use m_dlwqtr
+      use m_dlwqt0
+      use m_dlwqo2
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqnb ( a     , j     , c     , lun   , lchar  ,
      &                    action, dlwqd , gridps)
@@ -79,6 +99,23 @@
 !
 !     Declaration of arguments
 !
+      use m_dlwqce
+      use m_dlwqb9
+      use m_dlwqb8
+      use m_dlwqb7
+      use m_dlwqb6
+      use m_dlwqb5
+      use m_dlwqb4
+      use m_dlwqb3
+      use m_dlwqb2
+      use m_dlwqb1
+      use m_dlwq41
+      use m_dlwq17
+      use m_dlwq15
+      use m_dlwq14
+      use m_dlwq13
+      use m_delpar01
+      use m_delmat
       use m_move
       use m_fileutils
       use grids
@@ -531,7 +568,6 @@
           call putpev ('WQtoWQI','DataWQtoWQI',LAATST)
           call GETPER ('WQItoWQ','DataWQItoWQ')
       ENDIF
-
          call dlwqt0 ( lun      , itime    , itimel   , a(iharm) , a(ifarr) ,
      &                 j(inrha) , j(inrh2) , j(inrft) , idt      , a(ivol)  ,
      &                 a(idiff) , a(iarea) , a(iflow) , a(ivelo) , a(ileng) ,
@@ -540,7 +576,7 @@
      &                 intsrt   , isflag   , ifflag   , ivflag   , ilflag   ,
      &                 update   , j(iktim) , j(iknmr) , j(inisp) , a(inrsp) ,
      &                 j(intyp) , j(iwork) , .false.  , ldummy   , rdummy   ,
-     &                 .false.  , gridps   , dlwqd    )
+     &                 .false.   , gridps   , dlwqd    )
       if ( update ) updatr = .true.
 
 !          end of time loop
@@ -573,3 +609,5 @@
 
       RETURN
       END SUBROUTINE
+
+      end module m_dlwqnb

@@ -8,6 +8,8 @@ install_*/**
 
 # files extensions to exclude
 *.i90
+*.i
+*.mod
 
 # folders to exclude
 /src/**/obj/**

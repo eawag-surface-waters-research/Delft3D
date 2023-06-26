@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq81
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQ81 ( WASTE  , IWASTE , NOWST  , NOTOT  , CONC   ,
      *                    DERIV  , TIMER  , VOLUME , AMASS2 , IAFLAG ,
@@ -58,9 +64,14 @@
       use timers
 
       INTEGER     INTOPT, NDMPS
-      INTEGER     ISDMP(*)
-      DIMENSION   WASTE (*) , IWASTE(*) , CONC(*)  , DERIV(*) ,
-     *            VOLUME(*) , AMASS2(*) , TIMER (*), DMPS(*)
+      INTEGER     ISDMP(*)  , IWASTE(*)
+      real        WASTE (*) , CONC(*)  , DERIV(*) ,VOLUME(*),
+     *            AMASS2(*) , TIMER (*), DMPS(*)
+      integer     NOWST, NOTOT, IAFLAG, NOSYS
+
+      integer     i, i1, i3, i4, i5, itel, iseg, ipb, ipq, ibflag
+      real        aload, ahlp, c
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq81", ithandl )
       IF ( NOWST .EQ. 0 ) RETURN
@@ -157,3 +168,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwq81

@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq67
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQ67 ( AMAT   , NOSEG  , JTRACK )
 !
@@ -43,7 +49,9 @@
 !
       use timers
 
-      DIMENSION   AMAT(*)
+      real    AMAT(*)
+      integer noseg, jtrack
+      integer ISEG, ISTEP, ISET
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq67", ithandl )
 !
@@ -58,3 +66,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwq67

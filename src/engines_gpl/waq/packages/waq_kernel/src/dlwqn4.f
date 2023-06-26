@@ -20,6 +20,22 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqn4
+      use m_zercum
+      use m_setset
+      use m_proint
+      use m_proces
+      use m_hsurf
+      use m_dlwq_boundio
+      use m_dlwqtr
+      use m_dlwqt0
+      use m_dlwqo2
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqn4 ( a     , j     , c     , lun   , lchar  ,
      &                    action, dlwqd , gridps)
@@ -72,6 +88,20 @@
 !
 !     Declaration of arguments
 !
+      use m_dlwqf8
+      use m_dlwqce
+      use m_dlwqb3
+      use m_dlwq46
+      use m_dlwq44
+      use m_dlwq43
+      use m_dlwq42
+      use m_dlwq41
+      use m_dlwq40
+      use m_dlwq17
+      use m_dlwq15
+      use m_dlwq14
+      use m_dlwq13
+      use m_delpar01
       use m_srstop
       use m_move
       use m_fileutils
@@ -88,7 +118,7 @@
       use m_sysj          ! Pointers in integer array workspace
       use m_sysc          ! Pointers in character array workspace
       use m_dlwqdata_save_restore
-      
+
       implicit none
 
 
@@ -325,7 +355,7 @@
      +              A(ICONC), A(ICONS), A(IPARM), A(IFUNC), A(ISFUN),
      +              A(IVOL) , NOCONS  , NOFUN   , IDT     , NOUTP   ,
      +              LCHAR   , LUN     , J(IIOUT), J(IIOPO), A(IRIOB),
-     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC), 
+     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC),
      +              C(IONAM), NX      , NY      , J(IGRID), C(IEDIT),
      +              NOSYS   , A(IBOUN), J(ILP)  , A(IMASS), A(IMAS2),
      +              A(ISMAS), NFLUX   , A(IFLXI), ISFLAG  , IAFLAG  ,
@@ -437,7 +467,6 @@
      &                 idt     , a(iderv), iaflag  , a(imas2))
 
 !          new time values, volumes excluded
-
          call dlwqt0 ( lun      , itime    , itimel   , a(iharm) , a(ifarr) ,
      &                 j(inrha) , j(inrh2) , j(inrft) , idt      , a(ivol)  ,
      &                 a(idiff) , a(iarea) , a(iflow) , a(ivelo) , a(ileng) ,
@@ -446,7 +475,7 @@
      &                 intsrt   , isflag   , ifflag   , ivflag   , ilflag   ,
      &                 ldumm2   , j(iktim) , j(iknmr) , j(inisp) , a(inrsp) ,
      &                 j(intyp) , j(iwork) , .false.  , ldummy   , rdummy   ,
-     &                 .false.  , gridps   , dlwqd    )
+     &                 .false.   , gridps   , dlwqd    )
 
 !          update the necessary arrays
 
@@ -506,3 +535,5 @@
 
       RETURN
       END SUBROUTINE
+
+      end module m_dlwqn4

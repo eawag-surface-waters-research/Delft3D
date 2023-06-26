@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module m_dlwq_boundio
+
+implicit none
+
+contains
+
 
 subroutine dlwq_boundio( lunrep, notot , nosys , noseg , nobnd ,&
                          syname, bndid , ibpnt , conc  , bound ,&
@@ -64,6 +70,11 @@ subroutine dlwq_boundio( lunrep, notot , nosys , noseg , nobnd ,&
     integer                           :: extpos        ! position of extension
     integer                           :: extlen        ! length of extension
     type(TWQHBComm), save             :: wqHBComm      ! comm. info for hot boundary input
+    integer                           :: idummy
+    real                              :: rdummy
+    integer                           :: ierr
+    integer                           :: ibnd
+    integer                           :: iseg
 
     integer(4) ithandl /0/
     if ( timon ) call timstrt ( "dlwq_boundio", ithandl )
@@ -195,3 +206,5 @@ hotbound: &
     return
 
 end subroutine
+
+end module m_dlwq_boundio

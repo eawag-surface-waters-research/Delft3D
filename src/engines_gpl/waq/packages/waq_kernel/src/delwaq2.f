@@ -26,6 +26,31 @@
 !       A, J and C are now pointers to arrays
 !
       MODULE DELWAQ2
+      use m_dlwqnq
+      use m_dlwqnp
+      use m_dlwqno
+      use m_dlwqnm
+      use m_dlwqnj
+      use m_dlwqni
+      use m_dlwqnh
+      use m_dlwqng
+      use m_dlwqnf
+      use m_dlwqne
+      use m_dlwqnd
+      use m_dlwqnc
+      use m_dlwqnb
+      use m_dlwqna
+      use m_dlwqn9
+      use m_dlwqn8
+      use m_dlwqn7
+      use m_dlwqn6
+      use m_dlwqn5
+      use m_dlwqn4
+      use m_dlwqn3
+      use m_dlwqn3
+      use m_dlwqn2
+      use m_dlwqn1
+      use m_dlwqn0
       use m_startup_screen
       use m_srstop
       use m_monsys

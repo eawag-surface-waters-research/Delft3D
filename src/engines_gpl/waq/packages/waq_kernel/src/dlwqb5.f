@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqb5
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQB5 ( DISP   , DISPER , AREA   , FLOW   , ALENG  ,
      *                    VELO   , CONC   , BOUND  , IPOINT , NOSYS  ,
@@ -82,11 +88,18 @@
       use timers
 
       INTEGER    NDMPQ
-      INTEGER    IQDMP   (*)
-      DIMENSION  DISP  (  3) , DISPER(*) , AREA (*) , FLOW  (*) ,
-     *           ALENG (  *) , VELO  (*) , CONC (*) , BOUND (*) ,
-     *           IPOINT(4,*) , IDPNT(*)  , IVPNT(*) , AMASS2(*) ,
-     *           DMPQ(*)
+      INTEGER    IQDMP   (*) , IPOINT(4,*) , IDPNT(*) , IVPNT(*)
+      real       DISP  (  3) , DISPER(*)   , AREA (*) , FLOW  (*) ,
+     *           ALENG (  *) , VELO  (*)   , CONC (*) , BOUND (*) ,
+     *           AMASS2(*)   , DMPQ(*)
+      integer    NOSYS, NOTOT, NOQ1, NOQ2, NOQ, NODISP, NOVELO
+      integer    IOPT, ILFLAG, IDT
+
+      integer    i, i3, i4, i5, i6, iq, ipq, is
+      integer    noq12, ibflag, j, ipb, k1, k2
+
+      real       a, q, e, al, dl, d, v, dq
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqb5", ithandl )
 !
@@ -262,3 +275,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwqb5

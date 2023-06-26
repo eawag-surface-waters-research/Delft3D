@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_usolve
+
+      implicit none
+
+      contains
+
 
       subroutine usolve (  ntrace , nolay  , nsegl  , nomat  , amat   ,
      &                     imat   , diag   , idiag  , x      , rhs    ,
@@ -119,3 +125,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_usolve

@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqb6
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQB6 ( CONC   , DERIV  , NOSEG  , NOTOT  , VOLOLD ,
      *                    IDT    , ISYS   , RHS    , NSYS   )
@@ -50,7 +56,12 @@
 !
       use timers
 
-      DIMENSION   CONC (*)  ,  DERIV(*)  ,  VOLOLD(*) ,  RHS(*)
+      real    CONC (*)  ,  DERIV(*)  ,  VOLOLD(*) ,  RHS(*)
+      integer NOSEG, NOTOT, IDT, ISYS, NSYS
+
+      real    dt
+      integer iseg, iset, i1, k1
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqb6", ithandl )
 !
@@ -68,3 +79,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwqb6

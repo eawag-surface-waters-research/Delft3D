@@ -20,6 +20,14 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_psolve
+      use m_usolve
+
+
+      implicit none
+
+      contains
+
 
       subroutine psolve ( ntrace , x      , rhs    , nomat   , amat   ,
      &                    imat   , diag   , idiag  , nolay   , ioptpc ,
@@ -38,6 +46,7 @@
 !                 July     2009, Leo Postma  : double precission version
 !                 November 2009, Leo Postma  : streamlined for parallel computing
 
+      use m_lsolve
       use m_srstop
       use timers
       implicit none
@@ -181,3 +190,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_psolve

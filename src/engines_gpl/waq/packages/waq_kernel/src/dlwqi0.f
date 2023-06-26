@@ -22,6 +22,19 @@
 !!  rights reserved.
 
       module dlwqi0_mod
+      use m_zlayer
+      use m_segcol
+      use m_putper
+      use m_online
+      use m_getper
+      use m_dlwqtd
+      use m_dlwqt0
+      use m_dlwqiv
+      use m_dlwqip
+      use m_dlwqio
+      use m_dlwqi2
+      use m_delpar00
+      use m_chknmr
       use m_zoek
       use m_zero
       use m_srstop
@@ -139,16 +152,16 @@
 !
 !         initialisation of info from the system file
 !
-      CALL open_waq_files ( LUN(2) , LCHAR(2) , 2    , 2    , IERRD  )
-      CALL DLWQI2 ( LUN     , C(IMNAM), C(ISNAM), J(IDUMP), C(IDNAM),
-     *              J(IDPNT), J(IVPNT), A(IDISP), J(IBPNT), C(IBNID),
-     *              C(IBNAM), C(IBTYP), J(INTYP), J(IWAST), iwstkind,
-     *              C(IWSID), C(IWNAM), C(IWTYP), A(ILENG), A(ICONS),
-     *              A(IPARM), J(INRFT), J(INRH2), C(ICNAM), C(IPNAM),
-     *              C(IFNAM), C(ISFNA), C(IDINA), C(IVNAM), J(IKNMR),
-     *              C(IDANA), J(IPDMP), J(IQDMP), J(ISDMP), C(IRNAM),
-     *              J(IORAA), J(NQRAA), J(IQRAA), J(IGNOS), J(IGREF),
-     *              J(IGSEG), gridps  , J(IDMPB), dlwqd )
+      CALL open_waq_files ( LUN(2)   , LCHAR(2) , 2    , 2    , IERRD  )
+      CALL DLWQI2 ( LUN      , C(IMNAM) , C(ISNAM) , J(IDUMP:), C(IDNAM),
+     *              J(IDPNT:), J(IVPNT:), A(IDISP:), J(IBPNT:), C(IBNID),
+     *              C(IBNAM) , C(IBTYP) , J(INTYP:), J(IWAST:), iwstkind,
+     *              C(IWSID) , C(IWNAM) , C(IWTYP) , A(ILENG:), A(ICONS:),
+     *              A(IPARM:), J(INRFT:), J(INRH2:), C(ICNAM) , C(IPNAM),
+     *              C(IFNAM) , C(ISFNA) , C(IDINA) , C(IVNAM) , J(IKNMR:),
+     *              C(IDANA) , J(IPDMP:), J(IQDMP:), J(ISDMP:), C(IRNAM),
+     *              J(IORAA:), J(NQRAA:), J(IQRAA:), J(IGNOS:), J(IGREF:),
+     *              J(IGSEG:), gridps   , J(IDMPB:), dlwqd )
       CLOSE ( LUN(2) )
 
       IF ( OLCFWQ ) THEN
@@ -189,36 +202,36 @@
 !     initialisation of PROCES subsytem
 !
       IF ( NPROC .GT. 0 ) THEN
-         CALL open_waq_files (LUN(24) , LCHAR(24), 24      , 2        , IERRD   )
-         CALL DLWQIP (LUN(24) , LCHAR(24), LUN(19) , NOTOT    , NIPMSA  ,
-     +                NPROC   , NOLOC    , NFLUX   , NODEF    , J(INSVA),
-     +                J(IIFLU), J(IPVAR) , J(IPTYP), A(IDEFA) , A(ISTOC),
-     +                C(IPRNA), J(IIMOD) , IERR    , IPBLOO   , IPCHAR  ,
-     +                IOFFBL  , IOFFCH   , NOSYS   , NDSPX    , NVELX   ,
-     +                A(IDSTO), A(IVSTO) , NDSPN   , J(IDPNW) , NVELN   ,
-     +                J(IVPNW), NLOCX    , J(IPGRD), J(IPNDT) , NOVAR   ,
-     +                J(IVARR), J(IVIDX) , J(IVTDA), J(IVDAG) , J(IVTAG),
-     +                J(IVAGG), nrref    , J(ipror), j(iprvpt))
+         CALL open_waq_files (LUN(24)  , LCHAR(24), 24       , 2         , IERRD   )
+         CALL DLWQIP (LUN(24)  , LCHAR(24), LUN(19)  , NOTOT     , NIPMSA  ,
+     +                NPROC    , NOLOC    , NFLUX    , NODEF     , J(INSVA:),
+     +                J(IIFLU:), J(IPVAR:), J(IPTYP:), A(IDEFA:) , A(ISTOC:),
+     +                C(IPRNA:), J(IIMOD:), IERR     , IPBLOO    , IPCHAR  ,
+     +                IOFFBL   , IOFFCH   , NOSYS    , NDSPX     , NVELX   ,
+     +                A(IDSTO:), A(IVSTO:), NDSPN    , J(IDPNW:) , NVELN   ,
+     +                J(IVPNW:), NLOCX    , J(IPGRD:), J(IPNDT:) , NOVAR   ,
+     +                J(IVARR:), J(IVIDX:), J(IVTDA:), J(IVDAG:) , J(IVTAG:),
+     +                J(IVAGG:), nrref    , J(ipror:), j(iprvpt:))
          CLOSE ( LUN(24) )
       ENDIF
 !
 !     Set variable "structure"
 !
-      CALL DLWQIV ( LUN(19) , NOCONS  , NOPA    , NOFUN   , NOSFUN  ,
-     +              NOSYS   , NOTOT   , NODISP  , NOVELO  , NODEF   ,
-     +              NOLOC   , NDSPX   , NVELX   , NLOCX   , NFLUX   ,
-     +              NOPRED  , NOVAR   , J(IVARR), J(IVIDX), J(IVTDA),
-     +              J(IVDAG), J(IVTAG), J(IVAGG), NOGRID  , J(IVSET))
+      CALL DLWQIV ( LUN(19)  , NOCONS   , NOPA     , NOFUN    , NOSFUN  ,
+     +              NOSYS    , NOTOT    , NODISP   , NOVELO   , NODEF   ,
+     +              NOLOC    , NDSPX    , NVELX    , NLOCX    , NFLUX   ,
+     +              NOPRED   , NOVAR    , J(IVARR:), J(IVIDX:), J(IVTDA:),
+     +              J(IVDAG:), J(IVTAG:), J(IVAGG:), NOGRID   , J(IVSET:))
 !
 !     initialisation of OUTPUT subsytem
 !
 
       IF ( NOUTP .GT. 0 ) THEN
-         CALL open_waq_files ( LUN(25) , LCHAR(25), 25      , 2      , IERRD   )
-         CALL DLWQIO ( LUN(25) , LCHAR(25), LUN(19) , NOUTP   , NRVART  ,
-     +                 NBUFMX  , J(IIOUT) , J(IIOPO), C(IONAM), C(IOSNM),
-     +                 C(IOUNI), C(IODSC) , NOTOT   , C(ISSNM), C(ISUNI),
-     +                 C(ISDSC), LUN      , LCHAR   , IERR    )
+         CALL open_waq_files ( LUN(25) , LCHAR(25), 25       , 2       , IERRD   )
+         CALL DLWQIO ( LUN(25) , LCHAR(25), LUN(19)  , NOUTP   , NRVART  ,
+     +                 NBUFMX  , J(IIOUT:), J(IIOPO:), C(IONAM), C(IOSNM),
+     +                 C(IOUNI), C(IODSC) , NOTOT    , C(ISSNM), C(ISUNI),
+     +                 C(ISDSC), LUN      , LCHAR    , IERR    )
          CLOSE ( LUN(25) )
       ENDIF
 !
@@ -285,12 +298,12 @@
 !        feature 4 == segment belongs to own processor
 !
 
-      CALL CHKNMR ( LUN(19) , nosss  , J(IKNMR) )
+      CALL CHKNMR ( LUN(19) , nosss  , J(IKNMR:) )
 
       ! determine top of the vertcical columns
 
-      call segcol(nosss   , noq1    , noq2   , noq3  , noq4  ,
-     &            j(ixpnt), j(iknmr), isegcol)
+      call segcol(nosss    , noq1     , noq2   , noq3  , noq4  ,
+     &            j(ixpnt:), j(iknmr:), isegcol)
 
 !         initial conditions
 
@@ -370,31 +383,31 @@
           call GETPER ('WQItoWQ','DataWQItoWQ')
       ENDIF
 
-      CALL DLWQT0 ( LUN     , ITSTRT  , ITIMEL  , A(IHARM), A(IFARR),
-     *              J(INRHA), J(INRH2), J(INRFT), IDT     , A(IVOL) ,
-     *              A(IDIFF), A(IAREA), A(IFLOW), A(IVELO), A(ILENG),
-     *              A(IWSTE), A(IBSET), A(ICONS), A(IPARM), A(IFUNC),
-     *              A(ISFUN), J(IBULK), LCHAR   , C(ILUNT), ftype   ,
-     *              INTSRT  , ISFLAG  , IFFLAG  , IVFLAG  , ILFLAG  ,
-     *              UPDATR  , J(IKTIM), J(IKNMR), J(INISP), A(INRSP),
-     *              J(INTYP), J(IWORK), .FALSE. , LDUMMY  , RDUMMY  ,
-     &              .TRUE.  , gridps  , DLWQD   )
+      CALL DLWQT0 ( LUN      , ITSTRT   , ITIMEL   , A(IHARM:), A(IFARR:),
+     *              J(INRHA:), J(INRH2:), J(INRFT:), IDT      , A(IVOL:) ,
+     *              A(IDIFF:), A(IAREA:), A(IFLOW:), A(IVELO:), A(ILENG:),
+     *              A(IWSTE:), A(IBSET:), A(ICONS:), A(IPARM:), A(IFUNC:),
+     *              A(ISFUN:), J(IBULK:), LCHAR    , C(ILUNT) , ftype   ,
+     *              INTSRT   , ISFLAG   , IFFLAG   , IVFLAG   , ILFLAG  ,
+     *              UPDATR   , J(IKTIM:), J(IKNMR:), J(INISP:), A(INRSP:),
+     *              J(INTYP:), J(IWORK:), .FALSE.  , LDUMMY   , RDUMMY  ,
+     &              .TRUE.   , gridps   , DLWQD   )
 
 !         Particle tracking
 
-      call delpar00 ( lchar(45), noseg    , noq      , a(ivol)  , a(iflow) ,
-     &                nosfun   , c(isfna) , a(isfun) )
+      call delpar00 ( lchar(45), noseg    , noq      , a(ivol:)  , a(iflow:) ,
+     &                nosfun   , c(isfna:) , a(isfun:) )
 
 !
 !     New bottomlayer processing
 !
          IF ( NOQ4 .GT. 0 )
      *        CALL DLWQTD ( LUN     , NOSEG   , NSEG2   , NOLAY   , NOGRID  ,
-     *                      NOQ     , NOQ4    , J(IGREF), J(IGSEG), NOCONS  ,
-     *                      NOPA    , NOFUN   , NOSFUN  , A(ICONS), C(ICNAM),
-     *                      A(IPARM), C(IPNAM), A(IFUNC), C(IFNAM), A(ISFUN),
-     *                      C(ISFNA), J(IXPNT), A(IVOL ), A(IAREA), A(IFLOW),
-     *                      A(ILENG))
+     *                      NOQ     , NOQ4    , J(IGREF:), J(IGSEG:), NOCONS  ,
+     *                      NOPA    , NOFUN   , NOSFUN  , A(ICONS:), C(ICNAM:),
+     *                      A(IPARM:), C(IPNAM:), A(IFUNC:), C(IFNAM:), A(ISFUN:),
+     *                      C(ISFNA:), J(IXPNT:), A(IVOL :), A(IAREA:), A(IFLOW:),
+     *                      A(ILENG:))
 !
 
       IF ( INTSRT .EQ. 6 .OR. INTSRT .EQ. 7 ) THEN
@@ -454,11 +467,11 @@
       endif
 
 !         deal with z-layers (inactive cells at the bottom side of the water column
-      call zlayer ( noseg    , nosss    , nosys    , notot    , nolay    ,
-     &              a(ivol)  , noq1+noq2, noq      , a(iarea) , nocons   ,
-     &              c(icnam) , a(icons) , nopa     , c(ipnam) , a(iparm) ,
-     &              nosfun   , c(isfna) , a(isfun) , a(iconc) , a(imass) ,
-     &              j(iknmr) , iknmkv   , j(ixpnt) )
+      call zlayer ( noseg    , nosss    , nosys    , notot     , nolay    ,
+     &              a(ivol:) , noq1+noq2, noq      , a(iarea:) , nocons   ,
+     &              c(icnam:), a(icons:), nopa     , c(ipnam:) , a(iparm:) ,
+     &              nosfun   , c(isfna:), a(isfun:), a(iconc:) , a(imass:) ,
+     &              j(iknmr:), iknmkv   , j(ixpnt:) )
 
 !     temporary for closure error
 

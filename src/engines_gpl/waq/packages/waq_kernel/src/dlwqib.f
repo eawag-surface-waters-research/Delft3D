@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqib
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQIB ( LUN    , LUNUT  , A      , J      , MODE   ,
      *                                      IISP   , IRSP   , IERR   )
@@ -51,7 +57,12 @@
 !
       use timers
 
-      DIMENSION       A(*)   , J(*)
+      real        A(*)
+      integer     J(*)
+      integer     IISP, IRSP, IERR, MODE, LUN, LUNUT
+
+      integer     i, ia, ij, k, iopt
+      integer     noitm, nosys, npnt, ndim, ntal, nobrk
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqib", ithandl )
 !
@@ -116,3 +127,5 @@
       RETURN
 !
       END
+
+      end module m_dlwqib

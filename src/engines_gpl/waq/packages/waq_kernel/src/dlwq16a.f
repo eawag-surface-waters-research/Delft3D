@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq16a
+
+      implicit none
+
+      contains
+
 
       subroutine dlwq16a( nosys  , notot  , noseg  , noq1   , noq2   ,
      &                    noq3   , noq    , nodisp , novelo , disp   ,
@@ -272,3 +278,5 @@
 
       return
       end
+
+      end module m_dlwq16a

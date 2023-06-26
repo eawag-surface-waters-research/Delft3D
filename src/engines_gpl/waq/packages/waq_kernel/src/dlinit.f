@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlinit
+
+      implicit none
+
+      contains
+
 
       subroutine dlinit ( lunut   , noseg   , noq1    , noq2    , noq     ,
      &                    volume  , nopa    , paname  , param   , ilflag  ,
@@ -212,3 +218,5 @@
 
       return
       end
+
+      end module m_dlinit

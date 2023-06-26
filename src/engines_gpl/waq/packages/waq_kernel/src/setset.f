@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_setset
+
+      implicit none
+
+      contains
+
 
       subroutine setset ( lurep  , nocons , nopa   , nofun  , nosfun ,
      &                    nosys  , notot  , nodisp , novelo , nodef  ,
@@ -117,3 +123,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_setset

@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq43
+
+      implicit none
+
+      contains
+
 
 !> Implicit solution of one dimension by double sweep, central discretisation of the advection term.
 
@@ -294,3 +300,5 @@
 
       return
       end
+
+      end module m_dlwq43

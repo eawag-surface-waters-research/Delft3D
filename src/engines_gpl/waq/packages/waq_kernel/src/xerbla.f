@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_xerbla
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE XERBLA ( SRNAME, INFO )
       use m_srstop
@@ -72,3 +78,5 @@
 *
       if ( timon ) call timstop ( ithandl )
       END
+
+      end module m_xerbla

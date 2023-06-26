@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_values
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE VALUES ( NAME   , NOSSS  , VALUE  , NOCONS , NOPA   ,
      *                    NOFUN  , NOSFUN , CONST  , CONAME , PARAM  ,
@@ -33,6 +39,10 @@
       REAL         VALUE(NOSSS), CONST(NOCONS), PARAM (NOPA ,NOSSS ),
      *                           FUNCS(NOFUN ), SFUNCS(NOSSS,NOSFUN)
       LOGICAL      LGET
+      integer      NOSSS, NOCONS , NOPA, NOFUN, NOSFUN, IERR
+
+!     local
+      integer INDX
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "values", ithandl )
 !
@@ -78,3 +88,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_values
