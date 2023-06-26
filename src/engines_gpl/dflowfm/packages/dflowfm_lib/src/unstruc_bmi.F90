@@ -140,7 +140,7 @@ use dflowfm_version_module
    case ('model_name')
       att_value = product_name
    case ('version')
-      att_value = version_full
+      att_value = dflowfm_version_full
    case ('author_name')
       att_value = company
    case ('grid_type')
@@ -288,10 +288,10 @@ end subroutine set_logger_c_callback
 subroutine get_version_string(c_version_string) bind(C, name="get_version_string")
    !DEC$ ATTRIBUTES DLLEXPORT :: get_version_string
    use iso_c_binding, only: c_char
-   use dflowfm_version_module, only: version_full
+   use dflowfm_version_module, only: dflowfm_version_full
    character(kind=c_char), intent(out) :: c_version_string(MAXSTRLEN)
    character(len=MAXSTRLEN) :: name
-   name = version_full
+   name = dflowfm_version_full
    c_version_string = string_to_char_array(trim(name), len(trim(name)))
 end subroutine get_version_string
 

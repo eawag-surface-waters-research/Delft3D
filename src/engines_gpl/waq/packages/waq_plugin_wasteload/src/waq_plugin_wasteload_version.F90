@@ -32,8 +32,8 @@ module waq_plugin_wasteload_version_module
 
     character(*),  private, parameter :: component_name                   = 'WAQ_PLUGIN_WASTELOAD'
 
-    character(*),  public, parameter :: waq_plugin_wasteload_version_full = version_prefix // ', ' // component_name // version_suffix
-    character(*),  public, parameter :: waq_plugin_wasteload_version_id   = version_prefix_id // ', ' // component_name // ' ' // version_suffix_full
+    character(*),  public, parameter :: waq_plugin_wasteload_version_full = company // ', ' // component_name // major_minor_buildnr
+    character(*),  public, parameter :: waq_plugin_wasteload_version_id   = company_id // ', ' // component_name // ' ' // major_minor_buildnr_date_time
 
 contains
 
