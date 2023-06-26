@@ -36,8 +36,8 @@ module delpar_version_module
     ! The component name must be public because it is used by the BMI module
     character(*),  public, parameter :: component_name      = 'PART'
 
-    character(*),  public, parameter :: delpar_version_full = version_prefix // ', ' // component_name // version_suffix
-    character(*),  public, parameter :: delpar_version_id   = version_prefix_id // ', ' // component_name // ' ' // version_suffix_full
+    character(*),  public, parameter :: delpar_version_full = company // ', ' // component_name // major_minor_buildnr
+    character(*),  public, parameter :: delpar_version_id   = company_id // ', ' // component_name // ' ' // major_minor_buildnr_date_time
 
 contains
 
