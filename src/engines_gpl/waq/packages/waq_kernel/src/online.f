@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_online
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE SRWSHL(ITIME, A, J, C)
       use timers
@@ -34,8 +40,6 @@
       real,             dimension(*) :: a
       integer,          dimension(*) :: j
       character(len=*), dimension(*) :: c
-
-
 
       integer    itime
 
@@ -465,6 +469,7 @@
      +                   BOUND , NOLOC , PROLOC, NODEF , DEFAUL,
      +                   NTDMPQ, DANAM , SYNAME, paname, sfname,
      +                   funame, IOUTPS, IOPOIN, OUNAM )
+      use m_fiosub
       use m_gkwini
       use m_getcom
       use m_open_waq_files
@@ -504,6 +509,7 @@
       logical       lfound
       integer       idummy, ierr2
       real          rdummy
+      integer       k1, idum
 
       save    first
       save    filnam
@@ -574,3 +580,5 @@
       return
       end
 
+
+      end module m_online

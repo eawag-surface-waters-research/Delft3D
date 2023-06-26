@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_getper
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE GETPER (StreamName,DataSetName)
 !
@@ -146,3 +152,5 @@ cjvb  logical getResult
 
       RETURN
       END
+
+      end module m_getper

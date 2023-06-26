@@ -20,6 +20,22 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqnq
+      use m_zercum
+      use m_setset
+      use m_proint
+      use m_proces
+      use m_hsurf
+      use m_dlwq_mt3d
+      use m_dlwq_boundio
+      use m_dlwqtr
+      use m_dlwqt0
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqnq ( a     , j     , c     , lun   , lchar  ,
      &                    action, dlwqd , gridps)
@@ -66,6 +82,18 @@
 !               Some timer by someone:
 !                          CPU_TIME, Fortran timer routine
 
+      use m_dlwqo2
+      use m_dlwqf8
+      use m_dlwqce
+      use m_dlwqb3
+      use m_dlwq41
+      use m_dlwq18
+      use m_dlwq17
+      use m_dlwq16a
+      use m_dlwq15
+      use m_dlwq14
+      use m_dlwq13
+      use m_delpar01
       use m_move
       use m_fileutils
       use grids
@@ -91,7 +119,7 @@
       real     ( 4), intent(inout) :: a    (*)          !< System total real array space
       integer  ( 4), intent(inout) :: j    (*)          !< System total integer array space
       character*(*), intent(inout) :: c    (*)          !< System total character array space
-      integer  ( 4), intent(in   ) :: lun  (*)          !< array with unit numbers
+      integer  ( 4), intent(inout) :: lun  (*)          !< array with unit numbers
       character*(*), intent(in   ) :: lchar(*)          !< array with file names
       integer  ( 4), intent(in   ) :: action            !< type of action to perform
       type(delwaq_data)   , target :: dlwqd             !< delwaq data structure
@@ -102,7 +130,7 @@
 
       LOGICAL         IMFLAG , IDFLAG , IHFLAG
       LOGICAL         LREWIN
-      REAL            RDUMMY
+      REAL            RDUMMY(0)
       INTEGER         NSTEP
       INTEGER         IBND
       INTEGER         ISYS
@@ -449,3 +477,5 @@
 
       RETURN
       END SUBROUTINE
+
+      end module m_dlwqnq

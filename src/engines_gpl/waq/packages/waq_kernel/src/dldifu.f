@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dldifu
+
+      implicit none
+
+      contains
+
 
       subroutine dldifu(icreep    ,timest    ,lundia    ,nst       ,icx       ,
      &                  icy       ,j         ,nmmaxj    ,nmmax     ,kmax      ,
@@ -72,6 +78,7 @@
 !         6) the whish to include numereous subtimers where DELWAQ only times
 !            the total
 
+      use m_difacr
       use m_srstop
       use timers
       implicit none
@@ -776,3 +783,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end subroutine dldifu
+
+      end module m_dldifu

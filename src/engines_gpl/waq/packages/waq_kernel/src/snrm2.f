@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_snrm2
+
+      implicit none
+
+      contains
+
 
       real(8) function snrm2 ( n, sx, incx)
       integer i, incx, ix, j, n, next
@@ -149,3 +155,5 @@
   300 continue
       return
       end
+
+      end module m_snrm2

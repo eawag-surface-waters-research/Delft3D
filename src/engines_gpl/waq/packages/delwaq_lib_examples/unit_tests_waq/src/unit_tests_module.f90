@@ -25,6 +25,9 @@
 !     Collect the unit tests
 !
 module unit_tests_module
+    use m_dlwq_boundio
+    use m_dlwq13
+    use m_dlwq13
     use ftnunit
 
     implicit none

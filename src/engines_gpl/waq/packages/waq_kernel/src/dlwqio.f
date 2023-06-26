@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqio
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQIO ( LUNWRO, LCH   , LUREP , NOUTP , NRVART,
      +                    NBUFMX, IOUTPS, IOPOIN, OUNAM , OUSNM ,
@@ -76,7 +82,7 @@
       use output
 
       INTEGER       LUNWRO, LUREP , NOUTP , NRVART, NBUFMX, NOSYS,
-     +              IERR
+     +              IERR, NOTOT
       INTEGER       IOUTPS(7,*)   , IOPOIN(*)     , LUN(*)
       CHARACTER*(*) LCH           , LCHAR(*)
       CHARACTER*20  OUNAM(*)
@@ -86,30 +92,19 @@
 !
 !     Local declarations
 !
-      PARAMETER   ( VERSI1 = 0.2 , VERSI2 = 0.2 )
-      PARAMETER   ( LUOFF = 18 )
-      PARAMETER   ( LUOFF2= 36 )
+      integer, PARAMETER :: LUOFF = 18
+      integer, PARAMETER :: LUOFF2= 36
       INTEGER       NOUTPD, NRVARD, NBUFMD
       REAL          VERSIO
+
+      integer  k, isrtou, ifi, idum
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqio", ithandl )
 !
 !     read and check version number
 !
       READ (LUNWRO, ERR=900, END=900) VERSIO
-!
-!     less than lowest supported version, ERROR
-!
-      IF ( VERSIO .LT. VERSI1 ) THEN
-         WRITE ( LUREP, 2000 ) VERSIO , VERSI1
-         CALL SRSTOP(1)
-      ENDIF
-!
-!     greater than this version, WARNING
-!
-      IF ( VERSIO .GT. VERSI2 ) THEN
-         WRITE ( LUREP, 2010 ) VERSIO , VERSI2
-      ENDIF
 !
 !     read and check dimensions
 !
@@ -197,10 +192,6 @@
 !
 !     output formats
 !
- 2000 FORMAT ( ' ERROR  : version output intput ',F5.2,' NOT supported'
-     &        /'          by OUTPUT sytem version,',F5.2)
- 2010 FORMAT ( ' WARNING: version output intput ',F5.2,' greater than'
-     &        /'          OUTPUT sytem version,',F5.2)
  2020 FORMAT ( ' ERROR  : Output work file doesn''t match dimensions in'
      &        /'          DELWAQ boot file for NOUTP',
      &        /'          ',I6,' in output,',I6,' in boot file.')
@@ -214,3 +205,5 @@
      &        /'          on unit number ',I3)
 !
       END
+
+      end module m_dlwqio

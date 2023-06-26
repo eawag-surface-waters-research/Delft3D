@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqt4
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqt4 ( lun    , luntxt , ftype  , lunout , ilun   ,
      &                    itime  , result , ipoint , nosub  , nrftot ,
@@ -295,6 +301,9 @@
 
       use m_srstop
       use timers
+
+      integer   LUNOUT, ISFLAG, LLUN, ITIME, ITIME1, MESSGE
+
       CHARACTER*24  MSGTXT(6)
       CHARACTER*(*) SFILE
       DATA MSGTXT / ' REWIND ON              ' , ' WARNING READING        ' ,
@@ -345,3 +354,5 @@
      *   ' TIME IN FILE    :',I2,'Y ',I3,'D ',I2,'H ',I2,'M ',I2,'S .')
 
       END
+
+      end module m_dlwqt4

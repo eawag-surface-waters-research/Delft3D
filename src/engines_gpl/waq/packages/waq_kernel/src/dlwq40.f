@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq40
+
+      implicit none
+
+      contains
+
 
       subroutine dlwq40 ( nosys  , notot  , noseg  , noq    , nodisp ,
      &                    novelo , disp   , disper , velo   , area   ,
@@ -277,3 +283,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_dlwq40

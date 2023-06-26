@@ -20,6 +20,16 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqn7
+      use m_hsurf
+      use m_dlwqtr
+      use m_dlwqo2
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqn7 ( a     , j     , c     , lun   , lchar  ,
      &                    action, dlwqd , gridps)
@@ -68,6 +78,18 @@
 !
 !     Declaration of arguments
 !
+      use m_dlwq71
+      use m_dlwq70
+      use m_dlwq67
+      use m_dlwq66
+      use m_dlwq65
+      use m_dlwq63
+      use m_dlwq61
+      use m_dlwq60
+      use m_dlwq41
+      use m_dlwq15
+      use m_dlwq13
+      use m_delmat
       use m_zero
       use m_fileutils
       use grids
@@ -147,7 +169,7 @@
 !        They cannot have explicit processes during this time step
 
          call hsurf  ( noseg    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
-     &                 c(isfna) , a(isfun) , surface  , sindex   , lun(19)  )
+     &                 c(isfna) , a(isfun) , surface  , lun(19)  )
          call dryfld ( noseg    , nosss    , nolay    , a(ivol)  , noq1+noq2,
      &                 a(iarea) , nocons   , c(icnam) , a(icons) , sindex   ,
      &                 surface  , j(iknmr) , iknmkv   )
@@ -276,3 +298,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwqn7

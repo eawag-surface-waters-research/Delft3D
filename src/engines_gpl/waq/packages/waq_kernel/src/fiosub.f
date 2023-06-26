@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_fiosub
+
+      implicit none
+
+      contains
+
 
       subroutine fiosub (outval, iopoin, nrvar , nocons, nopa  ,
      +                   nofun , nosfun, notot , conc  , segfun,
@@ -419,3 +425,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_fiosub

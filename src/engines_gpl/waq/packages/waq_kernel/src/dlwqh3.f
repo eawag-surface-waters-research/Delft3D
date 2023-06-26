@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqh3
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqh3 ( noseg  , nosys  , notot  , nobnd  , isys   ,
      &                    deriv  , bound  , rhs    , diag   , sol    )
@@ -82,3 +88,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwqh3

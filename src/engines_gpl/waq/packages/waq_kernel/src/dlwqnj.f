@@ -20,6 +20,26 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqnj
+      use m_zercum
+      use m_waq2flow
+      use m_setset
+      use m_putper
+      use m_proint
+      use m_proces
+      use m_online
+      use m_hsurf
+      use m_getper
+      use m_dlwq_boundio
+      use m_dlwqtr
+      use m_dlwqt0
+      use m_dlwqo2
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqnj ( a     , j     , c     , lun   , lchar  ,
      &                    action, dlwqd , gridps)
@@ -80,6 +100,22 @@
 !
 !     Declaration of arguments
 !
+      use m_dlwqf8
+      use m_dlwqd2
+      use m_dlwqce
+      use m_dlwqb3
+      use m_dlwq41
+      use m_dlwq17
+      use m_dlwq15
+      use m_dlwq14
+      use m_dlwq13
+      use m_dlmasb
+      use m_dlinit
+      use m_dlflux
+      use m_dldifu
+      use m_dlconv
+      use m_dlback
+      use m_delpar01
       use m_move
       use m_fileutils
       use grids
@@ -131,17 +167,17 @@
       INTEGER          ICREEP
       INTEGER          ICENTR
       INTEGER          IZ
-      INTEGER          IDUMMY
+      INTEGER          IDUMMY(1)
       REAL             RDT
 
       INTEGER          IBND
       INTEGER           ISYS
 
       real             dsdksi(1,1), dsdeta(1,1), dtdksi(1,1), dtdeta(1,1)
-      real             rbnd
-      real             ws
-      real             adummy
-      integer          kmxsed
+      real             rbnd(1)
+      real             ws(1)
+      real             adummy(1)
+      real             kmxsed(1)
       logical          eqmbc
       character*4      sedtyp(2)
       INTEGER          sindex
@@ -621,7 +657,7 @@
      &                 intsrt   , isflag   , ifflag   , ivflag   , ilflag   ,
      &                 ldumm2   , j(iktim) , j(iknmr) , j(inisp) , a(inrsp) ,
      &                 j(intyp) , j(iwork) , .false.  , ldummy   , rdummy   ,
-     &                 .false.  , gridps   , dlwqd    )
+     &                 .false.   , gridps   , dlwqd    )
 
 !          end of loop
 
@@ -653,3 +689,5 @@
       RETURN
 
       END
+
+      end module m_dlwqnj

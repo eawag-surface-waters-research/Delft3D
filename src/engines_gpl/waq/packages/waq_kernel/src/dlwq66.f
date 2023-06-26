@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq66
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQ66 ( AMASS  , VOLUME , CONC   , NOTOT  , NOSEG  )
 !
@@ -45,7 +51,12 @@
 !
       use timers
 
-      DIMENSION  AMASS(NOTOT,*) , VOLUME(*) , CONC(NOTOT,*)
+      real       AMASS(NOTOT,*) , VOLUME(*) , CONC(NOTOT,*)
+      real       v1
+
+      integer    notot, noseg
+      integer    isys, iseg
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq66", ithandl )
 !
@@ -60,3 +71,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwq66

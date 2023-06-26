@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqt2
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQT2 ( LUNIN  , LUNOUT , ITIME  , RESULT , NTOTAL ,
      *                    LUNTXT , ISFLAG , IFFLAG , ONLINE  )
@@ -54,7 +60,8 @@
       use m_srstop
       use timers
 
-      DIMENSION     RESULT(NTOTAL)
+      real          RESULT(NTOTAL)
+      integer       LUNIN  , LUNOUT , ITIME , NTOTAL, ISFLAG , IFFLAG
       CHARACTER*10  MSGTXT(3)
       CHARACTER*(*) LUNTXT
       LOGICAL       ONLINE
@@ -62,6 +69,7 @@
       logical        stream_access                     ! help variable to detect the type of file access
       character(20)  access                            ! help variable to detect the type of file access
 
+      integer    ierr, itime1, messge
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqt2", ithandl )
 
@@ -164,3 +172,5 @@
      *   ' TIME IN FILE    :',I2,'Y ',I3,'D ',I2,'H ',I2,'M ',I2,'S .')
 !
       END
+
+      end module m_dlwqt2

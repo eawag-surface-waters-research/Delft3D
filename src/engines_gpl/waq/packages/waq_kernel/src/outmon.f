@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_outmon
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE OUTMON ( IOUT  , IDUMP , CONC  , AMASS2, ITIME ,
      +                    DNAME , SNAME , MNAME , NODUMP, NOTOT ,
@@ -66,6 +72,8 @@
 !     ITSTOP  INTEGER     1       INPUT   stop time
 !
 !
+      use m_outmo2
+      use m_outmo1
       use m_reptim
       use timers
 
@@ -80,6 +88,8 @@
 !     Local declaration
 !
       CHARACTER*40 VNAME
+      integer    k, id, nend
+      real       percit
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "outmon", ithandl )
 !
@@ -170,3 +180,5 @@
  2100 FORMAT (       45X, A40                       )
 !
       END
+
+      end module m_outmon

@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_outmnf
+
+      implicit none
+
+      contains
+
 
       subroutine outmnf ( iout  , lchout, itime , moname, noseg ,
      +                    notot1, conc1 , synam1, notot2, conc2 ,
@@ -376,3 +382,5 @@
  2000 format ( 'ERROR writing NEFIS map file errno:', i7 )
 
       end
+
+      end module m_outmnf

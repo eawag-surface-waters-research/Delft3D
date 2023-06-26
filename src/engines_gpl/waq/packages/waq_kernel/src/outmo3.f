@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_outmo3
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE OUTMO3 ( IOUT  , AMASS2, ITIME , SNAME , MNAME ,
      +                    NOTOT , IP    , ISFLAG, ASMASS, IBFLAG,
@@ -62,6 +68,7 @@
 !     DANAM   CHAR*20  NDMPAR     INPUT   names of dump area's
 !
 !
+      use m_outmo2
       use m_reptim
       use timers
 
@@ -76,6 +83,9 @@
 !     Local declaration
 !
       CHARACTER*40 VNAME
+      integer idmp, k, id, id2, nend, nend2
+      real    percit
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "outmo3", ithandl )
 !
@@ -172,3 +182,5 @@
  2100 FORMAT (       45X, A40                       )
 !
       END
+
+      end module m_outmo3

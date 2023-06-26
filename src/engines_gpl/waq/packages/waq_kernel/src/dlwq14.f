@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq14
+
+      implicit none
+
+      contains
+
 
       subroutine dlwq14 ( deriv  , notot  , noseg  , itfact , amass2 ,
      &                    idt    , iaflag , dmps   , intopt , isdmp  )
@@ -94,3 +100,5 @@
 
       return
       end
+
+      end module m_dlwq14

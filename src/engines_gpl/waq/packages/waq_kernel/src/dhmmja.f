@@ -21,8 +21,8 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-            module dhmmja_mod
-            use m_srstop
+      module dhmmja_mod
+      use m_srstop
 
       contains
       subroutine dhmmja ( lunrep, l_decl, arrpoi, arrtyp, arrbyt,

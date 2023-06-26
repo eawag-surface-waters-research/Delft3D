@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqt3
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQT3 ( ITIME  , IPERIO , APHASE , AVALUE , NRHARM ,
      *                    NOSUB  , NOSPAC , IPOINT , NPOINT , RESULT ,
@@ -77,11 +83,20 @@
       use m_srstop
       use timers
 
-      PARAMETER     ( TWOPI = 6.28319 )
-      DIMENSION     IPERIO(*) , APHASE(*) , AVALUE(*) , IPOINT(*) ,
-     *              RESULT(NOSUB,*)
+      real, PARAMETER :: TWOPI = 6.28319
+      integer       IPERIO(*) , IPOINT(*)
+      real          APHASE(*) , AVALUE(*) , RESULT(NOSUB,*)
+      integer       ITIME  , NRHARM , NOSUB  , NOSPAC , NPOINT ,
+     *              LUNIN  , LUNOUT , ISFLAG , IFFLAG
+
       CHARACTER*(*) LUNTXT
       LOGICAL       UPDATE
+
+
+      integer   k, notot
+      integer   irec, itel, ib, ih, ihstop, istart, i1, i2, iv
+      real      func
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqt3", ithandl )
 !
@@ -193,3 +208,5 @@
      *    ' SIMULATION TIME:',I2,'Y ',I3,'D ',I2,'H ',I2,'M ',I2,'S .')
 !
       END
+
+      end module m_dlwqt3

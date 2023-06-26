@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_delmat
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DELMAT (N,NUC,NLC,M,A,B,IOPT)
 !
@@ -65,8 +71,16 @@
       use m_srstop
       use timers
 
-      DIMENSION A(*),B(*)
+      REAL :: A(*), B(*)
       integer(4) ithandl /0/
+
+      integer NUC, NLC, N, NMUC, NMLC, NDM1, ND, N1
+      integer L1, L2, L3, L4, L5
+      integer K1, K2, K3, K4, K5, K6
+      integer M, IOPT
+
+      real F, P
+
       if ( timon ) call timstrt ( "delmat", ithandl )
       NMUC = N - NUC
       NMLC = N - NLC
@@ -275,3 +289,5 @@
  9999 if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_delmat

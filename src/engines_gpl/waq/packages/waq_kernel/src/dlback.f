@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlback
+
+      implicit none
+
+      contains
+
 
       subroutine dlback (  dt     , nmax   , mmax   , kmax   , lgrida ,
      &                     noseg  , nosys  , notot  , gsqs   , r1     ,
@@ -107,3 +113,5 @@
 
       return
       end
+
+      end module m_dlback

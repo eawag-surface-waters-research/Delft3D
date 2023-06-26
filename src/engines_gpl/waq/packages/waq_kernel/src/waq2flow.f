@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_waq2flow
+
+      implicit none
+
+      contains
+
 
       subroutine waq2flow(nrvart, ounam , ipoint, nocons, nopa  ,
      +                    nofun , nosfun, notot , conc  , segfun,
@@ -28,6 +34,7 @@
      +                    nx    , ny    , lgrid , bound , noloc ,
      +                    proloc, nodef , defaul, lunrep)
 
+      use m_fioutv
       use m_zoek
       use m_srstop
       use m_monsys
@@ -228,3 +235,5 @@
 
       return
       end
+
+      end module m_waq2flow

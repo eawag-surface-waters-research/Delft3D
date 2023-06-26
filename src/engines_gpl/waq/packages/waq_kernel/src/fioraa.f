@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_fioraa
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE FIORAA (OUTVAL, NRVAR , TRRAAI, NORAAI, NOSYS )
 !
@@ -52,7 +58,8 @@
 !
 !     Local
 !
-      PARAMETER ( RMISS = -999. )
+      integer   iraai, isys
+      real, PARAMETER  :: RMISS = -999.
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "fioraa", ithandl )
 !
@@ -70,3 +77,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_fioraa

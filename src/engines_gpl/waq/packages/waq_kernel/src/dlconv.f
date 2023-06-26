@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlconv
+
+      implicit none
+
+      contains
+
 
       subroutine dlconv ( noseg   , noq1    , noq2    , noq3    , noq     ,
      &                    nobnd   , nosys   , notot   , intsrt  , intopt  ,
@@ -370,3 +376,5 @@
 
       return
       end
+
+      end module m_dlconv

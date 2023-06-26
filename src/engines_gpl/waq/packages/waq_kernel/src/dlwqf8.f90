@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module m_dlwqf8
+
+implicit none
+
+contains
+
 
       subroutine dlwqf8 ( noseg  , noq    , ipnt   , idt    , iknmkv ,       &
      &                    volume , flow   , voll   , vol2   )
@@ -86,3 +92,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+end module m_dlwqf8

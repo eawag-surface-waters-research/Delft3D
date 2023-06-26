@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dltest
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLTEST(
 ! trisula parameters:
@@ -131,7 +137,7 @@
      *          kfs    (jstart:nmmaxj),
      *          kcs    (jstart:nmmaxj)
 !
-      DIMENSION  qxk    (jstart:nmmaxj, kmax),
+      real       qxk    (jstart:nmmaxj, kmax),
      *           qyk    (jstart:nmmaxj, kmax),
      *           qzk    (jstart:nmmaxj, 0:kmax),
      *           difx   (jstart:nmmaxj, kmax),
@@ -145,7 +151,7 @@
      *           gzz    (jstart:nmmaxj, 0:kmax)
 !
 ! work arrays:
-      DIMENSION  bdddx  (jstart:nmmaxj, kmax),
+      real       bdddx  (jstart:nmmaxj, kmax),
      *           bddx   (jstart:nmmaxj, kmax),
      *           bdx    (jstart:nmmaxj, kmax),
      *           bux    (jstart:nmmaxj, kmax),
@@ -160,6 +166,13 @@
      *           bbkl   (jstart:nmmaxj, kmax, nosys),
      *           cckl   (jstart:nmmaxj, kmax, nosys),
      *           ddkl   (jstart:nmmaxj, kmax, nosys)
+
+      real    timest
+      integer icx, icy, intsrt, jstart
+      integer lundia, kmax
+      integer nosys, notot, nmmax, nmmaxj
+      integer i, k, j
+
       write(lundia, * )       timest,icx,icy,jstart,nmmaxj,kmax
       write(lundia, * )       notot,nosys,intsrt,nmmax
       write(lundia,'(A)') 'kfu'
@@ -232,3 +245,5 @@
       call srstop(1)
       return
       end
+
+      end module m_dltest

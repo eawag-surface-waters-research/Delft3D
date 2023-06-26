@@ -20,6 +20,14 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq15
+      use m_wascal
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwq15 ( nosys   , notot   , noseg   , noq     , nowst   ,
      &                    nowtyp  , ndmps   , intopt  , idt     , itime   ,
@@ -523,3 +531,5 @@
 
       return
       end
+
+      end module m_dlwq15

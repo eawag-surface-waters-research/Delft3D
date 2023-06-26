@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqb3
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQB3 ( AREA   , FLOW   , VELO   , IPOINT , NOTOT  ,
      *                    NOQ    , NOVELO , IVPNT  , VOLUME , IOPT   ,
@@ -61,11 +67,17 @@
 !
       use timers
 
-      INTEGER    NDMPQ
+      INTEGER    NDMPQ, NOTOT, NOQ, NOVELO, NOSYS
+      INTEGER    IOPT, IDT, IAFLAG
       INTEGER    IQDMP   (*)
-      DIMENSION  AREA (*) , FLOW  (*) , VELO  (*) , IPOINT(4,*) ,
-     *           IVPNT(*) , VOLUME(*) , AMASS2(*) , DMPQ(*)
+      real       AREA (*) , FLOW  (*) , VELO  (*) , VOLUME(*),
+     *           AMASS2(*) , DMPQ(*)
+      integer    IVPNT(*) , IPOINT(4,*)
       LOGICAL    MASBAL
+
+      integer    i, j, i4, i5, i6, iq, ipq
+      real       b, q
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqb3", ithandl )
 !
@@ -138,3 +150,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwqb3
