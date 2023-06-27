@@ -100,7 +100,7 @@ implicit none
     integer, parameter :: MD_AUTOSTARTSTOP = 2   !< Autostart this model and then exit (batchmode)
 
     type(tree_data), pointer, public :: md_ptr   !< Unstruc Model Data in tree_data
-    character(len=64)  :: md_ident         = ' ' !< Identifier of the model, used as suggested basename for some files. (runid)
+    character(len=64), target  :: md_ident         = ' ' !< Identifier of the model, used as suggested basename for some files. (runid)
     character(len=64)  :: md_mdu           = ' ' !< similar, used in parsing parsing commandline
     character(len=64)  :: md_ident_sequential = ' ' !< Sequential model identifier, used for parallel outputdir
 
