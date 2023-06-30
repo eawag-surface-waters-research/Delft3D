@@ -106,8 +106,6 @@ subroutine transport()                           ! transport for now, advect sal
  ! It is not allowed to change the selection of limiters for sal/tem/sed as defined in the input file. Therefore, the next line is now a comment (and will be removed in future)
  ! limtyp = max(Limtypsa, limtyptm, limtypsed)                   ! check if limiter need be applied
 
- if (jasal == 0 .and. jatem == 0 .and. jased == 0 .and. jatransportmodule == 0 ) return    ! no salinity, or sediment, no higher orders
-
  if (jasal > 0) then
 
      do k  = 1,nbnds                              ! set 1D or 3D sal boundary conditions

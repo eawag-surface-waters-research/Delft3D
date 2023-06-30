@@ -48,7 +48,7 @@
  use unstruc_files, only: mdia
  use unstruc_netcdf
  use MessageHandling
- use m_flowparameters, only: jawave, jatrt, jacali, jacreep, jatransportmodule, flowWithoutWaves, jasedtrails, jajre, modind
+ use m_flowparameters, only: jawave, jatrt, jacali, jacreep, flowWithoutWaves, jasedtrails, jajre, modind
  use dfm_error
  use m_fm_wq_processes, only: jawaqproc
  use m_vegetation
