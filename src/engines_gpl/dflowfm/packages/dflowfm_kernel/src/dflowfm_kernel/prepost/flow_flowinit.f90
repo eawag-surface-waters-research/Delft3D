@@ -60,6 +60,7 @@
  use m_setucxcuy_leastsquare, only: reconst2nd
  use mathconsts, only: sqrt2_hp
  use m_sethu
+ use m_external_forcings
 
  implicit none
 
@@ -408,7 +409,7 @@ end if
  call setkbotktop(1)                                            ! set sigmabnds for ec
 
  if ( janudge.eq.1 ) call setzcs()
- call flow_setexternalforcings(tstart_user, .true., iresult)             ! set field oriented external forcings, flag that the call is from the initialization phase
+ call set_external_forcings(tstart_user, .true., iresult)             ! set field oriented external forcings, flag that the call is from the initialization phase
 
  if (iresult /= DFM_NOERR) then
     goto 888

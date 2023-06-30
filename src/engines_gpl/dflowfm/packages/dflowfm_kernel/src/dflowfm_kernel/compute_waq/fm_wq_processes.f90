@@ -575,7 +575,7 @@
       end if
       isffetchl = 0
       isffetchd = 0
-      if ( jawave.eq.1 .or. jawave.eq.2 ) then  ! copied from "flow_setexternalforcings", call to "tauwavefetch"
+      if ( jawave.eq.1 .or. jawave.eq.2 ) then  ! copied from "set_external_forcings", call to "tauwavefetch"
          if (icon>0) then
             nosfun = nosfun+1
             isffetchl = nosfun
