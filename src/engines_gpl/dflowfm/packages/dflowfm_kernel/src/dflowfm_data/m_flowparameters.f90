@@ -57,7 +57,7 @@
                                                                  !< wet surface width and make sure the crest level is equal or larger than the
                                                                  !< bed level of the channel. 
  integer                           :: lincontin         !< 0 = no, 1 = yes linear continuity
-
+ 
  integer                           :: iPerot            !< Perot weigthing type of cell center velocities ucx, ucy
                                                         !! in vectoren:
                                                         !! 0 : uc*sum(w) = sum (u W)
@@ -630,7 +630,7 @@ subroutine default_flowparameters()
                                          !< wet surface width and make sure the crest level is equal or larger than the
                                          !< bed level of the channel. 
     lincontin= 0      ! 0 = no, 1 = yes linear continuity
-
+    
     iPerot   = 1      ! Perot weigthing type of cell center velocities ucx, ucy
                       ! in vectoren:
                       ! 0 : uc*sum(w) = sum (u W)
