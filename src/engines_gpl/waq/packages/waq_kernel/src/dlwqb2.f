@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqb2
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQB2 ( CONC   , RHS    , NOSEG  , NOTOT  , ISYS   ,
      *                    NSYS   )
@@ -45,7 +51,10 @@
 !     ISYS    INTEGER       1         INPUT   system considered
 !     NSYS    INTEGER       1         INPUT   number of systems
 !
-      DIMENSION   CONC(*) , RHS(*)
+      real     CONC(*) , RHS(*)
+      integer  NOSEG  , NOTOT  , ISYS, NSYS
+
+      integer  iset, iseg, i1, k1
 !
 !         put result in concentration array
 !
@@ -60,3 +69,5 @@
 !
       RETURN
       END
+
+      end module m_dlwqb2

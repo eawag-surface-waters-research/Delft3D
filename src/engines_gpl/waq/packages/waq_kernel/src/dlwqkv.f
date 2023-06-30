@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqkv
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQKV ( LUNIN  , LUNOUT , ITIME  , IARRAY , NTOTAL ,
      +                    LUNTXT , ISFLAG , IFFLAG )
@@ -65,6 +71,9 @@
       character(20)  access                            ! help variable to detect the type of file access
       CHARACTER*10  MSGTXT(3)
       DATA          MSGTXT /' REWIND   ' , ' CONSTANT ' , ' ERROR    '/
+
+      integer   messge, itime1, ierr
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqkv", ithandl )
 !
@@ -144,3 +153,5 @@
      *         ' TIME IN FILE    :',I5,'D ',I2,'H ',I2,'M ',I2,'S ! ')
 !
       END
+
+      end module m_dlwqkv

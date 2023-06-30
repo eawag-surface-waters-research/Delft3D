@@ -24,7 +24,7 @@
       subroutine stadpt ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !>\file
 !>       Depth-averaged, max and min value per timestep
@@ -115,7 +115,7 @@
 
 !     default output is the value from the segment itself
       do iseg=1,noseg
-         call dhkmrk( 1, iknmrk(iseg), ikmrk )
+         call evaluate_waq_attribute( 1, iknmrk(iseg), ikmrk )
          if ( ikmrk .ne. 0 ) then
             cdepsum(iseg) = pmsa(ip1) * pmsa(ip2)
             vdepsum(iseg) = pmsa(ip2)
@@ -132,8 +132,8 @@
          ifrom  = iexpnt(1,iq)
          ito    = iexpnt(2,iq)
          if ( ifrom .gt. 0 .and. ito .gt. 0 ) then
-            call dhkmrk( 1, iknmrk(ifrom ), ik1from )
-            call dhkmrk( 1, iknmrk(ito)   , ik1to )
+            call evaluate_waq_attribute( 1, iknmrk(ifrom ), ik1from )
+            call evaluate_waq_attribute( 1, iknmrk(ito)   , ik1to )
             if ( ik1from .eq. 1 .and. ik1to .eq. 1 ) then
                cdepsum(ito) = cdepsum(ito) + cdepsum(ifrom)
                vdepsum(ito) = vdepsum(ito) + vdepsum(ifrom)
@@ -151,8 +151,8 @@
          ifrom  = iexpnt(1,iq)
          ito    = iexpnt(2,iq)
          if ( ifrom .gt. 0 .and. ito .gt. 0 ) then
-            call dhkmrk( 1, iknmrk(ifrom ), ik1from )
-            call dhkmrk( 1, iknmrk(ito)   , ik1to )
+            call evaluate_waq_attribute( 1, iknmrk(ifrom ), ik1from )
+            call evaluate_waq_attribute( 1, iknmrk(ito)   , ik1to )
             if ( ik1from .eq. 1 .and. ik1to .eq. 1 ) then
                cdepavg(ifrom) = cdepavg(ito)
                cdepmax(ifrom) = cdepmax(ito)
@@ -163,7 +163,7 @@
 
 !     copy final result back into pmsa array
       do iseg=1,noseg
-         call dhkmrk( 1, iknmrk(iseg), ikmrk )
+         call evaluate_waq_attribute( 1, iknmrk(iseg), ikmrk )
          if ( ikmrk .ne. 0 ) then
             pmsa(ip3) = cdepavg(iseg)
             pmsa(ip4) = cdepmax(iseg)

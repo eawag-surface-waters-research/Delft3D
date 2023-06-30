@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module m_dlwq_boundio
+
+implicit none
+
+contains
+
 
 subroutine dlwq_boundio( lunrep, notot , nosys , noseg , nobnd ,&
                          syname, bndid , ibpnt , conc  , bound ,&
@@ -27,7 +33,7 @@ subroutine dlwq_boundio( lunrep, notot , nosys , noseg , nobnd ,&
 
     use m_srstop
     use m_getcom
-    use m_dhpath
+    use m_get_filepath_and_pathlen
     use M_WQParComm
     use M_WQHBComm
     use timers
@@ -64,6 +70,11 @@ subroutine dlwq_boundio( lunrep, notot , nosys , noseg , nobnd ,&
     integer                           :: extpos        ! position of extension
     integer                           :: extlen        ! length of extension
     type(TWQHBComm), save             :: wqHBComm      ! comm. info for hot boundary input
+    integer                           :: idummy
+    real                              :: rdummy
+    integer                           :: ierr
+    integer                           :: ibnd
+    integer                           :: iseg
 
     integer(4) ithandl /0/
     if ( timon ) call timstrt ( "dlwq_boundio", ithandl )
@@ -71,7 +82,7 @@ subroutine dlwq_boundio( lunrep, notot , nosys , noseg , nobnd ,&
     ! Init, lees configuratie, initialiseer IO
 
     if ( init ) then
-        call dhpath(runid, runpath, pathlen)
+        call get_filepath_and_pathlen(runid, runpath, pathlen)
         call dhfext(runid, runext, extpos, extlen)
         curDomName = runid(pathlen+1:extpos-1)
         call getcom ( '-d'  , 3 , boundio_active, idummy, rdummy, ddconfig, ierr)
@@ -195,3 +206,5 @@ hotbound: &
     return
 
 end subroutine
+
+end module m_dlwq_boundio

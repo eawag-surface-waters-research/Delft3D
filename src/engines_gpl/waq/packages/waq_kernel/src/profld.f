@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_profld
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE PROFLD (NOFLUX, NFLUX1, NFLUXP, IGRID , NOSEG2,
      +                   NOSEG , NDT   , ISDMP , GRDSEG, FLUX  ,
@@ -63,6 +69,10 @@
       INTEGER ISDMP(NOSEG)       , GRDSEG(NOSEG,*)
       REAL    FLUX(NOFLUX,NOSEG2), VOLUME(NOSEG)       ,
      +        FLXDMP(NOFLUX,*)
+
+!     local
+      integer iseg, iseg2, ips, iflux
+      real    vol
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "profld", ithandl )
 !
@@ -86,3 +96,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_profld

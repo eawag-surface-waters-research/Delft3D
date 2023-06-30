@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_stepyn
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE STEPYN (ITIME , IDT   , ISTRT , ISTOP , ISTEP ,
      +                   LFLAG , LFIRST)
@@ -85,3 +91,5 @@
       RETURN
 !
       END
+
+      end module m_stepyn

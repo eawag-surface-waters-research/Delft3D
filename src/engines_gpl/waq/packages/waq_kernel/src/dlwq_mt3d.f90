@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module m_dlwq_mt3d
+
+implicit none
+
+contains
+
 
 subroutine dlwq_mt3d   ( lunrep, itime , idt   , itstop, notot ,&
                          nosys , noseg , nobnd , syname, bndid ,&
@@ -497,3 +503,5 @@ subroutine dlwq_mt3d   ( lunrep, itime , idt   , itstop, notot ,&
    return
 
 end subroutine
+
+end module m_dlwq_mt3d

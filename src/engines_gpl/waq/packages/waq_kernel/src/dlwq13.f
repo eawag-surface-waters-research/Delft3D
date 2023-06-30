@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq13
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQ13 ( LUN    , LCHAR  , CONC   , ITIME  , MNAME  ,
      &                    SNAME  , NOTOT  , NOSEG  )
@@ -49,16 +55,21 @@
 !     NOSEG   INTEGER  1           INPUT   total number of segments
 !
 !
-      use m_dhopnf
+      use m_open_waq_files
       use timers
 
-      DIMENSION     CONC  ( NOTOT, NOSEG ) , LUN(*)
+      real          CONC  ( NOTOT, NOSEG )
       CHARACTER*20  SNAME ( * )
       CHARACTER*40  MNAME ( * )
       CHARACTER*(*) LCHAR ( * )
       CHARACTER*255 LCHARMAP
-      integer    i
+      integer       lun(*)
+      
+      integer    i, j, k, itime
+      integer    noseg, notot, nonan, ierr
       integer(4) ithandl /0/
+      
+            
       if ( timon ) call timstrt ( "dlwq13", ithandl )
 !
 !      check for NaNs
@@ -97,7 +108,7 @@
       write (lun(19),*) ' Restart file written to restart_temporary.map !'
       lcharmap = 'restart_temporary.map'
 
-   20 CALL DHOPNF ( LUN(23), LCHARMAP, 23    , 1     , IERR  )
+   20 CALL open_waq_files ( LUN(23), LCHARMAP, 23    , 1     , IERR  )
       WRITE ( LUN(23) ) ( MNAME(K) , K=1,4 )
       WRITE ( LUN(23) )   NOTOT    , NOSEG
       WRITE ( LUN(23) ) ( SNAME(K) , K=1,NOTOT )
@@ -107,3 +118,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwq13

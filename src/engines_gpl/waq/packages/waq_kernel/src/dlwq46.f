@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq46
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQ46 ( DISP   , DISPER , AREA   , FLOW   , ALENG  ,
      *                    VELO   , CONC   , BOUND  , IPOINT , NOSYS  ,
@@ -76,14 +82,22 @@
       use timers
       INTEGER    NDMPQ         , IBACKW
       INTEGER    IQDMP   (*)
-      DIMENSION  DISP  (  3)   , DISPER(*) , AREA (*) , FLOW (*) ,
+      real       DISP  (  3)   , DISPER(*) , AREA (*) , FLOW (*) ,
      *           ALENG (  *)   , VELO  (*) , CONC (*) , BOUND(*) ,
-     *           IPOINT( 4,* ) , IDPNT(*)  , IVPNT(*) , DMPQ(*)
+     *           DMPQ(*)
       integer noqw                      !  input   number of exchanges waterphase
+      integer IDPNT(*), IVPNT(*), IPOINT( 4,* )
 
       logical disp0q0, disp0bnd, loword !  logical representation of options
 
       integer(4) ithandl /0/
+
+      integer notot, nosys, noq, novelo, nodisp
+      integer i, i3, i6, j, k1, k2
+      integer iq, ipb, iopt, ilflag, idt
+      real    v, q
+      real    f1, f2, g1, g2, d, dl, dq, a, al, e
+
       if ( timon ) call timstrt ( "dlwq46a", ithandl )
 
       disp0q0  = btest( iopt , 0 )
@@ -290,3 +304,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwq46

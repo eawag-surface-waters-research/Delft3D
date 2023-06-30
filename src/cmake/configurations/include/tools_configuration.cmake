@@ -56,6 +56,11 @@ if(NOT (TARGET dfm_api_access OR NO_FM_TOOLS))
     add_subdirectory(${checkout_src_root}/${dfm_api_access_module} dfm_api_access)
 endif()
 
+# cosumo_bmi
+if(NOT TARGET cosumo_bmi)
+    add_subdirectory(${checkout_src_root}/${cosumo_bmi_module} cosumo_bmi)
+endif()
+
 # Third party
 # FLAP
 if(NOT TARGET FLAP)

@@ -20,13 +20,19 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_segcol
+
+      implicit none
+
+      contains
+
 
       subroutine segcol(nosss , noq1  , noq2   , noq3  , noq4  ,
      &                  ipoint, iknmrk, isegcol)
 
       ! function : sets the top of the column for every segment
 
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
       use timers
       implicit none
 
@@ -70,7 +76,7 @@
 
          ! only if from segment is not a water segment
 
-         call dhkmrk(1,iknmrk(ifrom),ikmrkv)
+         call evaluate_waq_attribute(1,iknmrk(ifrom),ikmrkv)
          if ( ikmrkv.ne.3 ) cycle
 
          isegcol(ito) = isegcol(ifrom)
@@ -78,3 +84,5 @@
       enddo
 
       end
+
+      end module m_segcol

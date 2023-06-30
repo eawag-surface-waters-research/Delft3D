@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqb8
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqb8 ( nosys  , notot  , nototp , noseg  , volume ,
      &                    surface, amass  , conc   )
@@ -94,3 +100,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_dlwqb8

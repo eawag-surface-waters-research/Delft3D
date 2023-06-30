@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_zercum
+
+      implicit none
+
+      contains
+
 
       subroutine zercum ( notot  , nosys  , noflux , ndmpar , ndmpq  ,
      &                    ndmps  , asmass , flxint , amass2 , flxdmp ,
@@ -100,3 +106,5 @@
 
       return
       end
+
+      end module m_zercum

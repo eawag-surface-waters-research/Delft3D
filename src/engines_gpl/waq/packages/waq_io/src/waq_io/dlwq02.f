@@ -56,7 +56,7 @@
 !                           dlwq0t  converts an absolute time string to seconds
 !                           cnvtim  converts a 'DATE' integer to seconds
 !                           conver  converts an array of 'DATE' integers to seconds
-!                           dhopnf  opens files
+!                           open_waq_files  opens files
 !                           zoek    seaches a string in a set of strings
 !                           readmp  reads dump area's, new input style
 !                           rearaa  reads transects, new input style
@@ -71,7 +71,7 @@
 
       use m_zoek
       use m_srstop
-      use m_dhopnf
+      use m_open_waq_files
       use rd_token     !   for the reading of tokens
       use subs02
       use partmem      !   for PARTicle tracking
@@ -428,7 +428,7 @@
                write ( lunut , 2300 ) iar(1) , itstrt
                ierr = ierr+1
             endif
-            call dhopnf  ( lun(5 ) , lchar(5 ) , 5      , 1     , ioerr )
+            call open_waq_files  ( lun(5 ) , lchar(5 ) , 5      , 1     , ioerr )
             do ibrk = 1,nobrk*2,2
                write ( lun(5) ) iar(ibrk), float (iar(ibrk+1))
                if ( iar(ibrk+1) .le. 0 ) then

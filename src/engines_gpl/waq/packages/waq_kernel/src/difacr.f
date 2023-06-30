@@ -20,6 +20,14 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_difacr
+      use m_difhor
+
+
+      implicit none
+
+      contains
+
 
       subroutine difacr(icx       ,icy       ,j         ,nmmaxj    ,
      *                  nmmax     ,kmax      ,
@@ -187,16 +195,16 @@
 !-----------------------------------------------------------------------
       use timers
 
-      dimension   s0    (j:nmmaxj),dps   (j:nmmaxj),
+      real        s0    (j:nmmaxj),dps   (j:nmmaxj),
      *            guu   (j:nmmaxj),gvv   (j:nmmaxj),
      *            guv   (j:nmmaxj),gvu   (j:nmmaxj)
 !
-      dimension   kcs   (j:nmmaxj),
+      integer     kcs   (j:nmmaxj),
      *            kfu   (j:nmmaxj),kfv   (j:nmmaxj),
      *            kadu  (j:nmmaxj,  kmax),
      *            kadv  (j:nmmaxj,  kmax)
 !
-      dimension   dicuv (j:nmmaxj,kmax),
+      real        dicuv (j:nmmaxj,kmax),
      *            r0    (j:nmmaxj,kmax,lstsci),
      *            dsdksi(j:nmmaxj,kmax),dsdeta(j:nmmaxj,kmax  ),
      *            dtdksi(j:nmmaxj,kmax),dtdeta(j:nmmaxj,kmax  ),
@@ -204,10 +212,18 @@
      *            thick (kmax),sigdif(lstsci) ,
      *            sig   (kmax)
 
-      dimension   dfluxx(j:nmmaxj,kmax,lstsci),
+      real        dfluxx(j:nmmaxj,kmax,lstsci),
      *            dfluxy(j:nmmaxj,kmax,lstsci)
 
       integer(4) ithandl /0/
+
+      integer num, nm, nmu, nmmax, nmmaxj
+      integer k, j, kmax, icx, icy
+      integer lsal, lstsci, ltem
+      integer dpnum, dpnm, dpnmu
+      
+      real sepnum, sepnm, sepnmu
+
       if ( timon ) call timstrt ( "difacr", ithandl )
 
       dfluxx = 0.0
@@ -294,3 +310,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_difacr

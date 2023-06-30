@@ -287,6 +287,7 @@ rem ===============
     call :dflowfm_dll
     call :dfmoutput
     call :dfm_volume_tool
+    call :cosumo_bmi
     call :mormerge
     call :waq_plugin_wasteload
     call :delwaq_lib
@@ -928,6 +929,38 @@ rem ==========================
         call :copyFile "!checkout_src_root!\third_party_open\tcl\bin\win64\tclkitsh852.exe"                !dest_share!
     )
 
+goto :endproc
+
+
+
+rem ==========================
+rem === POST_BUILD_COSUMO_BMI
+rem ==========================
+:cosumo_bmi
+    echo "postbuild cosumo_bmi . . ."
+    
+    if "%configuration%" == "Debug" (
+    
+        echo "Debug postbuild"
+        set dest_bin="%install_dir%\x64\Debug"
+
+        call :makeDir !dest_bin!
+        call :copyFile "!build_dir!\cosumo_bmi\!configuration!\cosumo_bmi.*"                               !dest_bin!
+    )
+    
+    if "%configuration%" == "Release" ( 
+    
+        echo "Release postbuild"
+
+        set dest_bin="!install_dir!\x64\Release\dflowfm\bin"
+        set dest_scripts="!install_dir!\x64\Release\dflowfm\scripts"
+        set dest_share="!install_dir!\x64\Release\share\bin"
+
+        call :makeDir !dest_bin! 
+        call :makeDir !dest_scripts! 
+        call :copyFile "!build_dir!\cosumo_bmi\!configuration!\cosumo_bmi.*"                               !dest_bin!
+    )
+    
 goto :endproc
 
 

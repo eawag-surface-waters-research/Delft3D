@@ -25,7 +25,7 @@
      +                        NOFLUX , IEXPNT , IKNMRK , NOQ1  , NOQ2  ,
      +                        NOQ3   , NOQ4   )
       use m_monsys
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !
 !*******************************************************************************
@@ -94,7 +94,7 @@
 !
       DO 9000 ISEG = 1 , NOSEG
 
-         CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
+         CALL evaluate_waq_attribute(1,IKNMRK(ISEG),IKMRK1)
          IF (IKMRK1.EQ.1) THEN
 
 !

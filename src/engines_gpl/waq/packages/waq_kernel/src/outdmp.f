@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_outdmp
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE OUTDMP ( IOUT  , LCHOUT, ITIME , MNAME , NX    ,
      +                    NY    , LGRID , CGRID , NOTOT , NOSYS ,
@@ -69,7 +75,7 @@
       use timers
 
       INTEGER       IOUT  , ITIME , NX    , NY    , NOTOT ,
-     +              NOSYS , ISFLAG, NOTOT2
+     +              NOSYS , ISFLAG, NOTOT2, INIOUT
       INTEGER       LGRID(*)      , IP(*)
       REAL          CONC(NOTOT,*) , BOUND(NOSYS,*),
      +              CONC2 (*)
@@ -80,7 +86,9 @@
 !
 !     Local declaration
 !
-      PARAMETER   ( RMISS = -999. )
+      integer  itot, i, i1, i2, i3, k, j, iscale, factor, nend
+      real     cmax, c
+      real, PARAMETER   :: RMISS = -999.
       CHARACTER*6   POINT , PADDER
       DATA          POINT / '  .   ' /
       integer(4) ithandl /0/
@@ -218,3 +226,5 @@
  2040 FORMAT (  45X ,   A40 )
 !
       END
+
+      end module m_outdmp

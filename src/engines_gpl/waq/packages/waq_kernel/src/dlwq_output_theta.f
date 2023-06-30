@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq_output_theta
+
+      implicit none
+
+      contains
+
 
       subroutine dlwq_output_theta ( nrvart, ounam , ipoint, nocons, nopa  ,
      &                               nofun , nosfun, notot , noseg , noloc ,
@@ -116,3 +122,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_dlwq_output_theta

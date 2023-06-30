@@ -451,7 +451,7 @@ subroutine unc_addglobalatts(ncid)
 
    ierr = nf90_put_att(ncid, nf90_global,  'institution', trim(company))
    ierr = nf90_put_att(ncid, nf90_global,  'references', trim(company_url))
-   ierr = nf90_put_att(ncid, nf90_global,  'source', version_full)
+   ierr = nf90_put_att(ncid, nf90_global,  'source', major_minor_buildnr)
 
    call date_and_time(cdate, ctime, czone)
    ierr = nf90_put_att(ncid, nf90_global,  'history', &

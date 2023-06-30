@@ -20,6 +20,28 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqnm
+      use m_zlayer
+      use m_zercum
+      use m_sgmres
+      use m_setset
+      use m_putper
+      use m_proint
+      use m_proces
+      use m_online
+      use m_hsurf
+      use m_getper
+      use m_dlwq_output_theta
+      use m_dlwq_boundio
+      use m_dlwqtr
+      use m_dlwqt0
+      use m_dlwqo2
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqnm ( a     , j     , c     , lun   , lchar  ,
      &                    action, dlwqd , gridps)
@@ -71,10 +93,31 @@
 !                          dlwql3, sets (scaled) rhs of system of equations
 !                          move,   copies one array to another
 !                          proint, integration of fluxes
-!                          dhopnf, opens files
+!                          open_waq_files, opens files
 !                          sgmres, solves (iteratively) system of equations
 !                          zercum, zero's the cummulative array's
 
+      use m_dlwqm8
+      use m_dlwqm7
+      use m_dlwqm5
+      use m_dlwqm4
+      use m_dlwqm3
+      use m_dlwqm2
+      use m_dlwqm1
+      use m_dlwqm0
+      use m_dlwqf8
+      use m_dlwqf5
+      use m_dlwqf1
+      use m_dlwqce
+      use m_dlwqb8
+      use m_dlwqb4
+      use m_dlwqb3
+      use m_dlwq41
+      use m_dlwq17
+      use m_dlwq15
+      use m_dlwq14
+      use m_dlwq13
+      use m_delpar01
       use m_move
       use m_fileutils
       use grids
@@ -106,7 +149,7 @@
       type(GridPointerColl)       :: GridPs     !< collection of all grid definitions
 
 !$    include "omp_lib.h"
-      
+
 !     common to define external communications in SOBEK
 !     olcfwq             flag indicating ONLINE running of CF and WQ
 !     srwact             flag indicating active data exchange with SRW
@@ -488,7 +531,7 @@
 !     compute variable theta coefficients
          call dlwqm1 ( idt           , noseg          , nobnd         , a(ivol)       , noq           ,
      &                 noq1          , noq2           , j(ixpnt)      , flowtot(1,ith), disptot(1,ith),
-     &                 theta(1,ith)  , thetaseg(1,ith), antidiffusion , iexseg (1,ith))
+     &                 theta(1,ith)  , thetaseg(1,ith), antidiffusion , iexseg (:,ith))
 
          if ( isys .eq. 1 ) call dlwq_output_theta (nrvart  , c(ionam), j(iiopo)       , nocons, nopa ,
      &                                              nofun   , nosfun  , notot          , noseg , noloc,
@@ -498,7 +541,7 @@
          call dlwqm2 ( idt           , noseg          , a(ivol2)      , nobnd         , noq           ,
      &                 j(ixpnt)      , flowtot(1,ith) , disptot(1,ith), theta(1,ith)  , gm_diag(1,ith),
      &                 iscale        , gm_diac(1,ith) , nomat         , gm_amat(1,ith), rowpnt        ,
-     &                 fmat          , tmat           , iexseg (1,ith))
+     &                 fmat          , tmat           , iexseg (:,ith))
 
 !     construct rhs
          call dlwqm3 ( idt           , isys           , nosys         , notot         , noseg         ,
@@ -510,7 +553,7 @@
          call sgmres ( noseg+nobnd   , gm_rhs (1,ith) , gm_sol(1,ith) , novec         , gm_work(1,ith),
      &                 noseg+nobnd   , gm_hess(1,ith) , novec+1       , iter          , tol           ,
      &                 nomat         , gm_amat(1,ith) , j(imat)       , gm_diag(1,ith), rowpnt        ,
-     &                 nolay         , ioptpc         , nobnd         , gm_trid(1,ith), iexseg (1,ith),
+     &                 nolay         , ioptpc         , nobnd         , gm_trid(1,ith), iexseg (:,ith),
      &                 lun(19)       , litrep        )
 
 !     mass balance of transport
@@ -623,3 +666,5 @@
       return
 
       end subroutine dlwqnm
+
+      end module m_dlwqnm

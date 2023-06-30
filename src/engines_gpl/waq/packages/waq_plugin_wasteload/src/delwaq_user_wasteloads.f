@@ -25,7 +25,7 @@
 
       use m_zoek
       use m_srstop
-      use m_dhopnf
+      use m_open_waq_files
       use m_dhnolay
       use delwaq_loads
       use waq_plugin_wasteload_version_module
@@ -65,7 +65,7 @@
       if (ifirst == 1) then
          ifirst = 0
 
-         call dhopnf (lunrep, 'delwaq_user_wasteloads.mon', 19, 1, ierr)
+         call open_waq_files (lunrep, 'delwaq_user_wasteloads.mon', 19, 1, ierr)
          if (ierr .ne. 0) then
             write(*,'(A)') 'Could not open delwaq_user_wasteloads.mon for writing.'
             call srstop(1)

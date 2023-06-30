@@ -21,6 +21,7 @@
 !  P.O. Box 177                                                                 
 !  2600 MH Delft, The Netherlands                                               
 !                                                                               
+!                                                                               
 !  All indications and logos of, and references to, "Delft3D",                  
 !  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting 
 !  Deltares, and remain the property of Stichting Deltares. All rights reserved.
@@ -54,6 +55,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    use time_class
    use m_longculverts
    use unstruc_messages
+   use m_nearfield, only : nearfield_mode, NEARFIELD_UPDATED, addNearfieldData
 
    implicit none
 
@@ -181,7 +183,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
          enddo
       endif
 
-      if (jawave == 1 .or. jawave == 2) then
+      if (jawave == 1 .or. jawave == 2 .and. .not. flowWithoutWaves) then
          call tauwavefetch(tim)
       endif
    endif
@@ -556,6 +558,10 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
          subsupl_t0 = subsupl
          sdu_first  = .false.
       endif
+   endif
+
+   if (nearfield_mode == NEARFIELD_UPDATED) then
+      call addNearfieldData()
    endif
 
    call timstop(handle_ext)

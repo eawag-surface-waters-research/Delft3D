@@ -57,7 +57,7 @@
 !      Subroutines called : opt1    ( which file is it ? )
 !                           opt2    ( read the data from an ASCII file )
 !                           rdtok1  ( tokenized data reading )
-!                           dhopnf  ( to open the binary intermediate file )
+!                           open_waq_files  ( to open the binary intermediate file )
 !                           check   ( to see of the group was read correctly )
 
 !      Logical units      : lun(27) = unit DELWAQ input file
@@ -65,7 +65,7 @@
 !                           lun(18) = unit intermediate file (initials)
 
       use m_srstop
-      use m_dhopnf
+      use m_open_waq_files
       use grids          ! for the storage of contraction grids
       use dlwq_data      ! for definition and storage of data
       use rd_token
@@ -174,7 +174,7 @@
          call str_lower(cext)
          if ( cext .eq. '.map' .or. cext .eq. '.rmp' .or.
      &        cext .eq. '.rm2' ) then                             ! if .rmp or .rm2 (Sobek) or .map, it is a map-file
-            call dhopnf  ( lun(18) , lchar(18) , 18    , 2     , ierr2 )
+            call open_waq_files  ( lun(18) , lchar(18) , 18    , 2     , ierr2 )
             read ( lun(18) ) cdummy(1:160)                        ! read title of simulation
             close ( lun(18) )
             if ( cdummy(114:120) .eq. 'mass/m2' .or.
@@ -205,7 +205,7 @@
       else
          lchar(18)(ip:ip+3) = '.map'
       endif
-      call DHOPNF  ( lun(18) , lchar(18) , 18    , 1     , ierr2 )
+      call open_waq_files  ( lun(18) , lchar(18) , 18    , 1     , ierr2 )
       if ( ierr2 .gt. 0 ) goto 10
 
 !        Write the .map header

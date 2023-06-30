@@ -20,13 +20,21 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_strsv
+      use m_xerbla
+
+
+      implicit none
+
+      contains
+
 
 *
 ************************************************************************
 *
       SUBROUTINE STRSV ( UPLO, TRANS, DIAG, N, A, LDA, X, INCX )
       use timers
-
+      use m_lsame
 *     .. Scalar Arguments ..
       INTEGER            INCX, LDA, N
       CHARACTER*1        DIAG, TRANS, UPLO
@@ -135,11 +143,6 @@
       REAL(8)            TEMP
       INTEGER            I, INFO, IX, J, JX, KX
       LOGICAL            NOUNIT
-*     .. External Functions ..
-      LOGICAL            LSAME
-      EXTERNAL           LSAME
-*     .. External Subroutines ..
-      EXTERNAL           XERBLA
 *     .. Intrinsic Functions ..
       INTRINSIC          MAX
       integer(4) ithandl /0/
@@ -318,3 +321,5 @@
 *     End of STRSV .
 *
       END
+
+      end module m_strsv

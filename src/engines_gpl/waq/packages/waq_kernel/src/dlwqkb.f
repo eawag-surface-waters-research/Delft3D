@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqkb
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQKB ( LUNIN  , LUNOUT , ITIME  , IDTIME , ITIME1 ,
      +                    ITIME2 , IARRA1 , IARRA2 , NFTOT  , LUNTXT ,
@@ -71,6 +77,9 @@
       CHARACTER*16  MSGTXT(3)
       DATA          MSGTXT / ' REWIND ON      ' , ' WARNING READING' ,
      +                       ' REWIND ERROR   ' /
+      integer    messge, k, ierr
+
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqkb", ithandl )
 !
@@ -147,3 +156,5 @@
      *         ' TIME IN FILE:      ',I5,'D ',I2,'H ',I2,'M ',I2,'S !')
 !
       END
+
+      end module m_dlwqkb

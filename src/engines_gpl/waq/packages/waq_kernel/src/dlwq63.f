@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq63
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQ63 ( CONC   , DERIV  , AMASS2 , NOSEG  , NOTOT  ,
      *                    ISYS   , NSYS   , DMPS   , INTOPT , ISDMP  )
@@ -55,8 +61,10 @@
       use timers
 
       INTEGER     ISDMP(*)
-      DIMENSION   CONC(NOTOT,*) , DERIV(*) , AMASS2(NOTOT,*) ,
+      real        CONC(NOTOT,*) , DERIV(*) , AMASS2(NOTOT,*) ,
      *            DMPS(*)
+      integer    notot, nsys, noseg
+      integer    i, ip, i4, i5, i6, ntot, iset, intopt, iseg, isys
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq63", ithandl )
 !
@@ -93,3 +101,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwq63

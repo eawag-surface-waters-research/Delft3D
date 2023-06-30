@@ -20,6 +20,19 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqni
+      use m_sgmres
+      use m_setset
+      use m_proces
+      use m_hsurf
+      use m_dlwqtr
+      use m_dlwqo2
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqni ( a     , j     , c     , lun   , lchar  ,
      &                    action, dlwqd , gridps)
@@ -58,7 +71,7 @@
 !                          DLWQ66, makes masses
 !                          DLWQH3, check diagonal on zero's
 !                          SGMRES, fast solver
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !                          MOVE  , copy an array
 !
 !      NOTE             :   " DELWAQ FASTSOLVERS 2 " (R.J.Vos, M.Borsboom and K.
@@ -78,6 +91,19 @@
 !
 !     Declaration of arguments
 !
+      use m_dlwqg3
+      use m_dlwqh6
+      use m_dlwqh3
+      use m_dlwqh1
+      use m_dlwqf5
+      use m_dlwqf1
+      use m_dlwq66
+      use m_dlwq65
+      use m_dlwq64
+      use m_dlwq60
+      use m_dlwq41
+      use m_dlwq15
+      use m_dlwq13
       use m_zero
       use m_fileutils
       use grids
@@ -296,7 +322,7 @@
      &                 a(iarea)      , a(iflow)      , a(ileng)      , a(idisp)      , a(idnew)      ,
      &                 a(ivnew)      , isys          , intopt        , ilflag        , nomat         ,
      &                 gm_amat(1,ith), j(imat)       , rowpnt        , gm_diag(1,ith),gm_diac(1,ith),
-     &                 iscale        , fmat          , tmat          )
+     &                 iscale        , fmat          , tmat          , iknmkv)
 
 !          initial guess : take rhs / diagonal
 
@@ -309,7 +335,7 @@
          call sgmres ( noseg+nobnd   , gm_rhs (1,ith), gm_sol (1,ith), novec         , gm_work(1,ith),
      &                 noseg+nobnd   , gm_hess(1,ith), novec+1       , iter          , tol           ,
      &                 nomat         , gm_amat(1,ith), j(imat)       , gm_diag(1,ith), rowpnt        ,
-     &                 nolay         , ioptpc        , nobnd         , gm_trid(1,ith), iexseg (1,ith),
+     &                 nolay         , ioptpc        , nobnd         , gm_trid(1,ith), iexseg (:,ith),
      &                 lun(19)       , litrep        )
 
 !           copy solution for this substance into concentration array, note that the array for
@@ -372,3 +398,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwqni

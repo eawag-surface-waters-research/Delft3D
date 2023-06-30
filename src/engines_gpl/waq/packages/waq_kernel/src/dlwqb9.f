@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqb9
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqb9 ( disp   , disper , area   , flow   , aleng  ,
      &                    velo   , bound  , ipoint , nosys  , isys   ,
@@ -191,3 +197,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_dlwqb9

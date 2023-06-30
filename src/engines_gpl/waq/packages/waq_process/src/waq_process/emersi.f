@@ -35,7 +35,7 @@
 
       use m_dhnoseg
       use m_dhnolay
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
       use bottomset     !  module with definition of the waterbottom segments
 
       implicit none
@@ -102,14 +102,14 @@
 
       do iseg = 1 , nosegw
 
-         call dhkmrk(1,iknmrk(iseg),ikmrk1)
+         call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
          if ( ikmrk1 .eq. 1 ) then
             depth      = pmsa(ip1 )
             zthreshold = pmsa(ip2 )
 
             ! look if segment has water surface
 
-            call dhkmrk(2,iknmrk(iseg),ikmrk2)
+            call evaluate_waq_attribute(2,iknmrk(iseg),ikmrk2)
             if ( (ikmrk2.eq.1 .or. ikmrk2.eq.0) .and. depth .le. zthreshold ) then
 
                ! set this segment to inactive
@@ -122,7 +122,7 @@
 
                   ! give the underlying segment the attribure with water surface
 
-                  call dhkmrk(2,iknmrk(iseg_down),ikmrk2)
+                  call evaluate_waq_attribute(2,iknmrk(iseg_down),ikmrk2)
                   if (ikmrk2.eq.2) then
                      iknmrk(iseg_down) = iknmrk(iseg_down) - 10 ! sets second attribute to 1
                   elseif (ikmrk2.eq.3) then

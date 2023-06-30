@@ -97,7 +97,7 @@ subroutine fill_valobs()
                ux = ueux(kb); uy = ueuy(kb)
                um = max(hypot(ux,uy),1d-4)
                workx(k) = taus(k)*ux/um  
-               worky(k) = taus(k)*uy/um 
+               worky(k) = taus(k)*uy/um   
             enddo
          endif
       else

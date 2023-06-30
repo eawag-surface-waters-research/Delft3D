@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_delpar00
+
+      implicit none
+
+      contains
+
 
       subroutine delpar00 ( mdpfile, noseg  , noq    , dwqvol , dwqflo ,
      &                      nosfun , sfname , segfun )
@@ -339,3 +345,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_delpar00

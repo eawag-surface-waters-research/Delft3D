@@ -20,6 +20,22 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqn5
+      use m_zercum
+      use m_setset
+      use m_proint
+      use m_proces
+      use m_hsurf
+      use m_dlwq_boundio
+      use m_dlwqtr
+      use m_dlwqt0
+      use m_dlwqo2
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqn5 ( a     , j     , c     , lun   , lchar  ,
      &                    action, dlwqd , gridps)
@@ -55,9 +71,22 @@
 !                          DLWQ51, flux correction
 !                          DLWQ52, makes masses and concentrations
 !                          PROINT, integration of fluxes
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !                          ZERCUM, zero's the cummulative array's
 !
+      use m_dlwqf8
+      use m_dlwqce
+      use m_dlwqb3
+      use m_dlwq52
+      use m_dlwq51
+      use m_dlwq50
+      use m_dlwq41
+      use m_dlwq18
+      use m_dlwq17
+      use m_dlwq15
+      use m_dlwq14
+      use m_dlwq13
+      use m_delpar01
       use m_move
       use m_fileutils
       use grids
@@ -82,7 +111,7 @@
       real      (4), intent(inout)   :: a      (*)              !< flat real array space
       integer   (4), intent(inout)   :: j      (*)              !< flat integer array space with indices
       character (*), intent(in   )   :: c      (*)              !< flat character array spave with names
-      integer   (4), intent(in   )   :: lun    (*)              !< array with unit numbers
+      integer   (4), intent(inout)   :: lun    (*)              !< array with unit numbers
       character (*), intent(in   )   :: lchar  (*)              !< array with file names
       integer      , intent(in   )   :: action                  !< mode of operation
       type(delwaq_data), target      :: dlwqd                   !< data area stepwise processing
@@ -382,7 +411,6 @@
      &                 a(itimr) , a(iconc)   )
 
 !          new time values, volumes excluded
-
          call dlwqt0 ( lun      , itime    , itimel   , a(iharm) , a(ifarr) ,
      &                 j(inrha) , j(inrh2) , j(inrft) , idt      , a(ivol)  ,
      &                 a(idiff) , a(iarea) , a(iflow) , a(ivelo) , a(ileng) ,
@@ -391,7 +419,7 @@
      &                 intsrt   , isflag   , ifflag   , ivflag   , ilflag   ,
      &                 ldumm2   , j(iktim) , j(iknmr) , j(inisp) , a(inrsp) ,
      &                 j(intyp) , j(iwork) , .false.  , ldummy   , rdummy   ,
-     &                 .false.  , gridps   , dlwqd    )
+     &                 .false.   , gridps   , dlwqd    )
 
 
 !    calculate closure error
@@ -438,3 +466,5 @@
 
       RETURN
       END SUBROUTINE
+
+      end module m_dlwqn5

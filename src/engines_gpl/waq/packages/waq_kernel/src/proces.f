@@ -20,6 +20,17 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_proces
+      use m_provel
+      use m_proint
+      use m_profld
+      use m_prodr2
+
+
+      implicit none
+
+      contains
+
 
       subroutine proces ( notot  , noseg  , conc   , volume , itime  ,
      &                    idt    , deriv  , ndmpar , nproc  , noflux ,
@@ -67,6 +78,8 @@
 
 !     Files               : Monitoring file if needed for messages
 
+      use m_dlwqp0
+      use m_dlwq14
       use m_srstop
       use m_monsys
       use m_getcom
@@ -94,7 +107,7 @@
       integer( 4), intent(in   ) :: nodef                       !< Number of values in the deafult array
       integer( 4), intent(in   ) :: novar                       !<
       real   ( 4), intent(inout) :: conc  (notot,noseg,nogrid)  !< Model concentrations
-      real   ( 4), intent(in   ) :: volume(      noseg,nogrid)  !< Segment volumes
+      real   ( 4), intent(inout) :: volume(      noseg,nogrid)  !< Segment volumes
       integer( 4), intent(in   ) :: itime                       !< Time in system clock units
       integer( 4), intent(in   ) :: idt                         !< Time step system clock units
       real   ( 4), intent(  out) :: deriv (notot,noseg,nogrid)  !< Model derivatives
@@ -840,7 +853,15 @@
 !
 !     Local
 !
-      INTEGER             IDTPRO, ITYP
+      INTEGER            IDTPRO, ITYP, IX_HLP, IA_HLP, IV_HLP, IK_HLP, IP_HLP, ID1HLP, ID2HLP
+      integer            NOSEG2, IVARIO, IGRID, IGR3, NOSEG3, ISYSI, NOTOTI
+      integer            IVAR, IARR, IV_IDX, IARKND, IP_ARR, IDIM1, IDIM2
+      integer            IV_AG, IA_AG, IX_AG, IK_AG, IP_AG, ID1_AG, ID2_AG
+      integer            IP_ARI, NOTOTO, ISYSO, IP_ARO, IDATYP, IV_DA, IA_DA, IK_DA
+      integer            IX_DA, IP_DA, ID1_DA, ID2_DA, NOTOTW, ISYSW, IP_ARW
+      integer            NOTOTH, ISYSH, IP_ARH, ISWCUM, IAGTYP, IPFLUX, IPKNMR, IGR2
+      
+      
 !
 !     get the general local work array, first index of LOCAL array
 !
@@ -1264,3 +1285,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_proces

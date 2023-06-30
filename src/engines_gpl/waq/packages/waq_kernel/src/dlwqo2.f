@@ -20,6 +20,30 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqo2
+      use m_values
+      use m_stepyn
+      use m_sobbal
+      use m_raatra
+      use m_outmon
+      use m_outmo3
+      use m_outmnf
+      use m_outmap
+      use m_outhnf
+      use m_outhnc
+      use m_outhis
+      use m_outdmp
+      use m_outbal
+      use m_flxbal
+      use m_fioutv
+      use m_fiosub
+      use m_fioraa
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqo2 ( notot , noseg , nopa  , nosfun, itime ,
      +                    moname, syname, duname, idump , nodump,
@@ -156,6 +180,9 @@
 !     intopt  integer     1       input   Integration and balance suboptions
 !     ==================================================================
 !
+      use m_dlwq13
+      use m_baldmp
+      use m_actloc
       use m_zero
       use m_srstop
       use m_getcom
@@ -714,7 +741,7 @@
      j                       iniout, dmpbal, nowst , nowtyp   , wsttyp,
      j                       iwaste, inxtyp, wstdmp, isegcol  , imstep)
 
-               lun(ifi) = lunout ! Ad hoc: routine dhopnf sets the LU-number via newunit
+               lun(ifi) = lunout ! Ad hoc: routine open_waq_files sets the LU-number via newunit
                deallocate (surf)
 !
             endif
@@ -734,3 +761,5 @@
       return
       end
 
+
+      end module m_dlwqo2

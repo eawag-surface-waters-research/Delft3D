@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_srot
+
+      implicit none
+
+      contains
+
 
       subroutine srot (n,sx,incx,sy,incy,c,s)
 !
@@ -62,3 +68,5 @@
  9999 if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_srot

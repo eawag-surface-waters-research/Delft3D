@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqf7
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqf7( isys    , nosys   , notot   , noseg   , conc    ,
      &                   concvt  , nobnd   , bound   , noq     , ipoint  ,
@@ -152,3 +158,5 @@
 
       if ( timon ) call timstop ( ithandl )
       end subroutine dlwqf7
+
+      end module m_dlwqf7

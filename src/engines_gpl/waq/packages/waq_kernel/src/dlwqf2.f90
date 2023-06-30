@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module m_dlwqf2
+
+implicit none
+
+contains
+
 
       subroutine dlwqf2 ( noseg  , nobnd  , idt    , volnew , trace  )
 
@@ -73,3 +79,5 @@
 
       return
       end
+
+end module m_dlwqf2

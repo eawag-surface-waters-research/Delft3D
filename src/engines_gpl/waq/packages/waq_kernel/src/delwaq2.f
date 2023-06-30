@@ -26,12 +26,37 @@
 !       A, J and C are now pointers to arrays
 !
       MODULE DELWAQ2
+      use m_dlwqnq
+      use m_dlwqnp
+      use m_dlwqno
+      use m_dlwqnm
+      use m_dlwqnj
+      use m_dlwqni
+      use m_dlwqnh
+      use m_dlwqng
+      use m_dlwqnf
+      use m_dlwqne
+      use m_dlwqnd
+      use m_dlwqnc
+      use m_dlwqnb
+      use m_dlwqna
+      use m_dlwqn9
+      use m_dlwqn8
+      use m_dlwqn7
+      use m_dlwqn6
+      use m_dlwqn5
+      use m_dlwqn4
+      use m_dlwqn3
+      use m_dlwqn3
+      use m_dlwqn2
+      use m_dlwqn1
+      use m_dlwqn0
       use m_startup_screen
       use m_srstop
       use m_monsys
       use m_gkwini
       use m_getcom
-      use m_dhopnf
+      use m_open_waq_files
 
 
       CONTAINS
@@ -91,7 +116,7 @@
 !                          DLWQNI, 18th    integration procedure
 !                          DLWQNJ, 19+20   integration procedure
 !                          SRSTOP, stops execution
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !
 !     PARAMETERS    :
 !
@@ -219,7 +244,7 @@
 !
 !        the file does exist, so continue processing
 !
-         CALL DHOPNF ( LUNIN , LCHAR(1), 1     , 2     , IERR  )
+         CALL open_waq_files ( LUNIN , LCHAR(1), 1     , 2     , IERR  )
          IF ( IERR .GT. 0 ) GOTO 999
          READ  ( LUNIN )   IN
          READ  ( LUNIN )   II
@@ -233,7 +258,7 @@
          close(lunin)
 
 
-         CALL DHOPNF ( LUN(19) , LCHAR(19) , 19    , 1    , IERRD  )
+         CALL open_waq_files ( LUN(19) , LCHAR(19) , 19    , 1    , IERRD  )
          CALL SETMLU ( LUN(19) )
 
 !      Initialise communication options SOBEK

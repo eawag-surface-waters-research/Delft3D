@@ -194,6 +194,7 @@ extern "C" {
 
 				chdir(thisDimr->control->subBlocks[0].unit.component->workingDir);
 				thisDimr->log->Write(INFO, thisDimr->my_rank, "%s.Initialize(%s)", thisDimr->control->subBlocks[0].unit.component->name, thisDimr->control->subBlocks[0].unit.component->inputFile);
+				// SetKeyVals for settings (before initialize)
 				nSettingsSet = thisDimr->control->subBlocks[0].unit.component->dllSetKeyVals(thisDimr->control->subBlocks[0].unit.component->settings);
 				thisDimr->timerStart(thisDimr->control->subBlocks[0].unit.component);
 				thisDimr->control->subBlocks[0].unit.component->result = (thisDimr->control->subBlocks[0].unit.component->dllInitialize) (thisDimr->control->subBlocks[0].unit.component->inputFile);
@@ -210,6 +211,7 @@ extern "C" {
 				}
 				
 				thisDimr->timerEnd(thisDimr->control->subBlocks[0].unit.component);
+				// SetKeyVals for parameters (after initialize)
 				nParamsSet = thisDimr->control->subBlocks[0].unit.component->dllSetKeyVals(thisDimr->control->subBlocks[0].unit.component->parameters);
 				(thisDimr->control->subBlocks[0].unit.component->dllGetStartTime) (&thisDimr->control->subBlocks[0].tStart);
 				(thisDimr->control->subBlocks[0].unit.component->dllGetEndTime) (&thisDimr->control->subBlocks[0].tEnd);

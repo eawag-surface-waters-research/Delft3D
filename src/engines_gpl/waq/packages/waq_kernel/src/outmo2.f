@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_outmo2
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE OUTMO2 ( IOUT   , ARRA   , VNAME  , DNAME  , NODUMP ,
      +                    ID     , NEND   , NOTOT  )
@@ -56,6 +62,10 @@
       REAL         ARRA(NOTOT,*)
       CHARACTER*20 DNAME(*)
       CHARACTER*40 VNAME
+
+!     local
+      integer idmp, k
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "outmo2", ithandl )
 !
@@ -70,3 +80,5 @@
  2060 FORMAT (  ' ', A40 )
  2090 FORMAT (  ' ',      A20          ,10(1P,E11.4))
       END
+
+      end module m_outmo2

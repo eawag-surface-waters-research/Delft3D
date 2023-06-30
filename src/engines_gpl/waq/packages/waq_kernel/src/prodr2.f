@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_prodr2
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE PRODR2 (DERIV , NOTOT , NOFLUX, STOCHI, NFLUX1,
      +                   NFLUXP, FLUX  , NOSEG , VOLUME, NDT   )
@@ -54,9 +60,14 @@
 !     Declaration of arguments
 !
       use timers
-      INTEGER NOTOT , NOFLUX, NFLUX1, NFLUXP, NOSEG
+      INTEGER NOTOT , NOFLUX, NFLUX1, NFLUXP, NOSEG, NDT
       REAL    DERIV(NOTOT,NOSEG) , STOCHI(NOTOT,NOFLUX) ,
      +        FLUX(NOFLUX,NOSEG) , VOLUME(NOSEG)
+
+!     loclal
+      integer fdt, isys, iflux, iseg
+      real    st, fact
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "prodr2", ithandl )
 !
@@ -87,3 +98,5 @@
       RETURN
 !
       END
+
+      end module m_prodr2

@@ -34,7 +34,7 @@
 
       use m_zoek
       use m_srstop
-      use m_dhopnf
+      use m_open_waq_files
       use grids          ! for the storage of contraction grids
       use dlwq_data      ! for definition and storage of data
       use rd_token       ! tokenized reading
@@ -218,7 +218,7 @@
       if ( segfuncs%no_item   .gt. 0 ) write ( lun(2) ) (segfuncs%name(i)  , i=1, segfuncs%no_item)
       
       
-      call dhopnf  ( lun(16) , lchar(16) , 16    , 1     , ioerr )
+      call open_waq_files  ( lun(16) , lchar(16) , 16    , 1     , ioerr )
       write(lun(16)) ' 5.000PROCES'
       write(lun(16)) proc_pars%cursize
       do i = 1, proc_pars%cursize

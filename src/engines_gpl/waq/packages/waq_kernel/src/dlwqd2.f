@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqd2
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQD2 ( LUNUT , NOSYS , NOTOT , NOSEG , NOQ3 ,
      *                    KMAX  , CONC  , ALENG , NOWARN)
@@ -68,8 +74,14 @@
 !
       use timers
 !
-      INTEGER     LUNUT , NOSYS , NOTOT , NOSEG , NOQ3  , NOWARN
+      INTEGER     LUNUT , NOSYS , NOTOT , NOSEG , NOQ3  , NOWARN, KMAX
       REAL        CONC(NOTOT,NOSEG) , ALENG(2,NOQ3)
+
+      real        dd, dr, dr1, dr2, dz1, dz2, coef
+
+      integer     iseg, isys, ifilt, il, is, ilu, ifil, ild, ilay
+      integer     nhor, maxfil
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqd2", ithandl )
 !
@@ -152,3 +164,5 @@
      *         I2,'; segment: ', I6,'; layer: ',I2,' !' )
 !
       END
+
+      end module m_dlwqd2

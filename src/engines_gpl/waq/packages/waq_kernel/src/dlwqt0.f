@@ -20,6 +20,15 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqt0
+      use m_dlwqtk
+      use m_dlwqta
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqt0 ( lun    , itime  , itimel , harmat , array  ,
      &                    iharm  , nrharm , nrftot , idt    , volume ,
@@ -51,9 +60,10 @@
 !     SUBROUTINES CALLED  : DLWQT1, makes one time function
 !                           DLWQTA, make values for const,param,func,sfunc
 !                           DLWQTK, make values for kenmerk array
-!                           DHOPNF, opens files
+!                           open_waq_files, opens files
+      use m_dlwqt1
       use m_srstop
-      use m_dhopnf
+      use m_open_waq_files
       use timers
       use delwaq2_data
       use grids
@@ -90,7 +100,7 @@
       integer  ( 4), intent(in   ) :: ipoint(npoins)             !< Set of pointers to destination
       character*(*), intent(in   ) :: luntxt(*)                  !< text with the unit numbers
       character*200, intent(in   ) :: luntx2(*)                  !< text with the binary files
-      integer  ( 4), intent(in   ) :: ftype                      !< type of files to be opened
+      integer  ( 4), intent(in   ) :: ftype (*)                  !< type of files to be opened
       integer  ( 4), intent(in   ) :: intsrt                     !< integration option
       integer  ( 4), intent(in   ) :: isflag                     !< = 1 then 'ddhhmmss' format
       integer  ( 4), intent(inout) :: ifflag                     !< = 1 then first invocation
@@ -106,7 +116,7 @@
       logical      , intent(in   ) :: lstrec                     !< TRUE: last record on rewind wanted
       logical      , intent(  out) :: lrewin                     !< TRUE: rewind took place
       real     ( 4), intent(inout) :: vollst(*)                  !< Last volume record before rewind
-      logical      , intent(  out) :: rdvolu                     !< TRUE: also read volumes
+      logical      , intent(in   ) :: rdvolu                     !< TRUE: also read volumes
       type(GridPointerColl)        :: GridPs                     !< collection of all grid definitions
       type(delwaq_data)            :: dlwqd                      !< derived type for persistent storage
 
@@ -129,8 +139,8 @@
          wstset = .false.
          funset = .false.
          othset = .false.
-         call dhopnf ( lun(3), luntxt(3), 3    , 2     , ierr  )
-         call dhopnf ( lun(4), luntxt(4), 4    , 2     , ierr  )
+         call open_waq_files ( lun(3), luntxt(3), 3    , 2     , ierr  )
+         call open_waq_files ( lun(4), luntxt(4), 4    , 2     , ierr  )
       endif
 
 !         initialisation
@@ -415,3 +425,5 @@
 
       return
       end
+
+      end module m_dlwqt0

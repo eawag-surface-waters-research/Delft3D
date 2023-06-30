@@ -20,6 +20,14 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqtd
+      use m_values
+
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQTD ( LUN    , NOSEG  , NSEG2  , NOLAY  , NOGRID ,
      *                    NOQ    , NOQ4   , IGREF  , IGSEG  , NOCONS ,
@@ -84,11 +92,17 @@
      *                     ALENG (2,NOQ+NOQ4 ), FLOW(NOQ+NOQ4)
       CHARACTER*20         CONAME(NOCONS), PANAME(NOPA  ),
      *                     FUNAME(NOFUN ), SFNAME(NOSFUN)
-!
+      integer              NOSEG, NSEG2, NOLAY, NOGRID, NOQ, NOQ4, NOCONS
+      integer              NOFUN, NOSFUN, NOPA
+
+!     local
       LOGICAL              LGET
       logical           :: first_q_column
       REAL, Allocatable :: Horsurf(:), Thickn(:)
       CHARACTER*20         CTAG
+      integer              ierr, iq, iseg, nosss
+
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqtd", ithandl )
 !
@@ -180,3 +194,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_dlwqtd

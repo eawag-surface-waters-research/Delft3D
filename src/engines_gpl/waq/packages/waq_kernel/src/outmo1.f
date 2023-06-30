@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_outmo1
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE OUTMO1 ( IOUT   , IDUMP  , ARRA   , VNAME  , DNAME  ,
      *                    NODUMP , ID     , NEND   , NOTOT  )
@@ -63,6 +69,7 @@
 !
       CHARACTER*1  SPACE
       DATA         SPACE / ' ' /
+      integer      i, k, iseg
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "outmo1", ithandl )
 !
@@ -83,3 +90,5 @@
  2080 FORMAT (  ' SEGMENT NR:',I6,'   ',10(1P,E11.4))
  2090 FORMAT (  ' ',      A20          ,10(1P,E11.4))
       END
+
+      end module m_outmo1

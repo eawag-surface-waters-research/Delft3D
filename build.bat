@@ -2,34 +2,33 @@
 
 setlocal enabledelayedexpansion
 set prepareonly=0
-set mode=
-set config=
+set config=all
 set generator=
 set vs=
+set -vs=0
 set ifort=
+set -ifort=0
 set coverage=0
+set cmake=cmake
 
 rem # Jump to the directory where this build.bat script is
 cd %~dp0
 set root=%CD%
 
-
-call :CheckCMakeInstallation
-if !ERRORLEVEL! NEQ 0 exit /B %~1
 call :GetArguments %*
 if !ERRORLEVEL! NEQ 0 exit /B %~1
 call :GetEnvironmentVars
 if !ERRORLEVEL! NEQ 0 exit /B %~1
-call :PrepareSln
-if !ERRORLEVEL! NEQ 0 exit /B %~1
 call :SetGenerator
 if !ERRORLEVEL! NEQ 0 exit /B %~1
+call :CheckCMakeInstallation
+if !ERRORLEVEL! NEQ 0 exit /B %~1
+
 
 echo.
 echo     config      : !config!
 echo     generator   : !generator!
 echo     ifort       : !ifort!
-echo     mode        : !mode!
 echo     prepareonly : !prepareonly!
 echo     coverage    : !coverage!
 echo     vs          : !vs!
@@ -90,91 +89,49 @@ rem =================================
 :GetArguments
     echo.
     echo "Get command line arguments ..."
-    set mode=quiet
-    set prepareonly=0
+    
     if [%1] EQU [] (
-        set mode=interactive
-        set prepareonly=1
+        rem No arguments: continue with defaults
+        goto :endproc
     )
     if "%1" == "--help" (
         goto usage
     )
-    if "%1" == "all" (
-        set prepareonly=0
-        set config=%1
-        set mode=quiet
-    )
-    if "%1" == "dimr" (
-        set prepareonly=0
-        set config=%1
-        set mode=quiet
-    )
-    if "%1" == "dflowfm" (
-        set prepareonly=0
-        set config=%1
-        set mode=quiet
-    )
-    if "%1" == "dflowfm_interacter" (
-        set prepareonly=0
-        set config=%1
-        set mode=quiet
-    )
-    if "%1" == "dwaq" (
-        set prepareonly=0
-        set config=%1
-        set mode=quiet
-    )
-    if "%1" == "dwaves" (
-        set prepareonly=0
-        set config=%1
-        set mode=quiet
-    )
-    if "%1" == "swan" (
-        set prepareonly=0
-        set config=%1
-        set mode=quiet
-    )
-    if "%1" == "tests" (
-        set prepareonly=0
-        set config=%1
-        set mode=quiet
-    )
-    if "%1" == "delft3d4" (
-        set prepareonly=0
-        set config=%1
-        set mode=quiet
-    )
-    if "%1" == "flow2d3d" (
-        set prepareonly=0
-        set config=%1
-        set mode=quiet
+    rem First argument is the config
+    set "config=%1"
+    shift /1
+
+    set configs="all delft3d4 delft3dfm dflowfm dflowfm_interacter dimr drr dwaq dwaves flow2d3d swan tests tools tools_gpl"
+    set "modified=!configs:%config%=!"
+    if !modified!==%configs% (
+        echo ERROR: Configuration !config! not recognized
     )
 
-  set "options=-vs:0 -ifort:0 -coverage: -prepareonly:"
-
-  rem see: https://stackoverflow.com/questions/3973824/windows-bat-file-optional-argument-parsing answer 2.
-  for %%O in (%options%) do for /f "tokens=1,* delims=:" %%A in ("%%O") do set "%%A=%%~B"
-  :loop
-  if not "%~2"=="" (
-    set "test=!options:*%~2:=! "
-    if "!test!"=="!options! " (
-        echo Error: Invalid option %~2
-    ) else if "!test:~0,1!"==" " (
-        set "%~2=1"
-    ) else (
-        set "%~2=%~3"
-        shift /2
+    rem Read other arguments
+    set "options=-vs:0 -ifort:0 -coverage: -prepareonly:"
+    rem see: https://stackoverflow.com/questions/3973824/windows-bat-file-optional-argument-parsing answer 2.
+    for %%O in (%options%) do for /f "tokens=1,* delims=:" %%A in ("%%O") do set "%%A=%%~B"
+    :loop
+    if not "%~1"=="" (
+      set "test=!options:*%~1:=! "
+      if "!test!"=="!options! " (
+          echo Error: Invalid option %~1
+      ) else if "!test:~0,1!"==" " (
+          set "%~1=1"
+      ) else (
+          set "%~1=%~2"
+          shift /1
+      )
+      shift /1
+      goto :loop
     )
-    shift /2
-    goto :loop
-  )
-  if !-coverage! == 1 (
-  set coverage=1
-  )
-  if !-prepareonly! == 1 (
-  set prepareonly=1
-  )
-  goto :endproc
+    if !-coverage! == 1 (
+    set coverage=1
+    )
+    if !-prepareonly! == 1 (
+    set prepareonly=1
+    )
+    goto :endproc
 
 
 
@@ -258,13 +215,13 @@ rem =================================
     )
     :endfun
     if NOT !-vs! == 0 (
-    set vs=!-vs!
-    echo overriding vs with !-vs!
+        set vs=!-vs!
+        echo overriding vs with !-vs!
     )
 
     if NOT !-ifort! == 0 (
-    set ifort=!-ifort!
-    echo overriding ifort with !-ifort!
+        set ifort=!-ifort!
+        echo overriding ifort with !-ifort!
     )
     goto :endproc
 
@@ -276,47 +233,36 @@ rem ================================
     echo.
     echo "Checking whether CMake is installed ..."
     set count=1
-    for /f "tokens=* usebackq" %%f in (`cmake --version`) do (
+    for /f "tokens=* usebackq" %%f in (`!cmake! --version`) do (
       if !count! LEQ 1 (
           set var!count!=%%f
           set /a count=!count!+1
       )
     )
     if "!var1:~0,13!" == "cmake version" (
-        echo cmake version: !var1:~13,20!
+        echo !cmake! version: !var1:~13,20!
     ) else (
-        echo ERROR: CMake not found.
-        echo        Download page: https://cmake.org/download/
-        echo        Be sure that the cmake directory is added to environment parameter PATH
-        goto :end
-    )
-    goto :endproc
 
-
-
-rem =======================
-rem === Prepare_sln    ====
-rem =======================
-:PrepareSln
-    if "!mode!" == "quiet" (
-        echo "Mode is 'quiet': Calling prepare_sln.py is not needed ..."
-    ) else (
-        echo.
-        echo "Calling prepare_sln.py in interactive mode ..."
-        cd /d "%root%\src\"
-        rem # Catch stdout, each line in parameter var1, var2 etc.
-        for /f "tokens=* usebackq" %%f in (`python prepare_sln.py`) do (
-            set var=%%f
-            if "!var:~0,19!" == "CMake configuration"    (
-                set config=!var:~25,20!
-            )
-            if "!var:~0,22!" == "Visual Studio  Version" (
-                set vs=!var:~25,4!
-            )
-            if "!var:~0,16!" == "Preparation only"       (
-                set prepareonly=!var:~25,1!
-            )
+        echo !cmake! not found, trying with default path ...
+        set cmake="c:/Program Files/CMake/bin/cmake"
+        set count=1
+        for /f "tokens=* usebackq" %%f in (`!cmake! --version`) do (
+          if !count! LEQ 1 (
+              set var!count!=%%f
+              set /a count=!count!+1
+          )
         )
+        if "!var1:~0,13!" == "cmake version" (
+            echo !cmake! version: !var1:~13,20!
+        ) else (
+            echo ERROR: CMake not found.
+            echo        Download page: https://cmake.org/download/
+            echo        Be sure that the cmake directory is added to environment parameter PATH
+            goto :end
+        )
+
+
+
     )
     goto :endproc
 
@@ -405,7 +351,7 @@ rem =======================
     call :createCMakeDir build_%~1
     echo "Running CMake for %~1 ..."
     cd /d "%root%\build_%~1\"
-    cmake ..\src\cmake -G %generator% -A x64 -B "." -D CONFIGURATION_TYPE="%~1" 1>cmake_%~1.log 2>&1
+    !cmake! ..\src\cmake -G %generator% -A x64 -B "." -D CONFIGURATION_TYPE="%~1" 1>cmake_%~1.log 2>&1
     if !ERRORLEVEL! NEQ 0 call :errorMessage
     goto :endproc
 
@@ -492,6 +438,7 @@ rem =======================
 
         xcopy %root%\build_all\x64\Release\dflowfm\bin\dflowfm*     %root%\build_all\x64\dflowfm\bin\     /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_all\x64\Release\dflowfm\bin\dfm*         %root%\build_all\x64\dflowfm\bin\     /E /C /Y /Q > del.log 2>&1
+        xcopy %root%\build_all\x64\Release\dflowfm\bin\cosumo_bmi*  %root%\build_all\x64\dflowfm\bin\     /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_all\x64\Release\dflowfm\default          %root%\build_all\x64\dflowfm\default\ /E /C /Y /Q > del.log 2>&1
         xcopy %root%\build_all\x64\Release\dflowfm\scripts          %root%\build_all\x64\dflowfm\scripts\ /E /C /Y /Q > del.log 2>&1
 
@@ -559,27 +506,28 @@ rem =======================
     echo Usage:
     echo "build.bat"
     echo "build.bat <CONFIG> [OPTIONS]"
-    echo "  Without <CONFIG>:"
-    echo "    The prepare_sln.py window will pop-up. Related commands will be executed."
-    echo "  With    <CONFIG>:"
     echo "    The following actions will be executed:"
-    echo "    - Only when <CONFIG>=all: Execute prepare_sln.py in silent mode"
-    echo "    - Only when <CONFIG>=all: Compile all engines that are not CMaked yet in the traditional way"
     echo "    - Create directory 'build_<CONFIG>'"
-    echo "      Delete it when it already existed"
+    echo "      Delete it first when it already exists"
     echo "    - Execute 'CMake <CONFIG>' to create file '<CONFIG>.sln' inside 'build_<CONFIG>'"
     echo "    - Execute 'devenv.com <CONFIG>.sln /Build'"
     echo "    - Only when <CONFIG>=all: Combine all binaries in 'build_<CONFIG>\x64'"
     echo.
     echo "<CONFIG>:"
-    echo "- all: All CMaked projects, currently D-Flow FM, DWAQ and DIMR, and not-CMaked projects"
-    echo "- dflowfm"
-    echo "- dflowfm_interacter"
-    echo "- dwaq"
-    echo "- dimr"
+    echo "- all     (default) : D-Flow FM   , D-WAQ, D-Waves, DIMR"
+    echo "- delft3d4          : Delft3D-FLOW, D-WAQ, D-Waves"
+    echo "- delft3dfm         : D-Flow FM   , D-WAQ, D-Waves, DIMR"
+    echo "- dflowfm           : D-Flow FM"
+    echo "- dflowfm_interacter: D-Flow FM with Interacter"
+    echo "- dimr              : DIMR"
+    echo "- drr               : D-RR"
+    echo "- dwaq              : D-WAQ"
+    echo "- dwaves            : D-Waves"
+    echo "- flow2d3d          : Delft3D-FLOW"
+    echo "- swan              : SWAN"
     echo "- tests"
-    echo "- delft3d4"
-    echo "- flow2d3d"
+    echo "- tools"
+    echo "- tools_gpl"
     echo.
     echo "[OPTIONS]: usage [OPTION], sometimes followed by a value, space separated, in any order"
     echo "-coverage: Instrument object files for code-coverage tool (codecov) Example: -coverage"
@@ -613,9 +561,7 @@ rem === END TAG      ======
 rem =======================
 :end
     rem # To prevent the DOS box from disappearing immediately: remove the rem on the following line
-    if "!mode!" == "interactive" (
-        pause
-    )
+    rem pause
     if !ERRORLEVEL! NEQ 0 (
         exit /B %~1
     ) else (

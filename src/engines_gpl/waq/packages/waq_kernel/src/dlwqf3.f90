@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module m_dlwqf3
+
+implicit none
+
+contains
+
 
       subroutine dlwqf3 ( idt    , noseg  , volnew , nobnd  , noq    ,         &
      &                    ipoint , flowtot, disptot, diag   , iscale ,         &
@@ -151,3 +157,5 @@
 
       return
       end
+
+end module m_dlwqf3

@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqtr
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQTR ( NOTOT  , NOSYS  , NOSEG  , NOQ    , NOQ1   ,
      +                    NOQ2   , NOQ3   , NOPA   , NOSFUN , NODISP ,
@@ -97,8 +103,8 @@
 !
       SAVE
 !
-      DIMENSION    IPOINT(4,NOQ)
-      DIMENSION    VOLUME(NOSEG)     , AREA(NOQ)         ,
+      integer      IPOINT(4,NOQ)
+      real         VOLUME(NOSEG)     , AREA(NOQ)         ,
      +             FLOW(NOQ)         , ALENG (2,NOQ)     ,
      +             CONC(NOTOT,NOSEG) , DISP(3)           ,
      +             CONS(*)           , PARAM (NOPA,NOSEG),
@@ -108,10 +114,14 @@
      +             PANAME (*)        , FUNAME (*)        ,
      +             SFNAME (*)
       LOGICAL      UPDATR
+      integer      NOTOT, ILFLAG, NOSYS, NOSEG, NOQ, NOQ1, IDT, ITIME,
+     +             NOQ2, NOQ3, NOPA, NOSFUN, NODISP, NOVELO, NOCONS, NOFUN
 !
 !     Local
 !
-      INTEGER    LCCCO
+      INTEGER    LCCCO, ier, ierr, ier2, lunrep, isurf,
+     +           nmaxa, mmaxa, nma, idummy, nmt, k, iseg,
+     +           ilay, iq, ipos, ifrom, ito, layt
       LOGICAL    FIRST ,  LINIT , LEXI
       DATA       FIRST / .TRUE. /
       DATA       LINIT / .FALSE. /
@@ -229,3 +239,5 @@
  2070 FORMAT (' End extra functionality DLWQTR')
 !
       END
+
+      end module m_dlwqtr

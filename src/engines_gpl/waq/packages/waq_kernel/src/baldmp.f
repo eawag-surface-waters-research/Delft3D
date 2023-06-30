@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_baldmp
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE BALDMP (NOTOT , NOSYS , NOFLUX, NDMPAR, NDMPQ ,
      +                   NDMPS , NTDMPQ, IQDMP , ISDMP , IPDMP ,
@@ -142,3 +148,5 @@
       RETURN
 !
       END
+
+      end module m_baldmp

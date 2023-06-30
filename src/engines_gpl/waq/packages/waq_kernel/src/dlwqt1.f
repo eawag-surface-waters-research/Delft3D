@@ -20,6 +20,16 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqt1
+      use m_dlwqtb
+      use m_dlwqt4
+      use m_dlwqt3
+
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQT1 ( LUN    , ITIME  , ITIMEL , IHARM  , HARMAT ,
      *                    FARRAY , IPOINT , RESULT , NOSUB  , NRHARM ,
@@ -49,7 +59,7 @@
 !                           DLWQT3, makes values for harmonic function
 !                           DLWQT4, makes values for block / linear
 !                                   interpolated functions
-!                           DHOPNF, opens files
+!                           open_waq_files, opens files
 !
 !     PARAMETERS          :
 !
@@ -91,19 +101,23 @@
 !
 !     DECLARATIONS        :
 !
+      use m_dlwqt2
+      use m_dlwqib
       use m_srstop
-      use m_dhopnf
+      use m_open_waq_files
       use timers
       use delwaq2_data
 
       integer, intent(in   )           :: ftype  (*) !< type of files to be opened
       type(delwaq_data), intent(inout) :: dlwqd      !< derived type for persistent storage
 
-      DIMENSION     IHARM (*) , HARMAT(*) , FARRAY(*) , IPOINT(*) ,
-     *              RESULT(*) , LUN   (*) , IWORK (*) , RECLST(*)
+      integer       IHARM (*) , IPOINT(*) , LUN   (*) , IWORK (*)
+      real          HARMAT(*) , FARRAY(*) , RESULT(*) , RECLST(*)
       CHARACTER*(*) LUNTXT(*)
       CHARACTER*12  CHLP
       LOGICAL       UPDATE    , NEWSET    , LSTREC    , LREWIN
+      integer       IPA  , IPH    , IPF, ITIME  , ITIMEL , NOSUB , NRHARM,
+     +              NTOT , NRFTOT , IS , ISFLAG , IFFLAG , IOFF  , IPI
 !
 !     Local
 !
@@ -117,6 +131,10 @@
 
       LOGICAL            OLCFWQ, SRWACT, RTCACT
       COMMON /COMMUN/    OLCFWQ, SRWACT, RTCACT
+
+      integer ierr, ioerr, ipsi, ipsa, ipb, k, i, i2, j2
+      integer ntotal, nospac, npoint
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqt1", ithandl )
 !
@@ -135,7 +153,7 @@
       IF ( NTOTAL .GT. 0 ) THEN
          IF ( IFFLAG .EQ. 1 ) THEN
             IF ( .NOT. NEWSET ) THEN
-               CALL DHOPNF ( LUN(IS) , LUNTXT(IS) , IS , 2+ftype(is), IERR )
+               CALL open_waq_files ( LUN(IS) , LUNTXT(IS) , IS , 2+ftype(is), IERR )
                IF ( IERR .NE. 0 ) THEN
                   WRITE(LUN(19),*) 'ERROR in DLWQT1, opening file'
                   WRITE(LUN(19),*) 'number  :',IS
@@ -149,7 +167,7 @@
                   goto 9999        !  RETURN
                ELSE
                   CLOSE ( LUN(IS) )
-                  CALL DHOPNF ( LUN(IS) , LUNTXT(IS) , IS , 2+ftype(is), IERR )
+                  CALL open_waq_files ( LUN(IS) , LUNTXT(IS) , IS , 2+ftype(is), IERR )
                ENDIF
             ELSE
                IPSI = IPA
@@ -235,3 +253,5 @@
  9999 if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwqt1

@@ -20,6 +20,21 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqn0
+      use m_zercum
+      use m_setset
+      use m_proint
+      use m_proces
+      use m_hsurf
+      use m_dlwq_mt3d
+      use m_dlwqtr
+      use m_dlwqo2
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqn0 ( a     , j     , c     , lun   , lchar  ,
      &                    action, dlwqd , gridps)
@@ -31,6 +46,10 @@
 !>
 !>                         Performs only calculation of new concentrations due processes
 
+      use m_dlwq18
+      use m_dlwq14
+      use m_dlwq13
+      use m_delpar01
       use m_move
       use m_fileutils
       use grids
@@ -312,3 +331,5 @@
 
       RETURN
       END SUBROUTINE
+
+      end module m_dlwqn0

@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_proint
+
+      implicit none
+
+      contains
+
 
       subroutine proint ( noflux , ndmpar , idt    , iturat , flxdmp ,
      &                    flxint , isdmp  , ipdmp  , ntdmpq )
@@ -89,3 +95,5 @@
 
       return
       end
+
+      end module m_proint

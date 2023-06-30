@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_lsame
+
+      implicit none
+
+      contains
+
 
       LOGICAL          FUNCTION LSAME( CA, CB )
 *
@@ -111,3 +117,5 @@
 *     End of LSAME
 *
       END
+
+      end module m_lsame

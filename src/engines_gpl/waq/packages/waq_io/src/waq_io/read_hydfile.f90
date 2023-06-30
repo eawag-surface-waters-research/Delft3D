@@ -22,7 +22,7 @@
 !!  rights reserved.
 
 subroutine read_hydfile( lunout, hydfile, lchar, noseg, nexch, ierr )
-use m_dhpath
+use m_get_filepath_and_pathlen
 
 
 !   Deltares Software Centre
@@ -71,7 +71,7 @@ use m_dhpath
     idxlga  = -1
     idxgeom = -1
 
-    call dhpath( hydfile, path, pathlen )
+    call get_filepath_and_pathlen( hydfile, path, pathlen )
 
     open( newunit = lunin, file = hydfile, status = 'old', iostat = ierr )
     if ( ierr /= 0 ) then
