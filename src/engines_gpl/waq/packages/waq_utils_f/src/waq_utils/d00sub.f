@@ -80,28 +80,6 @@
             integer  ( 4), intent(inout) :: iwar          ! cumulative warning count
          end subroutine
 
-      SUBROUTINE DLWQS1 ( LUNREP       , NPOS       ,
-     +                    CCHAR        , VRSION     ,
-     +                    ILUN         , LCH        ,
-     +                    LSTACK       , IOUTPT     ,
-     +                    DTFLG1       , DTFLG3     ,
-     +                    StatProcesDef, AllItems ,
-     +                    NOINFO       , NOWARN   ,
-     +                    IERR         )
-!
-      USE ProcesSet
-!
-      INTEGER       LUNREP , NPOS   , LSTACK , IOUTPT , NOINFO ,
-     +              NOWARN , IERR
-      LOGICAL       DTFLG1 , DTFLG3
-      REAL          VRSION
-      INTEGER       ILUN(*)
-      CHARACTER*(*) LCH  (*)
-      CHARACTER*1   CCHAR
-      type(ProcesPropColl)  :: StatProcesDef       ! the statistical proces definition
-      type(ItemPropColl)    :: AllItems            ! all items of the proces system
-      END SUBROUTINE
-
       end interface
       end module
 
