@@ -66,7 +66,7 @@
      J             'transporte'/
       DATA INPDES /'ratio bloom/delwaq timesteps                   (-)',
      J             'DELWAQ timestep                                (d)',
-     J             'ambient water temperature                     (øC)',
+     J             'ambient water temperature                     (Â°C)',
      J             'suspended solids                            (g/m3)',
      J             'element of transport vector                 (g/m3)'/
       DATA INPVAL / 1.0, -999.,  15., 10., -999. /

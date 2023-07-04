@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_tabdim
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE TABDIM ( LUREP , NSVICH, NSVOCH, NFLCH , NSTCH ,
      +                    LASWI , ICONF ,         NO_ACT, ACTLST,
@@ -275,3 +281,5 @@
       if (timon) call timstop( ithndl )
       RETURN
       END
+
+      end module m_tabdim

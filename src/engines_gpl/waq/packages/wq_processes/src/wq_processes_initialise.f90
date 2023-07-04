@@ -36,6 +36,28 @@
 !>                             .
 !>                          to a consistent set of sequential processes for the simulation part
 
+      use m_set_old_items
+      use m_set_fractions
+      use m_set_active
+      use m_setvat
+      use m_setopp
+      use m_setopo
+      use m_setdvp
+      use m_repuse
+      use m_reaalg
+      use m_rd_tabs
+      use m_prsort
+      use m_prprop
+      use m_proc_totals
+      use m_primpro
+      use m_makbar
+      use m_intoou
+      use m_getinv
+      use m_fill_old_items
+      use m_cnfrep
+      use m_blmeff
+      use m_algrep
+      use m_actrep
       use m_zoek
       use m_dattim
       use m_srstop

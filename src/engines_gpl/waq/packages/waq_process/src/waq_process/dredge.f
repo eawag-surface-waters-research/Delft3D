@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dredge
+
+      implicit none
+
+      contains
+
 
       subroutine dredge     ( pmsa   , fl     , ipoint , increm, noseg ,
      +                        noflux , iexpnt , iknmrk , noq1  , noq2  ,
@@ -531,3 +537,5 @@
 
       return
       end
+
+      end module m_dredge

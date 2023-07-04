@@ -39,6 +39,9 @@
 !                          SPACE , computes space needed
 
 subroutine delwaq1_read_input_data()
+
+    use m_dlwqs1
+    use m_dlwqp1
     use m_delwaq1_data
 
     implicit none

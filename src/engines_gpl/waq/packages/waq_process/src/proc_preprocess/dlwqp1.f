@@ -20,6 +20,34 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqp1
+      use m_wr_proceswrk
+      use m_wrwrko
+      use m_wrtoys
+      use m_set_stat_output
+      use m_set_old_items
+      use m_set_fractions
+      use m_set_active
+      use m_setprg
+      use m_setopp
+      use m_setopo
+      use m_setdvp
+      use m_repuse
+      use m_reaalg
+      use m_rd_tabs
+      use m_prsort
+      use m_prprop
+      use m_proc_totals
+      use m_primpro
+      use m_outbo2
+      use m_makbar
+      use m_getinv
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqp1 ( lun          , lchar        ,
      +                    statprocesdef, allitems     ,
@@ -41,6 +69,11 @@
 !>                             .
 !>                          to a consistent set of sequential processes for the simulation part
 
+      use m_fill_old_items
+      use m_cnfrep
+      use m_blmeff
+      use m_algrep
+      use m_actrep
       use m_zoek
       use m_startup_screen
       use m_srstop
@@ -64,7 +97,7 @@
       integer             , intent(inout) :: lun(*)          !< unit numbers
       character(len=*)    , intent(inout) :: lchar(*)        !< filenames
       type(procespropcoll), intent(in   ) :: statprocesdef   !< the statistical proces definition
-      type(itempropcoll)  , intent(in   ) :: allitems        !< all items of the proces system
+      type(itempropcoll)  , intent(inout) :: allitems        !< all items of the proces system
       integer             , intent(inout) :: ioutps(7,*)     !< (old) output structure
       type(outputcoll)    , intent(inout) :: outputs         !< output structure
       integer  ( 4)       , intent(in   ) :: nomult          !< number of multiple substances
@@ -940,3 +973,5 @@
  2020 format (//' Model :            ',a40,/20x,a40 )
  2030 format (//' Run   :            ',a40,/20x,a40//)
       end
+
+      end module m_dlwqp1
