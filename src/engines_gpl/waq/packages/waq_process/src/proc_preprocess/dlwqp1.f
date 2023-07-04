@@ -219,11 +219,6 @@
       logical        lfound, laswi , swi_nopro
       integer        blm_act                       ! index of ACTIVE_BLOOM_P
 
-      ! charon coupling
-
-      type(procesprop)      :: procha              ! charon (extra) process definition
-      character*256  chemid
-      logical        l_chem
 
       ! information
 
@@ -511,27 +506,6 @@
      +                 algcof , outgrp , outtyp , noprot , namprot,
      +                 nampact, nopralg, nampralg)
       endif
-      ! chem coupling
-
-      call getcom ( '-chem'  , 3    , lfound, idummy, rdummy,
-     +              chemid, ierr2)
-      if ( lfound ) then
-         l_chem = .true.
-         write(line,'(a)' ) ' found -chem command line switch'
-         call monsys(line,1)
-         write(line,'(a)' ) ' chem coupling activated'
-         call monsys(line,1)
-         if ( ierr2.ne. 0 ) then
-            chemid = 'charon'
-            write(line,'(a30,a50)') ' using default chem input id: ', chemid
-            call monsys(line,1)
-         else
-            write(line,'(a22,a58)') ' using chem input id: ', chemid
-            call monsys(line,1)
-         endif
-      else
-         l_chem = .false.
-      endif
 
       ! check local dimensions
 
@@ -639,9 +613,7 @@
 
       if ( .not. laswi ) then
          if ( config .eq. ' ' ) then
-            if ( l_chem ) then
-               config = 'chem'
-            elseif ( l_eco ) then
+            if ( l_eco ) then
                config = 'eco'
             else
                config = 'waq'
@@ -672,12 +644,6 @@
 
       else
          nbpr   = 0
-      endif
-
-      ! charon coupling
-
-      if ( l_chem ) then
-
       endif
 
       ! add the statistical processes in the structure
