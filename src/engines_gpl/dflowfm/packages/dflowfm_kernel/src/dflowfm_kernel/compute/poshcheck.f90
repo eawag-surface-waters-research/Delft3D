@@ -72,6 +72,7 @@
 
               nodneg = n ; numnodneg = numnodneg + 1
               if ( jaGUI.eq.1 ) then
+                 
                  call rcirc( xz(n), yz(n) )
               end if
 
