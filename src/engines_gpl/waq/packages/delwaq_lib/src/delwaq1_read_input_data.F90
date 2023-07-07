@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module m_delwaq1_read_input_data
+
+implicit none
+
+contains
+
 
 
 !>\file
@@ -187,3 +193,5 @@ subroutine delwaq1_read_input_data()
 
 
 end subroutine delwaq1_read_input_data
+
+end module m_delwaq1_read_input_data
