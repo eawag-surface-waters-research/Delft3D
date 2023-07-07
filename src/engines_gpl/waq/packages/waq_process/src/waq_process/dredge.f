@@ -156,12 +156,7 @@
       integer              :: ifrac_dump_im1   ! dump towards this fraction
       integer              :: ifrac_dump_im2   ! dump towards this fraction
       integer              :: ifrac_dump_im3   ! dump towards this fraction
-      
-      logical, external    :: wq_processes_mydomain
-      logical              :: mydomain
-      logical, external    :: reduce_int_max_wq_processes
-      logical, external    :: reduce_sum_wq_processes
-      
+
       call getmlu( lunrep )
 
       ! initialise pointers in pmsa array
@@ -186,10 +181,6 @@
             no_basin = max(no_basin,basin_no)
             ip_basin_no = ip_basin_no + increm(2)
          enddo
-         if(.not.reduce_int_max_wq_processes(no_basin)) then
-            write (lunrep, *) 'ERROR in dredge process while reducing actual number of basins through mpi!'
-            call srstop(1)
-         endif
          pmsa(ipoint(3)) = real(no_basin)
       endif
 
@@ -324,7 +315,6 @@
                      volume              = pmsa(ip_volume)
                      surf                = pmsa(ip_surf)
                      delt                = pmsa(ip_delt)
-                     mydomain            = wq_processes_mydomain(iseg)
                      if ( sws1s2_dredge .eq. 1 ) then
                         if ( actths1 .gt. 1.e-15 ) then
                            fraction_dredge = (actths1-dredge_criterium)/actths1
@@ -333,9 +323,9 @@
                                  ip_im1s1            = ipoint(ip0_im1s1(ifrac_im1)) + (iseg-1)*increm(ip0_im1s1(ifrac_im1))
                                  im1s1               = pmsa(ip_im1s1)*surf
                                  ip_dredge_im1       = ip0_dredge_im1(ifrac_im1,basin_no)
-                                 if (mydomain) then
-                                    sum_dredge(ip_dredge_im1) = sum_dredge(ip_dredge_im1) + im1s1 * fraction_dredge
-                                 endif
+
+                                 sum_dredge(ip_dredge_im1) = sum_dredge(ip_dredge_im1) + im1s1 * fraction_dredge
+
                                  ipflux              = iflux + ifrac_im1
                                  fl(ipflux)          = im1s1*fraction_dredge/volume/delt
                               enddo
@@ -343,9 +333,7 @@
                                  ip_im2s1            = ipoint(ip0_im2s1(ifrac_im2)) + (iseg-1)*increm(ip0_im2s1(ifrac_im2))
                                  im2s1               = pmsa(ip_im2s1)*surf
                                  ip_dredge_im2       = ip0_dredge_im2(ifrac_im2,basin_no)
-                                 if (mydomain) then
-                                    sum_dredge(ip_dredge_im2) = sum_dredge(ip_dredge_im2) + im2s1 * fraction_dredge
-                                 endif
+                                 sum_dredge(ip_dredge_im2) = sum_dredge(ip_dredge_im2) + im2s1 * fraction_dredge
                                  ipflux              = iflux + nim1 + ifrac_im2
                                  fl(ipflux)          = im2s1*fraction_dredge/volume/delt
                               enddo
@@ -353,9 +341,7 @@
                                  ip_im3s1            = ipoint(ip0_im3s1(ifrac_im3)) + (iseg-1)*increm(ip0_im3s1(ifrac_im3))
                                  im3s1               = pmsa(ip_im3s1)*surf
                                  ip_dredge_im3       = ip0_dredge_im3(ifrac_im3,basin_no)
-                                 if (mydomain) then
-                                    sum_dredge(ip_dredge_im3) = sum_dredge(ip_dredge_im3) + im3s1 * fraction_dredge
-                                 endif
+                                 sum_dredge(ip_dredge_im3) = sum_dredge(ip_dredge_im3) + im3s1 * fraction_dredge
                                  ipflux              = iflux + nim1 + nim2 + ifrac_im3
                                  fl(ipflux)          = im3s1*fraction_dredge/volume/delt
                               enddo
@@ -369,9 +355,7 @@
                                  ip_im1s2            = ipoint(ip0_im1s2(ifrac_im1)) + (iseg-1)*increm(ip0_im1s2(ifrac_im1))
                                  im1s2               = pmsa(ip_im1s2)*surf
                                  ip_dredge_im1       = ip0_dredge_im1(ifrac_im1,basin_no)
-                                 if (mydomain) then
-                                    sum_dredge(ip_dredge_im1) = sum_dredge(ip_dredge_im1) + im1s2 * fraction_dredge
-                                 endif
+                                 sum_dredge(ip_dredge_im1) = sum_dredge(ip_dredge_im1) + im1s2 * fraction_dredge
                                  ipflux              = iflux + nim1 + nim2 + nim3 + ifrac_im1
                                  fl(ipflux)          = im1s2*fraction_dredge/volume/delt
                               enddo
@@ -379,9 +363,7 @@
                                  ip_im2s2            = ipoint(ip0_im2s2(ifrac_im2)) + (iseg-1)*increm(ip0_im2s2(ifrac_im2))
                                  im2s2               = pmsa(ip_im2s2)*surf
                                  ip_dredge_im2       = ip0_dredge_im2(ifrac_im2,basin_no)
-                                 if (mydomain) then
-                                    sum_dredge(ip_dredge_im2) = sum_dredge(ip_dredge_im2) + im2s2 * fraction_dredge
-                                 endif
+                                 sum_dredge(ip_dredge_im2) = sum_dredge(ip_dredge_im2) + im2s2 * fraction_dredge
                                  ipflux              = iflux + nim1 + nim2 + nim3 + nim1 + ifrac_im2
                                  fl(ipflux)          = im2s2*fraction_dredge/volume/delt
                               enddo
@@ -389,9 +371,7 @@
                                  ip_im3s2            = ipoint(ip0_im3s2(ifrac_im3)) + (iseg-1)*increm(ip0_im3s2(ifrac_im3))
                                  im3s2               = pmsa(ip_im3s2)*surf
                                  ip_dredge_im3       = ip0_dredge_im3(ifrac_im3,basin_no)
-                                 if (mydomain) then
-                                    sum_dredge(ip_dredge_im3) = sum_dredge(ip_dredge_im3) + im3s2 * fraction_dredge
-                                 endif
+                                 sum_dredge(ip_dredge_im3) = sum_dredge(ip_dredge_im3) + im3s2 * fraction_dredge
                                  ipflux              = iflux + nim1 + nim2 + nim3 + nim1 + nim2 + ifrac_im3
                                  fl(ipflux)          = im3s2*fraction_dredge/volume/delt
                               enddo
@@ -410,12 +390,6 @@
          ip_delt     = ip_delt     + increm(8)
          iflux       = iflux + noflux
       enddo
-
-      !  synchronise over MPI when necessary
-      if(.not.reduce_sum_wq_processes(size_sum_dredge, sum_dredge)) then
-         write (lunrep, *) 'ERROR in dredge process while reducing water quality processes data through mpi.'
-         call srstop(1)
-      endif
 
       ! dump loop
 
@@ -509,30 +483,19 @@
       enddo
 
 !     store remaining mass in pmsa, only if dumpsegment is in my domain
-      
+
       do i_basin = 1, no_basin
          dumpsegment= nint(pmsa(ip_dumpsegment(i_basin)))
-         if (wq_processes_mydomain(dumpsegment)) then
-            do ifrac_im1 = 1,nim1
-               pmsa(ipoint(ipoff+7*max_basin+ip0_dredge_im1(i_basin,ifrac_im1))) = sum_dredge(ip0_dredge_im1(i_basin,ifrac_im1))
-            enddo
-            do ifrac_im2 = 1,nim2
-               pmsa(ipoint(ipoff+7*max_basin+ip0_dredge_im2(i_basin,ifrac_im2))) = sum_dredge(ip0_dredge_im2(i_basin,ifrac_im2))
-            enddo
-            do ifrac_im3 = 1,nim3
-               pmsa(ipoint(ipoff+7*max_basin+ip0_dredge_im3(i_basin,ifrac_im3))) = sum_dredge(ip0_dredge_im3(i_basin,ifrac_im3)) 
-            enddo
-         else
-            do ifrac_im1 = 1,nim1
-               pmsa(ipoint(ipoff+7*max_basin+ip0_dredge_im1(i_basin,ifrac_im1))) = 0.0
-            enddo
-            do ifrac_im2 = 1,nim2
-               pmsa(ipoint(ipoff+7*max_basin+ip0_dredge_im2(i_basin,ifrac_im2))) = 0.0
-            enddo
-            do ifrac_im3 = 1,nim3
-               pmsa(ipoint(ipoff+7*max_basin+ip0_dredge_im3(i_basin,ifrac_im3))) = 0.0
-            enddo
-         endif
+
+         do ifrac_im1 = 1,nim1
+            pmsa(ipoint(ipoff+7*max_basin+ip0_dredge_im1(i_basin,ifrac_im1))) = sum_dredge(ip0_dredge_im1(i_basin,ifrac_im1))
+         enddo
+         do ifrac_im2 = 1,nim2
+            pmsa(ipoint(ipoff+7*max_basin+ip0_dredge_im2(i_basin,ifrac_im2))) = sum_dredge(ip0_dredge_im2(i_basin,ifrac_im2))
+         enddo
+         do ifrac_im3 = 1,nim3
+            pmsa(ipoint(ipoff+7*max_basin+ip0_dredge_im3(i_basin,ifrac_im3))) = sum_dredge(ip0_dredge_im3(i_basin,ifrac_im3))
+         enddo
       enddo
 
       return

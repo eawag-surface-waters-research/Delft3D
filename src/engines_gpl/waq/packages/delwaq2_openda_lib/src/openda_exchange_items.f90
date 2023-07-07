@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module m_openda_exchange_items
+
+implicit none
+
+contains
+
 
 ! Status: very temporary!
 !-----------------------------------------------------------
@@ -245,3 +251,5 @@ function SE_set_noise_for_time_span(exchange_item_id, start_time, end_time, oper
 end function SE_set_noise_for_time_span
 
 !----------------------------------------------------------------
+
+end module m_openda_exchange_items
