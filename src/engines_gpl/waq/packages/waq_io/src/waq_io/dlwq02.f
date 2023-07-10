@@ -69,6 +69,12 @@
 !                           LUN(4) = unit intermediate file (pointers)
 !                           LUN(5) = unit intermediate file (timesteps)
 
+      use m_part01
+      use m_report_date_time
+      use m_rdpart
+      use m_rdlgri
+      use m_rdfnam
+      use m_rdccol
       use m_zoek
       use m_srstop
       use m_open_waq_files
