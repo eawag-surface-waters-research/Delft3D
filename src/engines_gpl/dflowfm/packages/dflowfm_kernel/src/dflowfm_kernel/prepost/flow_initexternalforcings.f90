@@ -2384,14 +2384,14 @@ if (mext /= 0) then
              call clearECMessage()
              if (.not.ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, filename0, filetype0, method, operand='O', targetIndex=numsrc)) then
                 msgbuf = 'Connecting time series file ''' // trim(filename0) // ''' and polyline file ''' // trim(filename) &
-                                                          // '''. for source/sinks failed:' // dumpECMessageStack(LEVEL_WARN,callback_msg)
+                                                         // '''. for source/sinks failed:' // dumpECMessageStack(LEVEL_WARN,callback_msg)
                 call warn_flush()
                 success = .false.
              endif
           else
-             msgbuf = 'File: ''' // trim(filename0) // '''  does not exist (associated with ''' // trim(filename) // ''').'
+             write (msgbuf, '(a,a,a)') 'No .tim-series file found for source/sinks ''', trim(filename), '''. It maybe provided by a coupler if it exists.'
              call warn_flush()
-            success = .false.
+             success = .true.
           endif
        endif
     enddo
