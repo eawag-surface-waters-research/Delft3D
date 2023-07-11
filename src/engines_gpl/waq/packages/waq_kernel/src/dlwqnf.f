@@ -79,7 +79,6 @@
 !      |                   setset: not so clear what this does, probably process related
 !      |                   hsurf : set the surface array from the proces parameters
 !      |                   proces: DELWAQ water quality process system
-!      |                   dlwq_boundio: interface to on line boundary provision in bigger systems
 !      |                   dlwqo2: DELWAQ output system, provides all output to files
 !    time  ===> jump out   zercum: zero's the cummulative array's of balances and monitoring areas
 !    loop        point     dlwqb8: restores conc array (in case other routines did distroy ?!?)
@@ -394,13 +393,6 @@
      &                   a(ivol)  , noseg    , nosys    , nodump   , j(idump) ,
      &                   nx       , ny       , j(igrid) , a(iboun) , noloc    ,
      &                   a(iploc) , nodef    , a(idefa) , lun(19)  )
-
-
-!     communicate boundaries
-         call dlwq_boundio( lun  (19), notot   , nosys   , noseg   , nobnd   ,
-     &                      c(isnam) , c(ibnid), j(ibpnt), a(iconc), a(ibset),
-     &                      lchar(19))
-
 !     set new boundaries
          if ( itime .ge. 0   ) then
               ! first: adjust boundaries by OpenDA

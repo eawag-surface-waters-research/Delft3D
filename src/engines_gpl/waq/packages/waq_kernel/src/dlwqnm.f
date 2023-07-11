@@ -370,11 +370,6 @@
      &                 surface  ,lun(19) )
 
 
-!     communicate boundaries
-         call dlwq_boundio( lun  (19), notot   , nosys   , noseg   , nobnd   ,
-     &                      c(isnam) , c(ibnid), j(ibpnt), a(iconc), a(ibset),
-     &                      lchar(19))
-
 !     set new boundaries
          if ( itime .ge. 0   ) then
              ! first: adjust boundaries by OpenDA

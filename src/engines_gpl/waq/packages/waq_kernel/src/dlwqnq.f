@@ -27,7 +27,6 @@
       use m_proces
       use m_hsurf
       use m_dlwq_mt3d
-      use m_dlwq_boundio
       use m_dlwqtr
       use m_dlwqt0
 
@@ -285,12 +284,6 @@
      &                 c(iprna) , intsrt   ,
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
-
-!        communicate boundaries (for domain decomposition)
-
-         call dlwq_boundio ( lun(19)  , notot    , nosys    , nosss    , nobnd    ,
-     &                       c(isnam) , c(ibnid) , j(ibpnt) , a(iconc) , a(ibset) ,
-     &                       lchar(19))
 
 !          set new boundaries
 

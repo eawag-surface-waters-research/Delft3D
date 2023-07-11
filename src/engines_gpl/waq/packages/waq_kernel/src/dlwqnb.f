@@ -320,12 +320,6 @@
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
 
-!        communicate boundaries (for domain decomposition)
-
-         call dlwq_boundio ( lun(19)  , notot    , nosys    , nosss    , nobnd    ,
-     &                       c(isnam) , c(ibnid) , j(ibpnt) , a(iconc) , a(ibset) ,
-     &                       lchar(19))
-
 !          set new boundaries
 
          if ( itime .ge. 0   ) then

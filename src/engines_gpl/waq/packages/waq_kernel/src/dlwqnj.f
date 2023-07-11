@@ -360,11 +360,6 @@
      &                 nx       , ny       , j(igrid) , a(iboun) , noloc    ,
      &                 a(iploc) , nodef    , a(idefa) , lun(19)  )
 
-!          communicate boundaries (for domain decomposition)
-
-         call dlwq_boundio ( lun(19)  , notot    , nosys    , nosss    , nobnd    ,
-     &                       c(isnam) , c(ibnid) , j(ibpnt) , a(iconc) , a(ibset) ,
-     &                       lchar(19))
 
 !          set new boundaries
 
