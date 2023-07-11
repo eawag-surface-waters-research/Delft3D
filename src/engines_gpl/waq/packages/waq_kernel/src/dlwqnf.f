@@ -23,17 +23,12 @@
       module m_dlwqnf
       use m_zlayer
       use m_zercum
-      use m_waq2flow
       use m_sgmres
       use m_setset
-      use m_putper
       use m_proint
       use m_proces
-      use m_online
       use m_hsurf
-      use m_getper
       use m_dlwq_mt3d
-      use m_dlwq_boundio
       use m_dlwqtr
       use m_dlwqt0
       use m_dlwqo2
@@ -96,7 +91,6 @@
 !      |                   dlwqb4: update mass arrays, set explicit step for all passive substances
 !      |                   dlwqce: computes closure error correction at rewind of volume file
 !      |                   proint: integration of fluxes for mass balances per monitoring area
-!      |                   rtcshl: call to the real-time-control interface if switched 'on'
 !     VVV                  srwshl: call to the standaard-raamwerk-water interface if switched 'on'
 !      V                   dlwqt0: updates all time dependent items (in this case exclusive of volumes)
 !                          dlwq13: system dump routine of restart files at the end
@@ -156,15 +150,6 @@
 
 !$    include "omp_lib.h"
 
-
-
-!     Common to define external communications in SOBEK
-!     olcfwq             Flag indicating ONLINE running of CF and WQ
-!     srwact             Flag indicating active data exchange with SRW
-!     rtcact             Flag indicating output for RTC
-
-      logical            olcfwq, srwact, rtcact
-      common /commun/    olcfwq, srwact, rtcact
 
 !     Local declarations
 
@@ -385,14 +370,6 @@
 
 
 
-!          communicate with flow
-
-         call waq2flow ( nrvart   , c(ionam) , j(iiopo) , nocons   , nopa     ,
-     &                   nofun    , nosfun   , notot    , a(iconc) , a(isfun) ,
-     &                   a(ifunc) , a(iparm) , a(icons) , idt      , itime    ,
-     &                   a(ivol)  , noseg    , nosys    , nodump   , j(idump) ,
-     &                   nx       , ny       , j(igrid) , a(iboun) , noloc    ,
-     &                   a(iploc) , nodef    , a(idefa) , lun(19)  )
 !     set new boundaries
          if ( itime .ge. 0   ) then
               ! first: adjust boundaries by OpenDA
@@ -604,25 +581,6 @@
          if ( ibflag .gt. 0 ) then
             call proint ( nflux   , ndmpar  , idt     , itfact  , a(iflxd),
      &                    a(iflxi), j(isdmp), j(ipdmp), ntdmpq  )
-         endif
-
-         if ( rtcact ) call rtcshl (itime, a, j, c) ! Interface to RTC (i)
-         if ( srwact ) call srwshl (itime, a, j, c) ! Interface to SRW (i)
-
-         if ( olcfwq ) then
-            call putpcf('wqtocf','datawqtocf')
-            if ( itime+idt .lt. itstop ) then
-               call getpcf('cftowq','datacftowq')
-               laatst = 0
-            else
-               laatst = -1
-            endif
-         endif
-
-!     new time values, volumes excluded
-         if ( olcfwq .or. srwact ) then
-            call putpev ( 'WQtoWQI', 'DataWQtoWQI', laatst )
-            call getper ( 'WQItoWQ', 'DataWQItoWQ' )
          endif
 
 !     update all other time functions

@@ -22,15 +22,10 @@
 !!  rights reserved.
       module m_dlwqnj
       use m_zercum
-      use m_waq2flow
       use m_setset
-      use m_putper
       use m_proint
       use m_proces
-      use m_online
       use m_hsurf
-      use m_getper
-      use m_dlwq_boundio
       use m_dlwqtr
       use m_dlwqt0
       use m_dlwqo2
@@ -146,16 +141,6 @@
       TYPE(DELWAQ_DATA), TARGET   :: DLWQD
       type(GridPointerColl)       :: GridPs               ! collection of all grid definitions
 
-
-
-!     Common to define external communications in SOBEK
-!     olcfwq             Flag indicating ONLINE running of CF and WQ
-!     srwact             Flag indicating active data exchange with SRW
-!     rtcact             Flag indicating output for RTC
-
-      logical            olcfwq, srwact, rtcact
-      common /commun/    olcfwq, srwact, rtcact
-      integer                     :: laatst               ! detect latest step for communication
 
 !
 !     Local declarations
@@ -350,15 +335,6 @@
      &                 c(iprna) , intsrt   ,
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
-
-!          communicate with flow
-
-         call waq2flow(nrvart   , c(ionam) , j(iiopo) , nocons   , nopa     ,
-     &                 nofun    , nosfun   , notot    , a(iconc) , a(isfun) ,
-     &                 a(ifunc) , a(iparm) , a(icons) , idt      , itime    ,
-     &                 a(ivol)  , noseg    , nosys    , nodump   , j(idump) ,
-     &                 nx       , ny       , j(igrid) , a(iboun) , noloc    ,
-     &                 a(iploc) , nodef    , a(idefa) , lun(19)  )
 
 
 !          set new boundaries
@@ -623,24 +599,6 @@
             call proint ( nflux   , ndmpar  , idt     , itfact  , a(iflxd),
      &                    a(iflxi), j(isdmp), j(ipdmp), ntdmpq  )
          endif
-
-      if ( rtcact ) call rtcshl (itime, a, j, c) ! Interface to RTC (i)
-      if ( srwact ) call srwshl (itime, a, j, c) ! Interface to SRW (i)
-
-      if ( olcfwq ) then
-         call putpcf('wqtocf','datawqtocf')
-         if ( itime+idt .lt. itstop ) then
-            call getpcf('cftowq','datacftowq')
-            laatst = 0
-         else
-            laatst = -1
-         endif
-      endif
-
-      if ( olcfwq .or. srwact ) then
-         call putpev ( 'WQtoWQI', 'DataWQtoWQI', laatst )
-         call getper ( 'WQItoWQ', 'DataWQItoWQ' )
-      endif
 
 !          new time values, volumes excluded
 

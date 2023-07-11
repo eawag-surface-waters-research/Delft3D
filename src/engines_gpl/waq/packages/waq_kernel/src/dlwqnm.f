@@ -25,14 +25,10 @@
       use m_zercum
       use m_sgmres
       use m_setset
-      use m_putper
       use m_proint
       use m_proces
-      use m_online
       use m_hsurf
-      use m_getper
       use m_dlwq_output_theta
-      use m_dlwq_boundio
       use m_dlwqtr
       use m_dlwqt0
       use m_dlwqo2
@@ -149,14 +145,6 @@
       type(GridPointerColl)       :: GridPs     !< collection of all grid definitions
 
 !$    include "omp_lib.h"
-
-!     common to define external communications in SOBEK
-!     olcfwq             flag indicating ONLINE running of CF and WQ
-!     srwact             flag indicating active data exchange with SRW
-!     rtcact             flag indicating output for RTC
-
-      logical            olcfwq, srwact, rtcact
-      common /commun/    olcfwq, srwact, rtcact
 
 ! local declarations
 
@@ -600,25 +588,6 @@
          if ( ibflag .gt. 0 ) then
             call proint ( nflux   , ndmpar  , idt     , itfact, a(iflxd),
      &                    a(iflxi), j(isdmp), j(ipdmp), ntdmpq          )
-         endif
-
-      if ( rtcact ) call rtcshl (itime, a, j, c) ! Interface to RTC (i)
-      if ( srwact ) call srwshl (itime, a, j, c) ! Interface to SRW (i)
-
-      if ( olcfwq ) then
-          call putpcf('wqtocf','datawqtocf')
-          if ( itime+idt .lt. itstop ) then
-              call getpcf('cftowq','datacftowq')
-              laatst = 0
-          else
-              laatst = -1
-          endif
-      endif
-
-!     new time values, volumes excluded
-         if ( olcfwq .or. srwact ) then
-            call putpev ( 'WQtoWQI', 'DataWQtoWQI', laatst )
-            call getper ( 'WQItoWQ', 'DataWQItoWQ' )
          endif
 
 !     update all other time functions
