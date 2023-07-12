@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module m_wq_processes_initialise
+
+implicit none
+
+contains
+
 
       subroutine wq_processes_initialise ( lunlsp, pdffil, shared_dll_so, blmfil, blmoutfil, sttfil, statprocesdef, outputs, &
                                            nomult, imultp, constants, refday, noinfo, nowarn, ierr)
@@ -945,3 +951,5 @@
                 ' WQ Number  (in)active  name')
  2110 format ( i7,3x,a,a )
       end
+
+end module m_wq_processes_initialise
