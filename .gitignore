@@ -1,5 +1,5 @@
 # default build directories
-bin/**
+bin*/**
 build_*/**
 install_*/**
 
