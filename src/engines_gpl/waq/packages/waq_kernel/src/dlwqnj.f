@@ -226,8 +226,6 @@
          FORESTER = BTEST(INTOPT,6)
          NOWARN   = 0
 
-         call initialise_progress( dlwqd%progress, nstep, lchar(44) )
-
 !          initialize second volume array with the first one
 
 !        This statement caused a stack overflow with a very large model
@@ -388,7 +386,6 @@
      &                    a(idmpq), a(idmps), noraai  , imflag  , ihflag  ,
      &                    a(itrra), ibflag  , nowst   , a(iwdmp))
          endif
-         call write_progress( dlwqd%progress )
 
 !          simulation done ?
 

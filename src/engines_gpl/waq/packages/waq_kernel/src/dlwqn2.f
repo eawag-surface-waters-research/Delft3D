@@ -180,7 +180,6 @@
           NOQTT  = NOQ + NOQ4
           inwtyp = intyp + nobnd
 
-          CALL INITIALISE_PROGRESS( DLWQD%PROGRESS, NSTEP, LCHAR(44) )
 !
 !          initialize second volume array with the first one
 !
@@ -321,7 +320,6 @@
      &                    a(idmpq), a(idmps), noraai  , imflag  , ihflag  ,
      &                    a(itrra), ibflag  , nowst   , a(iwdmp))
          endif
-         call write_progress( dlwqd%progress )
 
 !          simulation done ?
 

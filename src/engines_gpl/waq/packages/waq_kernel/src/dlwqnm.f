@@ -266,7 +266,6 @@
           inwtyp = intyp + nobnd
           noqt   = noq1  + noq2
 
-          call initialise_progress( dlwqd%progress, nstep, lchar(44) )
 
 ! initialize second volume array with the first one
 
@@ -407,9 +406,6 @@
      &                    a(idmpq), a(idmps), noraai  , imflag  , ihflag  ,
      &                    a(itrra), ibflag  , nowst   , a(iwdmp))
          endif
-
-! progress file
-         call write_progress( dlwqd%progress )
 
 !     simulation done ?
          if ( itime .lt. 0      ) goto 9999

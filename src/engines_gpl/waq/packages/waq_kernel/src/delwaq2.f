@@ -187,7 +187,6 @@
       CHARACTER*(LCHMAX), SAVE :: RUNID
       LOGICAL, SAVE            :: INIT2        = .TRUE. ! To suppress the start-up screen
 
-      character*(lchmax)       :: inifil, dioconfig
       logical                  :: lfound
       integer                  :: idummy, ierr2
       real                     :: rdummy
@@ -252,11 +251,6 @@
 
          CALL open_waq_files ( LUN(19) , LCHAR(19) , 19    , 1    , IERRD  )
          CALL SETMLU ( LUN(19) )
-
-         LCHAR(44) = ' '
-         LUN(44)   = LUN(43) + 1
-
-         call gkwini(lunin,'General','ProgressFile',lchar(44))
 
 !           Show startup screen
 !
