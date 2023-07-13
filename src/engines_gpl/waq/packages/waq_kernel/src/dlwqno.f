@@ -104,7 +104,6 @@
       use waqmem          ! module with the more recently added arrays
       use delwaq2_data
       use m_openda_exchange_items, only : get_openda_buffer
-      use report_progress
       use m_actions
       use m_sysn          ! System characteristics
       use m_sysi          ! Timer characteristics

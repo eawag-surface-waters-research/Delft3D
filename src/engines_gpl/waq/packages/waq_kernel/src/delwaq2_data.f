@@ -151,7 +151,6 @@
       module delwaq2_data
 
       use waq_omi_constants
-      use report_progress
       use hydroset
       use dlwq_data
       use grids
