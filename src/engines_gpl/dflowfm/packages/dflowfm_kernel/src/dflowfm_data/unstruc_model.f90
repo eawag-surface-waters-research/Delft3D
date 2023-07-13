@@ -1375,6 +1375,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'sediment', 'Nr_of_sedfractions' ,  Mxgr)
     call prop_get_integer(md_ptr, 'sediment', 'MxgrKrone'          ,  MxgrKrone)
     call prop_get_integer(md_ptr, 'sediment', 'Seddenscoupling'    ,  jaseddenscoupling)
+    call prop_get_integer(md_ptr, 'sediment', 'Tracers_density_coupling',  ja_tracers_density_coupling)
     call prop_get_integer(md_ptr, 'sediment', 'Implicitfallvelocity', jaimplicitfallvelocity)
 
 
@@ -3474,6 +3475,10 @@ endif
        endif
     endif
 
+    if (writeall .or. ja_tracers_density_coupling > 0 ) then
+        call prop_set(prop_ptr, 'sediment', 'Tracers_density_coupling',  ja_tracers_density_coupling, 'tracers rho coupling (0=no, 1=yes), it is active when no sed rho coupling')
+    end if
+    
     if (writeall .or. javeg > 0) then
        call prop_set(prop_ptr, 'veg', 'Vegetationmodelnr', javeg      , 'Vegetation model nr, (0=no, 1=Baptist DFM)')
        call prop_set(prop_ptr, 'veg', 'Clveg'          , Clveg        , 'Stem distance factor, default 0.8 ()' )
