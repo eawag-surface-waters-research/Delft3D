@@ -252,7 +252,10 @@
 
          CALL open_waq_files ( LUN(19) , LCHAR(19) , 19    , 1    , IERRD  )
          CALL SETMLU ( LUN(19) )
-         
+
+         LCHAR(44) = ' '
+         LUN(44)   = LUN(43) + 1
+
          call gkwini(lunin,'General','ProgressFile',lchar(44))
 
 !           Show startup screen
