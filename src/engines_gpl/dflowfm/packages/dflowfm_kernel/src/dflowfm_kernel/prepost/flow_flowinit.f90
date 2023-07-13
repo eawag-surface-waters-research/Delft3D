@@ -84,7 +84,6 @@
  integer :: nstrucsg, L0, istru
  type(t_structure), pointer :: pstru
  integer, external :: flow_initexternalforcings
- double precision, external :: setrho
 
  double precision  :: trshcorioi
  double precision  :: Ds
