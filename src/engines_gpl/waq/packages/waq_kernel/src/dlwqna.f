@@ -26,7 +26,6 @@
       use m_proint
       use m_proces
       use m_hsurf
-      use m_dlwq_boundio
       use m_dlwqtr
       use m_dlwqt0
       use m_dlwqo2
@@ -109,7 +108,6 @@
       use timers
       use delwaq2_data
       use m_openda_exchange_items, only : get_openda_buffer
-      use report_progress
       use waqmem          ! module with the more recently added arrays
       use m_actions
       use m_sysn          ! System characteristics
@@ -193,7 +191,6 @@
          NOWARN   = 0
          IF ( ILFLAG .EQ. 0 ) LLENG = ILENG+2
 
-         call initialise_progress( dlwqd%progress, nstep, lchar(44) )
 !
 !          initialize second volume array with the first one
 !
@@ -301,12 +298,6 @@
      &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
      &                 surface  , lun(19)  )
 
-!        communicate boundaries (for domain decomposition)
-
-         call dlwq_boundio ( lun(19)  , notot    , nosys    , nosss    , nobnd    ,
-     &                       c(isnam) , c(ibnid) , j(ibpnt) , a(iconc) , a(ibset) ,
-     &                       lchar(19))
-
 !          set new boundaries
 
       if ( itime .ge. 0   ) then
@@ -358,7 +349,6 @@
      &                    a(idmpq), a(idmps), noraai  , imflag  , ihflag  ,
      &                    a(itrra), ibflag  , nowst   , a(iwdmp))
          endif
-         call write_progress( dlwqd%progress )
 
 !          simulation done ?
 

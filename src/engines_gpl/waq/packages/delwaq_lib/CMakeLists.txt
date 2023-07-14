@@ -23,7 +23,6 @@ add_library(${library_name} SHARED ${source_files}
 
 set(oss_dependencies_general deltares_common
                              deltares_common_c
-                             waq_delftio
                              io_netcdf
                              nefis
                              waq_data
@@ -131,5 +130,3 @@ if (UNIX)
     install(DIRECTORY  ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/csvFiles      DESTINATION share/delft3d)
     install(DIRECTORY  ${CMAKE_SOURCE_DIR}/../engines_gpl/waq/default/subFiles      DESTINATION share/delft3d)
 endif(UNIX)
-
-

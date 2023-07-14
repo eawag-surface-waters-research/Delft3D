@@ -151,7 +151,6 @@
       module delwaq2_data
 
       use waq_omi_constants
-      use report_progress
       use hydroset
       use dlwq_data
       use grids
@@ -198,7 +197,6 @@
           logical                                     :: updatr
           logical                                     :: litrep
           logical                                     :: ldummy
-          type(progress_data)                         :: progress
           type(operation_data), dimension(:), pointer :: operation => null()
           integer                                     :: number_operations = 0
           real(kind=kind(1.0d0))                      :: tol
@@ -366,9 +364,9 @@
       !     Routine to copy to and from the syst time data
       !
       subroutine copy_time_data( dlwqd, todlwqd )
-      
+
       use m_syst
-      
+
       type(delwaq_data), intent(inout) :: dlwqd
       logical                          :: todlwqd
 

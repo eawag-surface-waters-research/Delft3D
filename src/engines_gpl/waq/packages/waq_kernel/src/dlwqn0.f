@@ -56,7 +56,6 @@
       use timers
       use delwaq2_data
       use m_openda_exchange_items, only : get_openda_buffer
-      use report_progress
       use waqmem          ! module with the more recently added arrays
       use m_actions
       use m_sysn          ! System characteristics
@@ -118,7 +117,7 @@
 !     Dummy variables - used in DLWQD
           ITIMEL  = ITIME
           lleng   = 0
-          ioptzb  = 0 
+          ioptzb  = 0
           nopred  = 6
           NOWARN  = 0
           tol     = 0.0D0
@@ -146,7 +145,6 @@
           NOWARN   = 0
           IF ( ILFLAG .EQ. 0 ) LLENG = ILENG+2
 
-          call initialise_progress( dlwqd%progress, nstep, lchar(44) )
 
 !          Initialize second volume array with the first one
 
@@ -250,7 +248,7 @@
      +              A(ICONC), A(ICONS), A(IPARM), A(IFUNC), A(ISFUN),
      +              A(IVOL) , NOCONS  , NOFUN   , IDT     , NOUTP   ,
      +              LCHAR   , LUN     , J(IIOUT), J(IIOPO), A(IRIOB),
-     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC), 
+     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC),
      +              C(IONAM), NX      , NY      , J(IGRID), C(IEDIT),
      +              NOSYS   , A(IBOUN), J(ILP)  , A(IMASS), A(IMAS2),
      +              A(ISMAS), NFLUX   , A(IFLXI), ISFLAG  , IAFLAG  ,
@@ -278,7 +276,6 @@
      &                    a(idmpq), a(idmps), noraai  , imflag  , ihflag  ,
      &                    a(itrra), ibflag  , nowst   , a(iwdmp))
          endif
-         call write_progress( dlwqd%progress )
 
 !          simulation done ?
 
