@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_waq2flow
+
+      implicit none
+
+      contains
+
 
       subroutine waq2flow(nrvart, ounam , ipoint, nocons, nopa  ,
      +                    nofun , nosfun, notot , conc  , segfun,
@@ -28,6 +34,7 @@
      +                    nx    , ny    , lgrid , bound , noloc ,
      +                    proloc, nodef , defaul, lunrep)
 
+      use m_fioutv
       use m_zoek
       use m_srstop
       use m_monsys
@@ -143,15 +150,15 @@
                   paripnt(1) = ipoint(parindx)
                   if ( paripnt(1) .le. 0 ) then
                      call getmlu(lunrep)
-                     write(*,*)      'error waq2flow: parameter 1 not availeble'
-                     write(lunrep,*) 'error waq2flow: parameter 1 not availeble'
-                     call srstop(3)
+                     write(*,*)      'error waq2flow: parameter 1 not available'
+                     write(lunrep,*) 'error waq2flow: parameter 1 not available'
+                     call srstop(1)
                   endif
                else
                   call getmlu(lunrep)
-                  write(*,*)      'error waq2flow: parameter not availeble'
-                  write(lunrep,*) 'error waq2flow: parameter not availeble'
-                  call srstop(4)
+                  write(*,*)      'error waq2flow: parameter not available'
+                  write(lunrep,*) 'error waq2flow: parameter not available'
+                  call srstop(1)
                endif
 
 	       ! parameter two
@@ -172,15 +179,15 @@
                   paripnt(2) = ipoint(parindx)
                   if ( paripnt(2) .le. 0 ) then
                      call getmlu(lunrep)
-                     write(*,*)      'error waq2flow: parameter 2 not availeble'
-                     write(lunrep,*) 'error waq2flow: parameter 2 not availeble'
-                     call srstop(3)
+                     write(*,*)      'error waq2flow: parameter 2 not available'
+                     write(lunrep,*) 'error waq2flow: parameter 2 not available'
+                     call srstop(1)
                   endif
                else
                   call getmlu(lunrep)
-                  write(*,*)      'error waq2flow: parameter not availeble'
-                  write(lunrep,*) 'error waq2flow: parameter not availeble'
-                  call srstop(4)
+                  write(*,*)      'error waq2flow: parameter not available'
+                  write(lunrep,*) 'error waq2flow: parameter not available'
+                  call srstop(1)
                endif
 
                ! allocate output array
@@ -189,7 +196,7 @@
                if ( ierr_alloc .ne. 0 ) then
                   write(*,*)      'error waq2flow: allocating work array'
                   write(lunrep,*) 'error waq2flow: allocating work array'
-                  call srstop(5)
+                  call srstop(1)
                endif
 
                ! create DelftIO stream
@@ -228,3 +235,5 @@
 
       return
       end
+
+      end module m_waq2flow

@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_outhnc
+
+      implicit none
+
+      contains
+
 
       subroutine outhnc ( ncidhis, hncnam, ugridf, timeid, bndtimeid,
      &                    hncrec , itime , moname, idump , duname   ,
@@ -502,3 +508,5 @@
 
       end function nospaces
       end
+
+      end module m_outhnc

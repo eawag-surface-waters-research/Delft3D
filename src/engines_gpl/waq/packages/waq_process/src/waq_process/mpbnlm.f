@@ -24,7 +24,7 @@
       SUBROUTINE MPBNLM ( PMSA   , FL     , IPOINT , INCREM , NOSEG  ,
      +                    NOFLUX , IEXPNT , IKNMRK , NOQ1   , NOQ2   ,
      +                    NOQ3   , NOQ4   )
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 C***********************************************************************
 C     +----------------------------------------+
@@ -95,8 +95,8 @@ C     loop over the segments
 
       DO 1000 ISEG = 1 , NOSEG
 
-         CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-         CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+         CALL evaluate_waq_attribute(1,IKNMRK(ISEG),IKMRK1)
+         CALL evaluate_waq_attribute(2,IKNMRK(ISEG),IKMRK2)
 
          CAM       = MAX(PMSA(IP(1)),0.0)
          CNI       = MAX(PMSA(IP(2)),0.0)

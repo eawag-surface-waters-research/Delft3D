@@ -20,6 +20,16 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqn8
+      use m_hsurf
+      use m_dlwqtr
+      use m_dlwqo2
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqn8 ( a     , j     , c     , lun   , lchar  ,
      &                    action, dlwqd , gridps)
@@ -50,7 +60,7 @@
 !                          DLWQ81, add waste loads
 !                          DLWQ82, do the transport
 !                          DLWQ83, set iteration step and check
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !
 !     PARAMETERS    :
 !
@@ -64,11 +74,19 @@
 !
 !     Declaration of arguments
 !
+      use m_dlwq83
+      use m_dlwq82
+      use m_dlwq81
+      use m_dlwq80
+      use m_dlwq65
+      use m_dlwq41
+      use m_dlwq13
       use m_zero
       use m_fileutils
       use grids
       use timers
       use delwaq2_data
+      use m_actions
       use waqmem          ! module with the more recently added arrays
       use m_sysn          ! System characteristics
       use m_sysi          ! Timer characteristics
@@ -76,7 +94,8 @@
       use m_sysj          ! Pointers in integer array workspace
       use m_sysc          ! Pointers in character array workspace
 
-      DIMENSION       A(*)   , J(*)   , LUN(*)
+      real            A(*)
+      integer         J(*)   , LUN(*)
       CHARACTER*(*)   C(*)
       CHARACTER*(*)   LCHAR(*)
 
@@ -140,7 +159,7 @@
 !        They cannot have explicit processes during this time step
 
          call hsurf  ( noseg    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
-     &                 c(isfna) , a(isfun) , surface  , sindex   , lun(19)  )
+     &                 c(isfna) , a(isfun) , surface  , lun(19)  )
          call dryfld ( noseg    , nosss    , nolay    , a(ivol)  , noq1+noq2,
      &                 a(iarea) , nocons   , c(icnam) , a(icons) , sindex   ,
      &                 surface  , j(iknmr) , iknmkv   )
@@ -261,3 +280,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwqn8

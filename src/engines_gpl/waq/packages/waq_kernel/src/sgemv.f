@@ -20,10 +20,19 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_sgemv
+      use m_xerbla
+
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE SGEMV ( TRANS, M, N, ALPHA, A, LDA, X, INCX,
      $                   BETA, Y, INCY )
       use timers
+      use m_lsame
 
 *     .. Scalar Arguments ..
       REAL(8)            ALPHA, BETA
@@ -130,11 +139,6 @@
 *     .. Local Scalars ..
       REAL(8)            TEMP
       INTEGER            I, INFO, IX, IY, J, JX, JY, KX, KY, LENX, LENY
-*     .. External Functions ..
-      LOGICAL            LSAME
-      EXTERNAL           LSAME
-*     .. External Subroutines ..
-      EXTERNAL           XERBLA
 *     .. Intrinsic Functions ..
       INTRINSIC          MAX
       integer(4) ithandl /0/
@@ -287,3 +291,5 @@
 *     End of SGEMV .
 *
       END
+
+      end module m_sgemv

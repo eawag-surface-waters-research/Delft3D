@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module m_dlwqh2
+
+implicit none
+
+contains
+
 
       subroutine dlwqh2 ( noseg  , nobnd  , noq1   , noq2   , noq    ,         &
      &                    ipoint , nodisp , novelo , idpnt  , ivpnt  ,         &
@@ -194,3 +200,5 @@
 
       return
       end
+
+end module m_dlwqh2

@@ -52,8 +52,8 @@ C     110399  J. vGils        Error in time integration removed
 C     111103  Jan van Beek    2003 implementation
 C***********************************************************************
 
-      use m_dhkmrk
-      use m_dherrs
+      use m_evaluate_waq_attribute
+      use m_write_error_message
 
       IMPLICIT NONE
 
@@ -134,8 +134,8 @@ C     loop over the segments
 
       DO 1000 ISEG = 1 , NOSEG
 
-         CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-         CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+         CALL evaluate_waq_attribute(1,IKNMRK(ISEG),IKMRK1)
+         CALL evaluate_waq_attribute(2,IKNMRK(ISEG),IKMRK2)
 
          RADSURF    = PMSA(IP(1))
          RADTOP     = PMSA(IP(2))
@@ -169,7 +169,7 @@ C     loop over the segments
 
 C        check proces parameters
 
-         IF (I_NRDZ.LE.0) CALL DHERR2('I_NRDZ'   ,FLOAT(I_NRDZ),ISEG,'MPBLLM')
+         IF (I_NRDZ.LE.0) CALL write_error_message_with_values('I_NRDZ'   ,FLOAT(I_NRDZ),ISEG,'MPBLLM')
 
 C        scale all radiance to PAR, radsurf with enhancement since it is used as top of sediment layer radiation
 

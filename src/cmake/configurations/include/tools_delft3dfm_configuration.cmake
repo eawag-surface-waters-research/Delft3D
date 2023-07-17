@@ -54,3 +54,8 @@ endif()
 if(NOT TARGET maptonetcdf)
     add_subdirectory(${checkout_src_root}/${maptonetcdf_module} maptonetcdf)
 endif()
+
+# cosumo_bmi
+if(NOT TARGET cosumo_bmi)
+    add_subdirectory(${checkout_src_root}/${cosumo_bmi_module} cosumo_bmi)
+endif()

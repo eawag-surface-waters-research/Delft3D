@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq64
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQ64 ( DISP   , DISPER , AREA   , FLOW   , ALENG  ,
      *                    VELO   , CONC   , BOUND  , IPOINT , NOSYS  ,
@@ -76,10 +82,18 @@
 
       INTEGER    NDMPQ
       INTEGER    IQDMP   (*)
-      DIMENSION  DISP  (  3) , DISPER(*) , AREA (*) , FLOW  (*) ,
+      real       DISP  (  3) , DISPER(*) , AREA (*) , FLOW  (*) ,
      *           ALENG (  *) , VELO  (*) , CONC (*) , BOUND (*) ,
-     *           IPOINT(4,*) , IDPNT(*)  , IVPNT(*) , AMASS2(*) ,
-     *           DMPQ(*)
+     *           AMASS2(*) , DMPQ(*)
+
+      integer    IPOINT(4,*) , IDPNT(*), IVPNT(*)
+      integer    notot, nosys, noq, noq1, noq2, noq3, ilflag
+      integer    nodisp, novelo
+      integer    i, j, iq, is, i3, i4, i5, i6, ibflag
+      integer    iopt, ioptm, ipb, ipq, k1, k2
+
+      real       q, a, al, e, dl, d, v, dq
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq64", ithandl )
 !
@@ -254,3 +268,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwq64

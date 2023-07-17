@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqi2
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQI2 ( LUN    , MODID  , SYSID  , IDUMP  , DUMPID ,
      &                    IDPNT  , IVPNT  , DISP   , IBPNT  , BNDID  ,
@@ -131,24 +137,25 @@
 !
 
       INTEGER      IPDMP(*)  , IQDMP(*)   , ISDMP (*) , IORAAI(*) ,
-     +             NQRAAI(*) , IQRAAI(*)  , GRDNOS(*) , GRDREF(*)
+     +             NQRAAI(*) , IQRAAI(*)  , GRDNOS(*) , GRDREF(*),
+     +             IDUMP (*) , IDPNT (*)  , IVPNT (*) , IBPNT (4,*),
+     +             IWASTE(*) , NRFTOT(*)  , NRHARM(*) , LUN   (*),
+     +             IKNMRK(*) , INWTYP(*)
       INTEGER      GRDSEG(NOSEG+NSEG2,NOGRID)
       CHARACTER*40 MODID (4) , BNDNAM(*)  , WSTNAM(*)
       CHARACTER*20 SYSID (*) , DUMPID(*)  , BNDID (*) , BNDTYP(*) ,
      *             WASTID(*) , WSTTYP(*)  , CONAME(*) , PANAME(*) ,
-     *             FUNAME(*) , SFNAME(*)  , DINAME(*) , VENAME(*)  ,
+     *             FUNAME(*) , SFNAME(*)  , DINAME(*) , VENAME(*) ,
      *             DANAM (*) , RANAM (*)
-      DIMENSION    IDUMP (*) , IDPNT (*)  , IVPNT (*) , DISP  (*) ,
-     *             ALENG (*) , IBPNT (4,*), IWASTE(*) , CONST (*) ,
-     *             PARAM (*) , NRFTOT(*)  , NRHARM(*) , LUN   (*) ,
-     *             IKNMRK(*) , INWTYP(*)
+      real         DISP  (*) , ALENG (*)  , CONST (*) , PARAM (*)
       CHARACTER*40  FILLER
       type(GridPointerColl), intent(inout) :: GridPs     !< definitions of the grids
       type(delwaq_data),     intent(inout) :: dlwqd      !< derived type for persistent storage
       integer                              :: dmpbal(*)  !< indicates if dump area is included in the balance
       type(GridPointer)    :: aGrid      ! a single grid
 
-
+      integer  it, noqtt, nosss, k, igrid, iin, iseg, ierror, i_grid
+      integer  isys, ix, i, idummy
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqi2", ithandl )
 !
@@ -324,3 +331,5 @@
       END SUBROUTINE MODIFIED_JULIAN
 
       END
+
+      end module m_dlwqi2

@@ -4,18 +4,22 @@ Description: Ascii file comparer
 Copyright (C)  Stichting Deltares, 2013
 """
 
-import logging
 import os
 import sys
 from sys import float_info
+from typing import List, Tuple
 
 from src.config.file_check import FileCheck
+from src.config.parameter import Parameter
 from src.config.test_case_failure import TestCaseFailure
 from src.utils.comparers.comparison_result import ComparisonResult
+from src.utils.comparers.i_comparer import IComparer
+from src.utils.logging.i_logger import ILogger
 
 
-# Compares files on all floats that it contains.
-class AsciiComparer:
+class AsciiComparer(IComparer):
+    """Compares files on all floats that it contains."""
+
     __left = 0
     __right = 1
     __lineNumber = [0, 0]
@@ -41,14 +45,15 @@ class AsciiComparer:
     # output: boolean
     def compare(
         self,
-        leftpath: str,
-        rightpath: str,
+        left_path: str,
+        right_path: str,
         file_check: FileCheck,
         testcase_name: str,
+        logger: ILogger,
         startTag=None,
         startColumn: int = 0,
         endColumn: int = 0,
-    ):
+    ) -> List[Tuple[str, FileCheck, Parameter, ComparisonResult]]:
         self.__lineNumber = [0, 0]
         self.__columnNumber = [0, 0]
         self.__words = [[], []]
@@ -60,7 +65,7 @@ class AsciiComparer:
         nCompared = 0
         for parameters in file_check.parameters.values():
             for parameter in parameters:
-                logging.debug("Checking parameter: " + str(parameter.name))
+                logger.debug("Checking parameter: " + str(parameter.name))
                 result = ComparisonResult(error=local_error)
 
                 min_ref_value = sys.float_info.max
@@ -70,23 +75,23 @@ class AsciiComparer:
 
                 try:
                     filename = file_check.name
-                    with open(os.path.join(leftpath, filename), "r") as leftFile:
-                        with open(os.path.join(rightpath, filename), "r") as rightFile:
+                    with open(os.path.join(left_path, filename), "r") as leftFile:
+                        with open(os.path.join(right_path, filename), "r") as rightFile:
                             while True:
                                 leftData = self.__parseText__(leftFile, self.__left)
                                 rightData = self.__parseText__(rightFile, self.__right)
 
                                 if leftData is None and rightData is None:
                                     # Finished comparing the files
-                                    logging.debug(
+                                    logger.debug(
                                         "Absolute Tolerance: "
                                         + str(parameter.tolerance_absolute)
                                     )
-                                    logging.debug(
+                                    logger.debug(
                                         "Relative Tolerance: "
                                         + str(parameter.tolerance_relative)
                                     )
-                                    logging.debug("Compared %d floats", nCompared)
+                                    logger.debug(f"Compared {nCompared} floats")
                                     break
                                 elif leftData is None and rightData is not None:
                                     raise TestCaseFailure(
@@ -151,7 +156,7 @@ class AsciiComparer:
                             1.0, result.maxAbsDiff / (max_ref_value - min_ref_value)
                         )
                 except Exception as e:
-                    logging.exception(e)
+                    logger.error(e)
                     result.error = True
 
                 result.isToleranceExceeded(

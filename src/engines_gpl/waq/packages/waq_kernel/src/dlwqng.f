@@ -20,6 +20,24 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqng
+      use m_zlayer
+      use m_zercum
+      use m_sgmres
+      use m_setset
+      use m_proint
+      use m_proces
+      use m_hsurf
+      use m_dlwq_boundio
+      use m_dlwqtr
+      use m_dlwqt0
+      use m_dlwqo2
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqng ( a     , j     , c     , lun   , lchar  ,
      &                    action, dlwqd , gridps)
@@ -71,7 +89,7 @@
 !                          DLWQF6, checks matrix
 !                          MOVE,   copies one array to another
 !                          PROINT, integration of fluxes
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !                          SGMRES, solves (iteratively) system of equations
 !                          ZERCUM, zero's the cummulative array's
 !
@@ -85,6 +103,25 @@
 !     LUN     INTEGER    *      INPUT  array with unit numbers
 !     LCHAR   CHAR*(*)   *      INPUT  filenames
 !
+      use m_dlwqg3
+      use m_dlwqf8
+      use m_dlwqf6
+      use m_dlwqf5
+      use m_dlwqf4
+      use m_dlwqf2
+      use m_dlwqf1
+      use m_dlwqd2
+      use m_dlwqce
+      use m_dlwqb8
+      use m_dlwqb5
+      use m_dlwqb4
+      use m_dlwqb3
+      use m_dlwq41
+      use m_dlwq17
+      use m_dlwq15
+      use m_dlwq14
+      use m_dlwq13
+      use m_delpar01
       use m_move
       use m_fileutils
       use grids
@@ -507,7 +544,7 @@
          call sgmres ( noseg+nobnd  , gm_rhs (1,ith), gm_sol (1,ith), novec         , gm_work(1,ith),
      &                 noseg+nobnd  , gm_hess(1,ith), novec+1       , iter          , tol           ,
      &                 nomat        , gm_amat(1,ith), j(imat)       , gm_diag(1,ith), rowpnt        ,
-     &                 nolay        , ioptpc        , nobnd         , gm_trid(1,ith), iexseg (1,ith),
+     &                 nolay        , ioptpc        , nobnd         , gm_trid(1,ith), iexseg (:,ith),
      &                 lun(19)      , litrep        )
 
 !           copy solution for this substance into concentration array
@@ -601,3 +638,5 @@
 
       RETURN
       END
+
+      end module m_dlwqng

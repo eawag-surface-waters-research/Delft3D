@@ -20,6 +20,16 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module m_sgmres
+use m_strsv
+use m_srotg
+use m_srot
+
+
+implicit none
+
+contains
+
 
       subroutine sgmres ( ntrace , rhs    , sol    , restrt , work   ,                 &
      &                    ldw    , hess   , ldh    , maxit  , tol    ,                 &
@@ -44,6 +54,8 @@
 
 
 
+      use m_psolve
+      use m_matvec
       use m_srstop
       use timers                         ! WAQ performance timers
       implicit none
@@ -368,16 +380,12 @@
 
       SUBROUTINE UPDATS ( I      , N      , X      , H      , LDH     ,                         &
      &                    Y      , S      , V      , LDV              )
+      use m_sgemv
       use timers
       IMPLICIT NONE
 
       INTEGER   N      , I      , LDH    , LDV
       REAL(8)   X(*)   , Y(i)   , S(i)   , H(LDH,*)        , V(LDV,*)
-
-!        Subroutines called (BLAS)
-
-      EXTERNAL  SGEMV, STRSV
-
 
 !     This routine updates the GMRES iterated solution approximation.
 
@@ -436,3 +444,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+end module m_sgmres

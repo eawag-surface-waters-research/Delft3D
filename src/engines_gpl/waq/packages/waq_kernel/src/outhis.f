@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_outhis
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE OUTHIS ( IOHIS , NAMFIH, ITIME , MONAME, NODUMP,
      +                    IDUMP , DUNAME, NOTOT1, SYNAM1, CONC1 ,
@@ -64,6 +70,10 @@
       CHARACTER*(*) MONAME(4), NAMFIH
       CHARACTER*(*) DUNAME(*), SYNAM1(*), SYNAM2(*)
       REAL          CONC1(*) , CONC2(*)
+      
+!     local
+      integer      i, k1, k2, j
+      
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "outhis", ithandl )
 !
@@ -87,3 +97,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_outhis

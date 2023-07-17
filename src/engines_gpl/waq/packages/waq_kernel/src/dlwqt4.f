@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqt4
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqt4 ( lun    , luntxt , ftype  , lunout , ilun   ,
      &                    itime  , result , ipoint , nosub  , nrftot ,
@@ -44,7 +50,7 @@
 
 !     SUBROUTINES CALLED  : SRSTOP, stops execution
 
-      use m_dhopnf
+      use m_open_waq_files
       use timers
       use delwaq2_data
       USE HydroSet           ! for composed hydrodynamics
@@ -126,7 +132,7 @@
 
       if ( ilun .le. 800 .or. ilun .ge. 900 ) then
          ierr = 0
-         if ( ifflag .eq. 1 .and. nrftot .gt. 0 ) call dhopnf ( lun(ilun), luntxt(ilun) , ilun , 2+ftype(ilun), ierr )
+         if ( ifflag .eq. 1 .and. nrftot .gt. 0 ) call open_waq_files ( lun(ilun), luntxt(ilun) , ilun , 2+ftype(ilun), ierr )
          if ( ierr .ne. 0 ) call messag ( lunout , 5 , isflag , lun(ilun) , luntxt(ilun) , itime , 0 )
          ilt  = ilun
          llun = lun(ilun)
@@ -166,7 +172,7 @@
                iret = FilePropCollFind( PropColl, Prop )   ! See if it already exists
                if ( iret .eq. 0 ) then             ! this is the first time for this file
                   filtype = 0
-                  CALL DHOPNF ( ISLUN , SFILE , 3 , 2+filtype, ierr )   ! open the file
+                  CALL open_waq_files ( ISLUN , SFILE , 3 , 2+filtype, ierr )   ! open the file
                   IF ( ierr .NE. 0 ) CALL MESSAG ( LUNOUT, 5, ISFLAG, ISLUN, SFILE, ITIME, 0 )
                   iret = FilePropCollAdd( PropColl, Prop, nrftot )   ! add a copy of this all to the collection
                   if ( iret .eq. 0 ) CALL MESSAG ( LUNOUT , 4 , ISFLAG , ISLUN , SFILE , ITIME , 0 )
@@ -295,6 +301,9 @@
 
       use m_srstop
       use timers
+
+      integer   LUNOUT, ISFLAG, LLUN, ITIME, ITIME1, MESSGE
+
       CHARACTER*24  MSGTXT(6)
       CHARACTER*(*) SFILE
       DATA MSGTXT / ' REWIND ON              ' , ' WARNING READING        ' ,
@@ -345,3 +354,5 @@
      *   ' TIME IN FILE    :',I2,'Y ',I3,'D ',I2,'H ',I2,'M ',I2,'S .')
 
       END
+
+      end module m_dlwqt4

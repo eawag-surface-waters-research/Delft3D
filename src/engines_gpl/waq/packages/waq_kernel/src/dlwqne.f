@@ -20,6 +20,22 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqne
+      use m_zercum
+      use m_setset
+      use m_proint
+      use m_proces
+      use m_hsurf
+      use m_dlwq_boundio
+      use m_dlwqtr
+      use m_dlwqt0
+      use m_dlwqo2
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqne ( a     , j     , c     , lun   , lchar  ,
      +                    action, dlwqd , gridps)
@@ -55,7 +71,7 @@
 !                          DLWQ44, update arrays
 !                          DLWQT0, update other time functions
 !                          PROINT, integration of fluxes
-!                          DHOPNF, opens files
+!                          open_waq_files, opens files
 !                          ZERCUM, zero's the cummulative array's
 !
 !     PARAMETERS    :
@@ -68,6 +84,19 @@
 !     LUN     INTEGER    *      INPUT  array with unit numbers
 !     LCHAR   CHAR*(*)   *      INPUT  filenames
 !
+      use m_dlwqf8
+      use m_dlwqe1
+      use m_dlwqce
+      use m_dlwqb3
+      use m_dlwq44
+      use m_dlwq42
+      use m_dlwq41
+      use m_dlwq17
+      use m_dlwq16
+      use m_dlwq15
+      use m_dlwq14
+      use m_dlwq13
+      use m_delpar01
       use m_move
       use m_fileutils
       use grids
@@ -119,7 +148,7 @@
       INTEGER         LXPNT
       INTEGER         sindex
 
-      
+
       if ( action == ACTION_FINALISATION ) then
           call dlwqdata_restore(dlwqd)
           if ( timon ) call timstrt ( "dlwqne", ithandl )
@@ -292,7 +321,7 @@
      +              A(ICONC), A(ICONS), A(IPARM), A(IFUNC), A(ISFUN),
      +              A(IVOL) , NOCONS  , NOFUN   , IDT     , NOUTP   ,
      +              LCHAR   , LUN     , J(IIOUT), J(IIOPO), A(IRIOB),
-     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC), 
+     +              C(IOSNM), C(IOUNI), C(IODSC), C(ISSNM), C(ISUNI), C(ISDSC),
      +              C(IONAM), NX      , NY      , J(IGRID), C(IEDIT),
      +              NOSYS   , A(IBOUN), J(ILP)  , A(IMASS), A(IMAS2),
      +              A(ISMAS), NFLUX   , A(IFLXI), ISFLAG  , IAFLAG  ,
@@ -467,3 +496,5 @@
       RETURN
 
       END
+
+      end module m_dlwqne

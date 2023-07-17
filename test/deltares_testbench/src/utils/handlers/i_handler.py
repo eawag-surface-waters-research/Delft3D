@@ -1,12 +1,13 @@
 from abc import ABC, abstractmethod
 
 from src.config.credentials import Credentials
+from src.utils.logging.i_logger import ILogger
 
 
 class IHandler(ABC):
     @abstractmethod
     def prepare_upload(
-        self, from_path: str, to_path: str, credentials: Credentials
+        self, from_path: str, to_path: str, credentials: Credentials, logger: ILogger
     ) -> None:
         """Prepares upload
 
@@ -14,19 +15,23 @@ class IHandler(ABC):
             from_path (str): original path
             to_path (str): destination path
             credentials (Credentials): credentials needed for connection
+            logger (ILogger): logger to use
 
         Raises:
             NotImplementedError: this method could be invalid for some handlers
         """
 
     @abstractmethod
-    def upload(self, from_path: str, to_path: str, credentials: Credentials) -> None:
+    def upload(
+        self, from_path: str, to_path: str, credentials: Credentials, logger: ILogger
+    ) -> None:
         """Upload file using the specified from and to path
 
         Args:
             from_path (str): original path
             to_path (str): destination path
             credentials (Credentials): credentials needed for connection
+            logger (ILogger): logger to use
 
         Raises:
             NotImplementedError: this method could be invalid for some handlers
@@ -34,7 +39,12 @@ class IHandler(ABC):
 
     @abstractmethod
     def download(
-        self, from_path: str, to_path: str, credentials: Credentials, version: str
+        self,
+        from_path: str,
+        to_path: str,
+        credentials: Credentials,
+        version: str,
+        logger: ILogger,
     ):
         """Download a file from the specified location
 
@@ -43,6 +53,7 @@ class IHandler(ABC):
             to_path (str): destination path
             credentials (Credentials): credentials needed for connection
             version (str): version to use
+            logger (ILogger): logger to use
 
         Raises:
             NotImplementedError: this method could be invalid for some handlers

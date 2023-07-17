@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_fioutv
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE FIOUTV (OUTVAL, IOPOIN, NRVAR , NOCONS, NOPA  ,
      +                   NOFUN , NOSFUN, NOTOT , CONC  , SEGFUN,
@@ -90,11 +96,11 @@
 !
 !     Local
 !
-      PARAMETER ( IGSEG = 1 , IGMON = 2 , IGGRD = 3 , IGSUB = 4 )
-      PARAMETER ( RMISS = -999. )
-      PARAMETER ( NOPRED= 6 )
+      integer, PARAMETER :: IGSEG = 1 , IGMON = 2 , IGGRD = 3 , IGSUB = 4
+      real,    PARAMETER :: RMISS = -999.
+      integer, PARAMETER :: NOPRED= 6
       INTEGER     IOPA  , IOFUNC, IOSFUN, IOCONC, IOLOC ,
-     +            IODEF , IP
+     +            IODEF , IP, icel, iseg, iocons, nocel, i, iicel, iip
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "fioutv", ithandl )
 !
@@ -180,3 +186,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_fioutv

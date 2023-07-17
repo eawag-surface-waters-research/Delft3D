@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq82
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQ82 ( DISP   , DISPER , AREA   , FLOW   , ALENG  ,
      *                    VELO   , CONC   , BOUND  , IPOINT , NOSYS  ,
@@ -79,11 +85,18 @@
       use timers
 
       INTEGER    NDMPQ
-      INTEGER    IQDMP   (*)
-      DIMENSION  DISP  (  3) , DISPER(*) , AREA  (*) , FLOW (*) ,
-     *           ALENG (  *) , VELO  (*) , CONC  (*) , BOUND(*) ,
-     *           IPOINT(4,*) , IDPNT (*) , IVPNT (*) , DERIV(*) ,
-     *           AMASS2(  *) , TIMER (*) , VOLUME(*) , DMPQ(*)
+      INTEGER    IQDMP   (*) , IPOINT(4,*) , IDPNT (*) , IVPNT (*)
+      real       DISP  (  3) , DISPER(*)   , AREA  (*) , FLOW (*) ,
+     *           ALENG (  *) , VELO  (*)   , CONC  (*) , BOUND(*) ,
+     *           DERIV(*)    , AMASS2(  *) , TIMER (*) , VOLUME(*) ,
+     *           DMPQ(*)
+
+      integer  nosys, notot, noq, noq1, noq2, nodisp, novelo
+      integer  iopt, iaflag, ilflag, ibflag, iq, ipb, ipq
+      integer  i, i3, i4, i5, i6, j, k1, k2
+
+      real a, q, e, al, dl, b, v, vi, vj, d, dq
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq82", ithandl )
 !
@@ -264,3 +277,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwq82

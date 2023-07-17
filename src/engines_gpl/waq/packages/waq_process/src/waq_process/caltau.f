@@ -24,8 +24,8 @@
       subroutine caltau ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_errsys
-      use m_dhkmrk
+      use m_write_error_message
+      use m_evaluate_waq_attribute
 
 !>\file
 !>       Calculation of bottom friction
@@ -102,7 +102,7 @@
       DO 9000 ISEG = 1 , NOSEG
 
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-      CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+      CALL evaluate_waq_attribute(2,IKNMRK(ISEG),IKMRK2)
       IF (IKMRK2.EQ.0 .OR. IKMRK2 .EQ. 3) THEN
 !
       H       = PMSA(IP1 )
@@ -123,9 +123,9 @@
 !
       CHZ=MAX(1.0,CHZ)
       IF ((ISWTAU .NE. 1) .AND. (ISWTAU .NE. 2) .AND. (ISWTAU .NE. 3))
-     &     CALL ERRSYS ('Invald switch for tau (ISWTAU) in CALTAU', 1 )
+     &     CALL write_error_message ('Invald switch for tau (ISWTAU) in CALTAU')
       IF ((ISWTAUVELOC .NE. 1) .AND. (ISWTAUVELOC .NE. 2))
-     &     CALL ERRSYS ('Invald switch for tau (ISWTAUVELOC) in CALTAU', 1 )
+     &     CALL write_error_message ('Invald switch for tau (ISWTAUVELOC) in CALTAU')
 
 !     Initialisation
       TAU     = 0.0

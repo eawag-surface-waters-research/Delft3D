@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqtk
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQTK ( LUN    , ITIME  , IKTIM  , IKNMRK , NOSEG  ,
      +                    IS     , LUNTXT , ISFLAG , IFFLAG , IFIOPK )
@@ -52,9 +58,12 @@
 !
 !     DECLARATIONS        :
 !
+      use m_dlwqkv
+      use m_dlwqkb
+      use m_chknmr
       use m_srstop
-      use m_dhopnf
-      use m_dhkmrk
+      use m_open_waq_files
+      use m_evaluate_waq_attribute
       use m_dhimov
       use timers
       INTEGER       ITIME , NOSEG , IS    , ISFLAG, IFFLAG,
@@ -63,6 +72,8 @@
      +              IKTIM(*)
 
       CHARACTER*(*) LUNTXT(*)
+
+      integer  ierr, iseg, lunout, ikmrk4
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqtk", ithandl )
 
@@ -81,7 +92,7 @@
 !        (column 2)
 !
          IF ( IFFLAG .EQ. 1 ) THEN
-            CALL DHOPNF ( LUN(IS) , LUNTXT(IS) , IS    , 2     , IERR )
+            CALL open_waq_files ( LUN(IS) , LUNTXT(IS) , IS    , 2     , IERR )
             CALL DHIMOV ( IKNMRK(1,1), IKNMRK(1,2), NOSEG )
          ENDIF
 !
@@ -122,7 +133,7 @@
 !        (column 2)
 !
          DO 100 ISEG = 1 , NOSEG
-            CALL DHKMRK(4,IKNMRK(ISEG,2),IKMRK4)
+            CALL evaluate_waq_attribute(4,IKNMRK(ISEG,2),IKMRK4)
   100    CONTINUE
 !
 !        Change the time-variable kenmerk-array (column 3) such that it
@@ -143,3 +154,5 @@
 !
  2000 FORMAT ('ERROR: wrong file option for kenmerk array')
       END
+
+      end module m_dlwqtk

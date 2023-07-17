@@ -29,7 +29,7 @@
 
       use m_monsys
       use hydmod
-      use m_dherrs
+      use m_write_error_message
       use m_dhfext
 
 
@@ -133,5 +133,5 @@
       enddo
 
       return
- 900  call dherrs('error reading dbb file, last line:'//trim(inpfil%linbuf(inpfil%inputf)),1)
+ 900  call write_error_message('error reading dbb file, last line:'//trim(inpfil%linbuf(inpfil%inputf)))
       end subroutine read_ddb

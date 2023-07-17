@@ -20,6 +20,29 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqnf
+      use m_zlayer
+      use m_zercum
+      use m_waq2flow
+      use m_sgmres
+      use m_setset
+      use m_putper
+      use m_proint
+      use m_proces
+      use m_online
+      use m_hsurf
+      use m_getper
+      use m_dlwq_mt3d
+      use m_dlwq_boundio
+      use m_dlwqtr
+      use m_dlwqt0
+      use m_dlwqo2
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqnf ( a     , j     , c     , lun   , lchar  ,
      &                    action, dlwqd , gridps)
@@ -82,6 +105,24 @@
 !                                   the routines used for stepwise execution within a
 !                                   stepwise executing user interface
 
+      use m_dlwqm7
+      use m_dlwqm0
+      use m_dlwqf8
+      use m_dlwqf7
+      use m_dlwqf5
+      use m_dlwqf4
+      use m_dlwqf3
+      use m_dlwqf1
+      use m_dlwqce
+      use m_dlwqb8
+      use m_dlwqb4
+      use m_dlwqb3
+      use m_dlwq41
+      use m_dlwq17
+      use m_dlwq15
+      use m_dlwq14
+      use m_dlwq13
+      use m_delpar01
       use m_move
       use m_fileutils
       use grids
@@ -381,7 +422,7 @@
      &                 a(iconc), a(icons), a(iparm), a(ifunc), a(isfun),
      &                 a(ivol) , nocons  , nofun   , idt     , noutp   ,
      &                 lchar   , lun     , j(iiout), j(iiopo), a(iriob),
-     &                 c(iosnm), c(iouni), c(iodsc), c(issnm), c(isuni), c(isdsc), 
+     &                 c(iosnm), c(iouni), c(iodsc), c(issnm), c(isuni), c(isdsc),
      &                 c(ionam), nx      , ny      , j(igrid), c(iedit),
      &                 nosys   , a(iboun), j(ilp)  , a(imass), a(imas2),
      &                 a(ismas), nflux   , a(iflxi), isflag  , iaflag  ,
@@ -534,13 +575,13 @@
          call sgmres ( noseg+nobnd   , gm_rhs (1,ith), gm_sol (1,ith), novec         , gm_work(1,ith),
      &                 noseg+nobnd   , gm_hess(1,ith), novec+1       , iter          , tol           ,
      &                 nomat         , gm_amat(1,ith), j(imat)       , gm_diag(1,ith), rowpnt        ,
-     &                 nolay         , ioptpc        , nobnd         , gm_trid(1,ith), iexseg (1,ith),
+     &                 nolay         , ioptpc        , nobnd         , gm_trid(1,ith), iexseg (:,ith),
      &                 lun(19)       , litrep        )
 
 !     mass balance of transport and copy of solution in the concentration array
          call dlwqf7 ( isys          , nosys         , notot         , noseg         , a(iconc)      ,
      &                 gm_sol (1,ith), nobnd         , a(iboun)      , noq           , j(ixpnt)      ,
-     &                 flowtot(1,ith), disptot(1,ith), a(imas2)      , ndmpq         , j(iqdmp)      ,
+     &                 flowtot(1,ith), disptot(1,ith), a(imas2)      , ndmpq         , j(iqdmp)     ,
      &                 a(idmpq)      , iknmkv        , idt           )
 
 !        end loop over the substances
@@ -601,7 +642,7 @@
      &                 intsrt  , isflag  , ifflag  , ivflag  , ilflag  ,
      &                 update  , j(iktim), j(iknmr), j(inisp), a(inrsp),
      &                 j(intyp), j(iwork), .false. , ldummy  , rdummy  ,
-     &                 .false. , gridps  , dlwqd   )
+     &                 .FALSE. , gridps  , dlwqd   )
          if ( update ) updatr = .true.
 
 !     end of time loop
@@ -631,3 +672,5 @@
       return
 
       end subroutine dlwqnf
+
+      end module m_dlwqnf

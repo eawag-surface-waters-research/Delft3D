@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_outmap
+
+      implicit none
+
+      contains
+
 
       subroutine outmap ( iomap  , namfim , itime  , moname , noseg  ,
      &                    notot1 , conc1  , synam1 , notot2 , conc2  ,
@@ -112,3 +118,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_outmap

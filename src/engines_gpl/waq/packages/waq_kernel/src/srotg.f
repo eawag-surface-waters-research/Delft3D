@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_srotg
+
+      implicit none
+
+      contains
+
 
       subroutine srotg (sa,sb,c,s)
 !
@@ -53,3 +59,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_srotg

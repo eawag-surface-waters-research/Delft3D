@@ -53,7 +53,7 @@
 !    integer :: topsedsed  ! first within collumn exchange number
 !    integer :: botsedsed  ! last exchange of collumn to deeper bnd
 !
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
       USE BottomSet     !  Module with derived types and add function
 
 !     type ( BotColmnColl ) :: Coll  <= is defined in the module
@@ -159,7 +159,7 @@
 
 !     Zero output quantities on segment level
 
-         CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
+         CALL evaluate_waq_attribute(1,IKNMRK(ISEG),IKMRK1)
          IF (IKMRK1.EQ.3) THEN
             PMSA ( IPCFLX ) =  0.0
             PMSA ( IPRFLX ) =  0.0
@@ -794,7 +794,7 @@
 !
       use m_srstop
       use m_monsys
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
       USE BottomSet     !  Module with derived types and add function
 
 !     type ( BotColmnColl ) :: Coll  <= is defined in the module
@@ -838,9 +838,9 @@
 !        Zoek eerste kenmerk van- en naar-segmenten
 
          IKMRKV = -1
-         IF ( IVAN  .GT. 0 ) CALL DHKMRK(1,IKNMRK(IVAN ),IKMRKV)
+         IF ( IVAN  .GT. 0 ) CALL evaluate_waq_attribute(1,IKNMRK(IVAN ),IKMRKV)
          IKMRKN = -1
-         IF ( INAAR .GT. 0 ) CALL DHKMRK(1,IKNMRK(INAAR),IKMRKN)
+         IF ( INAAR .GT. 0 ) CALL evaluate_waq_attribute(1,IKNMRK(INAAR),IKMRKN)
 
 !        Bottom-water exchange, the collumn starts
 

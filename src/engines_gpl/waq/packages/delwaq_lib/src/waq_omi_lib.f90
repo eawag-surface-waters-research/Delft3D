@@ -31,7 +31,7 @@
 
 !> Utilities for the routines here (effectively a private module)
 module waq_omi_utils
-    use m_dhopnf
+    use m_open_waq_files
 
     integer, parameter :: LEVEL_FATAL   = 1
     integer, parameter :: LEVEL_ERROR   = 2
@@ -1561,7 +1561,7 @@ integer function WriteRestartFile ( lcharmap )
     !DEC$ ATTRIBUTES DECORATE, ALIAS : 'WRITERESTARTFILE' :: WriteRestartFile
 
     use delwaq2_global_data
-    use m_dhopnf
+    use m_open_waq_files
     use m_sysn          ! System characteristics
     use m_sysc          ! Pointers in character array workspace
     use m_sysa          ! Pointers in real array workspace
@@ -1571,7 +1571,7 @@ integer function WriteRestartFile ( lcharmap )
     character (len=*) lcharmap
     integer    i, k, ierr
 
-    call dhopnf ( lun(23), lcharmap, 23    , 1     , ierr  )
+    call open_waq_files ( lun(23), lcharmap, 23    , 1     , ierr  )
     if ( ierr == 0 ) then
       write ( lun(23) ) (dlwqd%chbuf(imnam+k-1) , k=1,160 )
       write ( lun(23) ) notot, noseg
@@ -1627,7 +1627,7 @@ integer function ModelInitialize ()
     !
     lunrep = lun(19)
     ! VORTech: early, otherwise we get those fort.1 files
-    call dhopnf ( lunrep , lchar(19) , 19    , 1    , ierr  )
+    call open_waq_files ( lunrep , lchar(19) , 19    , 1    , ierr  )
 
     !
     ! Make sure the harmonic work file exists

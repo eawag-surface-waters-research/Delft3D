@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_actloc
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE ACTLOC (IOPOIN, NRVAR , NOCONS, NOPA  , NOFUN ,
      +                   NOSFUN, NOTOT , NOSEG , NOLOC , NOGRID,
@@ -75,7 +81,17 @@
       use m_dhdagg
 
       INTEGER    NRVAR , NOCONS, NOPA  , NOFUN , NOSFUN,
-     +           NOTOT , NOSEG , NOLOC , NOGRID, NOVAR
+     +           NOTOT , NOSEG , NOLOC , NOGRID, NOVAR,
+     +           NOTOTO, NOTOTI, NOSEG2, NOPRED, I, IX_HLP,
+     +           IV_IDX, IV_HLP, IV_DA, IVAR, ISYSO, ISYSI,
+     +           NOTOTW, IX_DA, ISYSW, ISYSH, IP_HLP, IP_DA,
+     +           IPARW, IP_ARR, IP_ARO, IPARI, IOCONS, ILOC,
+     +           IK_HLP, NOTOTH, ISWCUM, IP_ARW, IP_ARI, IP_ARH,
+     +           IK_DA, IGRID, IDIM2, IDIM1, IDATYP, ID2_DA, ID2HLP,
+     +           ID1_DA, ID1HLP, IA_LOC, IA_HLP, IA_DA, IARR, IARKND
+                       
+                 
+                 
       INTEGER    IOPOIN(NRVAR) , VARARR(NOVAR) ,
      +           VARIDX(NOVAR) , VARTDA(NOVAR) ,
      +           VARDAG(NOVAR) , ARRKND(*)     ,
@@ -249,3 +265,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_actloc

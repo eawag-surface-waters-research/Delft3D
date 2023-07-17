@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_outbal
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE OUTBAL (LUBAL , FILBAL, ITIME , MONAME, NOTOT ,
      +                   NOFLUX, SYNAME, NDMPAR, DANAME, ASMASS,
@@ -62,7 +68,7 @@
       use timers
 
       INTEGER       LUBAL , ITIME , INIT  , NOTOT , NOFLUX,
-     +              NDMPAR, NOTOT2
+     +              NDMPAR, NOTOT2, NOPOUT
       REAL          ASMASS(NOTOT,NDMPAR,6), FLXINT(NOFLUX,NDMPAR),
      +              CONC2(NOTOT2,NDMPAR)
       CHARACTER*20  SYNAME(*)             , DANAME(*)
@@ -102,3 +108,5 @@
       RETURN
 !
       END
+
+      end module m_outbal

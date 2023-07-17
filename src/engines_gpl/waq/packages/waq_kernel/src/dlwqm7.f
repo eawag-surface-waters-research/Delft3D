@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqm7
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqm7 ( noq    , noq1   , noq2   , area   , flow   ,
      &                    aleng  , ilflag , iopt   , ipoint , mixlen ,
@@ -120,3 +126,5 @@
       return
       end
 
+
+      end module m_dlwqm7

@@ -4,44 +4,55 @@ Description: Nefis file comparer
 Copyright (C)  Stichting Deltares, 2013
 """
 
-import logging
+import copy
 import os
 import time
+from typing import List, Tuple
 
 from src.config.file_check import FileCheck
+from src.config.parameter import Parameter
 from src.config.program_config import ProgramConfig
-from src.suite.program import Programs
+from src.suite.program import Program
 from src.utils.comparers.ascii_comparer import AsciiComparer
+from src.utils.comparers.comparison_result import ComparisonResult
+from src.utils.comparers.i_comparer import IComparer
+from src.utils.logging.i_logger import ILogger
 
 
-# compare nefis content equality
-class NefisComparer(object):
-    # compare left and right file
-    # input: left path, right path, FileCheck instance
-    # output: list of (file_check, parameter, ResultComparison) tuples
+class NefisComparer(IComparer):
+    """Compare nefis content equality"""
+
+    def __init__(self, vs_program: Program) -> None:
+        self.__vs_program = vs_program
+
     def compare(
-        self, leftpath: str, rightpath: str, file_check: FileCheck, testcase_name: str
-    ):
+        self,
+        left_path: str,
+        right_path: str,
+        file_check: FileCheck,
+        testcase_name: str,
+        logger: ILogger,
+    ) -> List[Tuple[str, FileCheck, Parameter, ComparisonResult]]:
         # need to generate instruction file for vs.exe
         str_time = str(time.time())
         tmp_filename = "vs_" + str_time + ".tmp"
         vs_stdout = "vs_" + str_time + ".out"
         dict_quantity_filename = self.__createVsInput__(
-            leftpath, file_check, tmp_filename
+            left_path, file_check, tmp_filename, logger
         )
-        self.__createVsInput__(rightpath, file_check, tmp_filename)
+        self.__createVsInput__(right_path, file_check, tmp_filename, logger)
 
         # run vs for all filenames
         in_file = "<%s >%s 2>&1" % (tmp_filename, vs_stdout)
-        self.__runVs__(leftpath, in_file)
-        self.__runVs__(rightpath, in_file)
+        self.__runVs__(left_path, in_file, self.__vs_program, logger)
+        self.__runVs__(right_path, in_file, self.__vs_program, logger)
 
         # for all parameters, run the ascii comparer.
         comparer = AsciiComparer()
         results = []
         for parameters in file_check.parameters.values():
             for parameter in parameters:
-                logging.debug("Checking parameter: " + str(parameter.name))
+                logger.debug("Checking parameter: " + str(parameter.name))
                 file_check_ascii = FileCheck()
                 file_check_ascii.name = dict_quantity_filename[parameter.name]
                 # file_check_ascii.setParameters({'1':parameters})
@@ -53,14 +64,14 @@ class NefisComparer(object):
                 file_check_ascii.parameters = params
                 try:
                     result_lst = comparer.compare(
-                        leftpath, rightpath, file_check_ascii, testcase_name
+                        left_path, right_path, file_check_ascii, testcase_name, logger
                     )  # The result should be [ (testcase_name, file_check, parameter, ascii_result ) ]
 
                     # reset filename to NEFIS filename in stead of the filename which was used by the comparer
                     result_lst[0][1].name = file_check.name
-                    results.append(result_lst)
+                    results += result_lst
                 except Exception as e:
-                    logging.exception(e)
+                    logger.error(e)
                 del file_check_ascii
 
         return results
@@ -68,7 +79,9 @@ class NefisComparer(object):
     # create a vs config file
     # input: path, filecheck, filename
     # output: array of filenames that will be created by vs
-    def __createVsInput__(self, path: str, filecheck: FileCheck, uf: str):
+    def __createVsInput__(
+        self, path: str, filecheck: FileCheck, uf: str, logger: ILogger
+    ):
         defextension = ".def"
         if os.path.splitext(filecheck.name)[1] == ".hda":
             defextension = ".hdf"
@@ -78,7 +91,7 @@ class NefisComparer(object):
             defextension = ".ndf"
         if os.path.splitext(filecheck.name)[1] == ".wdo":  # WANDA
             defextension = ".wdo"
-        logging.debug("Creating temporary file %s", os.path.join(path, uf))
+        logger.debug(f"Creating temporary file {os.path.join(path, uf)}")
         result = {}  # Maps quantityNames to filenames.
         with open(os.path.join(path, uf), "w") as tmpinfile:
             tmpinfile.write(
@@ -104,19 +117,19 @@ class NefisComparer(object):
         tmpinfile.closed
         return result
 
-    def __runVs__(self, path: str, infile: str):
-        logging.debug("initializing vs")
+    def __runVs__(self, path: str, infile: str, vs_program: Program, logger: ILogger):
+        logger.debug("initializing vs")
         pcnf = ProgramConfig()
         pcnf.working_directory = path
         pcnf.arguments = [infile]
-        logging.debug("vs workdir %s, infile %s", path, infile)
-        prgm = Programs().get("vs")
+        logger.debug(f"vs workdir {path}, infile {infile}")
+        prgm = copy.deepcopy(vs_program)
         prgm.overwriteConfiguration(pcnf)
         try:
-            logging.debug("running vs")
-            prgm.run()
-            logging.debug("finished vs")
+            logger.debug("running vs")
+            prgm.run(logger)
+            logger.debug("finished vs")
         except SystemError:
-            logging.warning(
+            logger.warning(
                 "vs executable can give errors while functioning, continuing"
             )

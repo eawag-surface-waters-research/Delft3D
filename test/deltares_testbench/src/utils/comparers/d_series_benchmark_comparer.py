@@ -2,13 +2,16 @@ import os
 import sys
 from io import StringIO
 from tokenize import generate_tokens
+from typing import List, Tuple
 
 import numpy as np
 
 import src.utils.comparers.d_series_comparer as DSeriesComparer
+from src.config.file_check import FileCheck
 from src.config.parameter import Parameter
 from src.utils.comparers.comparison_result import ComparisonResult
 from src.utils.comparers.tree_comparer import TreeException
+from src.utils.logging.i_logger import ILogger
 
 # ------------------------DSeriesComparer-constructor------------------------ #
 
@@ -26,18 +29,23 @@ class DSeriesBenchmarkComparer(DSeriesComparer.DSeriesComparer):
         # compareTreePaths, but handled in compareThisNode.
         # Stop descending the tree!
 
-    def compare(self, ref_path, test_path, file_check, testcase_name):
+    def compare(
+        self,
+        left_path: str,
+        right_path: str,
+        file_check: FileCheck,
+        testcase_name: str,
+        logger: ILogger,
+    ) -> List[Tuple[str, FileCheck, Parameter, ComparisonResult]]:
         filename = file_check.name
-        self.test_path = test_path
-        test_file = os.path.join(test_path, filename)
+        self.test_path = right_path
+        test_file = os.path.join(right_path, filename)
         csv_filename = test_file[: test_file.rfind(".")] + ".csv"
 
         try:
             ftest = open(test_file, "r")
         except Exception as e:
-            raise Exception("Cannot open tested file " + filename + " in " + test_path)
-            logging.error("Cannot open tested file " + filename + " in " + test_path)
-            logging.exception(e)
+            raise Exception("Cannot open tested file " + filename + " in " + right_path)
         try:
             self.testtree = self.buildTrees(ftest)
         except TreeException as e:
@@ -59,12 +67,12 @@ class DSeriesBenchmarkComparer(DSeriesComparer.DSeriesComparer):
 
         paramResults = []
         varList = self.parse_params(csv_filename)
-        results = self.compareBenchmark(varList, test_path, filename)
+        results = self.compareBenchmark(varList, right_path, filename)
 
         local_error = False
         if (varList is not None) and (varList > []):
             paramResults_file = os.path.join(
-                test_path, "param_results_" + filename.split(".")[0] + ".csv"
+                right_path, "param_results_" + filename.split(".")[0] + ".csv"
             )
             fparamResults = open(paramResults_file, "w")
             fparamResults.write(

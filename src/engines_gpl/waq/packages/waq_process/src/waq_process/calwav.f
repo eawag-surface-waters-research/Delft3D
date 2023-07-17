@@ -24,8 +24,8 @@
       subroutine calwav ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
-      use m_errsys
-      use m_dhkmrk
+      use m_write_error_message
+      use m_evaluate_waq_attribute
 
 !>\file
 !>       Wave characteristics
@@ -81,7 +81,7 @@
       DO 9000 ISEG = 1 , NOSEG
 
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-      CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+      CALL evaluate_waq_attribute(2,IKNMRK(ISEG),IKMRK2)
       IF (IKMRK2.EQ.0 .OR. IKMRK2.EQ.3) THEN
 !
       VWIND   = PMSA(IP1 )
@@ -89,7 +89,7 @@
       DEPTH   = PMSA(IP3 )
       INIDEP  = PMSA(IP4 )
 
-      IF (FETCH .LT. 1E-20 )  CALL ERRSYS ('FETCH in CALWAVE zero', 1)
+      IF (FETCH .LT. 1E-20 )  CALL write_error_message ('FETCH in CALWAVE zero')
 
 !     Initialisation
       H       = 0.0

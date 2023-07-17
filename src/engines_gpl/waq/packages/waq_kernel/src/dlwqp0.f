@@ -20,6 +20,12 @@
 !!  all indications and logos of, and references to registered trademarks
 !!  of stichting deltares remain the property of stichting deltares. all
 !!  rights reserved.
+      module m_dlwqp0
+
+      implicit none
+
+      contains
+
 
       subroutine dlwqp0 ( conc   , amass  , deriv  , volume , idt    ,
      *                    nosys  , notot  , noseg  , lun     ,ivflag ,
@@ -116,3 +122,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_dlwqp0

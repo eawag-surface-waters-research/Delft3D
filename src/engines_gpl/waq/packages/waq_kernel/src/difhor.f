@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_difhor
+
+      implicit none
+
+      contains
+
 
       subroutine difhor(nm        ,nmu       ,j         ,nmmaxj    ,
      *                  kmax      ,lstsci    ,lsal      ,ltem      ,
@@ -156,22 +162,34 @@
 !
       use timers
 
-      dimension   kcs   (j:nmmaxj),
+      integer     kcs   (j:nmmaxj),
      *            kadu  (j:nmmaxj,  kmax)
 !
-      dimension   guu   (j:nmmaxj),gvu   (j:nmmaxj),
+      real        guu   (j:nmmaxj),gvu   (j:nmmaxj),
      *            r0    (j:nmmaxj,kmax,lstsci),
      *            ddkl  (j:nmmaxj,kmax,lstsci),
      *            thick (  kmax  ),sig   (  kmax  ),
      *            dicuv (j:nmmaxj,kmax),sigdif(lstsci)
 
-      dimension   dflux (j:nmmaxj,kmax,lstsci)
+      real        dflux (j:nmmaxj,kmax,lstsci)
 !
       real   , allocatable, save :: polal (:),polar (:),pocol (:),pocor (:),
      *                              poflu (:),point (:)
       integer, allocatable, save :: kicol (:),kicor (:)
       logical, save              :: first = .true.
       integer(4) ithandl /0/
+
+      integer ltem, lstsci, lsal
+      integer dpnm, dpnmu
+      real sepnm, sepnmu
+
+      integer l, j
+      integer k, k1, k2, kf, kmax, kpoint, krr, kll, kflux
+      integer nm, nmu, nmmaxj
+
+      real cl, cr, h0, flux, difl, difr
+      real grad, grad1, grad2, grmax, grmin, grmindpnm
+
       if ( timon ) call timstrt ( "difhor", ithandl )
 !
       if ( first ) then
@@ -362,3 +380,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_difhor

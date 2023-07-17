@@ -27,7 +27,8 @@ add_executable(${executable_name} ${source_files}
 
 # Set dependencies
 target_include_directories(${executable_name} PRIVATE ${version_include_dir})
-set(oss_dependencies    waq_utils_f
+set(oss_dependencies    deltares_common
+                        waq_utils_f
                         waqpb_lib) 
 oss_include_libraries(${executable_name} oss_dependencies)
 target_link_libraries(${executable_name} ${oss_dependencies})

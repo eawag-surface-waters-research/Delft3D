@@ -61,7 +61,7 @@ class Paths(object):
     # ensure valid local system path
     # input: some local path string
     # output: valid system path
-    def rebuildToLocalPath(self, path):
+    def rebuildToLocalPath(self, path: str):
         # if path starts with a /, put that in result; it will be removed during splitting
         if path == "":
             return path

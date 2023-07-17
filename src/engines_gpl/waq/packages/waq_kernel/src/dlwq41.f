@@ -20,6 +20,14 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq41
+      use m_dlwqt1
+
+
+      implicit none
+
+      contains
+
 
       subroutine dlwq41 ( lun    , itime  , itimel , harmat , array  ,
      &                    iharm  , nrharm , nrftot , noseg  , volume ,
@@ -126,3 +134,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_dlwq41

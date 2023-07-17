@@ -41,10 +41,11 @@ subroutine extract_constituents()
    use m_missing
    use m_plotdots
    use timers
+   use m_flowtimes
 
    implicit none
 
-   integer :: i, iconst, k, kk, limmin, limmax, k1, kt
+   integer :: i, iconst, k, kk, limmin, limmax,  ll, kb, k1, kt, ii
    double precision :: dmin, tempmi
 
    integer(4) ithndl /0/
@@ -66,8 +67,10 @@ subroutine extract_constituents()
                constituents(iconst,k) = 0d0
             endif
             !
+            ! keep track of mass error because of concentration limitation
             if (constituents(iconst,k)>upperlimitssc) then
                limmax = limmax + 1
+               maserrsed = maserrsed + vol1(k)*(constituents(iconst,k)-upperlimitssc)
                constituents(iconst,k) = upperlimitssc
             endif
             sed(i,k) = constituents(iconst,k)
@@ -98,7 +101,7 @@ subroutine extract_constituents()
             write(msgbuf , *) 'Max. temperature limited, number of cells Limmax = ' , limmax  ; call msg_flush()
          endif
       endif
-      limmin = 0
+         limmin = 0
      
       if (tempmin .ne. dmiss) then 
          k1 = 1 ; if (kmx > 0) k1 = Ndx + 1
@@ -120,8 +123,8 @@ subroutine extract_constituents()
             endif
          enddo
       endif
-      if (limmin .ne. 0) then
-         write(msgbuf , *) 'Min. temperature limited, number of cells Limmin = ' , limmin  ; call msg_flush()
+         if (limmin .ne. 0) then
+            write(msgbuf , *) 'Min. temperature limited, number of cells Limmin = ' , limmin  ; call msg_flush()
       endif
 
    endif
@@ -159,6 +162,20 @@ subroutine extract_constituents()
 
   if (jasal > 0 .and. maxitverticalforestersal > 0 .or. jatem > 0 .and. maxitverticalforestertem > 0) then
      call doforester()
+  endif
+  !
+  ! When a cell become dries, keep track of the mass in the water column in sscum array. This will be accounted
+  ! for in the bottom update when the cell becomes wet again. This prevents large concentration gradients and exploding bed levels.
+  if (ISED1>0) then
+    do ll=1,mxgr
+       do k=1,ndx
+          if (hs(k)<stmpar%morpar%sedthr) then
+             call getkbotktop(k,kb,kt)
+             ssccum(ll,k) = ssccum(ll,k)+sum(constituents(ISED1+ll-1,kb:kt))/dts*bai_mor(k)*vol1(k)
+             constituents(ISED1+ll-1,kb:kt) = 0d0
+          endif
+       enddo
+     enddo
   endif
 
   if (timon) call timstop( ithndl )

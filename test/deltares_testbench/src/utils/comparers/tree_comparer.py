@@ -2,17 +2,18 @@
 #  -----------------------------------------------------
 #  Copyright (C)  Stichting Deltares, 2017
 
-import logging
 import os
 import re
 import sys
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 
 from src.config.file_check import FileCheck
 from src.config.parameter import Parameter
 from src.utils.comparers.comparison_result import ComparisonResult
+from src.utils.comparers.i_comparer import IComparer
+from src.utils.logging.i_logger import ILogger
 
 # ------------------------TreeException-constructor------------------------ #
 
@@ -30,7 +31,7 @@ class TreeException(Exception):
 # ------------------------TreeComparer-constructor------------------------ #
 
 
-class TreeComparer:
+class TreeComparer(IComparer):
     """
     Compare two files with a data tree recursively,
        according to the configuration in file_check.
@@ -83,6 +84,7 @@ class TreeComparer:
         pathstr,
         currentresults,
         ignored_parameters,
+        logger: ILogger,
     ):
         """Compare trees recursively."""
         results = currentresults
@@ -122,6 +124,7 @@ class TreeComparer:
                     parameter,
                     results,
                     ignored_parameters,
+                    logger,
                 )
                 for (
                     key,
@@ -153,6 +156,7 @@ class TreeComparer:
                                             pathstr + ">" + key,
                                             results,
                                             ignored_parameters,
+                                            logger,
                                         )
             except TreeException as e:
                 raise
@@ -192,32 +196,39 @@ class TreeComparer:
             else:
                 return []
 
-    def compare(self, ref_path, test_path, file_check: FileCheck, testcase_name):
+    def compare(
+        self,
+        left_path,
+        right_path,
+        file_check: FileCheck,
+        testcase_name,
+        logger: ILogger,
+    ) -> List[Tuple[str, FileCheck, Parameter, ComparisonResult]]:
         """
         This function will be called for all the values entered in the xml file.
         for them the trees will be compared and finally the parameters and end results will be output
-        :param ref_path: path to reference file
-        :param test_path: path to test file
+        :param left_path: path to reference file
+        :param right_path: path to test file
         :return: a list were it is shown if all the values were OK
         """
         filename = file_check.name
-        self.test_path = test_path
-        self.ref_path = ref_path
-        test_file = os.path.join(test_path, filename)
-        ref_file = os.path.join(ref_path, filename)
+        self.test_path = right_path
+        self.ref_path = left_path
+        test_file = os.path.join(right_path, filename)
+        ref_file = os.path.join(left_path, filename)
         results = []
 
         # Open the test file
         try:
             ftest = open(test_file, "r")
         except Exception as e:
-            raise Exception("Cannot open tested file " + filename + " in " + test_path)
+            raise Exception("Cannot open tested file " + filename + " in " + right_path)
         # Open the reference file
         try:
             fref = open(ref_file, "r")
         except Exception:
             raise Exception(
-                "Cannot open reference file " + filename + " in " + ref_path
+                "Cannot open reference file " + filename + " in " + left_path
             )
 
         # Build Tree for test file
@@ -277,6 +288,7 @@ class TreeComparer:
                         pad,
                         [],
                         ignored_parameters,
+                        logger,
                     )
                     # Append the results this contains every possible path in the Tree
                     results.extend(newResults)
@@ -318,6 +330,10 @@ class TreeComparer:
             paramResults.append((testcase_name, file_check, parameter, end_result))
         return paramResults
 
+    # @abstractmethod
+    # def buildTrees(self, file):
+    #     pass
+
     def pullIgnored(self, parameters: List[Parameter]):
         """
          Pulls the ignored parameters and appends them in a list according to their name
@@ -334,7 +350,7 @@ class TreeComparer:
     # -----------------------Node-comparison-methods----------------------- #
 
     def compareTableWithMissingColumn(
-        self, resultslist, reftable, testtable, testbranch, refbranch
+        self, resultslist, reftable, testtable, testbranch, refbranch, logger: ILogger
     ):
         """
         Finds missing column and returns updated list of results
@@ -356,7 +372,7 @@ class TreeComparer:
                 testbranch["block_start"][0],
                 testbranch["block_end"][0],
             )
-            logging.info(
+            logger.info(
                 "\nColumn [%s] missing in reference. Block starts in line [%s] of the dumpfile"
                 % (",".join(missingcolumns), testbranch["block_start"][0])
             )
@@ -367,7 +383,7 @@ class TreeComparer:
                 refbranch["block_start"][0],
                 refbranch["block_end"][0],
             )
-            logging.info(
+            logger.info(
                 "\nColumn [%s] missing in test. Block starts in line [%s] of the dumpfile"
                 % (",".join(missingcolumns), refbranch["block_start"][0])
             )
@@ -377,7 +393,14 @@ class TreeComparer:
         return resultslist
 
     def compareThisNode(
-        self, testbranch, refbranch, pathstr, parameter, resultlist, ignored_parameters
+        self,
+        testbranch,
+        refbranch,
+        pathstr,
+        parameter,
+        resultlist,
+        ignored_parameters,
+        logger: ILogger,
     ):
         """
         Specific comparison of this node : floats, txt and tables
@@ -401,13 +424,13 @@ class TreeComparer:
             if reftable.__len__() == testtable.__len__():
                 # Compare them as tables
                 newresults = self.compareDataTables(
-                    reftable, testtable, pathstr, parameter
+                    reftable, testtable, pathstr, parameter, logger
                 )
                 resultlist.extend(newresults)
             else:
                 # Comparing tables where the length of the columns is not the same
                 resultlist = self.compareTableWithMissingColumn(
-                    resultlist, reftable, testtable, testbranch, refbranch
+                    resultlist, reftable, testtable, testbranch, refbranch, logger
                 )
         # parse and compare non-table statements
         try:
@@ -452,7 +475,7 @@ class TreeComparer:
                     )
                 # Compare the dictionaries creates and append them to the results
                 result = self.compareDictionary(
-                    testdictionary, refdictionary, pathstr, parameter
+                    testdictionary, refdictionary, pathstr, parameter, logger
                 )
                 if result > []:
                     resultlist.extend(result)
@@ -583,7 +606,9 @@ class TreeComparer:
         except ValueError:
             return False
 
-    def compareDictionary(self, testdictionary, refdictionary, pathstr, parameter):
+    def compareDictionary(
+        self, testdictionary, refdictionary, pathstr, parameter, logger: ILogger
+    ):
         """
         Compares the values form the dictionary made with the information held within a node
         :param testdictionary: input of test dictionary
@@ -627,17 +652,18 @@ class TreeComparer:
                     ):
                         result.maxAbsDiff = abs(testvalue - refvalue)
                         result.maxAbsDiffValues = (testvalue, refvalue)
-                        logging.info(
+                        message = (
                             "Absolute Error:   "
                             + "test = %12.6e     ref = %12.6e (%12.6e): %s"
                             % (testvalue, refvalue, result.maxAbsDiff, result.path)
                         )
+                        logger.info(message)
                         result.result = "NOK"
                     # The value is not the same and is above relative Tolerances
                     else:
                         result.maxRelDiff = abs((testvalue - refvalue) / refvalue)
                         result.maxRelDiffValues = (testvalue, refvalue)
-                        logging.info(
+                        message = (
                             "Relative Error:   "
                             + "test = %12.6e     ref = %12.6e (%10.2f %%): %s"
                             % (
@@ -647,6 +673,7 @@ class TreeComparer:
                                 result.path,
                             )
                         )
+                        logger.info(message)
                         result.result = "NOK"
                     results.append(result)
                 except:
@@ -663,7 +690,9 @@ class TreeComparer:
                         results.append(result)
         return results
 
-    def compareDataTables(self, reftable, testtable, pathstr, parameter: Parameter):
+    def compareDataTables(
+        self, reftable, testtable, pathstr, parameter: Parameter, logger: ILogger
+    ):
         """
         Compares the values held within a table
         :param reftable:
@@ -683,71 +712,56 @@ class TreeComparer:
                 # Lists of values refering to each column of the table
                 refvalue = reftable[key]
                 testvalue = testtable[key]
-                for i in range(len(refvalue)):
+                for i, ref_val in enumerate(refvalue):
                     # Create a container for the results
                     result = ComparisonResult(error=local_error)
                     result.lineNumber = i + 1
                     result.columnNumber = columnNumber
                     result.path = pathstr + ">" + key
                     # values equal
-                    if refvalue[i] == testvalue[i]:
+                    if ref_val == testvalue[i]:
                         result.result = "OK"
                     # values of absolute diff and relative diff within margins
                     else:
-                        if isinstance(refvalue[i], str) and isinstance(
-                            testvalue[i], str
-                        ):
-                            logging.info(
-                                "Absolute Error:   "
-                                + "test = %s     ref = %s (%s): %s(%d)"
-                                % (testvalue[i], refvalue[i], False, result.path, i)
+                        if isinstance(ref_val, str) and isinstance(testvalue[i], str):
+                            message = (
+                                f"Absolute Error:   test = {testvalue[i]}"
+                                + f"     ref = {ref_val} ({False}): {result.path}({i:d})"
                             )
+                            logger.info(message)
                             result.result = "NOK"
-                        elif abs(
-                            testvalue[i] - refvalue[i]
-                        ) <= self.SetPythonCompatibility(parameter.tolerance_absolute):
+                        elif abs(testvalue[i] - ref_val) <= self.SetPythonCompatibility(
+                            parameter.tolerance_absolute
+                        ):
                             result.result = "OK"
                         elif abs(
-                            (testvalue[i] - refvalue[i]) / refvalue[i]
+                            (testvalue[i] - ref_val) / ref_val
                         ) <= self.SetPythonCompatibility(parameter.tolerance_relative):
                             result.result = "OK"
                         # absolute tolerance exceeded
-                        elif abs(
-                            testvalue[i] - refvalue[i]
-                        ) > self.SetPythonCompatibility(parameter.tolerance_absolute):
-                            result.maxAbsDiff = abs(testvalue[i] - refvalue[i])
-                            result.maxAbsDiffValues = (testvalue[i], refvalue[i])
-                            logging.info(
-                                "Absolute Error:   "
-                                + "test = %12.6e     ref = %12.6e (%12.6e): %s(%d)"
-                                % (
-                                    testvalue[i],
-                                    refvalue[i],
-                                    result.maxAbsDiff,
-                                    result.path,
-                                    i,
-                                )
+                        elif abs(testvalue[i] - ref_val) > self.SetPythonCompatibility(
+                            parameter.tolerance_absolute
+                        ):
+                            result.maxAbsDiff = abs(testvalue[i] - ref_val)
+                            result.maxAbsDiffValues = (testvalue[i], ref_val)
+                            message = (
+                                f"Absolute Error:   test = {testvalue[i]:12.6e}"
+                                + f"     ref = {ref_val:12.6e} ({result.maxAbsDiff:12.6e}): {result.path}({i:d})"
                             )
+                            logger.info(message)
                             result.result = "NOK"
                         # relative tolerance exceeded
                         elif abs(
-                            (testvalue[i] - refvalue[i]) / refvalue[i]
+                            (testvalue[i] - ref_val) / ref_val
                         ) > self.SetPythonCompatibility(parameter.tolerance_relative):
-                            result.maxRelDiff = abs(
-                                (testvalue[i] - refvalue[i]) / refvalue[i]
+                            result.maxRelDiff = abs((testvalue[i] - ref_val) / ref_val)
+                            result.maxRelDiffValues = (testvalue[i], ref_val)
+
+                            message = (
+                                f"Relative Error:   test = {testvalue:12.6e}"
+                                + f"     ref = {ref_val:12.6e} ({result.maxRelDiff * 100:10.2f}): {result.path}({i:d})"
                             )
-                            result.maxRelDiffValues = (testvalue[i], refvalue[i])
-                            logging.info(
-                                "Relative Error:   "
-                                + "test = %12.6e     ref = %12.6e (%10.2f %%): %s%[%d%]"
-                                % (
-                                    testvalue,
-                                    refvalue,
-                                    result.maxRelDiff * 100,
-                                    result.path,
-                                    i,
-                                )
-                            )
+                            logger.info(message)
                             result.result = "NOK"
                     results.append(result)
         return results

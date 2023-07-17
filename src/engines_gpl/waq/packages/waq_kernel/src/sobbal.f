@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_sobbal
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE SOBBAL ( NOTOT , ITIME , NOSYS , NOFLUX, NDMPAR,
      J                    NDMPQ , NTDMPQ, ITSTOP, IMSTRT, IMSTOP,
@@ -91,16 +97,19 @@
 !     WSTDMP  REAL     NOTOT,NOWST,2  I   accumulated wasteloads 1/2 in and out
 !     ==================================================================
 !
+      use m_outhis
+      use m_dmpval
+      use m_dmpsurf
       use m_srstop
       use m_monsys
       use m_gkwini
       use m_getcom
-      use m_dhopnf
+      use m_open_waq_files
       use timers
-      INTEGER       NOTOT , ITIME , NOSYS ,
-     j              NOFLUX, NDMPAR, NDMPQ , NTDMPQ,
-     j              NOBND , ITSTOP, IMSTOP, IMSTRT, IMSTEP,
-     J              NOBTYP, NOCONS, NOQ   , INIOUT
+      INTEGER       NOTOT , ITIME , NOSYS , NOSEG , LUNOUT,
+     +              NOFLUX, NDMPAR, NDMPQ , NTDMPQ,
+     +              NOBND , ITSTOP, IMSTOP, IMSTRT, IMSTEP,
+     +              NOBTYP, NOCONS, NOQ   , INIOUT, INTOPT
       INTEGER       IQDMP(*)      , IPDMP(*)  ,
      +              INBTYP(NOBND) , IPOINT( 4,NOQ )
       REAL          DMPQ(NOSYS,NDMPQ,*),
@@ -183,6 +192,10 @@
       integer       idummy, ierr2
       integer       lunini
       real          rdummy
+      integer       iseg, iw, idum, ivan, ibal_off, idump_out
+      integer       ndmpar_out, ntrans, indx
+      integer       inaar, itstrt
+      real          tot_surf, tot_volu
       DATA          LUMPEM /.true./
       DATA          LUMPPR /.true./
       DATA          SUPPFT /.true./
@@ -531,7 +544,7 @@
           JDUMP(NDMPAR_OUT+1) = NDMPAR_OUT+1
 
           IF ( .NOT. SUPPFT )
-     J    CALL DHOPNF ( LUNOUT, LCHOUT, 21    , 1     , IDUM  )
+     J    CALL open_waq_files ( LUNOUT, LCHOUT, 21    , 1     , IDUM  )
 
 !         Zero output matrices
           DO IOUT  = 1,NOOUT
@@ -1331,3 +1344,5 @@
       END
 
 
+
+      end module m_sobbal

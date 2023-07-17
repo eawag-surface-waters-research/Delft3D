@@ -542,7 +542,7 @@
       endif
 
       ! write hyd file
-      call write_hyd(output_hyd, version_full)
+      call write_hyd(output_hyd, major_minor_buildnr)
 
       ! write time independent data
 

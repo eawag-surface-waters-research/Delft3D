@@ -24,7 +24,7 @@
       subroutine veloc      ( pmsa   , fl     , ipoint , increm, noseg , &
      &                        noflux , iexpnt , iknmrk , noq1  , noq2  , &
      &                        noq3   , noq4   )
-      use m_dhkmrk
+      use m_evaluate_waq_attribute
 
 !>\file
 !>       Horizontal stream velocity in a segment based on flows at interfaces
@@ -141,15 +141,15 @@
          ikmrkv = 0             !   see whether at least one of the
          ikmrkt = 0             !   segments (ifrom,ito) is interior to
                                 !   the domain of this processor
-         if ( ifrom  .gt. 0 ) call dhkmrk(1,iknmrk(ifrom),ikmrkv)
-         if ( ito    .gt. 0 ) call dhkmrk(1,iknmrk(ito  ),ikmrkt)
+         if ( ifrom  .gt. 0 ) call evaluate_waq_attribute(1,iknmrk(ifrom),ikmrkv)
+         if ( ito    .gt. 0 ) call evaluate_waq_attribute(1,iknmrk(ito  ),ikmrkt)
                                 !   if not, then skip the exchange
          if ( ikmrkv .eq. 0 .and. ikmrkt .eq. 0 ) cycle
 
          ikmrkv = 1             !   now check whether the segments
          ikmrkt = 1             !   are both active in the global domain
-         if ( ifrom  .gt. 0 ) call dhkmrk(3,iknmrk(ifrom),ikmrkv)
-         if ( ito    .gt. 0 ) call dhkmrk(3,iknmrk(ito  ),ikmrkt)
+         if ( ifrom  .gt. 0 ) call evaluate_waq_attribute(3,iknmrk(ifrom),ikmrkv)
+         if ( ito    .gt. 0 ) call evaluate_waq_attribute(3,iknmrk(ito  ),ikmrkt)
                                 !   if not, then skip the exchange
          if ( ikmrkv .eq. 0 .or.  ikmrkt .eq. 0 ) cycle
 
@@ -195,7 +195,7 @@
 !
       do 200 iseg = 1 , noseg
 !
-         call dhkmrk(1,iknmrk(iseg),ikmrk1)
+         call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
          if ( ikmrk1 .eq. 1 ) then
 
             Veloc1 = pmsa(ipnt(1)) / max( pmsa(ipnt(2)), 1.0 )

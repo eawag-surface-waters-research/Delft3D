@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_wascal
+
+      implicit none
+
+      contains
+
 
       subroutine wascal ( nowst , notot , nosys , noseg , syname,
      +                    conc  , itime , nowtyp, wastid, wstnam,
@@ -137,3 +143,5 @@
       if ( timon ) call timstop ( ithandl )
       return
       end
+
+      end module m_wascal

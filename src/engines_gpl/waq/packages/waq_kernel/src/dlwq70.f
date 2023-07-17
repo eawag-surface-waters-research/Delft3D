@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwq70
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQ70 ( DISP   , DISPER , AREA   , FLOW   , ALENG  ,
      *                    VELO   , BOUND  , IPOINT , NOTOT  , ISYS   ,
@@ -71,9 +77,18 @@
 !
       use timers
 
-      DIMENSION  DISP  (  3) , DISPER(*) , AREA (*) , FLOW (*) ,
+      real       DISP  (  3) , DISPER(*) , AREA (*) , FLOW (*) ,
      *           ALENG (  *) , VELO  (*) , BOUND(*) , AMAT (*) ,
-     *           IPOINT(4,*) , IDPNT(*)  , IVPNT(*) , DERIV(*)
+     *           DERIV(*)
+      integer    IPOINT(4,*) , IDPNT(*)  , IVPNT(*)
+
+      integer    iband, iq, i, it, i3, i4, iopt, ilflag, isys
+      integer    j, jtrack, jt
+      integer    noq, noq1, noq2, nodisp, novelo, notot, nsys
+      integer    kt, k1, k2
+
+      real       a, q, q1, q2, e, al, f1, f2, dl
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq70", ithandl )
 !
@@ -177,3 +192,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwq70

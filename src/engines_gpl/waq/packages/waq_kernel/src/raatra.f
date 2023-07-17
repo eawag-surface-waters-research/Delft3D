@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_raatra
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE RAATRA (NOSYS , NDMPQ , NORAAI, NTRAAQ, IORAAI,
      +                   NQRAAI, IQRAAI, IQDMP , DMPQ  , TRRAAI)
@@ -59,6 +65,10 @@
       INTEGER       IORAAI(*)             , NQRAAI(*)       ,
      +              IQRAAI(*)             , IQDMP(*)
       REAL          DMPQ(NOSYS,NDMPQ,*)   , TRRAAI(NOSYS,*)
+
+!     local
+      integer itel1, isys, iraai, nqc, iopt, iqc, iq, ipq
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "raatra", ithandl )
 !
@@ -116,3 +126,5 @@
       RETURN
 !
       END
+
+      end module m_raatra

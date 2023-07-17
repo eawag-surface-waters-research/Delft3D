@@ -25,8 +25,8 @@
                               noflux , iexpnt , iknmrk , noq1  , noq2  , &
                               noq3   , noq4   )
       use m_monsys
-      use m_errsys
-      use m_dhkmrk
+      use m_write_error_message
+      use m_evaluate_waq_attribute
 
 !XXXDEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'VBXS12' :: VBXS12
 !
@@ -374,8 +374,8 @@
            ! set botseg equal to iseg for the segments which have a bottom
 
           do iseg = 1,noseg
-              call dhkmrk(1,iknmrk(iseg),ikmrk1)
-              call dhkmrk(2,iknmrk(iseg),ikmrk2)
+              call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
+              call evaluate_waq_attribute(2,iknmrk(iseg),ikmrk2)
 
               if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
                   botseg(iseg) = iseg
@@ -468,8 +468,8 @@
       do iseg = 1 , noseg
 
 !         lowest water and 2d segments only, also dry, ikmrk1 = 0
-          call dhkmrk(1,iknmrk(iseg),ikmrk1)
-          call dhkmrk(2,iknmrk(iseg),ikmrk2)
+          call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
+          call evaluate_waq_attribute(2,iknmrk(iseg),ikmrk2)
           if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
 
 !*** VBSTAT ************************
@@ -627,11 +627,11 @@
               IF (  (SWiniVB .EQ. 1) .or. (SWiniVB .eq. 0 ) ) THEN
                    iniCovVB = iniCovVB / perc_frac
               ELSE
-                  CALL ERRSYS ('(no valid value for SWiniVB <0,1>', 1 )
+                  CALL write_error_message ('(no valid value for SWiniVB <0,1>')
               ENDIF
 
               IF (  (SWRegrVB .NE. 1) .and. (SWRegrVB .ne. 0 ) ) THEN
-                  CALL ERRSYS ('(no valid value for SWRegrVB <0,1>', 1 )
+                  CALL write_error_message ('(no valid value for SWRegrVB <0,1>')
               ENDIF
 
 ! ---          if the volume is zero, then the calculations below should be avoided altogether
@@ -661,18 +661,18 @@
 
 !                     Check values growth limitation (only 0 or 1)
                       IF ( (NINT(SWVBGro) .NE. 1) .and. (NINT(SWVBGro) .NE. 0) ) THEN
-                          CALL ERRSYS ('(no valid value for SWVBGroVB <0,1>', 1 )
+                          CALL write_error_message ('(no valid value for SWVBGroVB <0,1>')
                       ENDIF
 
 !                     Check values mort limitation (only 0 or 1)
                       IF ( (NINT(SWVBMrt) .NE. 1) .and. (NINT(SWVBMrt) .NE. 0) ) THEN
-                          CALL ERRSYS ('(no valid value for SWVBMrtVB <0,1>', 1 )
+                          CALL write_error_message ('(no valid value for SWVBMrtVB <0,1>')
                       ENDIF
 
 !                     Checking for nut availabilithy
 
                       if ( (F4VB + F5VB) - 1.E-10 .lt. 0.0 ) then
-                          CALL ERRSYS ('(no valid values for F4VB and F5VB (allocation factors vegetation  roots)', 1 )
+                          CALL write_error_message ('(no valid values for F4VB and F5VB (allocation factors vegetation  roots)' )
                       else
 !                         average Nutrient content of cohort
                           weighCN = F1VB*CNf1VB + F2VB*CNf2VB + F3VB*CNf3VB + F4VB*CNf4VB + F5VB*CNf5VB
@@ -889,7 +889,7 @@
     !             make sure allocation factors for roots > 0
 
                   if ( (F4VB + F5VB) - 1.E-10 .lt. 0.0 ) then
-                      CALL ERRSYS ('(no valid values for F4VB and F5VB (alloction factors vegetation  roots)', 1 )
+                      CALL write_error_message ('(no valid values for F4VB and F5VB (alloction factors vegetation  roots)')
                   else
     !                 average Nutrient content of cohort
                       weighCN = F1VB*CNf1VB + F2VB*CNf2VB + F3VB*CNf3VB + F4VB*CNf4VB + F5VB*CNf5VB
@@ -1065,8 +1065,8 @@
           VegHeVB = pmsa(ipnt(ip_VegHeVB))
           FFacVB = pmsa(ipnt(ip_FFacVB))
 
-          call dhkmrk(1,iknmrk(iseg),ikmrk1)
-          call dhkmrk(2,iknmrk(iseg),ikmrk2)
+          call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
+          call evaluate_waq_attribute(2,iknmrk(iseg),ikmrk2)
           if (ikmrk1.lt.3) then ! also when dry!
               if ( VegHeVB .gt. 0.0 ) then
 
@@ -1137,8 +1137,8 @@
           dS1VBups = 0.0
           dS2VBups = 0.0
 
-          call dhkmrk(1,iknmrk(iseg),ikmrk1)
-          call dhkmrk(2,iknmrk(iseg),ikmrk2)
+          call evaluate_waq_attribute(1,iknmrk(iseg),ikmrk1)
+          call evaluate_waq_attribute(2,iknmrk(iseg),ikmrk2)
 
           depth = pmsa(ipnt(ip_depth))
           totaldepth = pmsa(ipnt(ip_totaldepth))

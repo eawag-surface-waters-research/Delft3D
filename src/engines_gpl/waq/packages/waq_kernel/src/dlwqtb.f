@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_dlwqtb
+
+      implicit none
+
+      contains
+
 
       SUBROUTINE DLWQTB ( LUNUT  , IOFF   , A      , J      , IIPNT  ,
      *                    IRPNT  , IIMAX  , ITIME  , KTYPE  , AVAL   ,
@@ -58,8 +64,19 @@
 !
       use timers
 
-      PARAMETER     ( TWOPI = 6.28319 )
-      DIMENSION       A(*)   , J(*) , KTYPE(*) , AVAL(*) , IVAL(*)
+      real, PARAMETER  :: TWOPI = 6.28319
+      integer          J(*) , KTYPE(*) , IVAL(*)
+      real             A(*) , AVAL(*)
+      integer          IERR , LUNUT , IRPNT , IIMAX , ITIME , IOFF , IIPNT
+
+!     local
+      real     amiss, aa, ab, aphase, func
+      integer  noitm, notot, nobrk
+      integer  i, i1, i2, i3, ia, ib, ic, ij, ii
+      integer  iopt, ipro, iord, itim1, itim2
+      integer  irec, idt, itimf, it1c, it2c, idtc, iperio
+      integer  npnt, npst, ndim, ndst, ntt
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqtb", ithandl )
 !
@@ -367,8 +384,16 @@
      *                    IT1C   , IT2C   , IDTC   , AA     , AB     )
       use timers
 !
-      DIMENSION  A( * ) , J( * )
+      real    A( * )
+      integer J( * )
+      integer I, IJ, NTT, IREC, NOBRK, ITIMF, IOPT, IT1C, IT2C, IDTC
+      real    AMISS, AA, AB
+
+!  	local
+      integer ll, jj, kk
+
       integer(4) ithandl /0/
+
       if ( timon ) call timstrt ( "dlwmis", ithandl )
 !           Search backward for the first valid point
       LL = I
@@ -418,3 +443,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_dlwqtb

@@ -20,6 +20,15 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_delpar01
+      use m_par2waq
+      use m_oil2waq
+
+
+      implicit none
+
+      contains
+
       subroutine delpar01 ( itime   , noseg   , nolay   , noq     , nosys   ,
      &                      notot   , dwqvol  , surface , dwqflo  , syname  ,
      &                      nosfun  , sfname  , segfun  , amass   , conc    ,
@@ -480,3 +489,5 @@
  1020 format( '  Time ', i4.4 ,'D-', i2.2 ,'H-', i2.2 ,'M-', i2.2 ,'S.',' Stop time ',
      &          i4.4 ,'D-', i2.2 ,'H-', i2.2 ,'M-', i2.2 ,'S.', i11,' part. (of',i11,')')
       end
+
+      end module m_delpar01

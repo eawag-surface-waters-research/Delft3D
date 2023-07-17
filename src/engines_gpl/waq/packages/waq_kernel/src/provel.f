@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_provel
+
+      implicit none
+
+      contains
+
 
       subroutine provel (velonw, nveln , ivpnew, velo  , novelo,
      +                   ivpnt , velx  , nvelx , vsto  , nosys ,
@@ -160,3 +166,5 @@
 
       return
       end
+
+      end module m_provel

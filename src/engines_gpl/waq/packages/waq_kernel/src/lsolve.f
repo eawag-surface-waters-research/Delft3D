@@ -20,6 +20,12 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+      module m_lsolve
+
+      implicit none
+
+      contains
+
 
       subroutine lsolve (  ntrace , noseg  , nolay  , nsegl  , nomat  ,
      &                     amat   , imat   , diag   , idiag  , x      ,
@@ -121,3 +127,5 @@
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
+
+      end module m_lsolve
