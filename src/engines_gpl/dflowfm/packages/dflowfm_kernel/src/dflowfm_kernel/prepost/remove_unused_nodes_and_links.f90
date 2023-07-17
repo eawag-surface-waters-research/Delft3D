@@ -34,24 +34,25 @@
 !! This implementation does not yet take into account 1D links, hence the call
 !! is subject to the condition numl == 0 in flow_geominit.
 subroutine remove_unused_nodes_and_links()
- use m_netw, only : numk, numl, nump, kc, kn, lne, lnn, netcell, nmk, nod, nod0, xk, yk
+ use network_data, only : numk, numl, nump, kc, kn, lne, lnn, netcell, nmk, nod, tnod, xk, yk
  use m_missing, only : xymis
  use m_alloc
  implicit none
 
  ! local variables
- logical, dimension(:), allocatable :: nod_used !< flag specifying whether a node is used in the face definitions
- integer, dimension(:), allocatable :: k2knew   !< array containing the new node number for each original node (0 if unused)
- integer, dimension(:), allocatable :: l2lnew   !< array containing the new netlink number for each original netlink (0 if unused)
- logical, dimension(:), allocatable :: lin_used !< flag specifying whether a netlink is used in the face definitions
+ logical, dimension(:), allocatable :: nod_used   !< flag specifying whether a node is used in the face definitions
+ integer, dimension(:), allocatable :: k2knew     !< array containing the new node number for each original node (0 if unused)
+ integer, dimension(:), allocatable :: l2lnew     !< array containing the new netlink number for each original netlink (0 if unused)
+ logical, dimension(:), allocatable :: lin_used   !< flag specifying whether a netlink is used in the face definitions
+ type (tnod)          , allocatable :: nod_org(:) !< Backup for nod.
  
  integer                            :: i        !< generic loop index
  integer                            :: ic       !< loop index for faces/netcells
  integer                            :: ierr     !< error code memory allocation
  integer                            :: k        !< original node index
- integer                            :: knew     !< new node index
+ integer                            :: knew     !< new node index; knew <= k
  integer                            :: l        !< original netlink index
- integer                            :: lnew     !< new netlink index
+ integer                            :: lnew     !< new netlink index; lnew <= l
  integer                            :: numk_new !< new number of nodes
  integer                            :: numl_new !< new number of netlinks
  
@@ -100,19 +101,11 @@ subroutine remove_unused_nodes_and_links()
  numl_new = lnew
  
  ! check if there is anything to strip
- if (numk_new < numk .or. numl_new <numl) then
+ if (numk_new < numk .or. numl_new < numl) then
  
-     ! prepare nod0 for temporarily receiving the data from nod
-     if (allocated(nod0)) then
-         do k = 1,ubound(nod0,1)
-             if (allocated(nod0(k)%lin)) then
-                 deallocate(nod0(k)%lin)
-             endif
-         enddo
-         deallocate(nod0)
-     endif
-     allocate(nod0(numk_new), stat=ierr)
-     call aerr('nod0(numk_new)', ierr, numk_new )
+     ! prepare nod_org for temporarily receiving the data from nod
+     allocate(nod_org(numk_new), stat=ierr)
+     call aerr('nod_org(numk_new)', ierr, numk_new )
      
      ! update the arrays running over the number of nodes
      do k = 1, numk
@@ -129,16 +122,14 @@ subroutine remove_unused_nodes_and_links()
            enddo
            nmk(k) = i
            !
-           allocate(nod0(knew)%lin(i), stat=ierr)
-           call aerr('nod0(knew)%lin(i)', ierr, i )
-           nod0(knew)%lin = nod(k)%lin
+           allocate(nod_org(knew)%lin(i), stat=ierr)
+           call aerr('nod_org(knew)%lin(i)', ierr, i )
+           nod_org(knew)%lin = nod(k)%lin
            !
-           if (knew < k) then
-              xk(knew)  = xk(k)
-              yk(knew)  = yk(k)
-              kc(knew)  = kc(k)
-              nmk(knew) = nmk(k)
-           endif
+           xk(knew)  = xk(k)
+           yk(knew)  = yk(k)
+           kc(knew)  = kc(k)
+           nmk(knew) = nmk(k)
         endif
      enddo
      
@@ -151,12 +142,12 @@ subroutine remove_unused_nodes_and_links()
      call aerr('kc [realloc]', ierr, numk_new )
      call realloc(nmk, numk_new)
      call aerr('nmk [realloc]', ierr, numk_new )
-     ! finally move nod0 back to nod
+     ! finally move nod_org back to nod
      do k = 1, numk
          deallocate(nod(k)%lin)
      enddo
      deallocate(nod)
-     call move_alloc(nod0, nod)
+     call move_alloc(nod_org, nod)
      
      ! update the arrays running over the number of edges/netlinks
      do l = 1, numl
@@ -165,11 +156,9 @@ subroutine remove_unused_nodes_and_links()
              kn(1,l) = k2knew(kn(1,l))
              kn(2,l) = k2knew(kn(2,l))
              !
-             if (lnew < l) then
-                lnn(lnew) = lnn(l)
-                lne(:,lnew) = lne(:,l)
-                kn(:,lnew) = kn(:,l)
-             endif
+             lnn(lnew) = lnn(l)
+             lne(:,lnew) = lne(:,l)
+             kn(:,lnew) = kn(:,l)
          endif
      enddo
      
