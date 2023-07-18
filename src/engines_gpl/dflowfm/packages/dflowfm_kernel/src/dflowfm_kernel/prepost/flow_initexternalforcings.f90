@@ -2292,9 +2292,9 @@ if (mext /= 0) then
 
     do n = 1, ncgensg
        ! Set some zcgen values to their initial scalar values (for example, zcgen((n-1)*3+1) is quickly need for updating bobs.)
-       zcgen((n-1)*3+1) = hulp( 6, n) ! levelcenter
-       zcgen((n-1)*3+2) = hulp(11, n) ! gateheight  == 'gateloweredgelevel', really a level
-       zcgen((n-1)*3+3) = hulp(26, n) ! door_opening_width
+       zcgen((n-1)*3+1) = hulp(idx_crestlevel, n)         ! CrestLevel
+       zcgen((n-1)*3+2) = hulp(idx_gateloweredgelevel, n) ! GateLowerEdgeLevel
+       zcgen((n-1)*3+3) = hulp(idx_gateopeningwidth, n)   ! GateOpeningWidth
 
        call togeneral(n, hulp(:,n), L2cgensg(n)-L1cgensg(n)+1,widths(L1cgensg(n):L2cgensg(n))) ! orgcode
     enddo
@@ -2445,8 +2445,7 @@ end if
  if (allocated (kdd))      deallocate (kdd)
  if (allocated (kdgen))    deallocate (kdgen)
  if (allocated (kdp))      deallocate (kdp)
- if (allocated (kdss))     deallocate (kdss)
-
+ 
  if (allocated (xy2gate) ) deallocate (xy2gate)
  if (allocated (xy2cdam) ) deallocate (xy2cdam)
  if (allocated (xy2cgen) ) deallocate (xy2cgen)
