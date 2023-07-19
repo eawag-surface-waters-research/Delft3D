@@ -57,7 +57,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    real(fp)                   , pointer :: betasd
+    real(fp)                   , pointer :: beta_sw
     real(fp)                   , pointer :: cfrcon
     real(fp)                   , pointer :: cp
     real(fp)                   , pointer :: sarea
@@ -178,7 +178,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    betasd              => gdp%gdheat%betasd
+    beta_sw              => gdp%gdheat%beta_sw
     cfrcon              => gdp%gdheat%cfrcon
     cp                  => gdp%gdheat%cp
     sarea               => gdp%gdheat%sarea
@@ -657,20 +657,20 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
           !
           sprval = 0.0_sp
           !
-          ! Locate and read 'betasd'
+          ! Locate and read 'beta_sw'
           ! default value is 0.3
           !
           sprval = -999.0_sp
           !
-          ! betasd is used by default
-          call prop_get_real(gdp%mdfile_ptr, '*', 'betasd', sprval)
-          betasd = real(sprval, fp)
-          if (comparereal(betasd, -999.0_fp) == 0) then
-             betasd = 0.30_fp
-             write(message, '(a,f12.3)') 'Ocean heat model: Using default betasd ', betasd
+          ! beta_sw is used by default
+          call prop_get_real(gdp%mdfile_ptr, '*', 'beta_sw', sprval)
+          beta_sw = real(sprval, fp)
+          if (comparereal(beta_sw, -999.0_fp) == 0) then
+             beta_sw = 0.30_fp
+             write(message, '(a,f12.3)') 'Ocean heat model: Using default beta_sw ', beta_sw
              call prterr(lundia, 'G051', trim(message))
           else
-             write(message,'(a,f12.3)') 'Specified beta coefficient for surface absorption of shortwave radiation = ', betasd
+             write(message,'(a,f12.3)') 'Specified beta coefficient for surface absorption of shortwave radiation = ', beta_sw
              call prterr(lundia, 'G051', trim(message))
           endif
           !
