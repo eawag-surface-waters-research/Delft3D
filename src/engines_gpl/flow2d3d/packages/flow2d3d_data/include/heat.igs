@@ -91,6 +91,7 @@ type gd_heat
     real(fp)                :: dtrain    !  Time increment of the rain temperature
     real(fp)                :: mulsd     !  Multiplier for the Secchi depth to obtain the Shallow Secchi depth (range 0.01--1)
     real(fp)                :: betasd    !  Fraction of the solar radiation that penetrates deep (range 0--1)
+    real(fp)                :: beta_sw   !  Fraction of the solar radiation that is absorbed at the surface (range 0--1)
     real(fp)                :: albedo    !  Albedo coefficient 
 ! reals
 !
