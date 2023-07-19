@@ -1213,7 +1213,7 @@ do l=1,lstsci
                 !
                 extinc = 1.7_fp/secchi(nm)
                 corr  = 1.0_fp / ( (1.0_fp - exp(extinc*zbottom)) / extinc )
-                qink  = corr * qsn * (1.0_fp - exp(extinc*zdown)) / extinc
+                qink  = corr * (1.0_fp-betasd) *qsn * (1.0_fp - exp(extinc*zdown)) / extinc + qsn * betasd
                 qtotk = (qink-ql) / (rhow*cp)
                 !
                 ! Reduction of solar radiation at shallow areas
@@ -1254,7 +1254,7 @@ do l=1,lstsci
                    else
                       zdown = zdown - thick(k)*h0old
                    endif
-                   qink  = corr * qsn * (exp(extinc*ztop) - exp(extinc*zdown)) / extinc
+                   qink  = corr * (1.0_fp-betasd) * qsn * (exp(extinc*ztop) - exp(extinc*zdown)) / extinc
                    qtotk = qink / (rhow*cp)
                    if (zmodel) then
                       sour(nm, k, l) = sour(nm, k, l) + qtotk*gsqs(nm)
