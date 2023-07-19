@@ -57,6 +57,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    real(fp)                   , pointer :: betasd
     real(fp)                   , pointer :: cfrcon
     real(fp)                   , pointer :: cp
     real(fp)                   , pointer :: sarea
@@ -177,6 +178,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
 !
 !! executable statements -------------------------------------------------------
 !
+    betasd              => gdp%gdheat%betasd
     cfrcon              => gdp%gdheat%cfrcon
     cp                  => gdp%gdheat%cp
     sarea               => gdp%gdheat%sarea
@@ -648,6 +650,27 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
              free_convec = .false.
           else
              write(message,'(a,f12.3)') 'Specified free convection coefficient cfrcon = ', cfrcon
+             call prterr(lundia, 'G051', trim(message))
+          endif
+          !
+          ! reset sprval
+          !
+          sprval = 0.0_sp
+          !
+          ! Locate and read 'betasd'
+          ! default value is 0.3
+          !
+          sprval = -999.0_sp
+          !
+          ! betasd is used by default
+          call prop_get_real(gdp%mdfile_ptr, '*', 'betasd', sprval)
+          betasd = real(sprval, fp)
+          if (comparereal(betasd, -999.0_fp) == 0) then
+             betasd = 0.30_fp
+             write(message, '(a,f12.3)') 'Ocean heat model: Using default betasd ', betasd
+             call prterr(lundia, 'G051', trim(message))
+          else
+             write(message,'(a,f12.3)') 'Specified beta coefficient for surface absorption of shortwave radiation = ', betasd
              call prterr(lundia, 'G051', trim(message))
           endif
           !
