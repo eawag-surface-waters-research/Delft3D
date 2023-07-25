@@ -666,7 +666,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
           call prop_get_real(gdp%mdfile_ptr, '*', 'beta_sw', sprval)
           beta_sw = real(sprval, fp)
           if (comparereal(beta_sw, -999.0_fp) == 0) then
-             beta_sw = 0.30_fp
+             beta_sw = 0.00_fp
              write(message, '(a,f12.3)') 'Ocean heat model: Using default beta_sw ', beta_sw
              call prterr(lundia, 'G051', trim(message))
           else
