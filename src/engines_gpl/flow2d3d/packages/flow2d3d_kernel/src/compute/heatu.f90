@@ -76,6 +76,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     real(fp)                , pointer :: dalton
     real(fp)                , pointer :: mulsd
     real(fp)                , pointer :: betasd
+    real(fp)                , pointer :: beta_sw
     real(fp)                , pointer :: albedo
     real(fp)                , pointer :: qtotmx
     real(fp)                , pointer :: lambda
@@ -276,6 +277,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     dalton      => gdp%gdheat%dalton
     mulsd       => gdp%gdheat%mulsd
     betasd      => gdp%gdheat%betasd
+    beta_sw     => gdp%gdheat%beta_sw
     albedo      => gdp%gdheat%albedo
     qtotmx      => gdp%gdheat%qtotmx
     lambda      => gdp%gdheat%lambda
@@ -1213,7 +1215,7 @@ do l=1,lstsci
                 !
                 extinc = 1.7_fp/secchi(nm)
                 corr  = 1.0_fp / ( (1.0_fp - exp(extinc*zbottom)) / extinc )
-                qink  = corr * qsn * (1.0_fp - exp(extinc*zdown)) / extinc
+                qink  = corr * (1.0_fp-beta_sw) *qsn * (1.0_fp - exp(extinc*zdown)) / extinc + qsn * beta_sw
                 qtotk = (qink-ql) / (rhow*cp)
                 !
                 ! Reduction of solar radiation at shallow areas
@@ -1254,7 +1256,7 @@ do l=1,lstsci
                    else
                       zdown = zdown - thick(k)*h0old
                    endif
-                   qink  = corr * qsn * (exp(extinc*ztop) - exp(extinc*zdown)) / extinc
+                   qink  = corr * (1.0_fp-beta_sw) * qsn * (exp(extinc*ztop) - exp(extinc*zdown)) / extinc
                    qtotk = qink / (rhow*cp)
                    if (zmodel) then
                       sour(nm, k, l) = sour(nm, k, l) + qtotk*gsqs(nm)
